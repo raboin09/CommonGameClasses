@@ -27,7 +27,9 @@ public class CommonGameClasses : ModuleRules
 			{
 				"Core",
 				"GameplayTags",
-				"AIModule"
+				"AIModule",
+				"Niagara",
+				"SMSystem"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
