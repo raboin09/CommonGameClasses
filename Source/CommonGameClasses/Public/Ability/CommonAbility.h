@@ -33,7 +33,6 @@ protected:
 	// If the Activation occurs due to an external event (like Montage notifies) instead of from a Trigger
 	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Ability")
 	bool bActivatesOnExternalEvent = false;
-	
 	UPROPERTY(VisibleDefaultsOnly, Category="COMMON|Ability")
 	class USphereComponent* AbilityRoot;
 
@@ -43,22 +42,22 @@ private:
 	void SetCostMechanism(const TSubclassOf<AActor> InCostClass);
 	void SetActivationMechanism(const TSubclassOf<AActor> InActivationClass);
 	
-	bool Internal_StartNormalAbility();
+	bool Internal_StartNormalAbility() const;
 	AActor* Internal_CreateNewMechanism(const TSubclassOf<AActor> InMechanismClass, const UClass* InterfaceClass);
 	void Internal_BindMechanismEventsToAbility();
 
 	UFUNCTION()
-	void HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload);
+	void HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload) const;
 	UFUNCTION()
-	void HandleAbilityDeactivationEvent(const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload);
+	void HandleAbilityDeactivationEvent(const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload) const;
 	UFUNCTION()
 	void HandleTriggerActivationEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload) const;
 	UFUNCTION()
-	void HandleTriggerDeactivationEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload);
+	void HandleTriggerDeactivationEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload) const;
 	UFUNCTION()
-	void HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent);
+	void HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent) const;
 	UFUNCTION()
-	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent);
+	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent) const;
 
 	UPROPERTY()
 	TScriptInterface<class ICooldownMechanism> CooldownMechanism;
@@ -68,4 +67,6 @@ private:
 	TScriptInterface<ITriggerMechanism> TriggerMechanism;
 	UPROPERTY()
 	TScriptInterface<IActivationMechanism> ActivationMechanism;
+	UPROPERTY()
+	AActor* OwningActor;
 };

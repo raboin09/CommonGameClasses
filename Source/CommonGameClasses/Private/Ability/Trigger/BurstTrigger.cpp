@@ -1,7 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Ability/Trigger/BurstTrigger.h"
+﻿#include "Ability/Trigger/BurstTrigger.h"
 
 ABurstTrigger::ABurstTrigger()
 {
@@ -17,7 +14,10 @@ void ABurstTrigger::PressTrigger()
 void ABurstTrigger::ReleaseTrigger()
 {
 	bTriggerHeld = false;
-	TriggerDeactivatedEvent.Broadcast(FTriggerEventPayload(0));	
+	FTriggerEventPayload ReleaseTriggerEventPayload;
+	ReleaseTriggerEventPayload.ActivationLevel = 0;
+	ReleaseTriggerEventPayload.bRunActivationMechanism = false;
+	TriggerDeactivatedEvent.Broadcast(ReleaseTriggerEventPayload);
 }
 
 void ABurstTrigger::Internal_BurstFireTick()
@@ -28,5 +28,8 @@ void ABurstTrigger::Internal_BurstFireTick()
 		GetWorldTimerManager().ClearTimer(TimerHandle_BurstFire);
 		return;
 	}
-	TriggerActivatedEvent.Broadcast(FTriggerEventPayload(BurstFireCount));
+	FTriggerEventPayload PressTriggerEventPayload;
+	PressTriggerEventPayload.ActivationLevel = BurstFireCount;
+	PressTriggerEventPayload.bRunActivationMechanism = true;
+	TriggerActivatedEvent.Broadcast(PressTriggerEventPayload);
 }

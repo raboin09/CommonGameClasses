@@ -64,16 +64,24 @@ struct FTriggerEventPayload
 		ActivationLevel = 1;
 	}
 
-	FTriggerEventPayload(int32 ActivationLevel) : ActivationLevel(ActivationLevel) { }
-	
+	FTriggerEventPayload(bool bRunActivation) : bRunActivationMechanism(bRunActivation)
+	{
+		ActivationLevel = 0;
+	}
+
+	FTriggerEventPayload(bool bRunActivation, int32 ActivationLevel) : bRunActivationMechanism(bRunActivation), ActivationLevel(ActivationLevel) { }
+
+	// Should Activation run after this trigger event (activation can happen after the trigger is released instead of trigger pulled, e.g. Bow) 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRunActivationMechanism = false;
 	// How long has this trigger been pulled (charge/release guns and burst) 
-	UPROPERTY()
-	int32 ActivationLevel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 ActivationLevel = 0;
 	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ActivationSourceLocation = FVector::ZeroVector;
 	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ActivationDestinationLocation = FVector::ZeroVector;
 };
 DECLARE_EVENT_OneParam(ITriggerMechanism, FTriggerEvent, const FTriggerEventPayload&);

@@ -3,23 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actors/CommonActor.h"
+#include "API/Ability/ActivationMechanism.h"
 #include "GameFramework/Actor.h"
 #include "MeleeOverlapActivation.generated.h"
 
-UCLASS()
-class COMMONGAMECLASSES_API AMeleeOverlapActivation : public AActor
+UCLASS(Abstract, Blueprintable)
+class COMMONGAMECLASSES_API AMeleeOverlapActivation : public ACommonActor, public IActivationMechanism
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AMeleeOverlapActivation();
-
-protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	
+	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
+	virtual void Deactivate() override;
+	FORCEINLINE virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) override { MeshComponentRef = InMeshComponent; }
+	
+private:
+	UPROPERTY()
+	UMeshComponent* MeshComponentRef;
+	UPROPERTY(Transient)
+	TArray<AActor*> HitActors;
 };
