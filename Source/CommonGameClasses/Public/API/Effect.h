@@ -10,6 +10,7 @@
 UENUM(BlueprintType)
 enum class EModifierOperator : uint8 
 {
+	None,
 	Add,
 	Subtract,
 	Multiply,
@@ -18,6 +19,7 @@ enum class EModifierOperator : uint8
 UENUM(BlueprintType)
 enum class EModifierActor : uint8 
 {
+	None,
 	Instigator,
 	Receiver
 };
@@ -28,11 +30,11 @@ struct FModifierExpression
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere)
-	EModifierActor ModifierActor;
+	EModifierActor ModifierActor = EModifierActor::None;
 	UPROPERTY(EditAnywhere)
-	EModifierOperator Operation;
+	EModifierOperator Operation = EModifierOperator::None;
 	UPROPERTY(EditAnywhere)
-	float ModifierOperand;
+	float ModifierOperand = 1.f;
 };
 
 USTRUCT(BlueprintType)

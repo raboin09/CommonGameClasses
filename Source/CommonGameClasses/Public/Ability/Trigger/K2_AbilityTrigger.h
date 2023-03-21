@@ -16,19 +16,24 @@ class COMMONGAMECLASSES_API AK2_AbilityTrigger : public ACommonActor, public ITr
 	GENERATED_BODY()
 
 protected:
-	FORCEINLINE virtual void PressTrigger() override { K2_PressTrigger(); }	
+	FORCEINLINE virtual void PressTrigger() override
+	{
+		int ActivationLevel = 0;
+		float CooldownOverride = -1.f;
+		K2_PressTrigger(CooldownOverride, ActivationLevel);
+	}	
 	FORCEINLINE virtual void ReleaseTrigger() override { K2_ReleaseTrigger(); }	
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return K2_ShouldRetriggerAbilityAfterCooldown(); }
 	
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_PressTrigger();
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
+	void K2_PressTrigger(float& CooldownOverride, int32& ActivationLevel);
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void K2_ReleaseTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	bool K2_ShouldRetriggerAbilityAfterCooldown() const;
 
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
-	FORCEINLINE void BroadcastTriggerActivated() const { TriggerActivatedEvent.Broadcast({true}); }
+	FORCEINLINE void BroadcastTriggerActivated() const { }
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
-	FORCEINLINE void BroadcastTriggerDeactivated() const { TriggerDeactivatedEvent.Broadcast({true}); }
+	FORCEINLINE void BroadcastTriggerDeactivated() const { }
 };

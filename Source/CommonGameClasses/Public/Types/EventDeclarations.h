@@ -17,10 +17,11 @@ struct FCooldownTickedEventPayload
 	GENERATED_BODY()
 
 	UPROPERTY()
-	float CooldownLeft;
+	float CooldownLeft = 0.f;
 	UPROPERTY()
-	float TotalCooldown;
+	float TotalCooldown = 0.f;
 };
+DECLARE_EVENT_OneParam(ICooldownMechanism, FCooldownTickedEvent, const FCooldownTickedEventPayload&)
 
 ///////////////////////////////////////
 // Cooldown Started
@@ -31,8 +32,9 @@ struct FCooldownStartedEventPayload
 	GENERATED_BODY()
 
 	UPROPERTY()
-	float CooldownLength;
+	float CooldownLength = -1;
 };
+DECLARE_EVENT_OneParam(ICooldownMechanism, FCooldownStartedEvent, const FCooldownStartedEventPayload&)
 
 ///////////////////////////////////////
 // Cooldown Ended
@@ -41,31 +43,40 @@ USTRUCT(BlueprintType)
 struct FCooldownEndedEventPayload
 {
 	GENERATED_BODY()
+
+	FCooldownEndedEventPayload()
+	{
+		
+	}
 };
+DECLARE_EVENT_OneParam(ICooldownMechanism, FCooldownEndedEvent, const FCooldownEndedEventPayload&)
 
 ///////////////////////////////////////
 // Trigger Activated
 ///////////////////////////////////////
 USTRUCT(BlueprintType)
-struct FTriggerActivatedEventPayload
+struct FTriggerEventPayload
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	bool bDoesTriggerControlActivationDirectly;
-};
+	FTriggerEventPayload()
+	{
+		ActivationLevel = 1;
+	}
 
-///////////////////////////////////////
-// Trigger Deactivated
-///////////////////////////////////////
-USTRUCT(BlueprintType)
-struct FTriggerDeactivatedEventPayload
-{
-	GENERATED_BODY()
-
+	FTriggerEventPayload(int32 ActivationLevel) : ActivationLevel(ActivationLevel) { }
+	
+	// How long has this trigger been pulled (charge/release guns and burst) 
 	UPROPERTY()
-	bool bDoesTriggerControlActivationDirectly;
+	int32 ActivationLevel;
+	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
+	UPROPERTY()
+	FVector ActivationSourceLocation = FVector::ZeroVector;
+	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
+	UPROPERTY()
+	FVector ActivationDestinationLocation = FVector::ZeroVector;
 };
+DECLARE_EVENT_OneParam(ITriggerMechanism, FTriggerEvent, const FTriggerEventPayload&);
 
 ///////////////////////////////////////
 // Activation function started
@@ -75,8 +86,10 @@ struct FAbilityActivationEventPayload
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	bool bStartCooldownImmediately = true;
+	FAbilityActivationEventPayload()
+	{
+		
+	}
 };
 DECLARE_EVENT_OneParam(IActivationMechanism, FAbilityActivationEvent, const FAbilityActivationEventPayload&);
 
@@ -87,6 +100,11 @@ USTRUCT(BlueprintType)
 struct FAbilityDeactivationEventPayload
 {
 	GENERATED_BODY()
+
+	FAbilityDeactivationEventPayload()
+	{
+		
+	}
 };
 DECLARE_EVENT_OneParam(IActivationMechanism, FAbilityDeactivationEvent, const FAbilityDeactivationEventPayload&);
 
@@ -97,6 +115,11 @@ USTRUCT(BlueprintType)
 struct FGameplayTagAddedEventPayload
 {
 	GENERATED_BODY()
+
+	FGameplayTagAddedEventPayload()
+	{
+		AddedTag = FGameplayTag::EmptyTag;
+	}
 
 	UPROPERTY()
 	FGameplayTag AddedTag;
@@ -111,6 +134,11 @@ struct FGameplayTagRemovedEventPayload
 {
 	GENERATED_BODY()
 
+	FGameplayTagRemovedEventPayload()
+	{
+		RemovedTag = FGameplayTag::EmptyTag;
+	}
+	
 	UPROPERTY()
 	FGameplayTag RemovedTag;
 };
@@ -131,9 +159,9 @@ struct FActorDeathEventPayload
 	UPROPERTY()
 	AActor* KillingActor = nullptr;
 	UPROPERTY()
-	FHitResult HitResult;
+	FHitResult HitResult = FHitResult();
 	UPROPERTY()
-	FDamageHitReactEvent HitReactEvent;
+	FDamageHitReactEvent HitReactEvent = FDamageHitReactEvent();
 };
 DECLARE_EVENT_OneParam(UHealthComponent, FActorDeath, const FActorDeathEventPayload&);
 
@@ -146,11 +174,11 @@ struct FMaxWoundsEventPayload
 	GENERATED_BODY()
 
 	UPROPERTY()
-	float NewMaxWounds;
+	float NewMaxWounds = 1.f;
 	UPROPERTY()
-	float OldMaxWounds;
+	float OldMaxWounds = 1.f;
 	UPROPERTY()
-	float Delta;
+	float Delta = 0.f;
 };
 DECLARE_EVENT_OneParam(UHealthComponent, FMaxWoundsChanged, const FMaxWoundsEventPayload&);
 
@@ -163,47 +191,27 @@ struct FCurrentWoundEventPayload
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly)
-	FWound NewWound;
+	FWound NewWound = FWound();
 	UPROPERTY(BlueprintReadOnly)
-	FWound OldWound;
+	FWound OldWound = FWound();
 	UPROPERTY()
-	int32 MaxWounds;
+	int32 MaxWounds = 1;
 	UPROPERTY()
-	float Delta;
+	float Delta = 0.f;
 	UPROPERTY()
-	float Percentage;
+	float Percentage = 0.f;
 	UPROPERTY()
-	bool bWasDamage;
+	bool bWasDamage = false;
 	UPROPERTY()
-	bool bNaturalChange;
+	bool bNaturalChange = false;
 	UPROPERTY()
-	FDamageHitReactEvent DamageHitReactEvent;
+	FDamageHitReactEvent DamageHitReactEvent = FDamageHitReactEvent();
 	UPROPERTY()
-	AActor* ReceivingActor;
+	AActor* ReceivingActor = nullptr;
 	UPROPERTY()
-	AActor* InstigatingActor;
+	AActor* InstigatingActor = nullptr;
 };
 DECLARE_EVENT_OneParam(UHealthComponent, FCurrentWoundHealthChanged, const FCurrentWoundEventPayload&);
-
-///////////////////////////////////////
-// PLAYER IN COMBAT CHANGED EVENT
-///////////////////////////////////////
-USTRUCT(BlueprintType)
-struct FCharacterInCombatChangedPayload
-{
-	GENERATED_BODY()
-	FCharacterInCombatChangedPayload()
-	{
-		bIsInCombat = false;
-		DamageCauser = nullptr;
-	}
-	FCharacterInCombatChangedPayload(bool bInIsInCombat, AActor* InDamageCauser) : bIsInCombat(bInIsInCombat), DamageCauser(InDamageCauser) { }
-
-	UPROPERTY()
-	bool bIsInCombat;
-	UPROPERTY()
-	AActor* DamageCauser;
-};
 
 ///////////////////////////////////////
 // QUEST EVENT
@@ -215,9 +223,9 @@ struct FQuestObjectiveEventPayload
 	
 	// The overlapped actor, quest objective, or killed AI character
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* EventObjective;
+	AActor* EventObjective = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EQuestObjectiveAction EventAction;
+	EQuestObjectiveAction EventAction = EQuestObjectiveAction::None;
 
 	FQuestObjectiveEventPayload(AActor* InObjective, EQuestObjectiveAction InAction)
 	{
@@ -243,7 +251,7 @@ struct FQuestUpdateEventPayload
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UQuestStateMachine* UpdatedQuest;
+	UQuestStateMachine* UpdatedQuest = nullptr;
 
 	FQuestUpdateEventPayload(UQuestStateMachine* InUpdatedQuest)
 	{

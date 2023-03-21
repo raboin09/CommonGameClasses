@@ -4,10 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "RangedActivation.h"
-#include "GameFramework/Actor.h"
 #include "HitscanActivation.generated.h"
 
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API AHitscanActivation : public ARangedActivation
 {
 	GENERATED_BODY()
@@ -16,7 +15,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_PlayTrailFX(const FVector& EndPoint);
 	
-	virtual void Fire() override;
+	virtual void Fire(int32 ActivationLevel = -1) override;
 	
 private:
 	void Internal_FireShot();

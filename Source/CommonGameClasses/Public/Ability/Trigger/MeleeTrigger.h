@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "MeleeTrigger.generated.h"
 
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API AMeleeTrigger : public AActor
 {
 	GENERATED_BODY()

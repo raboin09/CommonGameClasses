@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#define COMMON_PRINT_STRING(message) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, message);
-
 class FCommonGameClassesModule : public IModuleInterface
 {
 public:

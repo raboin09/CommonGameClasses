@@ -22,7 +22,8 @@ class COMMONGAMECLASSES_API IActivationMechanism
 	GENERATED_BODY()
 
 public:
-	virtual void Activate() PURE_VIRTUAL(IActivationMechanism::Activate,)
+	// Activation level is for things like charge-up weapons, combos, etc
+	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(IActivationMechanism::Activate,)
 	virtual void Deactivate() PURE_VIRTUAL(IActivationMechanism::Deactivate,)
 	virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) PURE_VIRTUAL(IActivationMechanism::SetAbilityMesh, )
 	

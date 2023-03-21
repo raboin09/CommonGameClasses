@@ -4,6 +4,7 @@
 #include "Character/CommonCharacter.h"
 #include "GameFramework/Character.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Types/CoreTypes.h"
 #include "Types/TagTypes.h"
 
 ARangedActivation::ARangedActivation()
@@ -11,9 +12,9 @@ ARangedActivation::ARangedActivation()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void ARangedActivation::Activate()
+void ARangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
-	Fire();
+	Fire(TriggerEventPayload.ActivationLevel);
 	K2_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
 }
@@ -78,7 +79,7 @@ bool ARangedActivation::ShouldLineTrace() const
 	return IsValid(OwningAIController);
 }
 
-FHitResult ARangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact) const
+FHitResult ARangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact)
 {
 	if (Impact.bBlockingHit)
 	{
@@ -110,6 +111,29 @@ FVector ARangedActivation::GetShootDirection(const FVector& AimDirection)
 	return WeaponRandomStream.VRandCone(AimDirection, ConeHalfAngle, ConeHalfAngle);
 }
 
+FVector ARangedActivation::GetRaycastOriginRotation() const
+{
+	if (MeshType == EMeshType::AbilityMesh)
+	{
+		if(!MeshComponentRef)
+			return FVector::ZeroVector;
+		return MeshComponentRef->GetSocketRotation(MeshSocketName).Vector();
+	}
+	
+	if(MeshType == EMeshType::InstigatorMesh)
+	{
+		if(const USkeletalMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			return InstigatorMesh->GetSocketRotation(MeshSocketName).Vector();
+		}
+		if (const UStaticMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<UStaticMeshComponent>())
+		{
+			return InstigatorMesh->GetSocketRotation(MeshSocketName).Vector();
+		}
+	}	
+	return FVector::ZeroVector;
+}
+
 FVector ARangedActivation::GetRaycastOriginLocation() const
 {
 	if (MeshType == EMeshType::AbilityMesh)
@@ -123,7 +147,7 @@ FVector ARangedActivation::GetRaycastOriginLocation() const
 	{
 		if(const USkeletalMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<USkeletalMeshComponent>())
 		{
-			return InstigatorMesh->GetBoneLocation(MeshSocketName);
+			return InstigatorMesh->GetSocketLocation(MeshSocketName);
 		}
 		if (const UStaticMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<UStaticMeshComponent>())
 		{
@@ -131,29 +155,6 @@ FVector ARangedActivation::GetRaycastOriginLocation() const
 		}
 	}	
 	return FVector::ZeroVector;
-}
-
-FVector ARangedActivation::GetAimDirection() const
-{
-	const APawn* CurrentInstigator = GetInstigator(); 
-	if(!CurrentInstigator)
-	{
-		return FVector::ZeroVector;
-	}
-
-	if(const APlayerController* PlayerController = Cast<APlayerController>(CurrentInstigator->Controller))
-	{
-		FVector CamLoc;
-		FRotator CamRot;
-		PlayerController->GetPlayerViewPoint(CamLoc, CamRot);
-		return CamRot.Vector();
-	}
-
-	if(const AAIController* AIController = Cast<AAIController>(GetInstigator()->Controller))
-	{
-		return AIController->GetControlRotation().Vector();
-	}
-	return GetInstigator()->GetBaseAimRotation().Vector();
 }
 
 FVector ARangedActivation::GetCameraDamageStartLocation(const FVector& AimDirection) const
@@ -178,6 +179,11 @@ FVector ARangedActivation::GetCameraDamageStartLocation(const FVector& AimDirect
 
 FVector ARangedActivation::GetAdjustedAim() const
 {
+	if(!Internal_ShouldEyeTrace())
+	{
+		return GetRaycastOriginRotation();
+	}
+
 	if(OwningPlayerController)
 	{
 		FVector CamLoc;
@@ -192,13 +198,12 @@ FVector ARangedActivation::GetAdjustedAim() const
 	return GetInstigator()->GetBaseAimRotation().Vector();
 }
 
-FHitResult ARangedActivation::WeaponTrace(const FVector& StartTrace, const FVector& EndTrace, bool bLineTrace, float CircleRadius) const
+FHitResult ARangedActivation::WeaponTrace(const FVector& StartTrace, const FVector& EndTrace, bool bLineTrace, float CircleRadius)
 {
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, GetInstigator());
 	TraceParams.bReturnPhysicalMaterial = true;
 	FHitResult Hit(ForceInit);
 	TArray<AActor*> IgnoreActors; 
-	IgnoreActors.Add(GetInstigator());
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
 	auto DrawDebugTrace = EDrawDebugTrace::None;
 	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
@@ -212,9 +217,11 @@ FHitResult ARangedActivation::WeaponTrace(const FVector& StartTrace, const FVect
 	return Hit;
 }
 
-TArray<AActor*> ARangedActivation::GetActorsToIgnoreCollision() const
+TArray<AActor*> ARangedActivation::GetActorsToIgnoreCollision()
 {
 	TArray<AActor*> IgnoredActors;
+	IgnoredActors.Add(GetInstigator());
+	IgnoredActors.Add(this);
 	// If instigator is a Character, ignore their mount (if any)
 	if(const ACommonCharacter* CastedChar = Cast<ACommonCharacter>(GetInstigator()))
 	{

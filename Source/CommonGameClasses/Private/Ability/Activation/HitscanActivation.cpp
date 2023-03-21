@@ -7,7 +7,7 @@
 #include "Utils/CombatUtils.h"
 #include "Utils/EffectUtils.h"
 
-void AHitscanActivation::Fire()
+void AHitscanActivation::Fire(int32 ActivationLevel)
 {
 	Internal_FireShot();
 }

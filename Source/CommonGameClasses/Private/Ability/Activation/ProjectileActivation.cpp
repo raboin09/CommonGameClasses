@@ -2,25 +2,84 @@
 
 
 #include "Ability/Activation/ProjectileActivation.h"
+#include "Actors/CommonProjectile.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Utils/WorldUtils.h"
 
-
-// Sets default values
 AProjectileActivation::AProjectileActivation()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	bHasFiringSpread = false;
 }
 
-// Called when the game starts or when spawned
-void AProjectileActivation::BeginPlay()
+void AProjectileActivation::Fire(int32 ActivationLevel)
 {
-	Super::BeginPlay();
-	
+	HandleProjectileFire();
 }
 
-// Called every frame
-void AProjectileActivation::Tick(float DeltaTime)
+ACommonProjectile* AProjectileActivation::HandleProjectileFire()
 {
-	Super::Tick(DeltaTime);
+	FVector Origin, ProjectileVelocity;
+	Internal_AimAndShootProjectile(Origin, ProjectileVelocity);
+	return Internal_SpawnProjectile(Origin, ProjectileVelocity);
 }
 
+void AProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& ProjectileVelocity)
+{
+	const FVector& AimDirection = GetAdjustedAim();
+	const FVector& StartTrace = GetCameraDamageStartLocation(AimDirection);
+	OutSpawnOrigin = GetRaycastOriginLocation();
+	const FVector ShootDirection = GetShootDirection(AimDirection);
+	const FVector& EndTrace = StartTrace + ShootDirection * TraceRange;
+	constexpr float RaycastCircleRadius = 20.f;
+	if (FHitResult Impact = WeaponTrace(StartTrace, EndTrace, ShouldLineTrace(), RaycastCircleRadius); Impact.bBlockingHit)
+	{
+		const FVector AdjustedDir = (Impact.ImpactPoint - OutSpawnOrigin).GetSafeNormal();
+		bool bWeaponPenetration = false;
+		
+		if (const float DirectionDot = FVector::DotProduct(AdjustedDir, ProjectileVelocity); DirectionDot < 0.0f)
+		{
+			bWeaponPenetration = true;
+		}
+		else if (DirectionDot < 0.5f)
+		{
+			FVector MuzzleStartTrace = OutSpawnOrigin - GetRaycastOriginRotation() * 25.0f;
+			FVector MuzzleEndTrace = OutSpawnOrigin;
+			if (FHitResult MuzzleImpact = WeaponTrace(MuzzleStartTrace, MuzzleEndTrace, ShouldLineTrace(), RaycastCircleRadius); MuzzleImpact.bBlockingHit)
+			{
+				bWeaponPenetration = true;
+			}
+		}
+		
+		if (bWeaponPenetration)
+		{
+			OutSpawnOrigin = Impact.ImpactPoint - ProjectileVelocity * 10.0f;
+		}
+		else
+		{
+			ProjectileVelocity = AdjustedDir;
+		}
+	}
+}
+
+ACommonProjectile* AProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity)
+{
+
+	FTransform SpawnTrans = FTransform();
+	SpawnTrans.SetLocation(SpawnOrigin);
+	if (ACommonProjectile* Projectile = UWorldUtils::SpawnActorToWorld_Deferred<ACommonProjectile>(this, ProjectileClass, this, GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+	{		
+		Projectile->InitVelocity(ProjectileVelocity);
+		Projectile->SetLifeSpan(ProjectileLife);
+		Projectile->AddAdditionalEffectsToApply(Internal_GetAdditionalEffectsToApplyToProjectile());
+		Projectile->SetInstigator(GetInstigator());
+		Projectile->SetOwner(GetInstigator());
+		for(AActor* TempActor : GetActorsToIgnoreCollision())
+		{
+			Projectile->IgnoreActor(TempActor);
+		}
+		UWorldUtils::FinishSpawningActor_Deferred(Projectile, SpawnTrans);
+		return Projectile;
+	}
+	return nullptr;
+}

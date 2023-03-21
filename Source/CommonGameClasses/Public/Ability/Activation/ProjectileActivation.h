@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "RangedActivation.h"
 #include "ProjectileActivation.generated.h"
 
-UCLASS()
-class COMMONGAMECLASSES_API AProjectileActivation : public AActor
+UCLASS(Abstract, Blueprintable)
+class COMMONGAMECLASSES_API AProjectileActivation : public ARangedActivation
 {
 	GENERATED_BODY()
 
@@ -15,11 +15,17 @@ public:
 	// Sets default values for this actor's properties
 	AProjectileActivation();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+protected:	
+	virtual void Fire(int32 ActivationLevel = -1) override;
+	virtual class ACommonProjectile* HandleProjectileFire();
+	
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
+	TSubclassOf<ACommonProjectile> ProjectileClass;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON", meta=(ClampMin = "1", EditCondition = "ProjectileClass != nullptr", EditConditionHides))
+	float ProjectileLife = 10.f;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+private:
+	FORCEINLINE virtual TArray<TSubclassOf<AActor>> Internal_GetAdditionalEffectsToApplyToProjectile() const { return AbilityEffects; };
+	virtual void Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& OutVelocity);
+	virtual ACommonProjectile* Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity);
 };

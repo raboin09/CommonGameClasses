@@ -1,22 +1,10 @@
 ﻿#include "Ability/CooldownMechanismImpl.h"
 
-void UCooldownMechanismImpl::OverrideCooldownTime(const float NewCooldownTime)
-{
-	CooldownDuration = NewCooldownTime;
-}
+#include "Types/CoreTypes.h"
 
-void UCooldownMechanismImpl::SetCooldownTime(const float CooldownAdjustment)
+void UCooldownMechanismImpl::StartCooldownTimer(const float CooldownDuration)
 {
-	CooldownDuration = CooldownAdjustment;
-}
-
-void UCooldownMechanismImpl::MultiplyCooldownTime(const float CooldownAdjustment)
-{
-	CooldownDuration *= CooldownAdjustment;
-}
-
-void UCooldownMechanismImpl::StartCooldownTimer()
-{
+	TotalCooldownTime = CooldownDuration;
 	CurrentRunningCooldownTime = CooldownDuration;
 	GetWorld()->GetTimerManager().SetTimer(Timer_CooldownTick, this, &UCooldownMechanismImpl::Internal_CooldownTick, COOLDOWN_TICK_RATE, false);
 	CooldownStartedEvent.Broadcast(FCooldownStartedEventPayload());
@@ -25,6 +13,8 @@ void UCooldownMechanismImpl::StartCooldownTimer()
 void UCooldownMechanismImpl::StopCooldownTimer()
 {
 	GetWorld()->GetTimerManager().ClearTimer(Timer_CooldownTick);
+	TotalCooldownTime = 0.f;
+	CurrentRunningCooldownTime = 0.f;
 	CooldownEndedEvent.Broadcast(FCooldownEndedEventPayload());
 }
 
@@ -45,7 +35,7 @@ void UCooldownMechanismImpl::Internal_CooldownTick()
 	
 	FCooldownTickedEventPayload TickPayload;
 	TickPayload.CooldownLeft = CurrentRunningCooldownTime;
-	TickPayload.TotalCooldown = CooldownDuration;
+	TickPayload.TotalCooldown = TotalCooldownTime;
 	CooldownTickedEvent.Broadcast(TickPayload);
 	GetWorld()->GetTimerManager().SetTimer(Timer_CooldownTick, this, &UCooldownMechanismImpl::Internal_CooldownTick, COOLDOWN_TICK_RATE, false);
 }

@@ -14,16 +14,11 @@ class COMMONGAMECLASSES_API AK2_AbilityActivation : public ACommonActor, public 
 	GENERATED_BODY()
 
 protected:
-	FORCEINLINE virtual void Activate() override { K2_Activate(); }	
+	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { K2_Activate(TriggerEventPayload); }	
 	FORCEINLINE virtual void Deactivate() override { K2_Deactivate(); }
 	
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_Activate();
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
+	void K2_Activate(const FTriggerEventPayload& TriggerEventPayload);
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void K2_Deactivate();
-
-	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
-	void BroadcastAbilityActivated() { AbilityActivationEvent.Broadcast(FAbilityActivationEventPayload()); }
-	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
-	void BroadcastAbilityDeactivated() { AbilityDeactivationEvent.Broadcast(FAbilityDeactivationEventPayload()); }
 };

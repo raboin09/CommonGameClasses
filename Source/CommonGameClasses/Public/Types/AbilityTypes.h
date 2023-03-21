@@ -12,7 +12,7 @@ struct FResourceCostData : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	float ResourceCost;
+	float ResourceCost = 0.f;
 };
 
 UENUM(BlueprintType)

@@ -3,23 +3,31 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Actors/CommonActor.h"
+#include "API/Ability/TriggerMechanism.h"
 #include "BurstTrigger.generated.h"
 
-UCLASS()
-class COMMONGAMECLASSES_API ABurstTrigger : public AActor
+UCLASS(Abstract, Blueprintable)
+class COMMONGAMECLASSES_API ABurstTrigger : public ACommonActor, public ITriggerMechanism
 {
 	GENERATED_BODY()
-
 public:
-	// Sets default values for this actor's properties
 	ABurstTrigger();
+	virtual void PressTrigger() override;
+	virtual void ReleaseTrigger() override;
+	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return bTriggerHeld; }
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	int32 NumberOfShotsPerFire = 3;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	float TimeBetweenBurstShots = .1f;
+	
+private:	
+	UFUNCTION()
+	void Internal_BurstFireTick();
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	bool bTriggerHeld;
+	int32 BurstFireCount;
+	FTimerHandle TimerHandle_BurstFire;
 };

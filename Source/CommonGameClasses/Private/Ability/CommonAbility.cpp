@@ -6,7 +6,6 @@
 #include "API/Ability/TriggerMechanism.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Types/CoreTypes.h"
 #include "Types/TagTypes.h"
 #include "Utils/WorldUtils.h"
 
@@ -37,7 +36,6 @@ bool ACommonAbility::TryStartAbility()
 
 	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_ON_COOLDOWN))
 	{
-		COMMON_PRINTSCREEN("On cooldown")
 		return false;
 	}
 	
@@ -91,8 +89,13 @@ void ACommonAbility::SetTriggerMechanism(const TSubclassOf<AActor> InTriggerClas
 
 void ACommonAbility::SetCooldownMechanism()
 {
-	CooldownMechanism.SetInterface(Cast<ICooldownMechanism>(Cooldown));
-	CooldownMechanism.SetObject(Cooldown);
+	UCooldownMechanismImpl* SpawnedActor = NewObject<UCooldownMechanismImpl>(this);
+	if(!SpawnedActor)
+	{
+		return;
+	}
+	CooldownMechanism.SetInterface(Cast<ICooldownMechanism>(SpawnedActor));
+	CooldownMechanism.SetObject(SpawnedActor);
 }
 
 void ACommonAbility::SetCostMechanism(const TSubclassOf<AActor> InCostClass)
@@ -129,8 +132,8 @@ void ACommonAbility::SetActivationMechanism(const TSubclassOf<AActor> InActivati
 void ACommonAbility::BeginPlay()
 {
 	Super::BeginPlay();
-	SetActivationMechanism(ActivationMechanismClass);
 	SetCooldownMechanism();
+	SetActivationMechanism(ActivationMechanismClass);
 	SetCostMechanism(CostMechanismClass);
 	SetTriggerMechanism(TriggerMechanismClass);
 	Internal_BindMechanismEventsToAbility();
@@ -213,34 +216,40 @@ void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventP
 		CostMechanism->ConsumeResource();
 	}
 
-	// Some activation events (burst fire) only need to consume the resource and don't start cooldowns until after burst fire is over
-	if(CooldownMechanism && AbilityActivationEventPayload.bStartCooldownImmediately)
+	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
+	if(CooldownMechanism && bActivatesOnExternalEvent)
 	{
-		CooldownMechanism->StartCooldownTimer();
+		CooldownMechanism->StartCooldownTimer(CooldownDuration);
 	}
 }
 
-void ACommonAbility::HandleTriggerActivationEvent(const FTriggerActivatedEventPayload& AbilityTriggeredEventPayload) const
+void ACommonAbility::HandleTriggerActivationEvent(const FTriggerEventPayload& TriggeredEventPayload) const
 {
-	if(!ActivationMechanism)
-	{
-		return;
-	}
-
 	// Montage-based activation, so don't activate until notified
-	if(!AbilityTriggeredEventPayload.bDoesTriggerControlActivationDirectly)
-	{
-		return;
-	}	
-	ActivationMechanism->Activate();
-}
-
-void ACommonAbility::HandleTriggerDeactivationEvent(const FTriggerDeactivatedEventPayload& AbilityTriggeredEventPayload)
-{
-	if(!ActivationMechanism || !AbilityTriggeredEventPayload.bDoesTriggerControlActivationDirectly)
+	if(bActivatesOnExternalEvent)
 	{
 		return;
 	}
+	
+	if(ActivationMechanism)
+	{
+		// Pass some info from the Trigger to Activation (needed for things like charge-up weapons, throwing grenades with a predicted location, etc)
+		ActivationMechanism->Activate(TriggeredEventPayload);
+	}
+
+	if(CooldownMechanism)
+	{
+		CooldownMechanism->StartCooldownTimer(CooldownDuration);
+	}
+}
+
+void ACommonAbility::HandleTriggerDeactivationEvent(const FTriggerEventPayload& TriggeredEventPayload)
+{
+	if(!ActivationMechanism || bActivatesOnExternalEvent)
+	{
+		return;
+	}
+	
 	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_REQUESTING_START);
 	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_COMMITTED);	
 	ActivationMechanism->Deactivate();
@@ -256,7 +265,7 @@ void ACommonAbility::HandleCooldownEnded(const FCooldownEndedEventPayload& Abili
 	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_ON_COOLDOWN);
 	
 	// If it's a burst trigger (machine gun), try to activate it immediately
-	if(TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown())
+	if(TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown() && UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_REQUESTING_START))
 	{
 		Internal_StartNormalAbility();	
 	}

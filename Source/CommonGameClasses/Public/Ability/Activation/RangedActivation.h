@@ -12,24 +12,14 @@
 class UFXSystemComponent;
 enum class EMeshType : uint8;
 
-UENUM()
-enum class ETriggerMechanismType : uint8
-{
-	Automatic,
-	Burst,
-	ScatterShot,
-	ChargeAndRelease,
-	Continuous
-};
-
-UCLASS()
+UCLASS(Abstract, NotBlueprintable)
 class COMMONGAMECLASSES_API ARangedActivation : public ACommonActor, public IActivationMechanism
 {
 	GENERATED_BODY()
 
 public:
 	ARangedActivation();
-	virtual void Activate() override;
+	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
 	FORCEINLINE virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) override { MeshComponentRef = InMeshComponent; } 
 
@@ -38,22 +28,23 @@ protected:
 	virtual void BeginPlay() override;
 
 	// Ranged Activation 
-	virtual void Fire() PURE_VIRTUAL(ARangedActivation::Fire,)
+	virtual void Fire(int32 ActivationLevel = -1) PURE_VIRTUAL(ARangedActivation::Fire,)
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_PlayFireFX(const FVector& SpawnPoint);
-	
+
+	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
-	FVector GetAimDirection() const;
 	FVector GetCameraDamageStartLocation(const FVector& AimDirection) const;
 	FVector GetAdjustedAim() const;
 	FVector GetShootDirection(const FVector& AimDirection);
-	FHitResult WeaponTrace(const FVector& StartTrace, const FVector& EndTrace, bool bLineTrace, float CircleRadius = 5.f) const;
+	FHitResult WeaponTrace(const FVector& StartTrace, const FVector& EndTrace, bool bLineTrace, float CircleRadius = 5.f);
 	bool ShouldLineTrace() const;
-	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact) const;
+	TArray<AActor*> GetActorsToIgnoreCollision();
+	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };
 	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement="Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	EMeshType MeshType;
@@ -78,7 +69,6 @@ private:
 	void Internal_AssignOwningController();
 	void Internal_AssignOwningMesh();
 	bool Internal_ShouldEyeTrace() const;
-	TArray<AActor*> GetActorsToIgnoreCollision() const;
 
 	UPROPERTY(Transient)
 	float CurrentFiringSpread;

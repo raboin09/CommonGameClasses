@@ -3,24 +3,30 @@
 
 #include "Ability/Trigger/BurstTrigger.h"
 
-
-// Sets default values
 ABurstTrigger::ABurstTrigger()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
-// Called when the game starts or when spawned
-void ABurstTrigger::BeginPlay()
+void ABurstTrigger::PressTrigger()
 {
-	Super::BeginPlay();
-	
+	bTriggerHeld = true;
+	GetWorldTimerManager().SetTimer(TimerHandle_BurstFire, this, &ABurstTrigger::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);
 }
 
-// Called every frame
-void ABurstTrigger::Tick(float DeltaTime)
+void ABurstTrigger::ReleaseTrigger()
 {
-	Super::Tick(DeltaTime);
+	bTriggerHeld = false;
+	TriggerDeactivatedEvent.Broadcast(FTriggerEventPayload(0));	
 }
 
+void ABurstTrigger::Internal_BurstFireTick()
+{
+	if(++BurstFireCount > NumberOfShotsPerFire)
+	{
+		BurstFireCount = 0;
+		GetWorldTimerManager().ClearTimer(TimerHandle_BurstFire);
+		return;
+	}
+	TriggerActivatedEvent.Broadcast(FTriggerEventPayload(BurstFireCount));
+}

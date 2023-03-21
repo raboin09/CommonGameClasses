@@ -8,7 +8,7 @@
 #include "Types/EventDeclarations.h"
 #include "CommonAbility.generated.h"
 
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility
 {
 	GENERATED_BODY()
@@ -21,14 +21,18 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "COMMON|Ability")
-	class UCooldownMechanismImpl* Cooldown;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "CostMechanism"))
+	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Ability")
+	float CooldownDuration;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "/Script/CommonGameClasses.CostMechanism"))
 	TSubclassOf<AActor> CostMechanismClass;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "TriggerMechanism"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "/Script/CommonGameClasses.TriggerMechanism"))
 	TSubclassOf<AActor> TriggerMechanismClass;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "ActivationMechanism"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ActivationMechanism"))
 	TSubclassOf<AActor> ActivationMechanismClass;
+
+	// If the Activation occurs due to an external event (like Montage notifies) instead of from a Trigger
+	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Ability")
+	bool bActivatesOnExternalEvent = false;
 	
 	UPROPERTY(VisibleDefaultsOnly, Category="COMMON|Ability")
 	class USphereComponent* AbilityRoot;
@@ -48,16 +52,20 @@ private:
 	UFUNCTION()
 	void HandleAbilityDeactivationEvent(const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload);
 	UFUNCTION()
-	void HandleTriggerActivationEvent(const FTriggerActivatedEventPayload& AbilityTriggeredEventPayload) const;
+	void HandleTriggerActivationEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload) const;
 	UFUNCTION()
-	void HandleTriggerDeactivationEvent(const FTriggerDeactivatedEventPayload& AbilityTriggeredEventPayload);
+	void HandleTriggerDeactivationEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload);
 	UFUNCTION()
 	void HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent);
 	UFUNCTION()
 	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent);
-	
+
+	UPROPERTY()
 	TScriptInterface<class ICooldownMechanism> CooldownMechanism;
+	UPROPERTY()
 	TScriptInterface<class ICostMechanism> CostMechanism;
-	TScriptInterface<class ITriggerMechanism> TriggerMechanism;
-	TScriptInterface<class IActivationMechanism> ActivationMechanism;
+	UPROPERTY()
+	TScriptInterface<ITriggerMechanism> TriggerMechanism;
+	UPROPERTY()
+	TScriptInterface<IActivationMechanism> ActivationMechanism;
 };
