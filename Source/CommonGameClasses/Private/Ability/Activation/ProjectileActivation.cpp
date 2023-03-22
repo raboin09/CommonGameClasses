@@ -26,13 +26,9 @@ ACommonProjectile* AProjectileActivation::HandleProjectileFire()
 
 void AProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& ProjectileVelocity)
 {
-	const FVector& AimDirection = GetAdjustedAim();
-	const FVector& StartTrace = GetCameraDamageStartLocation(AimDirection);
 	OutSpawnOrigin = GetRaycastOriginLocation();
-	const FVector ShootDirection = GetShootDirection(AimDirection);
-	const FVector& EndTrace = StartTrace + ShootDirection * TraceRange;
 	constexpr float RaycastCircleRadius = 20.f;
-	if (FHitResult Impact = WeaponTrace(StartTrace, EndTrace, ShouldLineTrace(), RaycastCircleRadius); Impact.bBlockingHit)
+	if (FHitResult Impact = WeaponTrace(ShouldLineTrace(), RaycastCircleRadius); Impact.bBlockingHit)
 	{
 		const FVector AdjustedDir = (Impact.ImpactPoint - OutSpawnOrigin).GetSafeNormal();
 		bool bWeaponPenetration = false;
@@ -45,7 +41,7 @@ void AProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 		{
 			FVector MuzzleStartTrace = OutSpawnOrigin - GetRaycastOriginRotation() * 25.0f;
 			FVector MuzzleEndTrace = OutSpawnOrigin;
-			if (FHitResult MuzzleImpact = WeaponTrace(MuzzleStartTrace, MuzzleEndTrace, ShouldLineTrace(), RaycastCircleRadius); MuzzleImpact.bBlockingHit)
+			if (FHitResult MuzzleImpact = WeaponTrace(ShouldLineTrace(), RaycastCircleRadius, MuzzleStartTrace, MuzzleEndTrace); MuzzleImpact.bBlockingHit)
 			{
 				bWeaponPenetration = true;
 			}

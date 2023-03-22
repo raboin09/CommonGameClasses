@@ -14,5 +14,6 @@ class COMMONGAMECLASSES_API UCharacterAnimationComponent : public UActorComponen
 	GENERATED_BODY()
 
 public:
+	UCharacterAnimationComponent();
 	float TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
 };

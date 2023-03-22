@@ -1,11 +1,10 @@
 ﻿#include "Ability/Activation/RangedActivation.h"
-
+#include "GameFramework/PlayerController.h"
 #include "AIController.h"
 #include "Character/CommonCharacter.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CoreTypes.h"
-#include "Types/TagTypes.h"
 
 ARangedActivation::ARangedActivation()
 {
@@ -69,14 +68,82 @@ void ARangedActivation::Internal_AssignOwningMesh()
 	}
 }
 
-bool ARangedActivation::Internal_ShouldEyeTrace() const
+void ARangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
 {
-	return UGameplayTagComponent::ActorHasGameplayTag(GetInstigator(), TAG_STATE_AIMING) && bAimOriginIsPlayerEyesInsteadOfWeapon;
+	const FVector AimDirection = Internal_GetAimDirection();
+	StartTrace = Internal_GetStartTraceLocation(AimDirection);
+	if(bHasFiringSpread)
+	{
+		EndTrace = StartTrace + Internal_GetFiringSpreadDirection(AimDirection) * TraceRange; 
+	} else
+	{
+		EndTrace = StartTrace + AimDirection * TraceRange;
+	}
+	
 }
 
-bool ARangedActivation::ShouldLineTrace() const
+FVector ARangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const
 {
-	return IsValid(OwningAIController);
+	switch (LineTraceDirection) {
+		case ELineTraceDirection::Camera:
+			return Internal_GetCameraStartLocation(AimDirection);
+		case ELineTraceDirection::Mesh:
+		case ELineTraceDirection::Mouse:
+		default:
+			return GetRaycastOriginLocation();
+	}
+}
+
+FVector ARangedActivation::Internal_GetCameraStartLocation(const FVector AimDirection) const
+{
+	if (!OwningPlayerController)
+	{
+		return GetRaycastOriginLocation();
+	}
+	FRotator UnusedRot;
+	FVector OutStartTrace;
+	OwningPlayerController->GetPlayerViewPoint(OutStartTrace, UnusedRot);
+	return OutStartTrace + AimDirection * ((GetInstigator()->GetActorLocation() - OutStartTrace) | AimDirection);
+}
+
+FVector ARangedActivation::Internal_GetAimDirection() const
+{
+	switch (LineTraceDirection)
+	{
+	case ELineTraceDirection::Camera:
+		// By default this is Camera for PlayerControllers, Controller rotation for AI
+		return GetInstigator()->GetBaseAimRotation().Vector();
+	case ELineTraceDirection::Mesh:
+		// Use the socket rotation
+		return GetRaycastOriginRotation();
+	case ELineTraceDirection::Mouse:
+		return Internal_GetMouseAim();
+	default:
+		return FVector::ZeroVector;
+	}
+}
+
+FVector ARangedActivation::Internal_GetFiringSpreadDirection(const FVector AimDirection)
+{
+	const int32 RandomSeed = FMath::Rand();
+	const FRandomStream WeaponRandomStream(RandomSeed);
+	const float CurrentSpread = TraceSpread + CurrentFiringSpread;
+	const float ConeHalfAngle = FMath::DegreesToRadians(CurrentSpread * 0.5f);
+	CurrentFiringSpread = FMath::Min(FiringSpreadMax, CurrentFiringSpread + FiringSpreadIncrement);
+	return WeaponRandomStream.VRandCone(AimDirection, ConeHalfAngle, ConeHalfAngle);
+}
+
+FVector ARangedActivation::Internal_GetMouseAim() const
+{
+	if(!OwningPlayerController)
+	{
+		return FVector::ZeroVector;
+	}
+	FHitResult TempResult;
+	OwningPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, TempResult);
+	const FVector TempAimDir = TempResult.ImpactPoint - GetRaycastOriginLocation();
+	const FVector SocketRot = GetRaycastOriginRotation();
+	return FVector(TempAimDir.X, TempAimDir.Y, SocketRot.Z);
 }
 
 FHitResult ARangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact)
@@ -88,27 +155,12 @@ FHitResult ARangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 		{
 			const FVector StartTrace = Impact.ImpactPoint + Impact.ImpactNormal * 10.0f;
 			const FVector EndTrace = Impact.ImpactPoint - Impact.ImpactNormal * 10.0f;
-			FHitResult Hit = WeaponTrace(StartTrace, EndTrace, ShouldLineTrace());
+			FHitResult Hit = WeaponTrace(ShouldLineTrace(), 5.f, StartTrace, EndTrace);
 			UseImpact = Hit;
 			return UseImpact;
 		}
 	}
 	return Impact;
-}
-
-FVector ARangedActivation::GetShootDirection(const FVector& AimDirection)
-{
-	if(!bHasFiringSpread && IsPlayerControlled())
-	{
-		return AimDirection;
-	}
-	
-	const int32 RandomSeed = FMath::Rand();
-	const FRandomStream WeaponRandomStream(RandomSeed);
-	const float CurrentSpread = TraceSpread + CurrentFiringSpread;
-	const float ConeHalfAngle = FMath::DegreesToRadians(CurrentSpread * 0.5f);
-	CurrentFiringSpread = FMath::Min(FiringSpreadMax, CurrentFiringSpread + FiringSpreadIncrement);
-	return WeaponRandomStream.VRandCone(AimDirection, ConeHalfAngle, ConeHalfAngle);
 }
 
 FVector ARangedActivation::GetRaycastOriginRotation() const
@@ -122,6 +174,7 @@ FVector ARangedActivation::GetRaycastOriginRotation() const
 	
 	if(MeshType == EMeshType::InstigatorMesh)
 	{
+		// Could be reduced to just UMeshComponent, but it's better to check Skeletal meshes first for Characters
 		if(const USkeletalMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<USkeletalMeshComponent>())
 		{
 			return InstigatorMesh->GetSocketRotation(MeshSocketName).Vector();
@@ -157,49 +210,12 @@ FVector ARangedActivation::GetRaycastOriginLocation() const
 	return FVector::ZeroVector;
 }
 
-FVector ARangedActivation::GetCameraDamageStartLocation(const FVector& AimDirection) const
+FHitResult ARangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)
 {
-	FVector OutStartTrace = FVector::ZeroVector;	
-	if(!Internal_ShouldEyeTrace())
-	{
-		OutStartTrace = GetRaycastOriginLocation();
-	}
-	else if (OwningPlayerController)
-	{
-		FRotator UnusedRot;
-		OwningPlayerController->GetPlayerViewPoint(OutStartTrace, UnusedRot);
-		OutStartTrace = OutStartTrace + AimDirection * ((GetInstigator()->GetActorLocation() - OutStartTrace) | AimDirection);
-	}
-	else if (OwningAIController)
-	{
-		OutStartTrace = GetRaycastOriginLocation();
-	}
-	return OutStartTrace;
-}
-
-FVector ARangedActivation::GetAdjustedAim() const
-{
-	if(!Internal_ShouldEyeTrace())
-	{
-		return GetRaycastOriginRotation();
-	}
-
-	if(OwningPlayerController)
-	{
-		FVector CamLoc;
-		FRotator CamRot;
-		OwningPlayerController->GetPlayerViewPoint(CamLoc, CamRot);
-		return CamRot.Vector();
-	}	
-	if(OwningAIController)
-	{
-		return OwningAIController->GetControlRotation().Vector();
-	}
-	return GetInstigator()->GetBaseAimRotation().Vector();
-}
-
-FHitResult ARangedActivation::WeaponTrace(const FVector& StartTrace, const FVector& EndTrace, bool bLineTrace, float CircleRadius)
-{
+	FVector StartTrace, EndTrace;
+	Internal_GetTraceLocations(StartTrace, EndTrace);
+	StartTrace = StartOverride != FVector::ZeroVector ? StartOverride : StartTrace;
+	EndTrace = EndOverride != FVector::ZeroVector ? EndOverride : EndTrace;
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, GetInstigator());
 	TraceParams.bReturnPhysicalMaterial = true;
 	FHitResult Hit(ForceInit);

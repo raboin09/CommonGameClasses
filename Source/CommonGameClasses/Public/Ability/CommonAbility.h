@@ -29,10 +29,7 @@ protected:
 	TSubclassOf<AActor> TriggerMechanismClass;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ActivationMechanism"))
 	TSubclassOf<AActor> ActivationMechanismClass;
-
-	// If the Activation occurs due to an external event (like Montage notifies) instead of from a Trigger
-	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Ability")
-	bool bActivatesOnExternalEvent = false;
+	
 	UPROPERTY(VisibleDefaultsOnly, Category="COMMON|Ability")
 	class USphereComponent* AbilityRoot;
 

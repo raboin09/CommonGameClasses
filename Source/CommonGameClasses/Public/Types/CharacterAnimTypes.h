@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CharacterAnimTypes.generated.h"
 
 USTRUCT(BlueprintType)
 struct FAnimMontagePlayData

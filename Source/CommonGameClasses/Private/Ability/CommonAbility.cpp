@@ -218,43 +218,32 @@ void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventP
 	}
 
 	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
-	if(CooldownMechanism && bActivatesOnExternalEvent)
-	{
-		CooldownMechanism->StartCooldownTimer(CooldownDuration);
-	}
-}
-
-void ACommonAbility::HandleTriggerActivationEvent(const FTriggerEventPayload& TriggeredEventPayload) const
-{
-	// Montage-based activation, so don't activate until notified
-	if(bActivatesOnExternalEvent)
-	{
-		return;
-	}
-	
-	if(ActivationMechanism && TriggeredEventPayload.bRunActivationMechanism)
-	{
-		// Pass some info from the Trigger to Activation (needed for things like charge-up weapons, throwing grenades with a predicted location, etc)
-		ActivationMechanism->Activate(TriggeredEventPayload);
-	}
-
 	if(CooldownMechanism)
 	{
 		CooldownMechanism->StartCooldownTimer(CooldownDuration);
 	}
 }
 
+void ACommonAbility::HandleTriggerActivationEvent(const FTriggerEventPayload& TriggeredEventPayload) const
+{	
+	if(ActivationMechanism && TriggeredEventPayload.bStartActivationImmediately)
+	{
+		// Pass some info from the Trigger to Activation (needed for things like charge-up weapons, throwing grenades with a predicted location, etc)
+		ActivationMechanism->Activate(TriggeredEventPayload);
+	}
+}
+
 void ACommonAbility::HandleTriggerDeactivationEvent(const FTriggerEventPayload& TriggeredEventPayload) const
 {
-	if(!ActivationMechanism || bActivatesOnExternalEvent)
+	UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_REQUESTING_START);
+	UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_COMMITTED);
+	
+	if(!ActivationMechanism)
 	{
 		return;
 	}
-	
-	UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_REQUESTING_START);
-	UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_COMMITTED);
 
-	if(TriggeredEventPayload.bRunActivationMechanism)
+	if(TriggeredEventPayload.bStartActivationImmediately)
 	{
 		// Pass some info from the Trigger to Activation (needed for things like charge-up weapons, throwing grenades with a predicted location, etc)
 		ActivationMechanism->Activate(TriggeredEventPayload);

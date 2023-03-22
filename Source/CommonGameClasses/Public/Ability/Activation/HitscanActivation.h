@@ -19,6 +19,6 @@ protected:
 	
 private:
 	void Internal_FireShot();
-	void Internal_ProcessInstantHit(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDirection);
+	void Internal_ProcessInstantHit(const FHitResult& Impact);
 	void Internal_PlayWeaponMissEffectFX(const FHitResult& Impact);
 };

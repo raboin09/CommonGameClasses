@@ -2,7 +2,7 @@
 #include "Character/CharacterAnimationComponent.h"
 #include "Character/LockOnComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Types/AnimationTypes.h"
+#include "Types/CharacterAnimTypes.h"
 #include "Types/TagTypes.h"
 
 void AMontageTrigger::PressTrigger()
@@ -27,7 +27,7 @@ void AMontageTrigger::ReleaseTrigger()
 {
 	FTriggerEventPayload ReleaseTriggerEventPayload;
 	ReleaseTriggerEventPayload.ActivationLevel = 0;
-	ReleaseTriggerEventPayload.bRunActivationMechanism = false;
+	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
 	TriggerDeactivatedEvent.Broadcast(ReleaseTriggerEventPayload);
 }
 
@@ -63,11 +63,10 @@ void AMontageTrigger::Internal_StartMontage()
 	
 	if(UCharacterAnimationComponent* CharacterAnimationComponent = CurrentInstigator->FindComponentByClass<UCharacterAnimationComponent>())
 	{
-		CharacterAnimationComponent->TryPlayAnimMontage(Internal_GetPlayData());
+		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
+		CachedComboSection = PlayData.MontageSection;
+		CharacterAnimationComponent->TryPlayAnimMontage(PlayData);
 	}
-
-	const FAnimMontagePlayData PlayData = Internal_GetPlayData();
-	CachedComboSection = PlayData.MontageSection;
 	
 	if(bShouldPlayerLockOnToNearestTarget)
 	{
@@ -80,7 +79,8 @@ void AMontageTrigger::Internal_StartMontage()
 
 	FTriggerEventPayload PressTriggerEventPayload;
 	PressTriggerEventPayload.ActivationLevel = ComboSectionIncrement;
-	PressTriggerEventPayload.bRunActivationMechanism = true;
+	// Activation waits for montage notify to start
+	PressTriggerEventPayload.bStartActivationImmediately = false;
 	TriggerActivatedEvent.Broadcast(PressTriggerEventPayload);
 }
 

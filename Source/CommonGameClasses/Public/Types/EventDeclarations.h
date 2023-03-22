@@ -64,16 +64,16 @@ struct FTriggerEventPayload
 		ActivationLevel = 1;
 	}
 
-	FTriggerEventPayload(bool bRunActivation) : bRunActivationMechanism(bRunActivation)
+	FTriggerEventPayload(bool bRunActivation) : bStartActivationImmediately(bRunActivation)
 	{
 		ActivationLevel = 0;
 	}
 
-	FTriggerEventPayload(bool bRunActivation, int32 ActivationLevel) : bRunActivationMechanism(bRunActivation), ActivationLevel(ActivationLevel) { }
+	FTriggerEventPayload(bool bRunActivation, int32 ActivationLevel) : bStartActivationImmediately(bRunActivation), ActivationLevel(ActivationLevel) { }
 
 	// Should Activation run after this trigger event (activation can happen after the trigger is released instead of trigger pulled, e.g. Bow) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bRunActivationMechanism = false;
+	bool bStartActivationImmediately = false;
 	// How long has this trigger been pulled (charge/release guns and burst) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ActivationLevel = 0;

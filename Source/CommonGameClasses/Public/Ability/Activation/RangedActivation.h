@@ -32,20 +32,19 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_PlayFireFX(const FVector& SpawnPoint);
-
+	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
-	FVector GetCameraDamageStartLocation(const FVector& AimDirection) const;
-	FVector GetAdjustedAim() const;
-	FVector GetShootDirection(const FVector& AimDirection);
-	FHitResult WeaponTrace(const FVector& StartTrace, const FVector& EndTrace, bool bLineTrace, float CircleRadius = 5.f);
-	bool ShouldLineTrace() const;
+	FHitResult WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector);
+	FORCEINLINE bool ShouldLineTrace() const { return IsValid(OwningAIController); }
 	TArray<AActor*> GetActorsToIgnoreCollision();
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	EMeshType MeshType;
 	// Socket where the muzzle or hand is
@@ -68,7 +67,14 @@ protected:
 private:
 	void Internal_AssignOwningController();
 	void Internal_AssignOwningMesh();
-	bool Internal_ShouldEyeTrace() const;
+	
+	void Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace);
+
+	FVector Internal_GetStartTraceLocation(const FVector AimDirection) const;
+	FVector Internal_GetCameraStartLocation(const FVector AimDirection) const;
+	FVector Internal_GetAimDirection() const;
+	FVector Internal_GetFiringSpreadDirection(const FVector AimDirection);
+	FVector Internal_GetMouseAim() const;
 
 	UPROPERTY(Transient)
 	float CurrentFiringSpread;

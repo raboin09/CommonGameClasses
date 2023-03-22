@@ -14,21 +14,14 @@ void AHitscanActivation::Fire(int32 ActivationLevel)
 
 void AHitscanActivation::Internal_FireShot()
 {
-	const FVector& AimDirection = GetAdjustedAim();
-	const FVector& StartTrace = GetCameraDamageStartLocation(AimDirection);
-	const FVector ShootDirection = GetShootDirection(AimDirection);
-	const FVector& EndTrace = StartTrace + ShootDirection * TraceRange;
-	const FHitResult& Impact = WeaponTrace(StartTrace, EndTrace, ShouldLineTrace(), 20.f);
-	Internal_ProcessInstantHit(Impact, StartTrace, ShootDirection);
+	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), 20.f);
+	Internal_ProcessInstantHit(Impact);
 }
 
-
-void AHitscanActivation::Internal_ProcessInstantHit(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDirection)
+void AHitscanActivation::Internal_ProcessInstantHit(const FHitResult& Impact)
 {
-	AActor* HitActor = Impact.GetActor(); 
-	const FVector EndTrace = Origin + ShootDirection * TraceRange;
-	const FVector EndPoint = HitActor ? Impact.ImpactPoint : EndTrace;
-	K2_PlayTrailFX(EndPoint);
+	AActor* HitActor = Impact.GetActor();
+	K2_PlayTrailFX(HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
 	if(!HitActor || UCombatUtils::AreActorsAllies(HitActor, GetOwner()))
 	{
 		return;
