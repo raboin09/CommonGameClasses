@@ -2,8 +2,11 @@
 
 
 #include "Utils/CoreUtils.h"
+
+#include "ActorComponent/HealthComponent.h"
 #include "Player/CommonPlayerController.h"
 #include "Character/CommonCharacter.h"
+#include "Character/CommonPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 ACommonPlayerController* UCoreUtils::GetCommonPlayerController(const UObject* ContextObject)

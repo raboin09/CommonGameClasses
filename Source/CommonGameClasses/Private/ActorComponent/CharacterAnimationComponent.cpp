@@ -1,5 +1,5 @@
 ﻿
-#include "Character/CharacterAnimationComponent.h"
+#include "ActorComponent/CharacterAnimationComponent.h"
 
 
 UCharacterAnimationComponent::UCharacterAnimationComponent()

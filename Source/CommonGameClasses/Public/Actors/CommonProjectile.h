@@ -7,6 +7,9 @@
 #include "GameFramework/Actor.h"
 #include "CommonProjectile.generated.h"
 
+class UProjectileMovementComponent;
+class USphereComponent;
+
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonProjectile : public ACommonActor
 {
@@ -19,29 +22,30 @@ public:
 	void IgnoreActor(AActor* InActor) const;
 	void InitVelocity(const FVector& ShootDirection) const;
 
-	FORCEINLINE void AddAdditionalEffectsToApply(TArray<TSubclassOf<AActor>> AdditionalEffectsToApply) { ProjectileEffectsToApply.Append(AdditionalEffectsToApply);}
-
 protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON")
 	void K2_HandleImpact(const FHitResult& HitResult);
 	virtual void K2_HandleImpact_Implementation(const FHitResult& HitResult);
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
 	void K2_HandleActorDeath();
 	UFUNCTION()
 	virtual void OnImpact(const FHitResult& HitResult);
 	virtual void HandleActorDeath();
 	void ApplyMissEffects(const FHitResult Impact);
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="COMMON|Defaults")
-	class UProjectileMovementComponent* MovementComp;
-	UPROPERTY(VisibleDefaultsOnly, Category="COMMON|Defaults")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="CUSTOM|Defaults")
+	UProjectileMovementComponent* MovementComp;
+	UPROPERTY(VisibleDefaultsOnly, Category="CUSTOM|Defaults")
 	UParticleSystemComponent* ParticleComp;
 	UPROPERTY(VisibleDefaultsOnly)
-	class USphereComponent* CollisionComp;
+	USphereComponent* CollisionComp;
 	UPROPERTY(VisibleDefaultsOnly)
 	UStaticMeshComponent* SummonedMesh;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Defaults", meta=(MustImplement="Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults", meta=(MustImplement="Effect"))
 	TArray<TSubclassOf<AActor>> ProjectileEffectsToApply;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Defaults")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
 	float DeathBuffer = 0.f;
+
+public:
+	FORCEINLINE void AddAdditionalEffectsToApply(TArray<TSubclassOf<AActor>> AdditionalEffectsToApply) { ProjectileEffectsToApply.Append(AdditionalEffectsToApply);}
 };

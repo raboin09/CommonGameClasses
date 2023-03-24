@@ -3,7 +3,7 @@
 
 #include "Actors/CommonProjectile.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Character/EffectContainerComponent.h"
+#include "ActorComponent/EffectContainerComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"

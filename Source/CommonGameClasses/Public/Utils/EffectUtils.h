@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Types/CombatTypes.h"
-#include "Types/HealthTypes.h"
+#include "Types/ResourceTypes.h"
 #include "UObject/Object.h"
 #include "EffectUtils.generated.h"
 
@@ -25,8 +25,9 @@ public:
 	static void ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult = true);
 
 	static void TryAddMaxWoundsToActor(const AActor* ReceivingActor, float MaxWoundsToAdd);
-	static void TryApplyHealToActor(AActor* ReceivingActor, AActor* InstigatingActor, float Heal);
-	static void TryApplyDamageToActor(AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent = FDamageHitReactEvent());
+	static void TryApplyHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal);
+	UFUNCTION(BlueprintCallable)
+	static void TryApplyDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent = FDamageHitReactEvent());
 
 	static class UFXSystemAsset* GetVFXAssetFromKey(const struct FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot);
 	static class USoundCue* GetSFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot);

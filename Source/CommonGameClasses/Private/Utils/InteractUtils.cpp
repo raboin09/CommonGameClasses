@@ -3,7 +3,7 @@
 
 #include "Utils/InteractUtils.h"
 #include "Utils/CoreUtils.h"
-#include "Player/CommonPlayerCharacter.h"
+#include "Character/CommonPlayerCharacter.h"
 #include "API/Interactable.h"
 #include "GameFramework/Character.h"
 

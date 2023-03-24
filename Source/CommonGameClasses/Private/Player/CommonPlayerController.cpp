@@ -2,11 +2,13 @@
 
 
 #include "Player/CommonPlayerController.h"
+#include "Character/CommonPlayerCharacter.h"
+#include "API/Interactable.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Quest/QuestManagerComponent.h"
+#include "ActorComponent/QuestManagerComponent.h"
 
 ACommonPlayerController::ACommonPlayerController()
 {

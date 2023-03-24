@@ -16,6 +16,19 @@ struct FResourceCostData : public FTableRowBase
 };
 
 UENUM(BlueprintType)
+enum class EResourceContainerLocation : uint8
+{
+	Instigator,
+	InstigatorComponent,
+	PlayerController,
+	PlayerControllerComponent,
+	Ability,
+	AbilityComponent,
+	PlayerState,
+	PlayerStateComponent
+};
+
+UENUM(BlueprintType)
 enum class EMeshType : uint8
 {
 	InstigatorMesh,

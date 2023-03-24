@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Quest/QuestManagerComponent.h"
+#include "ActorComponent/QuestManagerComponent.h"
 #include "API/Questable.h"
 #include "SMSystem/Public/SMUtils.h"
 #include "Kismet/GameplayStatics.h"

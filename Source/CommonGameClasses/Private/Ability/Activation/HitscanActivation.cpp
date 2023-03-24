@@ -1,7 +1,7 @@
 ﻿#include "Ability/Activation/HitscanActivation.h"
 
 #include "NiagaraFunctionLibrary.h"
-#include "Character/EffectContainerComponent.h"
+#include "ActorComponent/EffectContainerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utils/CombatUtils.h"
@@ -15,10 +15,10 @@ void AHitscanActivation::Fire(int32 ActivationLevel)
 void AHitscanActivation::Internal_FireShot()
 {
 	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), 20.f);
-	Internal_ProcessInstantHit(Impact);
+	K2_ProcessInstantHit(Impact);
 }
 
-void AHitscanActivation::Internal_ProcessInstantHit(const FHitResult& Impact)
+void AHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& Impact)
 {
 	AActor* HitActor = Impact.GetActor();
 	K2_PlayTrailFX(HitActor ? Impact.ImpactPoint : Impact.TraceEnd);

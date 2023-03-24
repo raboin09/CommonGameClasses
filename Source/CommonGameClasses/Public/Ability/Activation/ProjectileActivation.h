@@ -6,6 +6,8 @@
 #include "RangedActivation.h"
 #include "ProjectileActivation.generated.h"
 
+class ACommonProjectile;
+
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API AProjectileActivation : public ARangedActivation
 {
@@ -17,7 +19,7 @@ public:
 
 protected:	
 	virtual void Fire(int32 ActivationLevel = -1) override;
-	virtual class ACommonProjectile* HandleProjectileFire();
+	virtual ACommonProjectile* HandleProjectileFire();
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	TSubclassOf<ACommonProjectile> ProjectileClass;
@@ -25,7 +27,8 @@ protected:
 	float ProjectileLife = 10.f;
 
 private:
-	FORCEINLINE virtual TArray<TSubclassOf<AActor>> Internal_GetAdditionalEffectsToApplyToProjectile() const { return AbilityEffects; };
 	virtual void Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& OutVelocity);
 	virtual ACommonProjectile* Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity);
+
+	FORCEINLINE virtual TArray<TSubclassOf<AActor>> Internal_GetAdditionalEffectsToApplyToProjectile() const { return AbilityEffects; };
 };

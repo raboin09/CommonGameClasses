@@ -1,7 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Character/GameplayTagComponent.h"
-
+#include "ActorComponent/GameplayTagComponent.h"
 #include "BlueprintGameplayTagLibrary.h"
 
 void UGameplayTagComponent::AddTag(const FGameplayTag& TagToAdd)

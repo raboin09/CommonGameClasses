@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "HealthCost.generated.h"
+#include "AIController.h"
+#include "CommonAIController.generated.h"
 
 UCLASS()
-class COMMONGAMECLASSES_API AHealthCost : public AActor
+class COMMONGAMECLASSES_API ACommonAIController : public AAIController
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	AHealthCost();
+	ACommonAIController();
 
 protected:
 	// Called when the game starts or when spawned

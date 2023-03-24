@@ -26,11 +26,11 @@ public:
 	static void TryAddActorToQuestableArray(AActor* InActor);
 	static void TryRemoveActorFromQuestableArray(AActor* InActor);
 
-	UFUNCTION(BlueprintCallable, Category="Genestealer|WorldUtils")
+	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
 	static AActor* K2_SpawnActorToWorld(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, FTransform SpawnTransform = FTransform(), AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
-	UFUNCTION(BlueprintCallable, Category="Genestealer|WorldUtils")
+	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
 	static void K2_FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform);
-	UFUNCTION(BlueprintCallable, Category="Genestealer|WorldUtils")
+	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
 	static AActor* K2_SpawnActorWorld_Deferred(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 
 	

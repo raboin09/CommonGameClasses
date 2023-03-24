@@ -8,6 +8,10 @@
 #include "Types/EventDeclarations.h"
 #include "CommonAbility.generated.h"
 
+class IResourceContainer;
+class USphereComponent;
+enum class EResourceContainerLocation : uint8;
+
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility
 {
@@ -21,24 +25,30 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Ability")
-	float CooldownDuration;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "/Script/CommonGameClasses.CostMechanism"))
-	TSubclassOf<AActor> CostMechanismClass;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "/Script/CommonGameClasses.TriggerMechanism"))
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability")
+	float CooldownDuration = 1.f;
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability")
+	int32 ResourceCost = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability")
+	EResourceContainerLocation ResourceContainerLocation;
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent", EditConditionHides))
+	TSubclassOf<UActorComponent> ResourceContainerClass;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.TriggerMechanism"))
 	TSubclassOf<AActor> TriggerMechanismClass;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ActivationMechanism"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ActivationMechanism"))
 	TSubclassOf<AActor> ActivationMechanismClass;
 	
-	UPROPERTY(VisibleDefaultsOnly, Category="COMMON|Ability")
-	class USphereComponent* AbilityRoot;
+	UPROPERTY(VisibleDefaultsOnly, Category="CUSTOM|Ability")
+	USphereComponent* AbilityRoot;
 
 private:	
 	void SetTriggerMechanism(const TSubclassOf<AActor> InTriggerClass);
 	void SetCooldownMechanism();
-	void SetCostMechanism(const TSubclassOf<AActor> InCostClass);
+	void SetResourceContainerObject();
 	void SetActivationMechanism(const TSubclassOf<AActor> InActivationClass);
-	
+
+	void Internal_SetResourceContainerToObject(UObject* ContainerObject);
+	void Internal_SetResourceContainerToComponent(const AActor* PotentialActor);
 	bool Internal_StartNormalAbility() const;
 	AActor* Internal_CreateNewMechanism(const TSubclassOf<AActor> InMechanismClass, const UClass* InterfaceClass);
 	void Internal_BindMechanismEventsToAbility();
@@ -57,13 +67,13 @@ private:
 	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent) const;
 
 	UPROPERTY()
-	TScriptInterface<class ICooldownMechanism> CooldownMechanism;
+	TScriptInterface<ICooldownMechanism> CooldownMechanism;
 	UPROPERTY()
-	TScriptInterface<class ICostMechanism> CostMechanism;
+	TScriptInterface<IResourceContainer> ResourceContainer;
 	UPROPERTY()
 	TScriptInterface<ITriggerMechanism> TriggerMechanism;
 	UPROPERTY()
 	TScriptInterface<IActivationMechanism> ActivationMechanism;
 	UPROPERTY()
 	AActor* OwningActor;
-};
+}; 

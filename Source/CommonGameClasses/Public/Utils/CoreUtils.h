@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "API/Interactable.h"
-#include "Character/HealthComponent.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Quest/QuestManagerComponent.h"
+#include "ActorComponent/QuestManagerComponent.h"
 #include "CoreUtils.generated.h"
 
 class ACommonPlayerCharacter;
@@ -32,6 +31,6 @@ public:
 	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UHealthComponent* GetHealthComponentFromActor(UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Genestealer|CoreUtils")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UQuestManagerComponent* GetQuestManager(const UObject* ContextObject);
 };

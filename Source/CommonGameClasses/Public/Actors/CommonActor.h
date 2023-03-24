@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Character/GameplayTagComponent.h"
 #include "CommonActor.generated.h"
+
+struct FGameplayTag;
+class UGameplayTagComponent;
 
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonActor : public AActor

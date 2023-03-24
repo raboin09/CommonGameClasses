@@ -1,9 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/LockOnComponent.h"
-
-#include "Character/GameplayTagComponent.h"
+#include "ActorComponent/LockOnComponent.h"
+#include "ActorComponent/GameplayTagComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"

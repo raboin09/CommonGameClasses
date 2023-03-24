@@ -1,12 +1,15 @@
 ﻿#include "Ability/CommonAbility.h"
 #include "Ability/CooldownMechanismImpl.h"
+#include "ActorComponent/GameplayTagComponent.h"
 #include "API/Ability/ActivationMechanism.h"
 #include "API/Ability/CooldownMechanism.h"
-#include "API/Ability/CostMechanism.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Types/TagTypes.h"
+#include "API/Ability/ResourceContainer.h"
+#include "GameFramework/PlayerState.h"
+#include "Types/AbilityTypes.h"
 #include "Utils/WorldUtils.h"
 
 ACommonAbility::ACommonAbility()
@@ -28,8 +31,7 @@ bool ACommonAbility::TryStartAbility()
 		{
 			UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_COMBO_ACTIVATED);
 			UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_COMBO_WINDOW_ENABLED);
-			Internal_StartNormalAbility();
-			return true;
+			return Internal_StartNormalAbility();
 		}		
 		return false;
 	}
@@ -98,24 +100,76 @@ void ACommonAbility::SetCooldownMechanism()
 	CooldownMechanism.SetObject(SpawnedActor);
 }
 
-void ACommonAbility::SetCostMechanism(const TSubclassOf<AActor> InCostClass)
+void ACommonAbility::SetResourceContainerObject()
 {
-	APawn* CharOwner = Cast<APawn>(GetOwner());
-	check(CharOwner)	
-	//AI and non-Pawns don't use resources
-	if(!CharOwner || !CharOwner->IsPlayerControlled())
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Resource is located in this ability or a component contained in this ability
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(ResourceContainerLocation == EResourceContainerLocation::Ability)
 	{
+		Internal_SetResourceContainerToObject(this);
+		return;
+	}
+	if(ResourceContainerLocation == EResourceContainerLocation::AbilityComponent)
+	{
+		Internal_SetResourceContainerToComponent(this);
+		return;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Resource is located in Instigator or a component contained in Instigator
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	APawn* OwningPawn = GetInstigator();
+	if(!OwningPawn) return;
+	if(ResourceContainerLocation == EResourceContainerLocation::Instigator)
+	{
+		Internal_SetResourceContainerToObject(OwningPawn);
+		return;
+	}
+	if(ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent)
+	{
+		Internal_SetResourceContainerToComponent(OwningPawn);
 		return;
 	}
 	
-	UObject* TempObj = Internal_CreateNewMechanism(InCostClass, UCostMechanism::StaticClass());
-	if(!TempObj)
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Resource is located in Instigator's Controller or a component contained in Instigator's Controller
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerController && OwningPawn->Controller)
 	{
+		Internal_SetResourceContainerToObject(OwningPawn->Controller);
 		return;
 	}
-	CostMechanism.SetInterface(Cast<ICostMechanism>(TempObj));
-	CostMechanism.SetObject(TempObj);
-	CostMechanism->InitCostMechanism(CharOwner);
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent && OwningPawn->Controller)
+	{
+		Internal_SetResourceContainerToComponent(OwningPawn->Controller);
+		return;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Resource is located in Instigator's PlayerState or a component contained in Instigator's PlayerState
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerState && OwningPawn->GetPlayerState())
+	{
+		Internal_SetResourceContainerToObject(OwningPawn->GetPlayerState());
+	}
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent && OwningPawn->GetPlayerState())
+	{
+		Internal_SetResourceContainerToComponent(OwningPawn->GetPlayerState());
+	}	
+}
+
+void ACommonAbility::Internal_SetResourceContainerToObject(UObject* ContainerObject)
+{
+	ResourceContainer.SetInterface(Cast<IResourceContainer>(ContainerObject));
+	ResourceContainer.SetObject(ContainerObject);
+}
+
+void ACommonAbility::Internal_SetResourceContainerToComponent(const AActor* PotentialActor)
+{
+	if(!PotentialActor)
+		return;
+	Internal_SetResourceContainerToObject(PotentialActor->GetComponentByClass(ResourceContainerClass));
 }
 
 void ACommonAbility::SetActivationMechanism(const TSubclassOf<AActor> InActivationClass)
@@ -134,7 +188,7 @@ void ACommonAbility::BeginPlay()
 	Super::BeginPlay();
 	SetCooldownMechanism();
 	SetActivationMechanism(ActivationMechanismClass);
-	SetCostMechanism(CostMechanismClass);
+	SetResourceContainerObject();
 	SetTriggerMechanism(TriggerMechanismClass);
 	Internal_BindMechanismEventsToAbility();
 	OwningActor = GetInstigator();
@@ -148,7 +202,7 @@ bool ACommonAbility::Internal_StartNormalAbility() const
 	}
 	
 	// If no costs are required, press trigger instantly. No need for resources.
-	if(!CostMechanism)
+	if(!ResourceContainer)
 	{
 		UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_REQUESTING_START);
 		TriggerMechanism->PressTrigger();
@@ -156,13 +210,9 @@ bool ACommonAbility::Internal_StartNormalAbility() const
 	}
 
 	// Golden path if/else
-	if(CostMechanism->CanConsumeResource())
+	if(ResourceContainer->TrySpendResource(ResourceCost))
 	{
 		UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_REQUESTING_START);
-		if(!CostMechanism->TryReserveResource())
-		{
-			return false;
-		}
 		TriggerMechanism->PressTrigger();
 		return true;
 	}
@@ -212,11 +262,6 @@ void ACommonAbility::HandleAbilityDeactivationEvent(const FAbilityDeactivationEv
 
 void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload) const
 {
-	if(CostMechanism)
-	{
-		CostMechanism->ConsumeResource();
-	}
-
 	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
 	if(CooldownMechanism)
 	{

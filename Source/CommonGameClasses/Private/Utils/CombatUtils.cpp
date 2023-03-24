@@ -3,7 +3,7 @@
 
 #include "Utils/CombatUtils.h"
 #include "Utils/CoreUtils.h"
-#include "Player/CommonPlayerCharacter.h"
+#include "Character/CommonPlayerCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 

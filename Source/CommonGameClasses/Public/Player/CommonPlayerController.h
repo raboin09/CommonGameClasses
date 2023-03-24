@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CommonPlayerCharacter.h"
 #include "GameplayTagContainer.h"
-#include "API/Interactable.h"
 #include "GameFramework/PlayerController.h"
 #include "CommonPlayerController.generated.h"
+
+class IInteractable;
+class ACommonPlayerCharacter;
+class UQuestManagerComponent;
 
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonPlayerController : public APlayerController
@@ -26,7 +28,7 @@ public:
 	
 	FORCEINLINE TScriptInterface<IInteractable> GetCurrentHoveredActor() const { return CurrentHoveredInteractable; };
 	FORCEINLINE ACommonPlayerCharacter* GetCommonPlayerCharacter() const { return PlayerCharacter; };
-	FORCEINLINE class UQuestManagerComponent* GetQuestManager() const { return QuestManager; }
+	FORCEINLINE UQuestManagerComponent* GetQuestManager() const { return QuestManager; }
 	
 protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")

@@ -7,6 +7,8 @@
 #include "API/Interactable.h"
 #include "CommonInteractableActor.generated.h"
 
+class UInteractionComponent;
+
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonInteractableActor : public ACommonActor, public IInteractable
 {
@@ -34,5 +36,5 @@ protected:
 	
 private:
 	UPROPERTY()
-	class UInteractionComponent* InteractionComponent;
+	UInteractionComponent* InteractionComponent;
 };

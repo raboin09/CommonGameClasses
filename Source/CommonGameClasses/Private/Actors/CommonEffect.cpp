@@ -1,7 +1,7 @@
 ﻿#include "Actors/CommonEffect.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Character/GameplayTagComponent.h"
+#include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraComponent.h"
 #include "Particles/ParticleSystemComponent.h"

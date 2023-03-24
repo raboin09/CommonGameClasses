@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "LockOnComponent.generated.h"
 
+class UTimelineComponent;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API ULockOnComponent : public UActorComponent
@@ -20,21 +21,21 @@ public:
 	void InterpToActor(AActor* ActorToInterpTo, TFunction<void()> InFinishedFunction = TFunction<void()>());
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	UCurveFloat* LockOnTransitionCurve;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FVector TraceOffset = FVector(0.f, 0.f, 50.f);
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	float NumCones = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	float ConeTraceArcWidth = 55.f;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	float SweepRadius = 55.f;		
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	float ArcDistance = 300.f;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bUseControllerRotation;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bDrawDebug;
 	
 private:
@@ -56,5 +57,5 @@ private:
 	UPROPERTY(Transient)
 	AActor* SelectedActor;
 	UPROPERTY()
-	class UTimelineComponent* LockOnInterpTimeline;
+	UTimelineComponent* LockOnInterpTimeline;
 };

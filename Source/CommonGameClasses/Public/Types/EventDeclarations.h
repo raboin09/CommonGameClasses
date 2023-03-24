@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "HealthTypes.h"
+#include "ResourceTypes.h"
 #include "QuestTypes.h"
 #include "EventDeclarations.generated.h"
 
@@ -199,9 +199,9 @@ struct FCurrentWoundEventPayload
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly)
-	FWound NewWound = FWound();
+	FResourcePool NewWound = FResourcePool();
 	UPROPERTY(BlueprintReadOnly)
-	FWound OldWound = FWound();
+	FResourcePool OldWound = FResourcePool();
 	UPROPERTY()
 	int32 MaxWounds = 1;
 	UPROPERTY()
@@ -272,3 +272,71 @@ struct FQuestUpdateEventPayload
 	}
 };
 DECLARE_EVENT_OneParam(UQuestObjectiveComponent, FQuestUpdateEvent, const FQuestUpdateEventPayload&);
+
+///////////////////////////////////////
+// MANA UPDATE
+///////////////////////////////////////
+
+USTRUCT(BlueprintType)
+struct FEnergyChangedEventPayload
+{
+	GENERATED_BODY()
+
+	FEnergyChangedEventPayload()
+	{
+		CurrentEnergy = -1.f;
+		MaxEnergy = -1.f;
+	}
+
+	FEnergyChangedEventPayload(const float InCurrentEnergy, const float InMaxEnergy)
+	{
+		CurrentEnergy = InCurrentEnergy;
+		MaxEnergy = InMaxEnergy;
+	}
+
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentEnergy;
+	UPROPERTY(BlueprintReadOnly)
+	float MaxEnergy;
+};
+DECLARE_EVENT_OneParam(UManaComponent, FEnergyAmountChangedEvent, const FEnergyChangedEventPayload&);
+
+///////////////////////////
+// AMMO AMOUNT CHANGED
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FAmmoAmountChangedPayload
+{
+	GENERATED_BODY()
+
+	FAmmoAmountChangedPayload(int32 InCurrAmmoInClip, int32 InClipCapacity, int32 InCurrentAmmo, int32 InMaxClips)
+		: CurrentAmmoInClip(InCurrAmmoInClip), ClipCapacity(InClipCapacity),  CurrentAmmo(InCurrentAmmo), MaxAmmo(InMaxClips) {}
+
+	FAmmoAmountChangedPayload(): CurrentAmmoInClip(0), ClipCapacity(0), CurrentAmmo(0), MaxAmmo(0)
+	{
+	}
+
+	UPROPERTY()
+	int32 CurrentAmmoInClip;
+	UPROPERTY()
+	int32 ClipCapacity;
+	UPROPERTY()
+	int32 CurrentAmmo;
+	UPROPERTY()
+	int32 MaxAmmo;
+	
+};
+DECLARE_EVENT_OneParam(UAmmoComponent, FAmmoAmountChangedEvent, const FAmmoAmountChangedPayload&);
+
+///////////////////////////
+// AMMO AMOUNT CHANGED
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FOutOfAmmoEventPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	bool bCompletelyOutOfAmmo = false;
+};
+DECLARE_EVENT_OneParam(UAmmoComponent, FOutOfAmmoEvent, const FOutOfAmmoEventPayload&);

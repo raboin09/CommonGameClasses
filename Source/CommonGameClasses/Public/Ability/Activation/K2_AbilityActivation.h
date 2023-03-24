@@ -13,12 +13,13 @@ class COMMONGAMECLASSES_API AK2_AbilityActivation : public ACommonActor, public 
 {
 	GENERATED_BODY()
 
-protected:
-	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { K2_Activate(TriggerEventPayload); }	
-	FORCEINLINE virtual void Deactivate() override { K2_Deactivate(); }
-	
+protected:	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void K2_Activate(const FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void K2_Deactivate();
+
+public:
+	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { K2_Activate(TriggerEventPayload); }	
+	FORCEINLINE virtual void Deactivate() override { K2_Deactivate(); }
 };

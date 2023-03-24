@@ -17,7 +17,7 @@ class COMMONGAMECLASSES_API UTransition_QuestSection : public USMTransitionInsta
 	GENERATED_BODY()
 public:
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="CUSTOM")
 	FQuestSectionData QuestSectionData;
 	int32 QuestID;
 

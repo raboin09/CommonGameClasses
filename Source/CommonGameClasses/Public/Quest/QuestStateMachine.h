@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
 #include "SMInstance.h"
-#include "Transition_QuestSection.h"
+#include "Types/QuestTypes.h"
 #include "QuestStateMachine.generated.h"
+
+class UTransition_QuestSection;
 
 /**
  * 
@@ -22,7 +23,7 @@ public:
 	void TryAddActorToQuest(AActor* InActor);
 	bool IsQuestComplete() const;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FQuestData QuestData;
 
 	UPROPERTY()

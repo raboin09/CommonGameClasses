@@ -6,7 +6,7 @@
 #include "API/Interactable.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Types/CombatTypes.h"
-#include "Types/HealthTypes.h"
+#include "Types/ResourceTypes.h"
 #include "CombatUtils.generated.h"
 
 #define OUTLINE_COLOR_RED 254

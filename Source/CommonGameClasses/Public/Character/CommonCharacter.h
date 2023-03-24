@@ -3,11 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActorComponent/EnergyComponent.h"
 #include "Types/CommonTypes.h"
-#include "GameplayTagComponent.h"
-#include "API/Mountable.h"
 #include "GameFramework/Character.h"
 #include "CommonCharacter.generated.h"
+
+struct FGameplayTag;
+class IMountable;
+class UHealthComponent;
+class UGameplayTagComponent;
 
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter
@@ -26,7 +30,7 @@ protected:
 	////////////////////////////////
 	/// Common Events
 	////////////////////////////////
-	UFUNCTION(BlueprintNativeEvent, Category = "CUSTOM|Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "COMMON|Character")
 	void K2_OnDeath();
 	virtual void K2_OnDeath_Implementation();
 
@@ -34,7 +38,9 @@ protected:
 	TArray<FGameplayTag> DefaultGameplayTags;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="CUSTOM|Defaults")
 	EAffiliation AbsoluteAffiliation;
-	
+
+	UPROPERTY()
+	UEnergyComponent* ManaComponent;
 	UPROPERTY()
 	UGameplayTagComponent* GameplayTagComponent;
 	UPROPERTY()

@@ -2,6 +2,7 @@
 
 
 #include "Quest/QuestStateMachine.h"
+#include "Quest/Transition_QuestSection.h"
 
 UQuestStateMachine::UQuestStateMachine()
 {

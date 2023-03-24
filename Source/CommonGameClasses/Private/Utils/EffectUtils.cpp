@@ -6,8 +6,8 @@
 #include "Actors/CommonEffect.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/DataTable.h"
-#include "Character/HealthComponent.h"
-#include "Character/EffectContainerComponent.h"
+#include "ActorComponent/HealthComponent.h"
+#include "ActorComponent/EffectContainerComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CombatTypes.h"
 #include "Utils/CombatUtils.h"
@@ -187,7 +187,7 @@ void UEffectUtils::TryAddMaxWoundsToActor(const AActor* ReceivingActor, float Ma
 	HealthComponent->AddMaxWounds(MaxWoundsToAdd);
 }
 
-void UEffectUtils::TryApplyHealToActor(AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
+void UEffectUtils::TryApplyHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
 {
 	if(!ReceivingActor)
 		return;
@@ -195,10 +195,10 @@ void UEffectUtils::TryApplyHealToActor(AActor* ReceivingActor, AActor* Instigati
 	
 	if (!HealthComponent)
 		return;
-	HealthComponent->ApplyHeal(Heal, ReceivingActor, InstigatingActor);
+	HealthComponent->ApplyHeal(Heal, InstigatingActor);
 }
 
-void UEffectUtils::TryApplyDamageToActor(AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
+void UEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
 {
 	if(!ReceivingActor)
 		return;
@@ -206,7 +206,7 @@ void UEffectUtils::TryApplyDamageToActor(AActor* ReceivingActor, AActor* Instiga
 	
 	if (!HealthComponent)
 		return;
-	HealthComponent->TakeDamage(Damage, ReceivingActor, InstigatingActor, HitReactEvent);
+	HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
 }
 
 UFXSystemAsset* UEffectUtils::GetVFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)

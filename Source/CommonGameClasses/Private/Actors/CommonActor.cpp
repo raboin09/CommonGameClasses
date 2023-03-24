@@ -2,6 +2,7 @@
 
 
 #include "Actors/CommonActor.h"
+#include "ActorComponent/GameplayTagComponent.h"
 
 ACommonActor::ACommonActor()
 {

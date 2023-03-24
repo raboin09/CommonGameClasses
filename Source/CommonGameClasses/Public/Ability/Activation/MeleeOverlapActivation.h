@@ -19,11 +19,13 @@ public:
 	
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
-	FORCEINLINE virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) override { MeshComponentRef = InMeshComponent; }
 	
 private:
 	UPROPERTY()
 	UMeshComponent* MeshComponentRef;
 	UPROPERTY(Transient)
 	TArray<AActor*> HitActors;
+
+public:
+	FORCEINLINE virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) override { MeshComponentRef = InMeshComponent; }
 };

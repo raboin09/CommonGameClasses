@@ -1,10 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/EffectContainerComponent.h"
+#include "ActorComponent/EffectContainerComponent.h"
 
 #include "Actors/CommonEffect.h"
-#include "Character/GameplayTagComponent.h"
+#include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utils/CombatUtils.h"
 #include "Utils/WorldUtils.h"

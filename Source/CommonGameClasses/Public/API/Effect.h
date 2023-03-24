@@ -55,10 +55,10 @@ struct FEffectContext
 	}
 
 	// Actor that the effect is being applied to
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="COMMON")
 	AActor* ReceivingActor;
 	// Actor that applied the effect
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="COMMON")
 	AActor* InstigatingActor;
 	FHitResult SurfaceHit;
 	FVector HitDirection;
@@ -82,9 +82,9 @@ struct FEffectValidTargets
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TArray<FGameplayTag> RequiredTags;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TArray<FGameplayTag> BlockedTags;
 };
 
@@ -93,23 +93,23 @@ struct FEffectInitializationData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, Category=Defaults, meta=(EditCondition = "EffectInterval != EEffectInterval::Instant", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "EffectInterval != EEffectInterval::Instant", EditConditionHides))
 	bool bInfinite = false;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FEffectValidTargets ValidTargets;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults, meta=(ClampMin="1.0", EditCondition = "bInfinite != true && EffectInterval != EEffectInterval::Instant", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(ClampMin="1.0", EditCondition = "bInfinite != true && EffectInterval != EEffectInterval::Instant", EditConditionHides))
 	float EffectDuration = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	EEffectInterval EffectInterval = EEffectInterval::Instant;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TArray<FGameplayTag> EffectTags;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TArray<FGameplayTag> TagsToApply;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bShouldReverseEffectsOnDestroy = true;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TArray<FGameplayTag> TagsToRemove;
-	UPROPERTY(EditDefaultsOnly, Category=Defaults)
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TArray<FGameplayTag> RemoveEffectsWithTags;
 };
 

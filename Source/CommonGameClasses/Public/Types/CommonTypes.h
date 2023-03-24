@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonTypes.generated.h"
 
 #define OUTLINE_COLOR_RED 254
 #define OUTLINE_COLOR_GREEN 252

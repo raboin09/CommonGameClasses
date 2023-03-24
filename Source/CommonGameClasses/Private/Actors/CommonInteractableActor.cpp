@@ -1,6 +1,5 @@
 ﻿#include "Actors/CommonInteractableActor.h"
-
-#include "Character/InteractionComponent.h"
+#include "ActorComponent/InteractionComponent.h"
 
 ACommonInteractableActor::ACommonInteractableActor()
 {

@@ -2,12 +2,15 @@
 
 
 #include "Character/CommonCharacter.h"
+#include "ActorComponent/GameplayTagComponent.h"
+#include "ActorComponent/HealthComponent.h"
 
 ACommonCharacter::ACommonCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	GameplayTagComponent = CreateDefaultSubobject<UGameplayTagComponent>(TEXT("GameplayTagComponent"));
+	ManaComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("ManaComponent"));
 }
 
 void ACommonCharacter::BeginPlay()

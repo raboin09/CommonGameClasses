@@ -3,14 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AIController.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/ActivationMechanism.h"
 #include "Types/AbilityTypes.h"
 #include "RangedActivation.generated.h"
 
 class UFXSystemComponent;
-enum class EMeshType : uint8;
+class AAIController;
 
 UCLASS(Abstract, NotBlueprintable)
 class COMMONGAMECLASSES_API ARangedActivation : public ACommonActor, public IActivationMechanism
@@ -30,38 +29,36 @@ protected:
 	// Ranged Activation 
 	virtual void Fire(int32 ActivationLevel = -1) PURE_VIRTUAL(ARangedActivation::Fire,)
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_PlayFireFX(const FVector& SpawnPoint);
 	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
 	FHitResult WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector);
-	FORCEINLINE bool ShouldLineTrace() const { return IsValid(OwningAIController); }
 	TArray<AActor*> GetActorsToIgnoreCollision();
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
-	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };
 	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	EMeshType MeshType;
 	// Socket where the muzzle or hand is
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	bool bAimOriginIsPlayerEyesInsteadOfWeapon;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	float TraceRange = 1000.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	bool bHasFiringSpread = false;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float TraceSpread = 5.f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float FiringSpreadIncrement = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float FiringSpreadMax = 10.f;
 	
 private:
@@ -84,4 +81,8 @@ private:
 	const APlayerController* OwningPlayerController;
 	UPROPERTY()
 	UMeshComponent* MeshComponentRef;
+
+public:
+	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };
+	FORCEINLINE bool ShouldLineTrace() const { return OwningAIController != nullptr; }
 };
