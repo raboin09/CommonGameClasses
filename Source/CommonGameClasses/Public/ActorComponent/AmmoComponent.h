@@ -24,10 +24,15 @@ public:
 	virtual float CalculateResourceCost(const float RequestedAmount) const override;
 	
 protected:
+	// Ammo shouldn't really regenerate
+	FORCEINLINE virtual bool CanRegen() const override { return bAmmoRegenerates; }
+
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bInfiniteAmmo = false;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bInfiniteClip = false;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	bool bAmmoRegenerates = false;
 	
 private:
 	void BroadcastAmmoUsage();

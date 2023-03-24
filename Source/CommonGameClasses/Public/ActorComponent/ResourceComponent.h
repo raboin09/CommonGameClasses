@@ -27,7 +27,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	
+
+	virtual bool CanRegen() const;
 	virtual bool CanSpendResourceAmount(const float RequestedAmount);
 	virtual float CalculateResourceCost(const float RequestedAmount) const PURE_VIRTUAL(UResourceComponent::CalculateResourceCost, return 0.f;)
 

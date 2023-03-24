@@ -13,8 +13,13 @@ UResourceComponent::UResourceComponent()
 void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	ResourcePoolContainer.InitResourceContainer(StartingResourcesPerPool, NumberOfResourcePools);	
-	Internal_StartRegenTimer();
+	ResourcePoolContainer.InitResourceContainer(StartingResourcesPerPool, NumberOfResourcePools);
+	Internal_StartRegenTimer();	
+}
+
+bool UResourceComponent::CanRegen() const
+{
+	return RegenAmount > 0.f && RegenRate > 0.f;
 }
 
 bool UResourceComponent::TrySpendResource(const float RequestedAmount)
@@ -49,12 +54,20 @@ bool UResourceComponent::CanSpendResourceAmount(const float RequestedAmount)
 
 void UResourceComponent::Internal_StartRegenTimer()
 {
+	if(!CanRegen())
+	{
+		return;
+	}
 	bIsRegenTicking = true;
 	GetWorld()->GetTimerManager().SetTimer(Timer_RegenRate, this, &UResourceComponent::Internal_TickRegen, RegenRate, true);
 }
 
 void UResourceComponent::Internal_StopRegenTimer()
 {
+	if(!CanRegen())
+	{
+		return;
+	}
 	bIsRegenTicking = false;
 	GetWorld()->GetTimerManager().ClearTimer(Timer_RegenRate);
 }
