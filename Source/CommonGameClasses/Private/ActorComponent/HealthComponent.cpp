@@ -41,7 +41,6 @@ float UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingAct
 	}
 	const float Delta = CalculateResourceCost(RawDamage);
 	const float ActualResourcesTaken = ResourcePoolContainer.ConsumeResources(Delta);
-	COMMON_PRINTSCREEN("Taking Damage");
 	const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
 	if(ResourcePoolContainer.HasResources())
 	{
@@ -113,7 +112,6 @@ bool UHealthComponent::TrySpendResource(const float RequestedAmount)
 	const float OldSum = ResourcePoolContainer.GetSumOfAllResourcePools();
 	if(Super::TrySpendResource(RequestedAmount))
 	{
-		COMMON_PRINTSCREEN("Taking resource damage");
 		const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
 		FCurrentWoundEventPayload WoundEventPayload;
 		WoundEventPayload.InstigatingActor = GetOwner();

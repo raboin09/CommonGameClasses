@@ -17,10 +17,10 @@ struct FTickingEffect
 		TickingEffect = nullptr;
 		TickModulus = -1;
 		ExpirationTime = -1;
-		TickID = -1;
+		TickID = nullptr;
 	}
 
-	FTickingEffect(TScriptInterface<IEffect> IncomingEffect, int32 InTickModulus, int32 InExpirationTime, int32 InTickID)
+	FTickingEffect(TScriptInterface<IEffect> IncomingEffect, int32 InTickModulus, int32 InExpirationTime, UClass* InTickID)
 	{
 		TickModulus = InTickModulus;
 		ExpirationTime = InExpirationTime;
@@ -31,7 +31,7 @@ struct FTickingEffect
 	TScriptInterface<IEffect> TickingEffect;
 	int32 TickModulus;
 	float ExpirationTime;
-	int32 TickID;
+	UClass* TickID;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -54,21 +54,26 @@ protected:
 private:
 	TScriptInterface<IEffect> CreateEffectInstance(TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor) const;
 
-	void TryActivateEffect(TScriptInterface<IEffect> IncomingEffect);
+	void Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect);
 	void Internal_ApplyEffect(TScriptInterface<IEffect> IncomingEffect);
 	void Internal_RemoveEffectsWithTags(const TArray<FGameplayTag>& InTags, TScriptInterface<IEffect> IncomingEffect);
 	
-	void TickEffects();
-	void Internal_TickEffect(const int32 CurrentTickingEffectKey);
-	void StartTicking();
-	void StopTicking();
+	void Internal_TickEffects();
+	void Internal_TickEffect(const UClass* CurrentTickingEffectKey);
+	void Internal_StartTicking();
+	void Internal_StopTicking();
 	
 	bool CanApplyEffect(TScriptInterface<IEffect> IncomingEffect) const;
-	void AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect);
-	void ActivateEffect(TScriptInterface<IEffect> IncomingEffect) const;
-	void DestroyEffect(TScriptInterface<IEffect> IncomingEffect, int32 TickID);
+	static int32 ConvertInterval(EEffectInterval EffectInterval);
+	
+	void Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect);
+	static void Internal_ActivateEffect(TScriptInterface<IEffect> IncomingEffect);
+	void Internal_DestroyEffect(TScriptInterface<IEffect> IncomingEffect, const UClass* TickID);
 
-	TMap<int32, FTickingEffect> EffectsToTick;
+	UPROPERTY()
+	const UWorld* CachedWorld;
+	
+	TMap<UClass*, FTickingEffect> EffectsToTick;
 	FTimerHandle Timer_EffectTicker;
 	
 	const float QuarterSecondTick = .25f;
@@ -79,6 +84,5 @@ private:
 	const float TotalTicksPerCycle = 4 * MaxCycles;
 	
 	int32 TickCounter = 1;
-	int32 TickEntityIDCounter = 0;
 	bool bIsTicking;
 };

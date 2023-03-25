@@ -9,16 +9,13 @@
 #include "GameFramework/Actor.h"
 #include "CommonEffect.generated.h"
 
-class UNiagaraSystem;
-class USoundCue;
-
 UCLASS(Blueprintable, BlueprintType, EditInlineNew, DefaultToInstanced)
-class COMMONGAMECLASSES_API UBaseEffectData : public UObject
+class COMMONGAMECLASSES_API UEffectData : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	UBaseEffectData()
+	UEffectData()
 	{
 		// ImpactVFXRowHandle.DataTable = LoadObject<UDataTable>(nullptr, UTF8_TO_TCHAR("DataTable'/Game/_CUSTOM/Data/CUSTOM_ImpactVFX.CUSTOM_ImpactVFX'"));
 		// ImpactSFXRowHandle.DataTable = LoadObject<UDataTable>(nullptr, UTF8_TO_TCHAR("DataTable'/Game/_CUSTOM/Data/CUSTOM_ImpactSFX.CUSTOM_ImpactSFX'"));
@@ -36,71 +33,7 @@ public:
 	TMap<FGameplayTag, FModifierExpression> EffectModifiers;
 };
 
-USTRUCT(BlueprintType)
-struct FEffectImpactVFX : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* DefaultFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* ConcreteFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* DirtFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* WaterFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* MetalFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* WoodFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* GlassFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* GrassFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* FleshFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* SandFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* PlasticFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* IceFX = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* FleshHeadshotFX = nullptr;
-};
-
-USTRUCT(BlueprintType)
-struct FEffectImpactSFX : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* DefaultSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* ConcreteSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* DirtSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* WaterSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* MetalSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* WoodSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* GlassSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* GrassSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* FleshSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* SandSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* PlasticSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* IceSound = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* FleshHeadshotSound = nullptr;
-};
+class USoundCue;
 
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonEffect : public AActor, public IEffect
@@ -131,17 +64,14 @@ protected:
 	//////////////////////////
 	
 	// Must override in child classes
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON")
-	void K2_ActivateEffect();
-	virtual void K2_ActivateEffect_Implementation();
-
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	void K2_OnActivateEffect();
 	// Optionally override one of these in child classes
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
 	void K2_OnDestroyEffect();
-	virtual void K2_OnDestroyEffect_Implementation();
 	
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON")
-	class UFXSystemAsset* K2_GetEffectParticleSystem();
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
+	UFXSystemAsset* K2_GetEffectParticleSystem();
 	virtual UFXSystemAsset* K2_GetEffectParticleSystem_Implementation();
 	
 	// Optionally override one of these in child classes
@@ -150,12 +80,13 @@ protected:
 	virtual USoundCue* K2_GetEffectSound_Implementation();
 	
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = "CUSTOM")
-	UBaseEffectData* EffectDataObj;
+	UEffectData* EffectDataObj;
 	UPROPERTY(BlueprintReadOnly, Category = "CUSTOM")
 	FEffectContext EffectContext;
 
 	UPROPERTY(Transient)
 	UFXSystemComponent* EffectVFX;
+	int32 tickcount;
 private:
 	void Internal_PlayEffectSound();
 	void Internal_PlayEffectParticleSystem();

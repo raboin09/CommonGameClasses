@@ -3,7 +3,6 @@
 
 #include "Character/CommonCharacter.h"
 #include "ActorComponent/GameplayTagComponent.h"
-#include "ActorComponent/HealthComponent.h"
 
 ACommonCharacter::ACommonCharacter()
 {
@@ -11,6 +10,7 @@ ACommonCharacter::ACommonCharacter()
 
 	GameplayTagComponent = CreateDefaultSubobject<UGameplayTagComponent>(TEXT("GameplayTagComponent"));
 	ManaComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("ManaComponent"));
+	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainerComponent"));
 }
 
 void ACommonCharacter::BeginPlay()

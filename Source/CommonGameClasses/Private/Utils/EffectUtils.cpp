@@ -123,7 +123,6 @@ void UEffectUtils::ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<AActor
 		return;
 	}
 
-
 	UEffectContainerComponent* EffectContainerComponent = ReceivingActor->FindComponentByClass<UEffectContainerComponent>();
 	if (!EffectContainerComponent)
 	{

@@ -9,7 +9,7 @@
 #include "Utils/CombatUtils.h"
 #include "Utils/WorldUtils.h"
 
-DECLARE_CYCLE_STAT(TEXT("Genestealer_EffectContainerTick"), STAT_Genestealer_StatsEffectContainerTicks, STATGROUP_StatSystem);
+DECLARE_CYCLE_STAT(TEXT("CommonClasses_EffectContainerTick"), STAT_CommonClasses_StatsEffectContainerTicks, STATGROUP_StatSystem);
 
 UEffectContainerComponent::UEffectContainerComponent()
 {
@@ -31,14 +31,9 @@ void UEffectContainerComponent::TryApplyEffectToContainer(TSubclassOf<AActor> Ba
 	if(!BaseEffectClass || !BaseEffectClass->ImplementsInterface(UEffect::StaticClass()))
 	{
 		return;
-	} 
+	}
 	const TScriptInterface<IEffect> BaseEffect = CreateEffectInstance(BaseEffectClass, InstigatingActor);
 	Internal_ApplyEffect(BaseEffect);
-}
-
-void UEffectContainerComponent::BeginPlay()
-{
-	Super::BeginPlay();
 }
 
 TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHitResult(UObject* ContextObject, TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
@@ -68,6 +63,12 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	EffectActor->SetEffectContext(EffectContext);
 	UWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	return EffectActor;
+}
+
+void UEffectContainerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	CachedWorld = GetWorld();
 }
 
 TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor) const
@@ -104,15 +105,15 @@ void UEffectContainerComponent::Internal_ApplyEffect(TScriptInterface<IEffect> I
 
 	if(EffectInitData.bInfinite)
 	{
-		AddEffectToTickContainer(IncomingEffect);
+		Internal_AddEffectToTickContainer(IncomingEffect);
 	} else
 	{
 		switch (EffectInitData.EffectInterval)
 		{
 		case EEffectInterval::Instant:
 			{
-				TryActivateEffect(IncomingEffect);
-				DestroyEffect(IncomingEffect, -1);
+				Internal_TryActivateEffect(IncomingEffect);
+				Internal_DestroyEffect(IncomingEffect, IncomingEffect.GetObject()->GetClass());
 				break;
 			}
 		case EEffectInterval::Apply_Once:
@@ -123,7 +124,7 @@ void UEffectContainerComponent::Internal_ApplyEffect(TScriptInterface<IEffect> I
 		case EEffectInterval::Apply_Every_Three_Seconds:
 		case EEffectInterval::Apply_Every_Five_Seconds:
 			{
-				AddEffectToTickContainer(IncomingEffect);
+				Internal_AddEffectToTickContainer(IncomingEffect);
 				break;
 			}
 		default: ;
@@ -135,9 +136,9 @@ void UEffectContainerComponent::Internal_RemoveEffectsWithTags(const TArray<FGam
 {
 	for(const FGameplayTag& CurrTag : InTags)
 	{
-		TArray<int32> EffectKeys;
+		TArray<UClass*> EffectKeys;
 		EffectsToTick.GetKeys(EffectKeys);
-		for(const int32 Key : EffectKeys)
+		for(const auto Key : EffectKeys)
 		{
 			if(const auto Effect = EffectsToTick.Find(Key); Effect->TickingEffect)
 			{
@@ -151,7 +152,7 @@ void UEffectContainerComponent::Internal_RemoveEffectsWithTags(const TArray<FGam
 	}
 }
 
-void UEffectContainerComponent::TryActivateEffect(TScriptInterface<IEffect> IncomingEffect)
+void UEffectContainerComponent::Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect)
 {
 	if(!IncomingEffect)
 	{
@@ -165,81 +166,66 @@ void UEffectContainerComponent::TryActivateEffect(TScriptInterface<IEffect> Inco
 	}
 }
 
-void UEffectContainerComponent::TickEffects()
+void UEffectContainerComponent::Internal_TickEffects()
 {
-	SCOPE_CYCLE_COUNTER(STAT_Genestealer_StatsEffectContainerTicks);
+	SCOPE_CYCLE_COUNTER(STAT_CommonClasses_StatsEffectContainerTicks);
 	if (++TickCounter > TotalTicksPerCycle)
 	{
 		TickCounter = 1;
 	}
 
-	TArray<int32> MapKeys;
+	TArray<UClass*> MapKeys;
 	EffectsToTick.GetKeys(MapKeys);
-	if (!GetWorld())
-	{
-		return;
-	}
 
-	for (const int32 CurrentTickingEffectKey : MapKeys)
+	for (const auto CurrentTickingEffectKey : MapKeys)
 	{
 		Internal_TickEffect(CurrentTickingEffectKey);
 	}
 }
 
-void UEffectContainerComponent::Internal_TickEffect(const int32 CurrentTickingEffectKey)
+void UEffectContainerComponent::Internal_TickEffect(const UClass* CurrentTickingEffectKey)
 {
-	if(!EffectsToTick.Contains(CurrentTickingEffectKey))
-	{
+	if(!CachedWorld || !EffectsToTick.Contains(CurrentTickingEffectKey))
 		return;
-	}
 	
 	const FTickingEffect CurrentTickingEffect = *EffectsToTick.Find(CurrentTickingEffectKey);
 	const TScriptInterface<IEffect> CurrentEffect = CurrentTickingEffect.TickingEffect;
 	
 	if(!CurrentEffect || CurrentEffect->GetEffectInitializationData().EffectInterval == EEffectInterval::Apply_Once)
-	{
 		return;
-	}
 	
 	const bool bIsInfinite = CurrentEffect->GetEffectInitializationData().bInfinite;
 	if (!bIsInfinite)
 	{
-		if(GetWorld()->GetTimeSeconds() >= CurrentTickingEffect.ExpirationTime)
+		if(CachedWorld->GetTimeSeconds() >= CurrentTickingEffect.ExpirationTime)
 		{
-			DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
+			Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 			return;
 		}
 	}
 	
 	if (TickCounter % CurrentTickingEffect.TickModulus == 0){
-			TryActivateEffect(CurrentEffect);
+			Internal_TryActivateEffect(CurrentEffect);
 	}
 }
 
-void UEffectContainerComponent::StartTicking()
+void UEffectContainerComponent::Internal_StartTicking()
 {
-	if(bIsTicking)
+	if(bIsTicking || !CachedWorld)
 	{
 		return;
-	}
-	
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-	World->GetTimerManager().SetTimer(Timer_EffectTicker, this, &UEffectContainerComponent::TickEffects, QuarterSecondTick, true);
+	}	
+	CachedWorld->GetTimerManager().SetTimer(Timer_EffectTicker, this, &UEffectContainerComponent::Internal_TickEffects, QuarterSecondTick, true);
 	bIsTicking = true;
 }
 
-void UEffectContainerComponent::StopTicking()
+void UEffectContainerComponent::Internal_StopTicking()
 {
-	const UWorld* World = GetWorld();
-	if (!World)
+	if (!CachedWorld)
 	{
 		return;
 	}
-	World->GetTimerManager().ClearTimer(Timer_EffectTicker);
+	CachedWorld->GetTimerManager().ClearTimer(Timer_EffectTicker);
 	bIsTicking = false;
 }
 
@@ -262,50 +248,31 @@ bool UEffectContainerComponent::CanApplyEffect(TScriptInterface<IEffect> Incomin
 	return true;
 }
 
-void UEffectContainerComponent::AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect)
+void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect)
 {
-	if (!IncomingEffect || !GetWorld())
+	if (!IncomingEffect || !CachedWorld)
 	{
 		return;
 	}
-
-	IncomingEffect->ActivateEffect();
-
+	const FEffectInitializationData& EffectInitializationData = IncomingEffect->GetEffectInitializationData();
+	
 	FTickingEffect TickingEffect;
-	TickingEffect.TickID = ++TickEntityIDCounter;
-	switch (IncomingEffect->GetEffectInitializationData().EffectInterval)
-	{
-	case EEffectInterval::Apply_Every_Quarter_Second:
-		TickingEffect.TickModulus = 1;
-		break;
-	case EEffectInterval::Apply_Every_Half_Second:
-		TickingEffect.TickModulus = 2;
-		break;
-	case EEffectInterval::Apply_Every_Second:
-		TickingEffect.TickModulus = 4;
-		break;
-	case EEffectInterval::Apply_Every_Two_Seconds:
-		TickingEffect.TickModulus = 8;
-		break;
-	case EEffectInterval::Apply_Every_Three_Seconds:
-		TickingEffect.TickModulus = 12;
-		break;
-	case EEffectInterval::Apply_Every_Five_Seconds:
-		TickingEffect.TickModulus = 20;
-		break;
-	default:
-		TickingEffect.TickModulus = -1;
-	}
+	TickingEffect.TickID = IncomingEffect.GetObject()->GetClass();
+	TickingEffect.TickModulus = ConvertInterval(EffectInitializationData.EffectInterval);
 	if(!IncomingEffect->GetEffectInitializationData().bInfinite)
 	{
-		TickingEffect.ExpirationTime = GetWorld()->GetTimeSeconds() + IncomingEffect->GetEffectInitializationData().EffectDuration;	
+		TickingEffect.ExpirationTime = CachedWorld->GetTimeSeconds() + EffectInitializationData.EffectDuration;	
 	}
 	TickingEffect.TickingEffect = IncomingEffect;
-	EffectsToTick.Add(TickingEffect.TickID, TickingEffect);
-	StartTicking();
+	if(!EffectsToTick.Contains(TickingEffect.TickID))
+	{
+		IncomingEffect->ActivateEffect();
+	}
+	EffectsToTick.Add(TickingEffect.TickID, TickingEffect);	
+	Internal_StartTicking();
 }
 
-void UEffectContainerComponent::ActivateEffect(TScriptInterface<IEffect> IncomingEffect) const
+void UEffectContainerComponent::Internal_ActivateEffect(TScriptInterface<IEffect> IncomingEffect)
 {
 	if (!IncomingEffect)
 	{
@@ -314,7 +281,7 @@ void UEffectContainerComponent::ActivateEffect(TScriptInterface<IEffect> Incomin
 	IncomingEffect->ActivateEffect();
 }
 
-void UEffectContainerComponent::DestroyEffect(TScriptInterface<IEffect> IncomingEffect, int32 TickID)
+void UEffectContainerComponent::Internal_DestroyEffect(TScriptInterface<IEffect> IncomingEffect, const UClass* TickID)
 {
 	if (!IncomingEffect)
 	{
@@ -328,8 +295,22 @@ void UEffectContainerComponent::DestroyEffect(TScriptInterface<IEffect> Incoming
 
 	if (EffectsToTick.Num() <= 0)
 	{
-		StopTicking();
+		Internal_StopTicking();
 	}
 
 	IncomingEffect->DestroyEffect();
+}
+
+int32 UEffectContainerComponent::ConvertInterval(EEffectInterval EffectInterval)
+{
+	switch (EffectInterval)
+	{
+	case EEffectInterval::Apply_Every_Quarter_Second: return 1;
+	case EEffectInterval::Apply_Every_Half_Second: return 2;
+	case EEffectInterval::Apply_Every_Second: return 4;
+	case EEffectInterval::Apply_Every_Two_Seconds: return 8;
+	case EEffectInterval::Apply_Every_Three_Seconds: return 12;
+	case EEffectInterval::Apply_Every_Five_Seconds: return 20;
+	default: return -1;
+	}
 }

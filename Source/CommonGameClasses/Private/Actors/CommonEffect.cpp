@@ -7,6 +7,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Utils/CombatUtils.h"
 #include "Sound/SoundCue.h"
+#include "Types/CoreTypes.h"
 #include "Utils/EffectUtils.h"
 
 
@@ -14,29 +15,12 @@ ACommonEffect::ACommonEffect()
 {
  	PrimaryActorTick.bCanEverTick = false;
 	SetAutoDestroyWhenFinished(false);
-	// if(!EffectDataObj)
-	// {
-	// 	EffectDataObj = Cast<UBaseEffectData>(UBaseEffectData::StaticClass()->GetDefaultObject());
-	// }
 }
 
 void ACommonEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	K2_OnDestroyEffect();
 	Super::EndPlay(EndPlayReason);
-}
-
-void ACommonEffect::K2_ActivateEffect_Implementation()
-{
-	check(false)
-}
-
-void ACommonEffect::K2_OnDestroyEffect_Implementation()
-{
-	if(EffectVFX)
-	{
-		EffectVFX->Deactivate();
-	}
 }
 
 void ACommonEffect::Internal_PlayEffectSound()
@@ -112,16 +96,18 @@ void ACommonEffect::ActivateEffect()
 {
 	PlayEffectFX();
 	Internal_AddAndRemoveTagsFromReceiver_Activation();
-	K2_ActivateEffect();
+	K2_OnActivateEffect();
 }
 
 void ACommonEffect::DestroyEffect()
 {
 	Internal_AddAndRemoveTagsFromReceiver_Deactivation();
-	if(IsValid(this))
+	if(EffectVFX)
 	{
-		SetLifeSpan(1.f);
+		EffectVFX->Deactivate();
 	}
+	K2_OnDestroyEffect();
+	SetLifeSpan(1.f);
 }
 
 UFXSystemAsset* ACommonEffect::K2_GetEffectParticleSystem_Implementation()

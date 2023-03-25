@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/EnergyComponent.h"
 #include "Types/CommonTypes.h"
 #include "GameFramework/Character.h"
@@ -41,6 +42,8 @@ protected:
 
 	UPROPERTY()
 	UEnergyComponent* ManaComponent;
+	UPROPERTY()
+	UEffectContainerComponent* EffectContainerComponent;
 	UPROPERTY()
 	UGameplayTagComponent* GameplayTagComponent;
 	UPROPERTY()

@@ -24,7 +24,7 @@ public:
 	virtual float CalculateResourceCost(const float RequestedAmount) const override;
 	
 protected:
-	// Ammo shouldn't really regenerate
+	// Ammo be default doesn't regenerate (unless it has a heat mechanism where overheating is reaching 0 resources)
 	FORCEINLINE virtual bool CanRegen() const override { return bAmmoRegenerates; }
 
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
