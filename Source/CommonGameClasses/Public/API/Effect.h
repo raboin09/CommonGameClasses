@@ -100,7 +100,7 @@ struct FEffectInitializationData
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FEffectValidTargets ValidTargets;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(ClampMin="1.0", EditCondition = "bInfinite != true && EffectInterval != EEffectInterval::Instant", EditConditionHides))
-	float EffectDuration = 1.f;
+	double EffectDuration = 1.0;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	EEffectInterval EffectInterval = EEffectInterval::Instant;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")

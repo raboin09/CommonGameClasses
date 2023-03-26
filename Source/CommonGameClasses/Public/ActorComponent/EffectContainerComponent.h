@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "API/Effect.h"
 #include "Components/ActorComponent.h"
+#include "Types/AbilityTypes.h"
 #include "EffectContainerComponent.generated.h"
 
 USTRUCT()
@@ -16,14 +17,14 @@ struct FTickingEffect
 	{
 		TickingEffect = nullptr;
 		TickModulus = -1;
-		ExpirationTime = -1;
+		RemainingTickActivations = -1;
 		TickID = -1;
 	}
 
 	FTickingEffect(TScriptInterface<IEffect> IncomingEffect, int32 InTickModulus, int32 InExpirationTime, int32 InTickID)
 	{
 		TickModulus = InTickModulus;
-		ExpirationTime = InExpirationTime;
+		RemainingTickActivations = InExpirationTime;
 		TickingEffect = IncomingEffect;
 		TickID = InTickID;
 	}
@@ -35,7 +36,7 @@ struct FTickingEffect
 
 	TScriptInterface<IEffect> TickingEffect;
 	int32 TickModulus;
-	float ExpirationTime;
+	int32 RemainingTickActivations;
 	int32 TickID;
 };
 
@@ -65,13 +66,15 @@ private:
 	
 	void Internal_TickEffects();
 	void Internal_TickEffect(int32 CurrentTickingEffectKey);
-	void Internal_StartTicking();
+	void Internal_TryStartTicking();
 	void Internal_StopTicking();
 	
 	bool CanApplyEffect(TScriptInterface<IEffect> IncomingEffect) const;
 	int32 GetTickingEffectIndex(const UClass* EffectClass);
 	bool HasEffectClassAlready(const UClass* EffectClass) const;
-	static int32 ConvertInterval(EEffectInterval EffectInterval);
+	static int32 GenerateModulus(EEffectInterval EffectInterval);
+	static double ConvertIntervalToNumTicks(EEffectInterval EffectInterval);
+	static int32 GenerateNumTicks(EEffectInterval EffectInterval, double Duration);
 	
 	FORCEINLINE TArray<int32> GetKeys() const { TArray<int32> Keys; EffectsToTick.GetKeys(Keys); return Keys; }
 	void Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect);
@@ -85,15 +88,7 @@ private:
 	TMap<int32, FTickingEffect> EffectsToTick;
 	
 	FTimerHandle Timer_EffectTicker;
-	
-	const float QuarterSecondTick = .25f;
-	const float HalfSecondTick = .5f;
-	const float FullSecondTick = 1.f;
-
-	const float MaxCycles = 5;
-	const float TotalTicksPerCycle = 4 * MaxCycles;
-	
-	int32 TickCounter = 1;
+	int32 TickCounter = 0;
 	int32 TickIDCounter = 0;
 	bool bIsTicking;
 };

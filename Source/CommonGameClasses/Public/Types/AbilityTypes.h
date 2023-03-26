@@ -6,6 +6,11 @@
 #include "Engine/DataTable.h"
 #include "AbilityTypes.generated.h"
 
+#define EFFECT_TICK_RATE .25
+#define EFFECT_TICK_CYCLE_SECONDS 5
+#define EFFECT_TICK_CONVERSION (1/EFFECT_TICK_RATE)
+#define EFFECT_TICKS_PER_CYCLE (EFFECT_TICK_CONVERSION*EFFECT_TICK_CYCLE_SECONDS)
+
 USTRUCT(BlueprintType)
 struct FResourceCostData : public FTableRowBase
 {
