@@ -17,10 +17,10 @@ struct FTickingEffect
 		TickingEffect = nullptr;
 		TickModulus = -1;
 		ExpirationTime = -1;
-		TickID = nullptr;
+		TickID = -1;
 	}
 
-	FTickingEffect(TScriptInterface<IEffect> IncomingEffect, int32 InTickModulus, int32 InExpirationTime, UClass* InTickID)
+	FTickingEffect(TScriptInterface<IEffect> IncomingEffect, int32 InTickModulus, int32 InExpirationTime, int32 InTickID)
 	{
 		TickModulus = InTickModulus;
 		ExpirationTime = InExpirationTime;
@@ -28,10 +28,15 @@ struct FTickingEffect
 		TickID = InTickID;
 	}
 
+	bool operator==(const FTickingEffect& OtherEffect) const
+	{
+		return OtherEffect.TickingEffect == TickingEffect;
+	}
+
 	TScriptInterface<IEffect> TickingEffect;
 	int32 TickModulus;
 	float ExpirationTime;
-	UClass* TickID;
+	int32 TickID;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -59,21 +64,26 @@ private:
 	void Internal_RemoveEffectsWithTags(const TArray<FGameplayTag>& InTags, TScriptInterface<IEffect> IncomingEffect);
 	
 	void Internal_TickEffects();
-	void Internal_TickEffect(const UClass* CurrentTickingEffectKey);
+	void Internal_TickEffect(int32 CurrentTickingEffectKey);
 	void Internal_StartTicking();
 	void Internal_StopTicking();
 	
 	bool CanApplyEffect(TScriptInterface<IEffect> IncomingEffect) const;
+	int32 GetTickingEffectIndex(const UClass* EffectClass);
+	bool HasEffectClassAlready(const UClass* EffectClass) const;
 	static int32 ConvertInterval(EEffectInterval EffectInterval);
 	
+	FORCEINLINE TArray<int32> GetKeys() const { TArray<int32> Keys; EffectsToTick.GetKeys(Keys); return Keys; }
 	void Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect);
-	static void Internal_ActivateEffect(TScriptInterface<IEffect> IncomingEffect);
-	void Internal_DestroyEffect(TScriptInterface<IEffect> IncomingEffect, const UClass* TickID);
+	static void Internal_ActivateEffect(const FTickingEffect& IncomingEffect);
+	void Internal_DestroyEffect(TScriptInterface<IEffect> IncomingEffect, int32 TickID);
+	FTickingEffect Internal_GenerateTickingEffectStruct(TScriptInterface<IEffect> EffectInitializationData);
 
 	UPROPERTY()
 	const UWorld* CachedWorld;
+	TSet<UClass*> CurrentEffectClasses;
+	TMap<int32, FTickingEffect> EffectsToTick;
 	
-	TMap<UClass*, FTickingEffect> EffectsToTick;
 	FTimerHandle Timer_EffectTicker;
 	
 	const float QuarterSecondTick = .25f;
@@ -84,5 +94,6 @@ private:
 	const float TotalTicksPerCycle = 4 * MaxCycles;
 	
 	int32 TickCounter = 1;
+	int32 TickIDCounter = 0;
 	bool bIsTicking;
 };

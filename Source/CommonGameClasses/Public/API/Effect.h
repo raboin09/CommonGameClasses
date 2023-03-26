@@ -95,6 +95,8 @@ struct FEffectInitializationData
 
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "EffectInterval != EEffectInterval::Instant", EditConditionHides))
 	bool bInfinite = false;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "EffectInterval != EEffectInterval::Instant", EditConditionHides))
+	bool bEffectCanStack = false;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FEffectValidTargets ValidTargets;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(ClampMin="1.0", EditCondition = "bInfinite != true && EffectInterval != EEffectInterval::Instant", EditConditionHides))

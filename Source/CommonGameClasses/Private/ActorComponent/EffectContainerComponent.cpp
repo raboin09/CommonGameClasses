@@ -6,6 +6,7 @@
 #include "Actors/CommonEffect.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Types/CoreTypes.h"
 #include "Utils/CombatUtils.h"
 #include "Utils/WorldUtils.h"
 
@@ -113,7 +114,7 @@ void UEffectContainerComponent::Internal_ApplyEffect(TScriptInterface<IEffect> I
 		case EEffectInterval::Instant:
 			{
 				Internal_TryActivateEffect(IncomingEffect);
-				Internal_DestroyEffect(IncomingEffect, IncomingEffect.GetObject()->GetClass());
+				Internal_DestroyEffect(IncomingEffect, -1);
 				break;
 			}
 		case EEffectInterval::Apply_Once:
@@ -136,9 +137,9 @@ void UEffectContainerComponent::Internal_RemoveEffectsWithTags(const TArray<FGam
 {
 	for(const FGameplayTag& CurrTag : InTags)
 	{
-		TArray<UClass*> EffectKeys;
+		TArray<int32> EffectKeys;
 		EffectsToTick.GetKeys(EffectKeys);
-		for(const auto Key : EffectKeys)
+		for(const int32 Key : EffectKeys)
 		{
 			if(const auto Effect = EffectsToTick.Find(Key); Effect->TickingEffect)
 			{
@@ -174,37 +175,31 @@ void UEffectContainerComponent::Internal_TickEffects()
 		TickCounter = 1;
 	}
 
-	TArray<UClass*> MapKeys;
-	EffectsToTick.GetKeys(MapKeys);
-
-	for (const auto CurrentTickingEffectKey : MapKeys)
+	for (const int32 CurrentTickingEffectKey : GetKeys())
 	{
 		Internal_TickEffect(CurrentTickingEffectKey);
 	}
 }
 
-void UEffectContainerComponent::Internal_TickEffect(const UClass* CurrentTickingEffectKey)
+void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKey)
 {
 	if(!CachedWorld || !EffectsToTick.Contains(CurrentTickingEffectKey))
 		return;
 	
-	const FTickingEffect CurrentTickingEffect = *EffectsToTick.Find(CurrentTickingEffectKey);
-	const TScriptInterface<IEffect> CurrentEffect = CurrentTickingEffect.TickingEffect;
-	
+	const TScriptInterface<IEffect> CurrentEffect = EffectsToTick[CurrentTickingEffectKey].TickingEffect;
 	if(!CurrentEffect || CurrentEffect->GetEffectInitializationData().EffectInterval == EEffectInterval::Apply_Once)
 		return;
 	
 	const bool bIsInfinite = CurrentEffect->GetEffectInitializationData().bInfinite;
 	if (!bIsInfinite)
 	{
-		if(CachedWorld->GetTimeSeconds() >= CurrentTickingEffect.ExpirationTime)
+		if(CachedWorld->GetTimeSeconds() >= EffectsToTick[CurrentTickingEffectKey].ExpirationTime)
 		{
 			Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 			return;
 		}
 	}
-	
-	if (TickCounter % CurrentTickingEffect.TickModulus == 0){
+	if (TickCounter % EffectsToTick[CurrentTickingEffectKey].TickModulus == 0){
 			Internal_TryActivateEffect(CurrentEffect);
 	}
 }
@@ -248,40 +243,79 @@ bool UEffectContainerComponent::CanApplyEffect(TScriptInterface<IEffect> Incomin
 	return true;
 }
 
+int32 UEffectContainerComponent::GetTickingEffectIndex(const UClass* EffectClass)
+{
+	TArray<int32> Keys;
+	EffectsToTick.GetKeys(Keys);
+	for(const int32 Key : Keys)
+	{
+		FTickingEffect TickingEffect = EffectsToTick[Key];
+		if(TickingEffect.TickingEffect && TickingEffect.TickingEffect.GetObject()->GetClass() == EffectClass)
+			return TickingEffect.TickID;
+	}
+	return -1;
+}
+
+bool UEffectContainerComponent::HasEffectClassAlready(const UClass* EffectClass) const
+{
+	TArray<int32> Keys;
+	EffectsToTick.GetKeys(Keys);
+	for(const int32 Key : Keys)
+	{
+		FTickingEffect TickingEffect = EffectsToTick[Key];
+		if(TickingEffect.TickingEffect && TickingEffect.TickingEffect.GetObject()->GetClass() == EffectClass)
+			return true;
+	}
+	return false;
+}
+
+FTickingEffect UEffectContainerComponent::Internal_GenerateTickingEffectStruct(TScriptInterface<IEffect> IncomingEffect)
+{
+	const FEffectInitializationData& EffectInitializationData = IncomingEffect->GetEffectInitializationData();
+	FTickingEffect TickingEffect;
+	TickingEffect.TickModulus = ConvertInterval(EffectInitializationData.EffectInterval);
+	TickingEffect.TickID = TickIDCounter++;
+	if(!IncomingEffect->GetEffectInitializationData().bInfinite)
+	{
+		TickingEffect.ExpirationTime = CachedWorld->GetTimeSeconds() + EffectInitializationData.EffectDuration;	
+	}	
+	TickingEffect.TickingEffect = IncomingEffect;
+	return TickingEffect;
+}
+
 void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect)
 {
 	if (!IncomingEffect || !CachedWorld)
 	{
 		return;
 	}
-	const FEffectInitializationData& EffectInitializationData = IncomingEffect->GetEffectInitializationData();
-	
-	FTickingEffect TickingEffect;
-	TickingEffect.TickID = IncomingEffect.GetObject()->GetClass();
-	TickingEffect.TickModulus = ConvertInterval(EffectInitializationData.EffectInterval);
-	if(!IncomingEffect->GetEffectInitializationData().bInfinite)
+	const UClass* IncomingClass = IncomingEffect.GetObject()->GetClass();
+	const FTickingEffect NewTickingEffect = Internal_GenerateTickingEffectStruct(IncomingEffect);
+	const bool bEffectCanStack = IncomingEffect->GetEffectInitializationData().bEffectCanStack; 
+	if(bEffectCanStack || !HasEffectClassAlready(IncomingClass))
 	{
-		TickingEffect.ExpirationTime = CachedWorld->GetTimeSeconds() + EffectInitializationData.EffectDuration;	
-	}
-	TickingEffect.TickingEffect = IncomingEffect;
-	if(!EffectsToTick.Contains(TickingEffect.TickID))
-	{
+		// TickingEffects can accept new effect
+		EffectsToTick.Add(NewTickingEffect.TickID, NewTickingEffect);
+		CurrentEffectClasses.Add(IncomingEffect.GetObject()->GetClass());
 		IncomingEffect->ActivateEffect();
+	} else
+	{
+		EffectsToTick.Add(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
+		// Replace old ticking effect with new one
 	}
-	EffectsToTick.Add(TickingEffect.TickID, TickingEffect);	
 	Internal_StartTicking();
 }
 
-void UEffectContainerComponent::Internal_ActivateEffect(TScriptInterface<IEffect> IncomingEffect)
+void UEffectContainerComponent::Internal_ActivateEffect(const FTickingEffect& IncomingEffect)
 {
-	if (!IncomingEffect)
+	if (!IncomingEffect.TickingEffect)
 	{
 		return;
 	}
-	IncomingEffect->ActivateEffect();
+	IncomingEffect.TickingEffect->ActivateEffect();
 }
 
-void UEffectContainerComponent::Internal_DestroyEffect(TScriptInterface<IEffect> IncomingEffect, const UClass* TickID)
+void UEffectContainerComponent::Internal_DestroyEffect(TScriptInterface<IEffect> IncomingEffect, int32 TickID)
 {
 	if (!IncomingEffect)
 	{
@@ -290,14 +324,21 @@ void UEffectContainerComponent::Internal_DestroyEffect(TScriptInterface<IEffect>
 
 	if (EffectsToTick.Contains(TickID))
 	{
-		EffectsToTick.Remove(TickID);
+		EffectsToTick.Remove(TickID);	
+	}
+	
+	const UClass* EffectClass = IncomingEffect.GetObject()->GetClass();
+
+	// If CurrentEffectToTick don't have this Effect class anymore, remove it from the tracked Set
+	if(!HasEffectClassAlready(EffectClass))
+	{
+		CurrentEffectClasses.Remove(EffectClass);
 	}
 
 	if (EffectsToTick.Num() <= 0)
 	{
 		Internal_StopTicking();
 	}
-
 	IncomingEffect->DestroyEffect();
 }
 

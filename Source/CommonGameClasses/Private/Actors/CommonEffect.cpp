@@ -94,6 +94,7 @@ void ACommonEffect::PlayEffectFX()
 
 void ACommonEffect::ActivateEffect()
 {
+	COMMON_PRINTSCREEN("Tick: " + FString::FromInt(++tickcount));
 	PlayEffectFX();
 	Internal_AddAndRemoveTagsFromReceiver_Activation();
 	K2_OnActivateEffect();
