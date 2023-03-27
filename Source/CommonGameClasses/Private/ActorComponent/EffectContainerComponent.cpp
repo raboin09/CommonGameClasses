@@ -188,19 +188,33 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 
 	FTickingEffect& TickingEffect = EffectsToTick[CurrentTickingEffectKey];
 	const TScriptInterface<IEffect> CurrentEffect = TickingEffect.TickingEffect;
-	if(!CurrentEffect || CurrentEffect->GetEffectInitializationData().EffectInterval == EEffectInterval::Apply_Once)
+	if(!CurrentEffect)
 		return;
 
-	// Not time to tick effect yet
+	const FEffectInitializationData& EffectInitializationData = CurrentEffect->GetEffectInitializationData();
+
+	// Check if ApplyOnce effect has expired
+	if(EffectInitializationData.EffectInterval == EEffectInterval::Apply_Once)
+	{
+		if(TickingEffect.ExpirationTime <= CachedWorld->GetTimeSeconds())
+		{
+			COMMON_PRINTSCREEN("DESTROY APPLY ONCE")
+			Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
+		}
+		// Return no matter what if it's ApplyOnce
+		return;
+	}		
+
+	// Check if it's not time to tick recurring effect yet
 	if(TickCounter % TickingEffect.TickModulus != 0)
 	{
 		return;
 	}
-
-	const bool bIsInfinite = CurrentEffect->GetEffectInitializationData().bInfinite;
+	
+	const bool bIsInfinite = EffectInitializationData.bInfinite;
 	if (!bIsInfinite && --TickingEffect.RemainingTickActivations < 0)
 	{
-		COMMON_PRINTSCREEN("DESTROY")
+		COMMON_PRINTSCREEN("DESTROY RECURRING")
 		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 		return;
 	}
@@ -282,8 +296,11 @@ FTickingEffect UEffectContainerComponent::Internal_GenerateTickingEffectStruct(T
 	TickingEffect.TickModulus = GenerateModulus(EffectInitializationData.EffectInterval);
 	TickingEffect.TickID = TickIDCounter++;
 	TickingEffect.TickingEffect = IncomingEffect;
-	if(!IncomingEffect->GetEffectInitializationData().bInfinite)
+	if(!EffectInitializationData.bInfinite)
 	{
+		// Expiration is generally only used for ApplyOnce
+		TickingEffect.ExpirationTime = CachedWorld->GetTimeSeconds() + EffectInitializationData.EffectDuration;
+		// RemainingTickActivations is only used for periodic activations (Once every .25/.5/1/2/5 seconds)
 		TickingEffect.RemainingTickActivations = GenerateNumTicks(EffectInitializationData.EffectInterval, EffectInitializationData.EffectDuration);
 	}
 	return TickingEffect;

@@ -36,8 +36,11 @@ struct FTickingEffect
 
 	TScriptInterface<IEffect> TickingEffect;
 	int32 TickModulus;
-	int32 RemainingTickActivations;
 	int32 TickID;
+	// Used for periodic activations (Once every .25/.5/1/2/5 seconds)
+	int32 RemainingTickActivations;
+	// Used for ApplyOnce
+	double ExpirationTime;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
