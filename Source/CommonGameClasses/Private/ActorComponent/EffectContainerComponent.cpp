@@ -3,11 +3,10 @@
 
 #include "ActorComponent/EffectContainerComponent.h"
 
-#include "Actors/CommonEffect.h"
+#include "Actors/Effects/CommonEffect.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Types/CoreTypes.h"
 #include "Utils/CombatUtils.h"
 #include "Utils/WorldUtils.h"
 
@@ -198,7 +197,6 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 	{
 		if(TickingEffect.ExpirationTime <= CachedWorld->GetTimeSeconds())
 		{
-			COMMON_PRINTSCREEN("DESTROY APPLY ONCE")
 			Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 		}
 		// Return no matter what if it's ApplyOnce
@@ -214,12 +212,9 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 	const bool bIsInfinite = EffectInitializationData.bInfinite;
 	if (!bIsInfinite && --TickingEffect.RemainingTickActivations < 0)
 	{
-		COMMON_PRINTSCREEN("DESTROY RECURRING")
 		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 		return;
 	}
-	
-	COMMON_PRINTSCREEN("TICK " + FString::FromInt(TickingEffect.RemainingTickActivations))
 	Internal_TryActivateEffect(CurrentEffect);
 }
 
@@ -314,7 +309,7 @@ void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterfa
 	}
 	const UClass* IncomingClass = IncomingEffect.GetObject()->GetClass();
 	const FTickingEffect NewTickingEffect = Internal_GenerateTickingEffectStruct(IncomingEffect);
-	const bool bEffectCanStack = IncomingEffect->GetEffectInitializationData().bEffectCanStack; 
+	const bool bEffectCanStack = IncomingEffect->GetEffectInitializationData().bEffectCanStack;
 	if(bEffectCanStack || !HasEffectClassAlready(IncomingClass))
 	{
 		// TickingEffects can accept new effect
@@ -322,8 +317,14 @@ void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterfa
 		CurrentEffectClasses.Add(IncomingEffect.GetObject()->GetClass());
 	} else
 	{
-		EffectsToTick.Add(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
 		// Replace old ticking effect with new one
+		EffectsToTick.Add(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
+	}
+	
+	// Activate the ApplyOnce once 
+	if(IncomingEffect->GetEffectInitializationData().EffectInterval == EEffectInterval::Apply_Once)
+	{
+		Internal_ActivateEffect(NewTickingEffect);
 	}
 	Internal_TryStartTicking();
 }

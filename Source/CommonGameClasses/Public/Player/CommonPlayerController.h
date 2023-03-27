@@ -35,8 +35,11 @@ protected:
 	void K2_HandleNewActorHovered(const TScriptInterface<IInteractable>& NewHoveredInteractable, bool bShouldOutline);
 	virtual void K2_HandleNewActorHovered_Implementation(const TScriptInterface<IInteractable>& NewHoveredInteractable, bool bShouldOutline);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
-	void K2_InteractWithCurrentHoveredActor();
-	virtual void K2_InteractWithCurrentHoveredActor_Implementation();
+	void K2_TryStartInteraction();
+	virtual void K2_TryStartInteraction_Implementation();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
+	void K2_StopInteraction();
+	virtual void K2_StopInteraction_Implementation();
 
 	void MoveToNewDestination(const FVector& MoveLocation);
 	

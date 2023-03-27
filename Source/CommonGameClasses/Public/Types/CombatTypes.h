@@ -10,12 +10,49 @@ class UNiagaraSystem;
 class USoundCue;
 
 UENUM(BlueprintType)
+enum class EHitReactType : uint8
+{
+	None,
+	Knockback_Tiny,
+	Knockback_VeryLight,
+	Knockback_Light,
+	Knockback_Medium,
+	Knockback_Heavy,
+	Knockback_VeryHeavy,
+	Knockback_Huge,
+	HitReact_Light,
+	HitReact_Chainsaw
+};
+
+USTRUCT(BlueprintType)
+struct FDamageHitReactEvent
+{
+	GENERATED_BODY()
+	
+	FVector HitDirection;
+	float DamageTaken;
+	FHitResult HitResult;
+	EHitReactType HitReactType = EHitReactType::None;
+	EHitReactType DeathReactType = EHitReactType::None;
+};
+
+UENUM(BlueprintType)
 enum class EAffectedAffiliation : uint8
 {
 	Allies,
 	Enemies,
 	Neutral,
 	All
+};
+
+
+UENUM(BlueprintType)
+enum class EEffectStatType : uint8 
+{
+	Health_MaxWounds,
+	Health_Damage,
+	Health_Heal,
+	Movespeed
 };
 
 USTRUCT(BlueprintType)

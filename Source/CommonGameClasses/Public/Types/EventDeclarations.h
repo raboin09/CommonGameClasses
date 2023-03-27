@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CombatTypes.h"
 #include "GameplayTagContainer.h"
 #include "ResourceTypes.h"
 #include "QuestTypes.h"

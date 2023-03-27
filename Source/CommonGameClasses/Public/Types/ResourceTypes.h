@@ -5,33 +5,6 @@
 #include "CoreMinimal.h"
 #include "ResourceTypes.generated.h"
 
-UENUM(BlueprintType)
-enum class EHitReactType : uint8
-{
-	None,
-	Knockback_Tiny,
-	Knockback_VeryLight,
-	Knockback_Light,
-	Knockback_Medium,
-	Knockback_Heavy,
-	Knockback_VeryHeavy,
-	Knockback_Huge,
-	HitReact_Light,
-	HitReact_Chainsaw
-};
-
-USTRUCT(BlueprintType)
-struct FDamageHitReactEvent
-{
-	GENERATED_BODY()
-	
-	FVector HitDirection;
-	float DamageTaken;
-	FHitResult HitResult;
-	EHitReactType HitReactType = EHitReactType::None;
-	EHitReactType DeathReactType = EHitReactType::None;
-};
-
 USTRUCT(BlueprintType)
 struct FResourcePool
 {

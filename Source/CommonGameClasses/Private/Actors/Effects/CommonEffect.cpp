@@ -1,4 +1,5 @@
-﻿#include "Actors/CommonEffect.h"
+﻿#include "Actors/Effects/CommonEffect.h"
+
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "ActorComponent/GameplayTagComponent.h"
@@ -7,7 +8,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Utils/CombatUtils.h"
 #include "Sound/SoundCue.h"
-#include "Types/CoreTypes.h"
 #include "Utils/EffectUtils.h"
 
 

@@ -98,13 +98,13 @@ void ACommonPlayerController::K2_HandleNewActorHovered_Implementation(const TScr
 	}
 }
 
-void ACommonPlayerController::K2_InteractWithCurrentHoveredActor_Implementation()
+void ACommonPlayerController::K2_TryStartInteraction_Implementation()
 {
 	if(CurrentHoveredInteractable && CurrentHoveredActor)
 	{
 		if(IsInRangeOfInteractable(CurrentHoveredInteractable, CurrentHoveredActor))
 		{
-			CurrentHoveredInteractable->InteractWithActor(PlayerCharacter);	
+			CurrentHoveredInteractable->InteractWithActor(PlayerCharacter, true);	
 		} else
 		{
 			TargetedActor = CurrentHoveredActor;
@@ -112,6 +112,15 @@ void ACommonPlayerController::K2_InteractWithCurrentHoveredActor_Implementation(
 			MoveToNewDestination(TargetedActor->GetActorLocation());
 			GetWorldTimerManager().SetTimer(Timer_InteractDistanceCheck, this, &ACommonPlayerController::Internal_CheckDistanceToInteractActor, DISTANCE_CHECK_RATE, true);
 		}
+	}
+}
+
+void ACommonPlayerController::K2_StopInteraction_Implementation()
+{
+	if(CurrentHoveredInteractable && CurrentHoveredActor)
+	{
+		CurrentHoveredInteractable->InteractWithActor(PlayerCharacter, false);
+		Internal_ClearCheckDistTimer();
 	}
 }
 

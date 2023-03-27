@@ -2,8 +2,7 @@
 
 
 #include "Utils/EffectUtils.h"
-
-#include "Actors/CommonEffect.h"
+#include "Actors/Effects/CommonEffect.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/DataTable.h"
 #include "ActorComponent/HealthComponent.h"

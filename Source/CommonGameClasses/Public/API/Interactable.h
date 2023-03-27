@@ -21,6 +21,6 @@ class COMMONGAMECLASSES_API IInteractable
 public:
 	virtual EAffiliation GetAffiliation() const PURE_VIRTUAL(IInteractable::GetAffiliation, return EAffiliation::Neutral;)
 	virtual void SwitchOutlineOnMesh(bool bShouldOutline) PURE_VIRTUAL(IInteractable::SwitchOutlineOnMesh, );
-	virtual void InteractWithActor(AActor* InstigatingActor) PURE_VIRTUAL(IInteractable::InteractWithActor, );
+	virtual void InteractWithActor(AActor* InstigatingActor, bool bStartingInteraction = true) PURE_VIRTUAL(IInteractable::InteractWithActor, );
 	virtual FString GetInteractionText() const PURE_VIRTUAL(IInteractable::GetInteractionText, return "";);
 };

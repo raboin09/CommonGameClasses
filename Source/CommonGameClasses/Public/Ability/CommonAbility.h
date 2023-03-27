@@ -25,13 +25,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (ClampMin="0"))
 	float CooldownDuration = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (ClampMin="0"))
 	int32 ResourceCost = 0;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (EditCondition = "ResourceCost > 0", EditConditionHides))
 	EResourceContainerLocation ResourceContainerLocation;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceCost > 0 && (ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)", EditConditionHides))
 	TSubclassOf<UActorComponent> ResourceContainerClass;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.TriggerMechanism"))
 	TSubclassOf<AActor> TriggerMechanismClass;
