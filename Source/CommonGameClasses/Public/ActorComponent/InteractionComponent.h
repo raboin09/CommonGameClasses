@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/TimelineComponent.h"
 #include "API/Interactable.h"
+#include "Types/CommonTypes.h"
 #include "Types/EventDeclarations.h"
 #include "InteractionComponent.generated.h"
 
@@ -19,6 +20,9 @@ public:
 	UInteractionComponent();
 	void SwitchOutlineOnAllMeshes(bool bShouldOutline);
 	void StartInteraction(AActor* InstigatingActor, bool bStartingInteraction);
+
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	EAffiliation Affiliation = EAffiliation::Neutral;
 	
 protected:
 	virtual void BeginPlay() override;

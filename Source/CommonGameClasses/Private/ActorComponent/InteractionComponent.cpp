@@ -49,7 +49,6 @@ void UInteractionComponent::Internal_SetupInteractionTimeline()
 	SetComponentTickEnabled(false);
 }
 
-
 void UInteractionComponent::SwitchOutlineOnAllMeshes(bool bShouldOutline)
 {
 	for(UMeshComponent* CurrMesh : OwnerMeshes)

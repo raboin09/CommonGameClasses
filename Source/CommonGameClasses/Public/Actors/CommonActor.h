@@ -20,7 +20,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
 	TArray<FGameplayTag> DefaultGameplayTags;
 
 private:

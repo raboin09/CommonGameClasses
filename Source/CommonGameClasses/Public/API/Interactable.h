@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/CommonTypes.h"
 #include "Types/EventDeclarations.h"
 #include "UObject/Interface.h"
 #include "Interactable.generated.h"
@@ -19,6 +20,7 @@ class COMMONGAMECLASSES_API IInteractable
 	GENERATED_BODY()
 
 public:
+	virtual EAffiliation GetAffiliation() const PURE_VIRTUAL(IInteractable::GetAffiliation, return EAffiliation::Neutral; )
 	virtual void SwitchOutlineOnMesh(bool bShouldOutline) PURE_VIRTUAL(IInteractable::SwitchOutlineOnMesh, );
 	virtual void InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction = true) PURE_VIRTUAL(IInteractable::InitiateInteractionWithActor, );
 	// Optional callback after InteractionComponent completes it's timeline

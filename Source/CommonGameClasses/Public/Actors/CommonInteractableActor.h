@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CommonOverlapActor.h"
+#include "ActorComponent/InteractionComponent.h"
 #include "API/Interactable.h"
 #include "Components/SphereComponent.h"
 #include "CommonInteractableActor.generated.h"
@@ -25,6 +26,7 @@ public:
 	virtual void SwitchOutlineOnMesh(bool bShouldOutline) override;
 	virtual void InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction = true) override;
 	virtual void HandleInteractionStarted(const FInteractionEventPayload& InteractionEventPayload) override;
+	FORCEINLINE virtual EAffiliation GetAffiliation() const override { return InteractionComponent->Affiliation; }
 	
 	//////////////////////////////////////
 	// ACommonOverlapActor Overrides
@@ -55,12 +57,6 @@ protected:
 	UStaticMeshComponent* PickupBase;
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	URotatingMovementComponent* RotatingMovementComponent;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
-	bool bInteractInstantly = true;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact", meta=(EditCondition="!bInteractInstantly", EditConditionHides))
-	float InteractTime = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
-	FString InteractionText = "Placeholder";
 
 private:
 	UPROPERTY()

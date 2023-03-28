@@ -38,7 +38,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleInteractionInitiated(AActor* InstigatingActor);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Genestealer|Defaults")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM")
 	float DeathBuffer = 5.f;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 	UHealthComponent* HealthComponent;

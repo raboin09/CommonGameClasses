@@ -25,6 +25,6 @@ protected:
 
 	UPROPERTY()
 	USMInstance* TriggerMachine;
-	UPROPERTY(EditInstanceOnly, Category="Genestealer")
+	UPROPERTY(EditInstanceOnly, Category="CUSTOM|Trigger")
 	TSubclassOf<USMInstance> TriggerLogicClass;
 };

@@ -33,17 +33,17 @@ protected:
 	virtual void HandleActorDeath();
 	void ApplyMissEffects(const FHitResult Impact);
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="CUSTOM|Defaults")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UProjectileMovementComponent* MovementComp;
-	UPROPERTY(VisibleDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(VisibleDefaultsOnly)
 	UParticleSystemComponent* ParticleComp;
 	UPROPERTY(VisibleDefaultsOnly)
 	USphereComponent* CollisionComp;
 	UPROPERTY(VisibleDefaultsOnly)
 	UStaticMeshComponent* SummonedMesh;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Projectile", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> ProjectileEffectsToApply;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Projectile")
 	float DeathBuffer = 0.f;
 
 public:
