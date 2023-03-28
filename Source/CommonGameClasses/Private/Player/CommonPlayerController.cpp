@@ -69,7 +69,7 @@ void ACommonPlayerController::Internal_CheckDistanceToInteractActor()
 	if(IsInRangeOfInteractable(TargetedInteractable, TargetedActor))
 	{
 		PlayerCharacter->GetMovementComponent()->StopActiveMovement();
-		TargetedInteractable->InteractWithActor(PlayerCharacter);
+		TargetedInteractable->InitiateInteractionWithActor(PlayerCharacter);
 		Internal_ClearCheckDistTimer();
 	} else
 	{
@@ -104,7 +104,7 @@ void ACommonPlayerController::K2_TryStartInteraction_Implementation()
 	{
 		if(IsInRangeOfInteractable(CurrentHoveredInteractable, CurrentHoveredActor))
 		{
-			CurrentHoveredInteractable->InteractWithActor(PlayerCharacter, true);	
+			CurrentHoveredInteractable->InitiateInteractionWithActor(PlayerCharacter, true);	
 		} else
 		{
 			TargetedActor = CurrentHoveredActor;
@@ -119,7 +119,7 @@ void ACommonPlayerController::K2_StopInteraction_Implementation()
 {
 	if(CurrentHoveredInteractable && CurrentHoveredActor)
 	{
-		CurrentHoveredInteractable->InteractWithActor(PlayerCharacter, false);
+		CurrentHoveredInteractable->InitiateInteractionWithActor(PlayerCharacter, false);
 		Internal_ClearCheckDistTimer();
 	}
 }

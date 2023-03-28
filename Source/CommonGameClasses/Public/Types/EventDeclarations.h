@@ -341,3 +341,26 @@ struct FOutOfAmmoEventPayload
 	bool bCompletelyOutOfAmmo = false;
 };
 DECLARE_EVENT_OneParam(UAmmoComponent, FOutOfAmmoEvent, const FOutOfAmmoEventPayload&);
+
+///////////////////////////
+// INTERACTION EVENT OCCURRED
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FInteractionEventPayload
+{
+	GENERATED_BODY()
+
+	FInteractionEventPayload()
+	{
+		InstigatingActor = nullptr;
+	}
+
+	FInteractionEventPayload(AActor* InInstigator)
+	{
+		InstigatingActor = InInstigator;
+	}
+
+	UPROPERTY()
+	AActor* InstigatingActor = nullptr;
+};
+DECLARE_EVENT_OneParam(UAmmoComponent, FInteractionEvent, const FInteractionEventPayload&);

@@ -7,7 +7,6 @@
 ACommonActor::ACommonActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	
 	GameplayTagComponent = CreateDefaultSubobject<UGameplayTagComponent>(TEXT("GameplayTagComponent"));
 }
 

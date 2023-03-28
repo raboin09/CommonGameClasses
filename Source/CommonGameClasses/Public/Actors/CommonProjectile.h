@@ -41,7 +41,7 @@ protected:
 	USphereComponent* CollisionComp;
 	UPROPERTY(VisibleDefaultsOnly)
 	UStaticMeshComponent* SummonedMesh;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults", meta=(MustImplement="Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> ProjectileEffectsToApply;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
 	float DeathBuffer = 0.f;

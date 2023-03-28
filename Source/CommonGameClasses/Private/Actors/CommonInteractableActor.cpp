@@ -1,50 +1,35 @@
 ﻿#include "Actors/CommonInteractableActor.h"
 #include "ActorComponent/InteractionComponent.h"
-#include "Types/CoreTypes.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/RotatingMovementComponent.h"
 
 ACommonInteractableActor::ACommonInteractableActor()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+
+	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
+	CollisionComp->InitSphereRadius(15.f);
+	CollisionComp->bTraceComplexOnMove = true;
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	CollisionComp->CanCharacterStepUpOn = ECB_No;
+	SetRootComponent(CollisionComp);
+
+	PickupBase = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickupBaseMesh"));
+	PickupBase->SetupAttachment(RootComponent);
+	PickupBase->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PickupBase->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	RotatingMovementComponent = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("RotatingComponent"));
+	RotatingMovementComponent->bRotationInLocalSpace = true;
+	RotatingMovementComponent->RotationRate = FRotator(0.f, 90.f, 0.f);
+
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
-}
-
-void ACommonInteractableActor::BeginPlay()
-{
-	Super::BeginPlay();	
-	Timeline.SetTimelineLength(InteractTime);
-	Timeline.SetTimelineLengthMode(TL_TimelineLength);
-	Timeline.SetLooping(false);
 	
-	FOnTimelineEvent InteractProgressFunction;
-	InteractProgressFunction.BindDynamic(this, &ACommonInteractableActor::Internal_InteractionTick);
-	Timeline.SetTimelinePostUpdateFunc(InteractProgressFunction);
-	
-	FOnTimelineEvent InteractFinishedEvent;
-	InteractFinishedEvent.BindDynamic(this, &ACommonInteractableActor::Internal_InteractionFinished);
-	Timeline.SetTimelineFinishedFunc(InteractFinishedEvent);	
-}
-
-void ACommonInteractableActor::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-	if(Timeline.IsPlaying())
-	{
-		Timeline.TickTimeline(DeltaSeconds);
-	}
-}
-
-void ACommonInteractableActor::Internal_InteractionTick()
-{
-
-}
-
-void ACommonInteractableActor::Internal_InteractionFinished()
-{
-	// If the instigator has been set, we want to finish the this interaction. If not, ignore cooldown
-	if(CachedInstigatingActor)
-	{
-		K2_HandleInteraction(CachedInstigatingActor);	
-	}
+	bDiesAfterOverlap = true;
+	DefaultGameplayTags.Add(TAG_STATE_ACTIVE);
+	DeathBuffer = 2.f;
 }
 
 void ACommonInteractableActor::SwitchOutlineOnMesh(bool bShouldOutline)
@@ -56,22 +41,46 @@ void ACommonInteractableActor::SwitchOutlineOnMesh(bool bShouldOutline)
 	K2_HandleMeshOutlining(bShouldOutline);
 }
 
-void ACommonInteractableActor::InteractWithActor(AActor* InstigatingActor, bool bStartingInteraction)
+void ACommonInteractableActor::InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction)
 {
-	if(bInteractInstantly)
+	K2_HandleInteractionInitiated(InstigatingActor);
+	if(InteractionComponent)
 	{
-		if(bStartingInteraction)
-			K2_HandleInteraction(InstigatingActor);
-		return;
+		InteractionComponent->StartInteraction(InstigatingActor, bStartingInteraction);
 	}
+}
 
-	if(bStartingInteraction)
+void ACommonInteractableActor::HandleInteractionStarted(const FInteractionEventPayload& InteractionEventPayload)
+{
+	K2_HandleInteractionStarted(InteractionEventPayload.InstigatingActor);
+}
+
+void ACommonInteractableActor::K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
+{
+	if(ACharacter* CastedChar = Cast<ACharacter>(OtherActor))
 	{
-		CachedInstigatingActor = InstigatingActor;
-		Timeline.IsPlaying() ? Timeline.Play() : Timeline.PlayFromStart();
-	} else
+		if(CanPickup(CastedChar))
+		{
+			ConsumePickup(CastedChar);
+			if(bDiesAfterOverlap)
+			{
+				PickupBase->SetVisibility(false);
+			}
+			Super::K2_HandleOverlapEvent_Implementation(OtherActor, HitResult);
+		}
+	}
+}
+
+void ACommonInteractableActor::ConsumePickup(ACharacter* ConsumingChar)
+{
+	K2_HandleConsumePickup(ConsumingChar);
+}
+
+void ACommonInteractableActor::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if(RotatingMovementComponent)
 	{
-		CachedInstigatingActor = nullptr;
-		Timeline.Reverse();
+		RotatingMovementComponent->SetUpdatedComponent(GetMesh());	
 	}
 }
