@@ -49,7 +49,7 @@ private:
 	bool IsValidInteractableActorUnderCursor(const FHitResult& HitResult) const;
 	void OnNewActorTargeted(AActor* NewHoveredActor);
 	void Internal_CheckDistanceToInteractActor();
-	bool IsInRangeOfInteractable(TScriptInterface<IInteractable> InInteractable, const AActor* InActor) const;
+	bool IsInRangeOfInteractable(const AActor* InActor) const;
 	void Internal_ClearCheckDistTimer();
 	
 protected:

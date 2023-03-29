@@ -36,15 +36,6 @@ struct FDamageHitReactEvent
 	EHitReactType DeathReactType = EHitReactType::None;
 };
 
-UENUM(BlueprintType)
-enum class EAffectedAffiliation : uint8
-{
-	Allies,
-	Enemies,
-	Neutral,
-	All
-};
-
 
 UENUM(BlueprintType)
 enum class EEffectStatType : uint8 

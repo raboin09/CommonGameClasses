@@ -9,10 +9,10 @@
 #include "ActorComponent/EffectContainerComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CombatTypes.h"
-#include "Utils/CombatUtils.h"
+#include "Utils/InteractUtils.h"
 #include "Utils/WorldUtils.h"
 
-void UEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, EAffectedAffiliation AffectedAffiliation, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
+void UEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, EAffiliation AffectedAffiliation, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
 {
 	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceLocation.IsZero())
 	{
@@ -37,25 +37,25 @@ void UEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TA
 	for(AActor* CurrActor : AllHitActors)
 	{
 		switch (AffectedAffiliation) {
-		case EAffectedAffiliation::Allies:
-				if(!UCombatUtils::AreActorsAllies(CurrActor, InstigatingActor))
+		case EAffiliation::Allies:
+				if(!UInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
 				{
 					CulledHitActors.Remove(CurrActor);
 				}
 				break;
-			case EAffectedAffiliation::Enemies:
-				if(!UCombatUtils::AreActorsEnemies(CurrActor, InstigatingActor))
+			case EAffiliation::Enemies:
+				if(!UInteractUtils::AreActorsEnemies(CurrActor, InstigatingActor))
 				{
 					CulledHitActors.Remove(CurrActor);
 				}
 				break;
-			case EAffectedAffiliation::Neutral:
-				if(!UCombatUtils::IsActorNeutral(CurrActor))
+			case EAffiliation::Neutral:
+				if(!UInteractUtils::IsActorNeutral(CurrActor))
 				{
 					CulledHitActors.Remove(CurrActor);
 				}
 				break;
-			case EAffectedAffiliation::All:
+			case EAffiliation::All:
 			default:
 				break;
 		}

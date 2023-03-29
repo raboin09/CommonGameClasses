@@ -16,7 +16,9 @@ enum class EAffiliation : uint8
 	Allies,
 	Enemies,
 	Neutral,
-	Destructible
+	Destructible,
+	All,
+	None
 };
 
 UENUM()

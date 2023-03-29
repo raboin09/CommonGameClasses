@@ -40,8 +40,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM")
 	float DeathBuffer = 5.f;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UHealthComponent* HealthComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UInteractionComponent* InteractionComponent;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 	UStaticMeshComponent* DestructibleMesh;
 	
@@ -51,6 +53,4 @@ private:
 	
 	UPROPERTY()
 	class UEffectContainerComponent* EffectContainerComponent;
-	UPROPERTY()
-	class UInteractionComponent* InteractionComponent;
 };

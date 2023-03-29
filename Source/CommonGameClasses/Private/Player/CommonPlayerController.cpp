@@ -9,6 +9,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ActorComponent/QuestManagerComponent.h"
+#include "Types/CoreTypes.h"
+#include "Utils/InteractUtils.h"
 
 ACommonPlayerController::ACommonPlayerController()
 {
@@ -66,7 +68,7 @@ void ACommonPlayerController::OnNewActorTargeted(AActor* NewHoveredActor)
 
 void ACommonPlayerController::Internal_CheckDistanceToInteractActor()
 {
-	if(IsInRangeOfInteractable(TargetedInteractable, TargetedActor))
+	if(IsInRangeOfInteractable(TargetedActor))
 	{
 		PlayerCharacter->GetMovementComponent()->StopActiveMovement();
 		TargetedInteractable->InitiateInteractionWithActor(PlayerCharacter);
@@ -102,7 +104,7 @@ void ACommonPlayerController::K2_TryStartInteraction_Implementation()
 {
 	if(CurrentHoveredInteractable && CurrentHoveredActor)
 	{
-		if(IsInRangeOfInteractable(CurrentHoveredInteractable, CurrentHoveredActor))
+		if(IsInRangeOfInteractable(CurrentHoveredActor))
 		{
 			CurrentHoveredInteractable->InitiateInteractionWithActor(PlayerCharacter, true);	
 		} else
@@ -158,14 +160,14 @@ FHitResult ACommonPlayerController::Internal_ScanForActorUnderCursor() const
 	return TempResult;
 }
 
-bool ACommonPlayerController::IsInRangeOfInteractable(TScriptInterface<IInteractable> InInteractable, const AActor* InActor) const
+bool ACommonPlayerController::IsInRangeOfInteractable(const AActor* InActor) const
 {
-	if (!InActor || !InInteractable || !PlayerCharacter) {
+	if (!InActor || !PlayerCharacter) {
 		return false;
 	}
 
 	const float DistanceToProtagonist = FVector::Dist(InActor->GetActorLocation(), PlayerCharacter->GetActorLocation());
-	switch (InInteractable->GetAffiliation())
+	switch (UInteractUtils::GetAffiliationOfActor(InActor))
 	{
 	case EAffiliation::Allies:
 	case EAffiliation::Neutral:

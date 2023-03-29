@@ -9,8 +9,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Utils/CombatUtils.h"
 #include "Utils/EffectUtils.h"
+#include "Utils/InteractUtils.h"
 
 ACommonProjectile::ACommonProjectile() 
 {
@@ -97,7 +97,7 @@ void ACommonProjectile::OnImpact(const FHitResult& HitResult)
 		return;
 	}
 
-	if(HitActor->FindComponentByClass<UEffectContainerComponent>() && !UCombatUtils::AreActorsAllies(HitActor, GetInstigator()))
+	if(HitActor->FindComponentByClass<UEffectContainerComponent>() && !UInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
 		K2_HandleImpact(HitResult);
 	} else

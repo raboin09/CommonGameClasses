@@ -26,7 +26,6 @@ public:
 	virtual void SwitchOutlineOnMesh(bool bShouldOutline) override;
 	virtual void InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction = true) override;
 	virtual void HandleInteractionStarted(const FInteractionEventPayload& InteractionEventPayload) override;
-	FORCEINLINE virtual EAffiliation GetAffiliation() const override { return InteractionComponent->Affiliation; }
 	
 	//////////////////////////////////////
 	// ACommonOverlapActor Overrides
@@ -42,13 +41,11 @@ protected:
 	void K2_HandleInteractionInitiated(AActor* InstigatingActor);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleConsumePickup(ACharacter* ConsumingChar);
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteraction(AActor* InstigatingActor);
 	
 	virtual void PostInitializeComponents() override;	
 	virtual void K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult) override;
 	FORCEINLINE virtual UMeshComponent* GetMesh_Implementation() const override { return PickupBase; }
-	virtual bool CanPickup(ACharacter* PotentialChar) PURE_VIRTUAL(ABaseOverlapPickup::CanPickup, return false;)
+	virtual bool CanPickup(ACharacter* PotentialChar) PURE_VIRTUAL(ACommonInteractableActor::CanPickup, return false;)
 	virtual void ConsumePickup(ACharacter* ConsumingChar);
 
 	UPROPERTY(EditAnywhere)
@@ -57,8 +54,6 @@ protected:
 	UStaticMeshComponent* PickupBase;
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	URotatingMovementComponent* RotatingMovementComponent;
-
-private:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UInteractionComponent* InteractionComponent;
 };

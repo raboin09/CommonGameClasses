@@ -29,15 +29,4 @@ public:
 	static bool IsBoneNameHead(const FName& InBone);
 	static FName GetNearestValidBoneForImpact(FName InBone);
 	static FRotator GetRotationFromComponentHit(const FHitResult& Impact);
-	static EAffectedAffiliation GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor);
-	static bool AreActorsAllies(TScriptInterface<IInteractable> FirstActor, AActor* SecondActor);
-	static bool AreActorsAllies(AActor* FirstActor, AActor* SecondActor);
-	UFUNCTION(BlueprintCallable)
-	static bool AreActorsEnemies(AActor* FirstActor, AActor* SecondActor);
-	static bool AreActorsEnemies(TScriptInterface<IInteractable> FirstActor, AActor* SecondActor);
-	static bool IsActorNeutral(AActor* FirstActor);
-	static bool IsActorNeutral(TScriptInterface<IInteractable> FirstActor);
-	static bool IsActorDestructible(AActor* FirstActor);
-	static bool IsActorDestructible(TScriptInterface<IInteractable> FirstActor);
-	static int32 GetOutlineInt(AActor* InActor);
 };

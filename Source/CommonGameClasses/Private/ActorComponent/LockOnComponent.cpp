@@ -8,6 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/TagTypes.h"
 #include "Utils/CombatUtils.h"
+#include "Utils/InteractUtils.h"
 
 ULockOnComponent::ULockOnComponent()
 {
@@ -129,7 +130,7 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 		UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, SweepRadius, ObjectTypes, false, { SourceActor }, bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, TempHitResults, true);
 		for (FHitResult HitResult : TempHitResults) {
-			if(UCombatUtils::AreActorsEnemies(SourceActor, HitResult.GetActor()))
+			if(UInteractUtils::AreActorsEnemies(SourceActor, HitResult.GetActor()))
 			{
 				OutHitResults.Add(HitResult);
 			}

@@ -2,6 +2,7 @@
 
 #include "ActorComponent/InteractionComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Types/CoreTypes.h"
 #include "Utils/InteractUtils.h"
 
 UInteractionComponent::UInteractionComponent()

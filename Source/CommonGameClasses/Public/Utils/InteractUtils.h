@@ -18,12 +18,11 @@ class COMMONGAMECLASSES_API UInteractUtils : public UBlueprintFunctionLibrary
 	
 public:
 	static EAffiliation GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor);
-	static bool AreActorsAllies(TScriptInterface<IInteractable> FirstActor, AActor* SecondActor);
-	static bool AreActorsAllies(AActor* FirstActor, AActor* SecondActor);
+	static EAffiliation GetAffiliationOfActor(const AActor* InActor);
+	static bool AreActorsAllies(const AActor* FirstActor, const AActor* SecondActor);
 	UFUNCTION(BlueprintCallable, Category="COMMON|InteractUtils")
 	static bool AreActorsEnemies(AActor* FirstActor, AActor* SecondActor);
-	static bool AreActorsEnemies(TScriptInterface<IInteractable> FirstActor, AActor* SecondActor);
-	static bool IsActorNeutral(AActor* FirstActor);
-	static bool IsActorNeutral(TScriptInterface<IInteractable> FirstActor);
-	static int32 GetOutlineInt(AActor* InActor);
+	static bool IsActorDestructible(const AActor* FirstActor);
+	static bool IsActorNeutral(const AActor* FirstActor);
+	static int32 GetOutlineInt(const AActor* InActor);
 };

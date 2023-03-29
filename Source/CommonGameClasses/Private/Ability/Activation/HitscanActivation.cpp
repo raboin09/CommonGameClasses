@@ -6,6 +6,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Utils/CombatUtils.h"
 #include "Utils/EffectUtils.h"
+#include "Utils/InteractUtils.h"
 
 void AHitscanActivation::Fire(int32 ActivationLevel)
 {
@@ -20,9 +21,9 @@ void AHitscanActivation::Internal_FireShot()
 
 void AHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& Impact)
 {
-	AActor* HitActor = Impact.GetActor();
+	const AActor* HitActor = Impact.GetActor();
 	K2_PlayTrailFX(HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
-	if(!HitActor || UCombatUtils::AreActorsAllies(HitActor, GetOwner()))
+	if(!HitActor || UInteractUtils::AreActorsAllies(HitActor, GetOwner()))
 	{
 		return;
 	}
