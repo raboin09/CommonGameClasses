@@ -19,8 +19,9 @@ class COMMONGAMECLASSES_API UInteractionComponent : public UActorComponent
 public:	
 	UInteractionComponent();
 	void SwitchOutlineOnAllMeshes(bool bShouldOutline);
-	void StartInteraction(AActor* InstigatingActor, bool bStartingInteraction);
-
+	void InitiateInteraction(AActor* InstigatingActor, bool bStartingInteraction);
+	FORCEINLINE FVector GetOwnerLocation() const { return GetOwner() ? GetOwner()->GetActorLocation() : FVector::ZeroVector; }
+	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
 	EAffiliation Affiliation = EAffiliation::Neutral;
 	
@@ -36,6 +37,7 @@ protected:
 	FString InteractionText = "Placeholder";
 	
 private:
+	void InitEventListeners();
 	void Internal_AddOwnerMeshesToArray();
 	void Internal_SetupInteractionTimeline();
 	
@@ -50,5 +52,8 @@ private:
 	AActor* CachedInstigatingActor;
 	UPROPERTY()
 	FTimeline Timeline;
-	FInteractionEvent InteractionEvent;
+
+	FInteractionOutlinedEvent InteractionOutlinedEvent;
+	FInteractionStartedEvent InteractionStartedEvent;
+	FInteractionInitiatedEvent InteractionInitiatedEvent;
 };

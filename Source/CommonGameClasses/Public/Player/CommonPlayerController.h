@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "ActorComponent/InteractionComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "CommonPlayerController.generated.h"
 
@@ -26,14 +27,14 @@ public:
 	/// CommonPlayerController
 	//////////////////////////////////////////////
 	
-	FORCEINLINE TScriptInterface<IInteractable> GetCurrentHoveredActor() const { return CurrentHoveredInteractable; };
+	FORCEINLINE UInteractionComponent* GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent; };
 	FORCEINLINE ACommonPlayerCharacter* GetCommonPlayerCharacter() const { return PlayerCharacter; };
 	FORCEINLINE UQuestManagerComponent* GetQuestManager() const { return QuestManager; }
 	
 protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
-	void K2_HandleNewActorHovered(const TScriptInterface<IInteractable>& NewHoveredInteractable, bool bShouldOutline);
-	virtual void K2_HandleNewActorHovered_Implementation(const TScriptInterface<IInteractable>& NewHoveredInteractable, bool bShouldOutline);
+	void K2_HandleNewActorHovered(const UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
+	virtual void K2_HandleNewActorHovered_Implementation(const UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
 	void K2_TryStartInteraction();
 	virtual void K2_TryStartInteraction_Implementation();
@@ -47,9 +48,9 @@ private:
 	void Internal_TryAssignInteractable();
 	FHitResult Internal_ScanForActorUnderCursor() const;
 	bool IsValidInteractableActorUnderCursor(const FHitResult& HitResult) const;
-	void OnNewActorTargeted(AActor* NewHoveredActor);
+	void OnNewActorTargeted(const AActor* NewHoveredActor);
 	void Internal_CheckDistanceToInteractActor();
-	bool IsInRangeOfInteractable(const AActor* InActor) const;
+	bool IsInRangeOfInteractable(const UInteractionComponent* InteractionComponent) const;
 	void Internal_ClearCheckDistTimer();
 	
 protected:
@@ -68,15 +69,11 @@ private:
 	ACommonPlayerCharacter* PlayerCharacter;
 	
 	UPROPERTY()
-	TScriptInterface<IInteractable> CurrentHoveredInteractable;
-	UPROPERTY()
-	AActor* CurrentHoveredActor;
+	UInteractionComponent* CurrentHoveredInteractionComponent;
 
 	// Interact move-to variables
 	UPROPERTY()
-	TScriptInterface<IInteractable> TargetedInteractable;
-	UPROPERTY()
-	AActor* TargetedActor;
+	UInteractionComponent* TargetedInteractionComponent;
 	const float DISTANCE_CHECK_RATE = 0.1f;
 	const float MAX_DISTANCE_CHECK_TIME = 7.f;	
 	float CachedDistanceCheckTime = 0.f;

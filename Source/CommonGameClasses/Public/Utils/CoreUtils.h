@@ -26,7 +26,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static ACommonPlayerController* GetCommonPlayerController(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static TScriptInterface<IInteractable> GetHoveredActorByPlayerController(const UObject* ContextObject);
+	static UInteractionComponent* GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")

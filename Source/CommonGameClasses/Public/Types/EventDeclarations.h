@@ -129,11 +129,13 @@ struct FGameplayTagAddedEventPayload
 	{
 		AddedTag = FGameplayTag::EmptyTag;
 	}
-
-	UPROPERTY()
+	
+	FGameplayTagAddedEventPayload(const FGameplayTag& AddedTag) : AddedTag(AddedTag) { }
+	
+	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag AddedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload&)
+DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload)
 
 ///////////////////////////////////////
 // Gameplay tag removed
@@ -147,11 +149,13 @@ struct FGameplayTagRemovedEventPayload
 	{
 		RemovedTag = FGameplayTag::EmptyTag;
 	}
+
+	FGameplayTagRemovedEventPayload(const FGameplayTag& RemovedTag) : RemovedTag(RemovedTag) { }
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag RemovedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload&)
+DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload)
 
 ///////////////////////////
 // DEATH EVENT
@@ -346,21 +350,66 @@ DECLARE_EVENT_OneParam(UAmmoComponent, FOutOfAmmoEvent, const FOutOfAmmoEventPay
 // INTERACTION EVENT OCCURRED
 ///////////////////////////
 USTRUCT(BlueprintType)
-struct FInteractionEventPayload
+struct FInteractionStartedEventPayload
 {
 	GENERATED_BODY()
 
-	FInteractionEventPayload()
+	FInteractionStartedEventPayload()
 	{
 		InstigatingActor = nullptr;
 	}
 
-	FInteractionEventPayload(AActor* InInstigator)
+	FInteractionStartedEventPayload(AActor* InInstigator, bool bIsStarting)
+		: InstigatingActor(InInstigator), bIsStarting(bIsStarting) {	}
+	
+	UPROPERTY(BlueprintReadOnly)
+	AActor* InstigatingActor = nullptr;
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsStarting = true;
+
+};
+DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionStartedEvent, const FInteractionStartedEventPayload);
+
+///////////////////////////
+// INTERACTION EVENT OCCURRED
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FInteractionInitiatedEventPayload
+{
+	GENERATED_BODY()
+
+	FInteractionInitiatedEventPayload()
 	{
-		InstigatingActor = InInstigator;
+		InstigatingActor = nullptr;
 	}
 
-	UPROPERTY()
+	FInteractionInitiatedEventPayload(AActor* InInstigator)
+		: InstigatingActor(InInstigator) {	}
+	
+	UPROPERTY(BlueprintReadOnly)
 	AActor* InstigatingActor = nullptr;
+
 };
-DECLARE_EVENT_OneParam(UAmmoComponent, FInteractionEvent, const FInteractionEventPayload&);
+DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionInitiatedEvent, const FInteractionInitiatedEventPayload);
+
+///////////////////////////
+// INTERACTION EVENT OCCURRED
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FInteractionOutlinedEventPayload
+{
+	GENERATED_BODY()
+
+	FInteractionOutlinedEventPayload()
+	{
+		bShouldOutline = false;
+	}
+
+	FInteractionOutlinedEventPayload(bool bShouldOutline)
+		: bShouldOutline(bShouldOutline) {	}
+	
+	UPROPERTY(BlueprintReadOnly)
+	bool bShouldOutline = false;
+
+};
+DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionOutlinedEvent, const FInteractionOutlinedEventPayload);

@@ -46,6 +46,7 @@ public:
 	FORCEINLINE FGameplayTagContainer& GetTagContainer() { return GameplayTagContainer; }
 	void RemoveTag(const FGameplayTag& TagToRemove);
 	void AddTag(const FGameplayTag& TagToAdd);
+	virtual void BeginPlay() override;
 	
 private:
 	FGameplayTagContainer GameplayTagContainer;

@@ -13,10 +13,25 @@ ACommonCharacter::ACommonCharacter()
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainerComponent"));
 }
 
+void ACommonCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	UGameplayTagComponent::AddTagsToActor(this, DefaultGameplayTags);
+}
+
 void ACommonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	UGameplayTagComponent::AddTagsToActor(this, DefaultGameplayTags);
+}
+
+void ACommonCharacter::HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload)
+{
+	K2_HandleTagAdded(TagAddedEventPayload);
+}
+
+void ACommonCharacter::HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload)
+{
+	K2_HandleTagRemoved(TagRemovedEventPayload);
 }
 
 void ACommonCharacter::K2_OnDeath_Implementation()

@@ -11,25 +11,17 @@ ACommonAICharacter::ACommonAICharacter()
 	AIControllerClass = ACommonAIController::StaticClass();
 }
 
-void ACommonAICharacter::SwitchOutlineOnMesh(bool bShouldOutline)
+void ACommonAICharacter::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)
 {
-	if(InteractionComponent)
-	{
-		InteractionComponent->SwitchOutlineOnAllMeshes(bShouldOutline);
-	}
-	K2_HandleMeshOutlining(bShouldOutline);
+	K2_HandleInteractionStarted(InteractionEventPayload);
 }
 
-void ACommonAICharacter::InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction)
+void ACommonAICharacter::HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionInitiated(InstigatingActor);
-	if(InteractionComponent)
-	{
-		InteractionComponent->StartInteraction(InstigatingActor, bStartingInteraction);
-	}
+	K2_HandleInteractionInitiated(InteractionEventPayload);
 }
 
-void ACommonAICharacter::HandleInteractionStarted(const FInteractionEventPayload& InteractionEventPayload)
+void ACommonAICharacter::HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload)
 {
-	K2_HandleInteractionStarted(InteractionEventPayload.InstigatingActor);
+	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
 }

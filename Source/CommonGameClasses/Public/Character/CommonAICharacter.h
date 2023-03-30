@@ -23,17 +23,17 @@ public:
 	//////////////////////////////////////
 	// Interactable Overrides
 	//////////////////////////////////////
-	virtual void SwitchOutlineOnMesh(bool bShouldOutline) override;
-	virtual void InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction = true) override;
-	virtual void HandleInteractionStarted(const FInteractionEventPayload& InteractionEventPayload) override;
-
+	virtual void HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload) override;
+	virtual void HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload) override;
+	virtual void HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload) override;
+	
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleMeshOutlining(bool bIsOutlining);
+	void K2_HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionStarted(AActor* InstigatingActor);
+	void K2_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionInitiated(AActor* InstigatingActor);
+	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UInteractionComponent* InteractionComponent;

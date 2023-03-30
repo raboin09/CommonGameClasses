@@ -14,6 +14,7 @@ UInteractionComponent::UInteractionComponent()
 void UInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	InitEventListeners();
 	Internal_AddOwnerMeshesToArray();
 	Internal_SetupInteractionTimeline();
 }
@@ -27,14 +28,20 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 }
 
-void UInteractionComponent::Internal_SetupInteractionTimeline()
+void UInteractionComponent::InitEventListeners()
 {
 	IInteractable* InteractableOwner = Cast<IInteractable>(GetOwner());
 	if(!InteractableOwner)
 	{
 		return;
 	}	
-	InteractionEvent.AddRaw(InteractableOwner, &IInteractable::HandleInteractionStarted);
+	InteractionStartedEvent.AddRaw(InteractableOwner, &IInteractable::HandleInteractionStarted);
+	InteractionInitiatedEvent.AddRaw(InteractableOwner, &IInteractable::HandleInteractionInitiated);
+	InteractionOutlinedEvent.AddRaw(InteractableOwner, &IInteractable::HandleMeshOutlining);
+}
+
+void UInteractionComponent::Internal_SetupInteractionTimeline()
+{
 	Timeline.SetTimelineLength(InteractTime);
 	Timeline.SetTimelineLengthMode(TL_TimelineLength);
 	Timeline.SetLooping(false);
@@ -61,14 +68,17 @@ void UInteractionComponent::SwitchOutlineOnAllMeshes(bool bShouldOutline)
 			CurrMesh->SetCustomDepthStencilValue(OutlineColorInt);
 		}
 	}
+	InteractionOutlinedEvent.Broadcast(bShouldOutline);
 }
 
-void UInteractionComponent::StartInteraction(AActor* InstigatingActor, bool bStartingInteraction)
+void UInteractionComponent::InitiateInteraction(AActor* InstigatingActor, bool bStartingInteraction)
 {
 	if(bInteractInstantly)
 	{
 		if(bStartingInteraction)
-			InteractionEvent.Broadcast(FInteractionEventPayload(InstigatingActor));
+		{
+			InteractionStartedEvent.Broadcast({InstigatingActor, true});
+		}
 		return;
 	}
 
@@ -81,6 +91,7 @@ void UInteractionComponent::StartInteraction(AActor* InstigatingActor, bool bSta
 		CachedInstigatingActor = nullptr;
 		Timeline.Reverse();
 	}
+	InteractionInitiatedEvent.Broadcast(InstigatingActor);
 	SetComponentTickEnabled(true);
 }
 
@@ -115,7 +126,10 @@ void UInteractionComponent::Internal_InteractionFinished()
 	// If not, the timeline was moving backward (and resetting) so ignore this
 	if(CachedInstigatingActor)
 	{
-		InteractionEvent.Broadcast(FInteractionEventPayload(CachedInstigatingActor));	
+		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor, true));	
+	} else
+	{
+		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor, false));	
 	}
 	SetComponentTickEnabled(false);
 }

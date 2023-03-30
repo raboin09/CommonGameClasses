@@ -2,16 +2,29 @@
 
 #include "ActorComponent/GameplayTagComponent.h"
 #include "BlueprintGameplayTagLibrary.h"
+#include "Character/CommonCharacter.h"
+
+void UGameplayTagComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	if(ITaggable* Taggable = Cast<ITaggable>(GetOwner()))
+	{
+		GameplayTagAddedEvent.AddRaw(Taggable, &ITaggable::HandleTagAdded);
+		GameplayTagRemovedEvent.AddRaw(Taggable, &ITaggable::HandleTagRemoved);	
+	}
+}
 
 void UGameplayTagComponent::AddTag(const FGameplayTag& TagToAdd)
 {
 	GameplayTagContainer.AddTag(TagToAdd);
+	GameplayTagAddedEvent.Broadcast(TagToAdd);
 	// Trigger event
 }
 
 void UGameplayTagComponent::RemoveTag(const FGameplayTag& TagToRemove)
 {
 	GameplayTagContainer.RemoveTag(TagToRemove);
+	GameplayTagRemovedEvent.Broadcast(TagToRemove);
 	// Trigger event
 }
 

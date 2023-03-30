@@ -6,10 +6,8 @@
 #include "API/Interactable.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ActorComponent/QuestManagerComponent.h"
-#include "Types/CoreTypes.h"
 #include "Utils/InteractUtils.h"
 
 ACommonPlayerController::ACommonPlayerController()
@@ -41,37 +39,32 @@ void ACommonPlayerController::MoveToNewDestination(const FVector& MoveLocation)
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MoveLocation);
 }
 
-void ACommonPlayerController::OnNewActorTargeted(AActor* NewHoveredActor)
+void ACommonPlayerController::OnNewActorTargeted(const AActor* NewHoveredActor)
 {
 	if(!NewHoveredActor)
 	{
-		K2_HandleNewActorHovered(CurrentHoveredInteractable, false);
-		CurrentHoveredInteractable = nullptr;
-		CurrentHoveredActor = nullptr;
+		K2_HandleNewActorHovered(CurrentHoveredInteractionComponent, false);
+		CurrentHoveredInteractionComponent = nullptr;
 		return;
 	}
-	
-	TScriptInterface<IInteractable> NewHoveredInteractable;
-	NewHoveredInteractable.SetObject(NewHoveredActor);
-	NewHoveredInteractable.SetInterface(Cast<IInteractable>(NewHoveredActor));
-	
-	if(NewHoveredInteractable == CurrentHoveredInteractable)
+
+	UInteractionComponent* FoundInteractionComponent = NewHoveredActor->FindComponentByClass<UInteractionComponent>();
+	if(!FoundInteractionComponent || FoundInteractionComponent == CurrentHoveredInteractionComponent)
 	{
 		return;
 	}
 
-	K2_HandleNewActorHovered(CurrentHoveredInteractable, false);
-	CurrentHoveredInteractable = NewHoveredInteractable;
-	CurrentHoveredActor = NewHoveredActor;
-	K2_HandleNewActorHovered(NewHoveredInteractable, true);
+	K2_HandleNewActorHovered(CurrentHoveredInteractionComponent, false);
+	CurrentHoveredInteractionComponent = FoundInteractionComponent;
+	K2_HandleNewActorHovered(FoundInteractionComponent, true);
 }
 
 void ACommonPlayerController::Internal_CheckDistanceToInteractActor()
 {
-	if(IsInRangeOfInteractable(TargetedActor))
+	if(IsInRangeOfInteractable(TargetedInteractionComponent))
 	{
 		PlayerCharacter->GetMovementComponent()->StopActiveMovement();
-		TargetedInteractable->InitiateInteractionWithActor(PlayerCharacter);
+		TargetedInteractionComponent->InitiateInteraction(PlayerCharacter, true);
 		Internal_ClearCheckDistTimer();
 	} else
 	{
@@ -86,32 +79,30 @@ void ACommonPlayerController::Internal_CheckDistanceToInteractActor()
 
 void ACommonPlayerController::Internal_ClearCheckDistTimer()
 {
-	TargetedInteractable = nullptr;
-	TargetedActor = nullptr;
+	TargetedInteractionComponent = nullptr;
 	CachedDistanceCheckTime = 0.f;
 	GetWorldTimerManager().ClearTimer(Timer_InteractDistanceCheck);
 }
 
-void ACommonPlayerController::K2_HandleNewActorHovered_Implementation(const TScriptInterface<IInteractable>& NewlyHoveredInteractable, bool bShouldOutline)
+void ACommonPlayerController::K2_HandleNewActorHovered_Implementation(const UInteractionComponent* NewlyHoveredInteractable, bool bShouldOutline)
 {
 	if(NewlyHoveredInteractable)
 	{
-		CurrentHoveredInteractable->SwitchOutlineOnMesh(bShouldOutline);	
+		CurrentHoveredInteractionComponent->SwitchOutlineOnAllMeshes(bShouldOutline);	
 	}
 }
 
 void ACommonPlayerController::K2_TryStartInteraction_Implementation()
 {
-	if(CurrentHoveredInteractable && CurrentHoveredActor)
+	if(CurrentHoveredInteractionComponent)
 	{
-		if(IsInRangeOfInteractable(CurrentHoveredActor))
+		if(IsInRangeOfInteractable(CurrentHoveredInteractionComponent))
 		{
-			CurrentHoveredInteractable->InitiateInteractionWithActor(PlayerCharacter, true);	
+			CurrentHoveredInteractionComponent->InitiateInteraction(PlayerCharacter, true);	
 		} else
 		{
-			TargetedActor = CurrentHoveredActor;
-			TargetedInteractable = CurrentHoveredInteractable;
-			MoveToNewDestination(TargetedActor->GetActorLocation());
+			TargetedInteractionComponent = CurrentHoveredInteractionComponent;
+			MoveToNewDestination(TargetedInteractionComponent->GetOwnerLocation());
 			GetWorldTimerManager().SetTimer(Timer_InteractDistanceCheck, this, &ACommonPlayerController::Internal_CheckDistanceToInteractActor, DISTANCE_CHECK_RATE, true);
 		}
 	}
@@ -119,9 +110,9 @@ void ACommonPlayerController::K2_TryStartInteraction_Implementation()
 
 void ACommonPlayerController::K2_StopInteraction_Implementation()
 {
-	if(CurrentHoveredInteractable && CurrentHoveredActor)
+	if(CurrentHoveredInteractionComponent)
 	{
-		CurrentHoveredInteractable->InitiateInteractionWithActor(PlayerCharacter, false);
+		CurrentHoveredInteractionComponent->InitiateInteraction(PlayerCharacter, false);
 		Internal_ClearCheckDistTimer();
 	}
 }
@@ -132,7 +123,7 @@ void ACommonPlayerController::Internal_TryAssignInteractable()
 	if(IsValidInteractableActorUnderCursor(HitResult))
 	{
 		OnNewActorTargeted(HitResult.GetActor());
-	} else if(CurrentHoveredInteractable)
+	} else if(CurrentHoveredInteractionComponent)
 	{
 		OnNewActorTargeted(nullptr);
 	}
@@ -160,14 +151,14 @@ FHitResult ACommonPlayerController::Internal_ScanForActorUnderCursor() const
 	return TempResult;
 }
 
-bool ACommonPlayerController::IsInRangeOfInteractable(const AActor* InActor) const
+bool ACommonPlayerController::IsInRangeOfInteractable(const UInteractionComponent* InteractionComponent) const
 {
-	if (!InActor || !PlayerCharacter) {
+	if (!PlayerCharacter || !InteractionComponent) {
 		return false;
 	}
 
-	const float DistanceToProtagonist = FVector::Dist(InActor->GetActorLocation(), PlayerCharacter->GetActorLocation());
-	switch (UInteractUtils::GetAffiliationOfActor(InActor))
+	const float DistanceToProtagonist = FVector::Dist(InteractionComponent->GetOwnerLocation(), PlayerCharacter->GetActorLocation());
+	switch (UInteractUtils::GetAffiliationOfActor(InteractionComponent->GetOwner()))
 	{
 	case EAffiliation::Allies:
 	case EAffiliation::Neutral:

@@ -37,11 +37,11 @@ bool UCoreUtils::IsObjectPlayerControlled(const UObject* Object)
 	return false;
 }
 
-TScriptInterface<IInteractable> UCoreUtils::GetHoveredActorByPlayerController(const UObject* ContextObject)
+UInteractionComponent* UCoreUtils::GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject)
 {
 	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
 	{
-		return PlayerController->GetCurrentHoveredActor();
+		return PlayerController->GetCurrentHoveredInteractionComponent();
 	}
 	return nullptr;
 }

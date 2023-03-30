@@ -22,9 +22,9 @@ protected:
 	//////////////////////////////////////
 	// Interactable Overrides
 	//////////////////////////////////////
-	virtual void SwitchOutlineOnMesh(bool bShouldOutline) override;
-	virtual void InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction = true) override { }
-	virtual void HandleInteractionStarted(const FInteractionEventPayload& InteractionEventPayload) override { }
+	virtual void HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload) override;
+	virtual void HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload) override;
+	virtual void HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload) override;
 	
 	////////////////////////////////
 	// ABaseDestructibleActor
@@ -32,18 +32,18 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleDeath(const FHitResult& HitResult);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleMeshOutlining(bool bIsOutlining);
+	void K2_HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionStarted(AActor* InstigatingActor);
+	void K2_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionInitiated(AActor* InstigatingActor);
+	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM")
 	float DeathBuffer = 5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UHealthComponent* HealthComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UInteractionComponent* InteractionComponent;
+	UInteractionComponent* InteractionComponent;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 	UStaticMeshComponent* DestructibleMesh;
 	

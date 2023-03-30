@@ -32,27 +32,19 @@ ACommonInteractableActor::ACommonInteractableActor()
 	DeathBuffer = 2.f;
 }
 
-void ACommonInteractableActor::SwitchOutlineOnMesh(bool bShouldOutline)
+void ACommonInteractableActor::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)
 {
-	if(InteractionComponent)
-	{
-		InteractionComponent->SwitchOutlineOnAllMeshes(bShouldOutline);
-	}
-	K2_HandleMeshOutlining(bShouldOutline);
+	K2_HandleInteractionStarted(InteractionEventPayload);
 }
 
-void ACommonInteractableActor::InitiateInteractionWithActor(AActor* InstigatingActor, bool bStartingInteraction)
+void ACommonInteractableActor::HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionInitiated(InstigatingActor);
-	if(InteractionComponent)
-	{
-		InteractionComponent->StartInteraction(InstigatingActor, bStartingInteraction);
-	}
+	K2_HandleInteractionInitiated(InteractionEventPayload);
 }
 
-void ACommonInteractableActor::HandleInteractionStarted(const FInteractionEventPayload& InteractionEventPayload)
+void ACommonInteractableActor::HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload)
 {
-	K2_HandleInteractionStarted(InteractionEventPayload.InstigatingActor);
+	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
 }
 
 void ACommonInteractableActor::K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)

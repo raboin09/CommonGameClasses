@@ -35,15 +35,20 @@ void ACommonDestructibleActor::BeginPlay()
 	}
 }
 
-void ACommonDestructibleActor::SwitchOutlineOnMesh(bool bShouldOutline)
+void ACommonDestructibleActor::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)
 {
-	if(InteractionComponent)
-	{
-		InteractionComponent->SwitchOutlineOnAllMeshes(bShouldOutline);
-	}
-	K2_HandleMeshOutlining(bShouldOutline);
+	K2_HandleInteractionStarted(InteractionEventPayload);
 }
 
+void ACommonDestructibleActor::HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload)
+{
+	K2_HandleInteractionInitiated(InteractionEventPayload);
+}
+
+void ACommonDestructibleActor::HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload)
+{
+	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
+}
 
 void ACommonDestructibleActor::HandleDeathEvent(const FActorDeathEventPayload& EventPayload)
 {

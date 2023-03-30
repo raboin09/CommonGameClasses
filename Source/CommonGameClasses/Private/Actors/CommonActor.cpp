@@ -15,3 +15,13 @@ void ACommonActor::BeginPlay()
 	Super::BeginPlay();
 	UGameplayTagComponent::AddTagsToActor(this, DefaultGameplayTags);
 }
+
+void ACommonActor::HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload)
+{
+	K2_HandleTagAdded(TagAddedEventPayload);
+}
+
+void ACommonActor::HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload)
+{
+	K2_HandleTagRemoved(TagRemovedEventPayload);
+}
