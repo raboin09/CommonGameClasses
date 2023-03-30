@@ -13,8 +13,9 @@ struct FGameplayTag;
 class IMountable;
 class UHealthComponent;
 class UGameplayTagComponent;
+class UCommonCharacterMovementComponent;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(Abstract, NotBlueprintable)
 class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -23,7 +24,7 @@ public:
 	ACommonCharacter();
 
 	FORCEINLINE TScriptInterface<IMountable> GetCurrentMount() const { return CurrentMount; }
-
+	FORCEINLINE UCommonCharacterMovementComponent* GetMyMovementComponent() const { return MyCharacterMovementComponent; }
 protected:
 
 	virtual void BeginPlay() override;
@@ -37,8 +38,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
 	TArray<FGameplayTag> DefaultGameplayTags;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="CUSTOM|Defaults")
-	EAffiliation AbsoluteAffiliation;
 
 	UPROPERTY()
 	UEnergyComponent* ManaComponent;
@@ -48,4 +47,6 @@ protected:
 	UGameplayTagComponent* GameplayTagComponent;
 	UPROPERTY()
 	TScriptInterface<IMountable> CurrentMount;
+	UPROPERTY()
+	UCommonCharacterMovementComponent* MyCharacterMovementComponent;
 };

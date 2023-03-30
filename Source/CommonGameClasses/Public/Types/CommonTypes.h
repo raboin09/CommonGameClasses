@@ -30,8 +30,7 @@ enum class EOutlineColor : uint8
 	Purple
 };
 
-#define COMMON_TRACE_WEAPON ECC_GameTraceChannel1
-
+#define COMMON_TRACE_INTERACTION ECC_GameTraceChannel1
 #define COMMON_OBJECT_TYPE_PROJECTILE ECC_GameTraceChannel4
 
 #define COMMON_SURFACE_Default		SurfaceType_Default

@@ -156,7 +156,7 @@ bool ACommonPlayerController::IsValidInteractableActorUnderCursor(const FHitResu
 FHitResult ACommonPlayerController::Internal_ScanForActorUnderCursor() const
 {
 	FHitResult TempResult;
-	GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, TempResult);
+	GetHitResultUnderCursor(COMMON_TRACE_INTERACTION, true, TempResult);
 	return TempResult;
 }
 

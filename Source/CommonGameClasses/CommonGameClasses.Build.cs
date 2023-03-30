@@ -27,6 +27,8 @@ public class CommonGameClasses : ModuleRules
 			{
 				"Core",
 				"GameplayTags",
+				"NavigationSystem",
+				"GameplayTasks",
 				"AIModule",
 				"Niagara",
 				"SMSystem"
