@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "CommonActor.h"
 #include "API/Interactable.h"
-#include "GameFramework/Actor.h"
 #include "CommonDestructibleActor.generated.h"
 
 UCLASS(Abstract, Blueprintable)

@@ -15,13 +15,15 @@ class COMMONGAMECLASSES_API UMaterialDissolverComponent : public UActorComponent
 
 public:
 	UMaterialDissolverComponent();
-	
+
+	UFUNCTION(BlueprintCallable, Category="COMMON|Dissolver")
 	void InitDissolveableMesh(UMeshComponent* InMesh);
+	UFUNCTION(BlueprintCallable, Category="COMMON|Dissolver")
 	void StartAppearTimeline();
+	UFUNCTION(BlueprintCallable, Category="COMMON|Dissolver")
 	void StartDissolveTimeline();
 	
 protected:
-
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UPROPERTY(EditAnywhere, Category="Genestealer")

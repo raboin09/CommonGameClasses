@@ -36,7 +36,7 @@ protected:
 	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UInteractionComponent* InteractionComponent;
+	UInteractionComponent* InteractionComponent;
 	UPROPERTY(EditAnywhere, Category="COMMON|Defaults")
 	UBehaviorTree* DefaultBehaviorTree;
 };

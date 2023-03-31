@@ -33,7 +33,7 @@ void UQuestStateMachine::TryAddActorToQuest(AActor* InActor)
 
 bool UQuestStateMachine::IsQuestComplete() const
 {
-	for(UTransition_QuestSection* CurrTrans : QuestTransitions)
+	for(const UTransition_QuestSection* CurrTrans : QuestTransitions)
 	{
 		if(CurrTrans && !CurrTrans->QuestSectionData.IsQuestSectionDone())
 		{

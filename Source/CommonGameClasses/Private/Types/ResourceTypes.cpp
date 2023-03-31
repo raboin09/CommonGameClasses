@@ -88,13 +88,13 @@ FResourcePool& FResourcePoolContainer::GetCurrentResourcePool()
 	
 	for(FResourcePool& CurrWound : ResourcePools)
 	{
-		// If a Wound has 0 < X < 100 health, it's the Current Wound
+		// If a Wound has 0 < X < 100 health, it's the Current Resource Pool
 		if(CurrWound.CurrentResources > 0 && !CurrWound.IsFullPool())
 		{
 			return CurrWound;
 		}
 
-		// If a Wound has 100 HP but the previous has 0, then it's the Current Wound (ex. 0|0|100|100 , then the third is our Current Wound)
+		// If a Wound has 100 HP but the previous has 0, then it's the Current Resource Pool (ex. 0|0|100|100 , then the third is our Current Resource Pool)
 		if(CurrWound.ResourcePoolIndex > 0 && ResourcePools[CurrWound.ResourcePoolIndex - 1].CurrentResources <= 0 && CurrWound.CurrentResources > 0)
 		{
 			return CurrWound;

@@ -10,7 +10,7 @@ UMaterialDissolverComponent::UMaterialDissolverComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	// Load Dissolve Curve here from BP
-	
+	DissolveCurveFloat = LoadObject<UCurveFloat>(nullptr, UTF8_TO_TCHAR("/Script/Engine.CurveFloat'/CommonGameClasses/CommonCurves/COMMON_Curve_Dissolve.COMMON_Curve_Dissolve'"));
 	DissolveParameterName = "Dissolve Amount";
 	ColorParameterName = "Color";
 }
