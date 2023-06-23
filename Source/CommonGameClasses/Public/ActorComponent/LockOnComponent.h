@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/TimelineComponent.h"
 #include "LockOnComponent.generated.h"
-
-class UTimelineComponent;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API ULockOnComponent : public UActorComponent
@@ -21,6 +20,8 @@ public:
 	void InterpToActor(AActor* ActorToInterpTo, TFunction<void()> InFinishedFunction = TFunction<void()>());
 	
 protected:
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	UCurveFloat* LockOnTransitionCurve;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
@@ -57,5 +58,5 @@ private:
 	UPROPERTY(Transient)
 	AActor* SelectedActor;
 	UPROPERTY()
-	UTimelineComponent* LockOnInterpTimeline;
+	FTimeline LockOnInterpTimeline;
 };

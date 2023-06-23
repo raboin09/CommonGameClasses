@@ -13,25 +13,20 @@
 ULockOnComponent::ULockOnComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	LockOnInterpTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("LockOnInterpTimeline"));
 }
 
 void ULockOnComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if(!LockOnInterpTimeline)
-	{
-		return;
-	}
 	
 	FOnTimelineFloat CoverLerpFunction;
 	CoverLerpFunction.BindDynamic(this, &ULockOnComponent::Internal_CoverTransitionUpdate);
-	LockOnInterpTimeline->AddInterpFloat(LockOnTransitionCurve, CoverLerpFunction);
-	LockOnInterpTimeline->SetLooping(false);
+	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, CoverLerpFunction);
+	LockOnInterpTimeline.SetLooping(false);
 
 	FOnTimelineEvent CoverLerpFinishedEvent;
 	CoverLerpFinishedEvent.BindDynamic(this, &ULockOnComponent::Internal_CoverTransitionFinished);
-	LockOnInterpTimeline->SetTimelineFinishedFunc(CoverLerpFinishedEvent);
+	LockOnInterpTimeline.SetTimelineFinishedFunc(CoverLerpFinishedEvent);
 }
 
 void ULockOnComponent::InterpToBestTargetForMeleeAttack(TFunction<void()> InFinishedFunction)
@@ -61,13 +56,22 @@ void ULockOnComponent::InterpToActor(AActor* ActorToInterpTo, TFunction<void()> 
 	Internal_StartInterpTransition();
 }
 
+void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if(LockOnInterpTimeline.IsPlaying())
+	{
+		LockOnInterpTimeline.TickTimeline(DeltaTime);
+	}
+}
+
 void ULockOnComponent::Internal_StartInterpTransition()
 {
-	if(!SelectedActor || !LockOnInterpTimeline)
+	if(!SelectedActor)
 	{
 		return;
 	}
-	LockOnInterpTimeline->PlayFromStart();
+	LockOnInterpTimeline.IsPlaying() ? LockOnInterpTimeline.Play() : LockOnInterpTimeline.PlayFromStart();
 }
 
 void ULockOnComponent::Internal_CoverTransitionUpdate(float Alpha)
