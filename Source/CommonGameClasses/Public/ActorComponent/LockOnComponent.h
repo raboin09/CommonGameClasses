@@ -46,9 +46,9 @@ private:
 	
 	void Internal_StartInterpTransition();
 	UFUNCTION()
-	void Internal_CoverTransitionUpdate(float Alpha);
+	void Internal_InterpTransitionUpdate(float Alpha);
 	UFUNCTION()
-	void Internal_CoverTransitionFinished();
+	void Internal_InterpTransitionFinished();
 
 	TFunction<void()> OnFinishedFunction;
 	

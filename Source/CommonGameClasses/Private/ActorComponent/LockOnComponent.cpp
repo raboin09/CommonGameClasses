@@ -20,12 +20,12 @@ void ULockOnComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	FOnTimelineFloat CoverLerpFunction;
-	CoverLerpFunction.BindDynamic(this, &ULockOnComponent::Internal_CoverTransitionUpdate);
+	CoverLerpFunction.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionUpdate);
 	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, CoverLerpFunction);
 	LockOnInterpTimeline.SetLooping(false);
 
 	FOnTimelineEvent CoverLerpFinishedEvent;
-	CoverLerpFinishedEvent.BindDynamic(this, &ULockOnComponent::Internal_CoverTransitionFinished);
+	CoverLerpFinishedEvent.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionFinished);
 	LockOnInterpTimeline.SetTimelineFinishedFunc(CoverLerpFinishedEvent);
 }
 
@@ -74,7 +74,7 @@ void ULockOnComponent::Internal_StartInterpTransition()
 	LockOnInterpTimeline.IsPlaying() ? LockOnInterpTimeline.Play() : LockOnInterpTimeline.PlayFromStart();
 }
 
-void ULockOnComponent::Internal_CoverTransitionUpdate(float Alpha)
+void ULockOnComponent::Internal_InterpTransitionUpdate(float Alpha)
 {
 	if(!SelectedActor)
 	{
@@ -88,7 +88,7 @@ void ULockOnComponent::Internal_CoverTransitionUpdate(float Alpha)
 	GetOwner()->SetActorLocationAndRotation(NewActorTransform.GetTranslation(), NewActorTransform.GetRotation(), true);
 }
 
-void ULockOnComponent::Internal_CoverTransitionFinished()
+void ULockOnComponent::Internal_InterpTransitionFinished()
 {
 	SelectedActor = nullptr;
 	if(OnFinishedFunction)
