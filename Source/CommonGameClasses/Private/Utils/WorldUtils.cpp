@@ -7,34 +7,8 @@
 TArray<AActor*> UWorldUtils::QuestRelevantActors = {};
 TArray<AActor*> UWorldUtils::AlliedActors = {};
 TArray<AActor*> UWorldUtils::EnemyActors = {};
-
-void UWorldUtils::FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform)
-{
-	if(!InActor)
-	{
-		return;
-	}
-	InActor->FinishSpawning(ActorTransform);
-}
-
-void UWorldUtils::K2_FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform)
-{
-	FinishSpawningActor_Deferred(InActor, ActorTransform);
-}
-
-AActor* UWorldUtils::K2_SpawnActorWorld_Deferred(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, AActor* Owner, APawn* Instigator, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride)
-{
-	return SpawnActorToWorld_Deferred<AActor>(ContextObject, ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
-}
-
-AActor* UWorldUtils::Internal_SpawnActorFromClass(UWorld* World, UClass* Class, const FTransform& SpawnTransform)
-{
-	if(!World)
-	{
-		return nullptr;
-	}
-	return World->SpawnActor<AActor>(Class, SpawnTransform);
-}
+UWorld* UWorldUtils::PersistentWorld = nullptr;
+UWorld* UWorldUtils::CurrentStreamedWorld = nullptr;
 
 void UWorldUtils::TryAddActorToTeamArray(AActor* InActor, EAffiliation AbsoluteAffiliation)
 {
@@ -69,7 +43,74 @@ void UWorldUtils::TryRemoveActorFromQuestableArray(AActor* InActor)
 	QuestRelevantActors.Remove(InActor);
 }
 
-AActor* UWorldUtils::K2_SpawnActorToWorld(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, FTransform SpawnTransform, AActor* Owner, APawn* Instigator, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride)
+TArray<AActor*> UWorldUtils::GetAllActorsOfClassInPersistentWorld(TSubclassOf<AActor> ActorClass)
 {
-	return SpawnActorToWorld<AActor>(ContextObject, ClassToSpawn, SpawnTransform, Owner, Instigator, CollisionHandlingOverride);
+	return Internal_GetAllActorsFromWorld(PersistentWorld, ActorClass);
+}
+
+TArray<AActor*> UWorldUtils::GetAllActorsOfClassInCurrentStreamedWorld(TSubclassOf<AActor> ActorClass)
+{
+	return Internal_GetAllActorsFromWorld(CurrentStreamedWorld, ActorClass);
+}
+
+AActor* UWorldUtils::K2_SpawnActorToCurrentStreamedWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner, APawn* Instigator, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride)
+{
+	return SpawnActorToCurrentStreamedWorld_Deferred<AActor>(ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
+}
+
+AActor* UWorldUtils::K2_SpawnActorToPersistentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner, APawn* Instigator, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride)
+{
+	return SpawnActorToPersistentWorld_Deferred<AActor>(ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
+}
+
+void UWorldUtils::HandleNewLevelLoadEvent(const FNewLevelLoadedEventPayload& NewLevelLoadedPayload)
+{
+	CurrentStreamedWorld = NewLevelLoadedPayload.NewStreamedWorld;
+}
+
+void UWorldUtils::FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform)
+{
+	if(!InActor)
+	{
+		return;
+	}
+	InActor->FinishSpawning(ActorTransform);
+}
+
+AActor* UWorldUtils::K2_SpawnActorToCurrentStreamedWorld(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform)
+{
+	return Internal_SpawnActorFromClass(CurrentStreamedWorld, ClassToSpawn, SpawnTransform);
+}
+
+AActor* UWorldUtils::K2_SpawnActorToPersistentWorld(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform)
+{
+	return Internal_SpawnActorFromClass(PersistentWorld, ClassToSpawn, SpawnTransform);
+}
+
+AActor* UWorldUtils::Internal_SpawnActorFromClass(UWorld* World, UClass* Class, const FTransform& SpawnTransform)
+{
+	if(!World)
+	{
+		return nullptr;
+	}
+	return World->SpawnActor<AActor>(Class, SpawnTransform);
+}
+
+TArray<AActor*> UWorldUtils::Internal_GetAllActorsFromWorld(UWorld* World, TSubclassOf<AActor> ActorClass)
+{
+	TArray<AActor*> OutActors;
+	if(!World)
+	{
+		return OutActors;
+	}
+	
+	if (ActorClass)
+	{
+		for(TActorIterator<AActor> It(World, ActorClass); It; ++It)
+		{
+			AActor* Actor = *It;
+			OutActors.Add(Actor);
+		}
+	}
+	return OutActors;
 }

@@ -48,12 +48,12 @@ protected:
 	virtual bool CanPickup(ACharacter* PotentialChar) PURE_VIRTUAL(ACommonInteractableActor::CanPickup, return false;)
 	virtual void ConsumePickup(ACharacter* ConsumingChar);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	USphereComponent* CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
 	UStaticMeshComponent* PickupBase;
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	URotatingMovementComponent* RotatingMovementComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CUSTOM")
 	UInteractionComponent* InteractionComponent;
 };

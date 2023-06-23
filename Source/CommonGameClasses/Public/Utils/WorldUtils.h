@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Types/CommonTypes.h"
+#include "Types/EventDeclarations.h"
 #include "WorldUtils.generated.h"
 
 /**
@@ -21,43 +22,61 @@ public:
 	static TArray<AActor*> QuestRelevantActors;
 	static TArray<AActor*> AlliedActors;
 	static TArray<AActor*> EnemyActors;
+	
+	static UWorld* PersistentWorld;
+	static UWorld* CurrentStreamedWorld;
 
+	UFUNCTION()
+	static void HandleNewLevelLoadEvent(const FNewLevelLoadedEventPayload& NewLevelLoadedPayload); 
+	
 	static void TryAddActorToTeamArray(AActor* InActor, EAffiliation AbsoluteAffiliation);
 	static void TryAddActorToQuestableArray(AActor* InActor);
 	static void TryRemoveActorFromQuestableArray(AActor* InActor);
 
-	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
-	static AActor* K2_SpawnActorToWorld(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, FTransform SpawnTransform = FTransform(), AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
-	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
-	static void K2_FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform);
-	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
-	static AActor* K2_SpawnActorWorld_Deferred(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+	////////////////////////////////////////////////////////////////////
+	/// Get all actors of world
+	////////////////////////////////////////////////////////////////////
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SpawnUtils")
+	static TArray<AActor*> GetAllActorsOfClassInPersistentWorld(TSubclassOf<AActor> ActorClass);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SpawnUtils")
+	static TArray<AActor*> GetAllActorsOfClassInCurrentStreamedWorld(TSubclassOf<AActor> ActorClass);
 
-	
+	////////////////////////////////////////////////////////////////////
+	/// K2 Spawn deferred
+	////////////////////////////////////////////////////////////////////
+	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
+	static AActor* K2_SpawnActorToCurrentStreamedWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
+	static AActor* K2_SpawnActorToPersistentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+	UFUNCTION(BlueprintCallable)
 	static void FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform);
-	template<typename T>
-	FORCEINLINE static T* SpawnActorToWorld_Deferred(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
-	{
-		if(!ContextObject)
-		{
-			return nullptr;
-		}
-		return Internal_TemplatedSpawnActorFromClassDeferred<T>(ContextObject->GetWorld(), ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
-	}
 
+	////////////////////////////////////////////////////////////////////
+	/// K2 Spawn instantly
+	////////////////////////////////////////////////////////////////////
+	UFUNCTION(BlueprintCallable)
+	static AActor* K2_SpawnActorToCurrentStreamedWorld(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform);
+	UFUNCTION(BlueprintCallable)
+	static AActor* K2_SpawnActorToPersistentWorld(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform);
+
+	////////////////////////////////////////////////////////////////////
+	/// Native Spawn deferred
+	////////////////////////////////////////////////////////////////////
 	template<typename T>
-	FORCEINLINE static T* SpawnActorToWorld(UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, FTransform SpawnTransform = FTransform(), AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
+	FORCEINLINE static T* SpawnActorToPersistentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
-		if(!ContextObject)
-		{
-			return nullptr;
-		}
-		return Internal_TemplatedSpawnActorFromClass<T>(ContextObject->GetWorld(), ClassToSpawn, SpawnTransform, Owner, Instigator, CollisionHandlingOverride);
+		return Internal_TemplatedSpawnActorFromClass<T>(PersistentWorld, ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
+	}
+	
+	template<typename T>
+	FORCEINLINE static T* SpawnActorToCurrentStreamedWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
+	{
+		return Internal_TemplatedSpawnActorFromClass<T>(CurrentStreamedWorld, ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
 	}
 	
 private:
 	template<typename T>
-	FORCEINLINE static T* Internal_TemplatedSpawnActorFromClassDeferred(UWorld* World, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
+	FORCEINLINE static T* Internal_TemplatedSpawnActorFromClass(UWorld* World, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
 		if(!World)
 		{
@@ -66,19 +85,6 @@ private:
 		return World->SpawnActorDeferred<T>(ClassToSpawn, FTransform(), Owner, Instigator, CollisionHandlingOverride);
 	}
 
-	template<typename T>
-	FORCEINLINE static T* Internal_TemplatedSpawnActorFromClass(UWorld* World, TSubclassOf<AActor> ClassToSpawn, FTransform SpawnTransform = FTransform(), AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
-	{
-		if(!World)
-		{
-			return nullptr;
-		}
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.Instigator = Instigator;
-		SpawnParameters.Owner = Owner;
-		SpawnParameters.SpawnCollisionHandlingOverride = CollisionHandlingOverride;
-		return World->SpawnActor<T>(ClassToSpawn, SpawnTransform, SpawnParameters);
-	}
-
 	static AActor* Internal_SpawnActorFromClass(UWorld* World, UClass* Class, const FTransform& SpawnTransform);
+	static TArray<AActor*> Internal_GetAllActorsFromWorld(UWorld* World, TSubclassOf<AActor> ActorClass);
 };

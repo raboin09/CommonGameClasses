@@ -26,13 +26,13 @@ public:
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UPROPERTY(EditAnywhere, Category="Genestealer")
+	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	float StartingDissolveValue = 0.f;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FName DissolveParameterName;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FName ColorParameterName;
-	UPROPERTY(EditAnywhere, Category="Genestealer")
+	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	UCurveFloat* DissolveCurveFloat;
 
 private:
@@ -50,3 +50,4 @@ private:
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> DissolveDynamicMaterialInstances;
 };
+ 

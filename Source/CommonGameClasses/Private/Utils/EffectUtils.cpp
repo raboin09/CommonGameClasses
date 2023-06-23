@@ -107,7 +107,7 @@ void UEffectUtils::ApplyEffectAtLocation(AActor* InstigatingActor, TSubclassOf<A
 	FTransform SpawnTransform = FTransform();
 	SpawnTransform.SetLocation(Location);
 
-	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToWorld_Deferred<ACommonEffect>(InstigatingActor, EffectToApply, InstigatingActor, Cast<APawn>(InstigatingActor));
+	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonEffect>(EffectToApply, InstigatingActor, Cast<APawn>(InstigatingActor));
 	UWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	if(bActivateImmediately)
 	{

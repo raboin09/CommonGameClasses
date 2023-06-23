@@ -230,7 +230,7 @@ AActor* ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<AActor> In
 	{
 		return nullptr;
 	}
-	AActor* SpawnedActor = UWorldUtils::SpawnActorToWorld_Deferred<AActor>(GetWorld(), InMechanismClass, this, GetInstigator());
+	AActor* SpawnedActor = UWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<AActor>(InMechanismClass, this, GetInstigator());
 	UWorldUtils::FinishSpawningActor_Deferred(SpawnedActor, FTransform());
 	return SpawnedActor;
 }

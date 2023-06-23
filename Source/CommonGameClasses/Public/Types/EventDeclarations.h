@@ -9,6 +9,24 @@
 #include "QuestTypes.h"
 #include "EventDeclarations.generated.h"
 
+USTRUCT(BlueprintType)
+struct FNewLevelLoadedEventPayload
+{
+	GENERATED_BODY()
+	
+	FNewLevelLoadedEventPayload(): NewStreamedWorld(nullptr)
+	{
+	}
+	
+	FNewLevelLoadedEventPayload(UWorld* InWorld): NewStreamedWorld(InWorld)
+	{
+	}
+
+	UPROPERTY()
+	UWorld* NewStreamedWorld;
+};
+DECLARE_EVENT_OneParam(ILevelLoadingManager, FNewLevelLoadedEvent, const FNewLevelLoadedEventPayload&);
+
 ///////////////////////////////////////
 // Cooldown Tick
 ///////////////////////////////////////

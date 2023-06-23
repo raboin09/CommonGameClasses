@@ -50,7 +50,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 		SpawnTransform = FTransform(UCombatUtils::GetRotationFromComponentHit(Impact), Impact.ImpactPoint);
 	}
 
-	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToWorld_Deferred<ACommonEffect>(ContextObject, BaseEffectClass,InstigatingActor, Cast<APawn>(InstigatingActor));
+	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor, Cast<APawn>(InstigatingActor));
 	if (!EffectActor)
 	{
 		return nullptr;
@@ -81,7 +81,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubcl
 
 	const FTransform& SpawnTransform = GetOwner()->GetActorTransform();
 
-	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToWorld_Deferred<ACommonEffect>(GetOwner(), BaseEffectClass);
+	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass);
 	if (!EffectActor)
 	{
 		return nullptr;

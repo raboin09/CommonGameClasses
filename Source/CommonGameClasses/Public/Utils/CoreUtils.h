@@ -6,6 +6,8 @@
 #include "API/Interactable.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ActorComponent/QuestManagerComponent.h"
+#include "API/Managers/CompetitorDeckManager.h"
+#include "Core/CommonGameInstance.h"
 #include "CoreUtils.generated.h"
 
 class ACommonPlayerCharacter;
@@ -33,4 +35,20 @@ public:
 	static UHealthComponent* GetHealthComponentFromActor(UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UQuestManagerComponent* GetQuestManager(const UObject* ContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Gladius|CoreUtils")
+	static UCommonGameInstance* GetCommonGameInstance(const UObject* ContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
+	static TScriptInterface<ICompetitorDeckManager> GetCompetitorDeckManager(const UObject* ContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
+	static TScriptInterface<ILevelLoadingManager> GetLevelLoadingManager(const UObject* ContextObject);
+
+	template<typename M, typename I>
+	static FORCEINLINE TScriptInterface<I> CreateInterfaceOfType(UObject* OuterObject)
+	{
+		UObject* TempInterfaceObj = NewObject<M>(OuterObject, M::StaticClass());
+		TScriptInterface<I> TempInterface;
+		TempInterface.SetObject(TempInterfaceObj);
+		TempInterface.SetInterface(Cast<I>(TempInterfaceObj));
+		return TempInterface;
+	}
 };

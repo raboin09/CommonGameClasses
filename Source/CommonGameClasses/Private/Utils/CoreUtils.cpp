@@ -7,6 +7,7 @@
 #include "Player/CommonPlayerController.h"
 #include "Character/CommonCharacter.h"
 #include "Character/CommonPlayerCharacter.h"
+#include "Core/CommonGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 ACommonPlayerController* UCoreUtils::GetCommonPlayerController(const UObject* ContextObject)
@@ -74,5 +75,39 @@ UQuestManagerComponent* UCoreUtils::GetQuestManager(const UObject* ContextObject
 	{
 		return BaseCon->GetQuestManager();
 	}
+	return nullptr;
+}
+
+UCommonGameInstance* UCoreUtils::GetCommonGameInstance(const UObject* ContextObject)
+{
+	UGameInstance* GameInst = UGameplayStatics::GetGameInstance(ContextObject);
+	if(!GameInst)
+	{
+		COMMON_LOG(Error, "GameplayStatics error getting GameInstance")
+	}
+	if(UCommonGameInstance* CastedGameInst = Cast<UCommonGameInstance>(GameInst))
+	{
+		return CastedGameInst;
+	}
+	COMMON_LOG(Error, "CoreUtils error getting BaseGameInstance")
+	return nullptr;
+}
+
+TScriptInterface<ICompetitorDeckManager> UCoreUtils::GetCompetitorDeckManager(const UObject* ContextObject)
+{
+	if(const UCommonGameInstance* GameInst = GetCommonGameInstance(ContextObject))
+	{
+		return GameInst->GetCompetitorDeckManager();
+	}
+	return nullptr;
+}
+
+TScriptInterface<ILevelLoadingManager> UCoreUtils::GetLevelLoadingManager(const UObject* ContextObject)
+{
+	if(const UCommonGameInstance* GameInst = GetCommonGameInstance(ContextObject))
+	{
+		return GameInst->GetLevelLoadingManager();
+	}
+	COMMON_LOG(Error, "CoreUtils error getting Loading Manager")
 	return nullptr;
 }
