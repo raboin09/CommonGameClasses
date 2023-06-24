@@ -5,14 +5,14 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Types/CommonTypes.h"
-#include "Types/EventDeclarations.h"
-#include "WorldUtils.generated.h"
+#include "Types/CommonEventDeclarations.h"
+#include "CommonWorldUtils.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class COMMONGAMECLASSES_API UWorldUtils : public UBlueprintFunctionLibrary
+class COMMONGAMECLASSES_API UCommonWorldUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

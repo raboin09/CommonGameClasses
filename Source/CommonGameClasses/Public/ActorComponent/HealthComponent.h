@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ResourceComponent.h"
-#include "Types/EventDeclarations.h"
-#include "Types/ResourceTypes.h"
+#include "Types/CommonEventDeclarations.h"
 #include "HealthComponent.generated.h"
 
 

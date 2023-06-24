@@ -6,9 +6,8 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/TagTypes.h"
-#include "Utils/CombatUtils.h"
-#include "Utils/InteractUtils.h"
+#include "Types/CommonTagTypes.h"
+#include "Utils/CommonInteractUtils.h"
 
 ULockOnComponent::ULockOnComponent()
 {
@@ -134,7 +133,7 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 		UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, SweepRadius, ObjectTypes, false, { SourceActor }, bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, TempHitResults, true);
 		for (FHitResult HitResult : TempHitResults) {
-			if(UInteractUtils::AreActorsEnemies(SourceActor, HitResult.GetActor()))
+			if(UCommonInteractUtils::AreActorsEnemies(SourceActor, HitResult.GetActor()))
 			{
 				OutHitResults.Add(HitResult);
 			}
@@ -149,7 +148,7 @@ AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> P
 	{
 		return nullptr;
 	}
-	FHitResult ClosestHit = PotentialHitResults[0];
+	
 	TArray<AActor*> HitActors;
 	for(FHitResult TempHit : PotentialHitResults)
 	{
@@ -157,18 +156,13 @@ AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> P
 		{
 			HitActors.Add(TempHit.GetActor());
 		}
-		// if(TempHit.Distance < ClosestHit.Distance)
-		// {
-		// 	ClosestHit = TempHit;
-		// }
 	}
-	//return ClosestHit.GetActor();
 	return HitActors[0];
 }
 
 FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor) const
 {
-	APlayerController* PlayerController = nullptr;
+	const APlayerController* PlayerController = nullptr;
 	if(const APawn* PawnObj = Cast<APawn>(SourceActor))
 	{
 		PlayerController = Cast<APlayerController>(PawnObj->Controller);

@@ -1,18 +1,18 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Utils/EffectUtils.h"
+#include "Utils/CommonEffectUtils.h"
 #include "Actors/Effects/CommonEffect.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/DataTable.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/EffectContainerComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CombatTypes.h"
-#include "Utils/InteractUtils.h"
-#include "Utils/WorldUtils.h"
+#include "Types/CommonCombatTypes.h"
+#include "Utils/CommonInteractUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
-void UEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, EAffiliation AffectedAffiliation, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
+void UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, EAffiliation AffectedAffiliation, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
 {
 	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceLocation.IsZero())
 	{
@@ -38,19 +38,19 @@ void UEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TA
 	{
 		switch (AffectedAffiliation) {
 		case EAffiliation::Allies:
-				if(!UInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
+				if(!UCommonInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
 				{
 					CulledHitActors.Remove(CurrActor);
 				}
 				break;
 			case EAffiliation::Enemies:
-				if(!UInteractUtils::AreActorsEnemies(CurrActor, InstigatingActor))
+				if(!UCommonInteractUtils::AreActorsEnemies(CurrActor, InstigatingActor))
 				{
 					CulledHitActors.Remove(CurrActor);
 				}
 				break;
 			case EAffiliation::Neutral:
-				if(!UInteractUtils::IsActorNeutral(CurrActor))
+				if(!UCommonInteractUtils::IsActorNeutral(CurrActor))
 				{
 					CulledHitActors.Remove(CurrActor);
 				}
@@ -102,20 +102,20 @@ void UEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TA
 	}
 }
 
-void UEffectUtils::ApplyEffectAtLocation(AActor* InstigatingActor, TSubclassOf<AActor> EffectToApply, FVector Location, bool bActivateImmediately)
+void UCommonEffectUtils::ApplyEffectAtLocation(AActor* InstigatingActor, TSubclassOf<AActor> EffectToApply, FVector Location, bool bActivateImmediately)
 {
 	FTransform SpawnTransform = FTransform();
 	SpawnTransform.SetLocation(Location);
 
-	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonEffect>(EffectToApply, InstigatingActor, Cast<APawn>(InstigatingActor));
-	UWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonEffect>(EffectToApply, InstigatingActor, Cast<APawn>(InstigatingActor));
+	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	if(bActivateImmediately)
 	{
 		EffectActor->ActivateEffect();
 	}
 }
 
-void UEffectUtils::ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<AActor> EffectToApply)
+void UCommonEffectUtils::ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<AActor> EffectToApply)
 {
 	if (!ReceivingActor || !EffectToApply)
 	{
@@ -130,7 +130,7 @@ void UEffectUtils::ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<AActor
 	EffectContainerComponent->TryApplyEffectToContainer(EffectToApply, ReceivingActor);
 }
 
-void UEffectUtils::ApplyEffectsToActor(TArray<TSubclassOf<AActor>> EffectsToApply, AActor* ReceivingActor)
+void UCommonEffectUtils::ApplyEffectsToActor(TArray<TSubclassOf<AActor>> EffectsToApply, AActor* ReceivingActor)
 {
 	for (const TSubclassOf<AActor> EffectClass : EffectsToApply)
 	{
@@ -138,7 +138,7 @@ void UEffectUtils::ApplyEffectsToActor(TArray<TSubclassOf<AActor>> EffectsToAppl
 	}
 }
 
-void UEffectUtils::ApplyEffectsToHitResult(TArray<TSubclassOf<AActor>> EffectsToApply, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
+void UCommonEffectUtils::ApplyEffectsToHitResult(TArray<TSubclassOf<AActor>> EffectsToApply, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
 {
 	for(const TSubclassOf<AActor> EffectClass : EffectsToApply)
 	{
@@ -146,7 +146,7 @@ void UEffectUtils::ApplyEffectsToHitResult(TArray<TSubclassOf<AActor>> EffectsTo
 	}
 }
 
-void UEffectUtils::ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
+void UCommonEffectUtils::ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
 {
 	if (!InstigatingActor)
 	{
@@ -173,7 +173,7 @@ void UEffectUtils::ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectClass, c
 	EffectContainerComponent->TryApplyEffectToContainerFromHitResult(BaseEffectClass, Impact, InstigatingActor, bShouldRotateHitResult);
 }
 
-void UEffectUtils::TryAddMaxWoundsToActor(const AActor* ReceivingActor, float MaxWoundsToAdd)
+void UCommonEffectUtils::TryAddMaxWoundsToActor(const AActor* ReceivingActor, float MaxWoundsToAdd)
 {
 	if(!ReceivingActor)
 		return;
@@ -185,7 +185,7 @@ void UEffectUtils::TryAddMaxWoundsToActor(const AActor* ReceivingActor, float Ma
 	HealthComponent->AddMaxWounds(MaxWoundsToAdd);
 }
 
-void UEffectUtils::TryApplyHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
+void UCommonEffectUtils::TryApplyHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
 {
 	if(!ReceivingActor)
 		return;
@@ -196,7 +196,7 @@ void UEffectUtils::TryApplyHealToActor(const AActor* ReceivingActor, AActor* Ins
 	HealthComponent->ApplyHeal(Heal, InstigatingActor);
 }
 
-void UEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
+void UCommonEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
 {
 	if(!ReceivingActor)
 		return;
@@ -207,7 +207,7 @@ void UEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AActor* I
 	HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
 }
 
-UFXSystemAsset* UEffectUtils::GetVFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)
+UFXSystemAsset* UCommonEffectUtils::GetVFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)
 {
 	if(RowHandle.IsNull() || RowHandle.RowName.IsNone())
 	{
@@ -263,7 +263,7 @@ UFXSystemAsset* UEffectUtils::GetVFXAssetFromKey(const FDataTableRowHandle& RowH
 	return SelectedParticle ? SelectedParticle : OutRow.DefaultFX;
 }
 
-USoundCue* UEffectUtils::GetSFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)
+USoundCue* UCommonEffectUtils::GetSFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)
 {
 	if(RowHandle.IsNull() || RowHandle.RowName.IsNone())
 	{

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "AbilityTypes.generated.h"
+#include "CommonAbilityTypes.generated.h"
 
 #define EFFECT_TICK_RATE .25
 #define EFFECT_TICK_CYCLE_SECONDS 5

@@ -4,9 +4,9 @@
 #include "ActorComponent/EffectContainerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Utils/CombatUtils.h"
-#include "Utils/EffectUtils.h"
-#include "Utils/InteractUtils.h"
+#include "Utils/CommonCombatUtils.h"
+#include "Utils/CommonEffectUtils.h"
+#include "Utils/CommonInteractUtils.h"
 
 void AHitscanActivation::Fire(int32 ActivationLevel)
 {
@@ -23,7 +23,7 @@ void AHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& I
 {
 	const AActor* HitActor = Impact.GetActor();
 	K2_PlayTrailFX(HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
-	if(!HitActor || UInteractUtils::AreActorsAllies(HitActor, GetOwner()))
+	if(!HitActor || UCommonInteractUtils::AreActorsAllies(HitActor, GetOwner()))
 	{
 		return;
 	}
@@ -33,7 +33,7 @@ void AHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& I
 		Internal_PlayWeaponMissEffectFX(Impact);
 	} else
 	{
-		UEffectUtils::ApplyEffectsToHitResult(AbilityEffects, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
+		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
 	}
 }
 

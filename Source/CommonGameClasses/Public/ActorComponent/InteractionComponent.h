@@ -5,9 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/TimelineComponent.h"
-#include "API/Interactable.h"
 #include "Types/CommonTypes.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "InteractionComponent.generated.h"
 
 

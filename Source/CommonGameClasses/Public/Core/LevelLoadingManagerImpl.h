@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "API/Managers/LevelLoadingManager.h"
-#include "Types/CoreTypes.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "UObject/Object.h"
 #include "LevelLoadingManagerImpl.generated.h"
 

@@ -6,13 +6,13 @@
 #include "Types/CommonTypes.h"
 #include "API/Interactable.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "InteractUtils.generated.h"
+#include "CommonInteractUtils.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class COMMONGAMECLASSES_API UInteractUtils : public UBlueprintFunctionLibrary
+class COMMONGAMECLASSES_API UCommonInteractUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 	
@@ -20,7 +20,6 @@ public:
 	static EAffiliation GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor);
 	static EAffiliation GetAffiliationOfActor(const AActor* InActor);
 	static bool AreActorsAllies(const AActor* FirstActor, const AActor* SecondActor);
-	UFUNCTION(BlueprintCallable, Category="COMMON|InteractUtils")
 	static bool AreActorsEnemies(AActor* FirstActor, AActor* SecondActor);
 	static bool IsActorDestructible(const AActor* FirstActor);
 	static bool IsActorNeutral(const AActor* FirstActor);

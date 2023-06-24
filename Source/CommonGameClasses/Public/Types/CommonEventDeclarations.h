@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CombatTypes.h"
+#include "CommonCombatTypes.h"
 #include "GameplayTagContainer.h"
-#include "ResourceTypes.h"
-#include "QuestTypes.h"
-#include "EventDeclarations.generated.h"
+#include "CommonResourceTypes.h"
+#include "CommonQuestTypes.h"
+#include "CommonEventDeclarations.generated.h"
 
 USTRUCT(BlueprintType)
 struct FNewLevelLoadedEventPayload

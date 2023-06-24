@@ -3,8 +3,8 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Types/CharacterAnimTypes.h"
-#include "Types/TagTypes.h"
+#include "Types/CommonCharacterAnimTypes.h"
+#include "Types/CommonTagTypes.h"
 
 void AMontageTrigger::PressTrigger()
 {

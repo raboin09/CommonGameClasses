@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CommonEffect.h"
-#include "Types/CombatTypes.h"
+#include "Types/CommonCombatTypes.h"
 #include "CommonStatModifierEffect.generated.h"
 
 UCLASS(Blueprintable, BlueprintType, EditInlineNew, DefaultToInstanced)

@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Utils/CoreUtils.h"
+#include "Utils/CommonCoreUtils.h"
 
 #include "ActorComponent/HealthComponent.h"
 #include "Player/CommonPlayerController.h"
@@ -9,13 +9,14 @@
 #include "Character/CommonPlayerCharacter.h"
 #include "Core/CommonGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Types/CommonCoreTypes.h"
 
-ACommonPlayerController* UCoreUtils::GetCommonPlayerController(const UObject* ContextObject)
+ACommonPlayerController* UCommonCoreUtils::GetCommonPlayerController(const UObject* ContextObject)
 {
 	return Cast<ACommonPlayerController>(UGameplayStatics::GetPlayerController(ContextObject, 0));
 }
 
-ACommonPlayerCharacter* UCoreUtils::GetCommonPlayerCharacter(const UObject* ContextObject)
+ACommonPlayerCharacter* UCommonCoreUtils::GetCommonPlayerCharacter(const UObject* ContextObject)
 {
 	if (const ACommonPlayerController* CurrCon = GetCommonPlayerController(ContextObject))
 	{
@@ -24,7 +25,7 @@ ACommonPlayerCharacter* UCoreUtils::GetCommonPlayerCharacter(const UObject* Cont
 	return nullptr;
 }
 
-bool UCoreUtils::IsObjectPlayerControlled(const UObject* Object)
+bool UCommonCoreUtils::IsObjectPlayerControlled(const UObject* Object)
 {
 	if(!Object)
 	{
@@ -38,7 +39,7 @@ bool UCoreUtils::IsObjectPlayerControlled(const UObject* Object)
 	return false;
 }
 
-UInteractionComponent* UCoreUtils::GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject)
+UInteractionComponent* UCommonCoreUtils::GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject)
 {
 	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
 	{
@@ -47,7 +48,7 @@ UInteractionComponent* UCoreUtils::GetHoveredInteractionComponentByPlayerControl
 	return nullptr;
 }
 
-UHealthComponent* UCoreUtils::GetPlayerCharacterHealthComponent(const UObject* WorldContextObject)
+UHealthComponent* UCommonCoreUtils::GetPlayerCharacterHealthComponent(const UObject* WorldContextObject)
 {
 	if(!WorldContextObject){
 		return nullptr;
@@ -55,7 +56,7 @@ UHealthComponent* UCoreUtils::GetPlayerCharacterHealthComponent(const UObject* W
 	return GetHealthComponentFromActor(GetCommonPlayerCharacter(WorldContextObject));
 }
 
-UHealthComponent* UCoreUtils::GetHealthComponentFromActor(UObject* ContextObject)
+UHealthComponent* UCommonCoreUtils::GetHealthComponentFromActor(UObject* ContextObject)
 {
 	if(!ContextObject || !ContextObject->IsA(AActor::StaticClass()))
 	{
@@ -69,7 +70,7 @@ UHealthComponent* UCoreUtils::GetHealthComponentFromActor(UObject* ContextObject
 	return nullptr;
 }
 
-UQuestManagerComponent* UCoreUtils::GetQuestManager(const UObject* ContextObject)
+UQuestManagerComponent* UCommonCoreUtils::GetQuestManager(const UObject* ContextObject)
 {
 	if (const ACommonPlayerController* BaseCon = GetCommonPlayerController(ContextObject))
 	{
@@ -78,7 +79,7 @@ UQuestManagerComponent* UCoreUtils::GetQuestManager(const UObject* ContextObject
 	return nullptr;
 }
 
-UCommonGameInstance* UCoreUtils::GetCommonGameInstance(const UObject* ContextObject)
+UCommonGameInstance* UCommonCoreUtils::GetCommonGameInstance(const UObject* ContextObject)
 {
 	UGameInstance* GameInst = UGameplayStatics::GetGameInstance(ContextObject);
 	if(!GameInst)
@@ -93,16 +94,7 @@ UCommonGameInstance* UCoreUtils::GetCommonGameInstance(const UObject* ContextObj
 	return nullptr;
 }
 
-TScriptInterface<ICompetitorDeckManager> UCoreUtils::GetCompetitorDeckManager(const UObject* ContextObject)
-{
-	if(const UCommonGameInstance* GameInst = GetCommonGameInstance(ContextObject))
-	{
-		return GameInst->GetCompetitorDeckManager();
-	}
-	return nullptr;
-}
-
-TScriptInterface<ILevelLoadingManager> UCoreUtils::GetLevelLoadingManager(const UObject* ContextObject)
+TScriptInterface<ILevelLoadingManager> UCommonCoreUtils::GetLevelLoadingManager(const UObject* ContextObject)
 {
 	if(const UCommonGameInstance* GameInst = GetCommonGameInstance(ContextObject))
 	{

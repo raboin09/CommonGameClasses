@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "CombatTypes.generated.h"
+#include "CommonCombatTypes.generated.h"
 
 class UNiagaraSystem;
 class USoundCue;

@@ -1,14 +1,14 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Utils/CombatUtils.h"
-#include "Utils/CoreUtils.h"
+#include "Utils/CommonCombatUtils.h"
+#include "Utils/CommonCoreUtils.h"
 #include "Character/CommonPlayerCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Utils/InteractUtils.h"
+#include "Utils/CommonInteractUtils.h"
 
-float UCombatUtils::GetHitImpulseValue(EHitReactType InHit)
+float UCommonCombatUtils::GetHitImpulseValue(EHitReactType InHit)
 {
 	const float Multiplier = 30000.f;
 	switch (InHit)
@@ -24,7 +24,7 @@ float UCombatUtils::GetHitImpulseValue(EHitReactType InHit)
 	}
 }
 
-bool UCombatUtils::ShouldHitKnockback(EHitReactType InHit)
+bool UCommonCombatUtils::ShouldHitKnockback(EHitReactType InHit)
 {
 	switch (InHit)
 	{
@@ -44,7 +44,7 @@ bool UCombatUtils::ShouldHitKnockback(EHitReactType InHit)
 	}
 }
 
-float UCombatUtils::GetKnockbackRecoveryTime(EHitReactType InHit)
+float UCommonCombatUtils::GetKnockbackRecoveryTime(EHitReactType InHit)
 {
 	switch (InHit)
 	{
@@ -68,7 +68,7 @@ float UCombatUtils::GetKnockbackRecoveryTime(EHitReactType InHit)
 	}
 }
 
-bool UCombatUtils::IsBoneNameHead(const FName& InBone)
+bool UCommonCombatUtils::IsBoneNameHead(const FName& InBone)
 {
 	TArray<FName> ValidBones;
 	ValidBones.Add("head");
@@ -78,7 +78,7 @@ bool UCombatUtils::IsBoneNameHead(const FName& InBone)
  	return ValidBones.Contains(InBone);
 }
 
-FName UCombatUtils::GetNearestValidBoneForImpact(FName InBone)
+FName UCommonCombatUtils::GetNearestValidBoneForImpact(FName InBone)
 {
 	if(InBone.IsEqual(NAME_None))
 	{
@@ -159,7 +159,7 @@ FName UCombatUtils::GetNearestValidBoneForImpact(FName InBone)
 	return InBone;
 }
 
-FRotator UCombatUtils::GetRotationFromComponentHit(const FHitResult& Impact)
+FRotator UCommonCombatUtils::GetRotationFromComponentHit(const FHitResult& Impact)
 {
 	if(!Impact.Component.Get() || !Impact.Component.IsValid())
 	{

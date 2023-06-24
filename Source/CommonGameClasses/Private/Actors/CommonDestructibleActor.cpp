@@ -7,7 +7,7 @@
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/InteractionComponent.h"
 #include "Types/CommonTypes.h"
-#include "Types/TagTypes.h"
+#include "Types/CommonTagTypes.h"
 
 
 ACommonDestructibleActor::ACommonDestructibleActor()

@@ -3,7 +3,7 @@
 
 #include "Actors/CommonExplodingProjectile.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Utils/EffectUtils.h"
+#include "Utils/CommonEffectUtils.h"
 
 ACommonExplodingProjectile::ACommonExplodingProjectile()
 {
@@ -42,6 +42,6 @@ void ACommonExplodingProjectile::OnImpact(const FHitResult& HitResult)
 void ACommonExplodingProjectile::Internal_Explode()
 {
 	bExplodedAlready = true;
-	UEffectUtils::ApplyEffectsToHitResultsInRadius(GetOwner(), ProjectileEffectsToApply, GetActorLocation(), ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), bFriendlyFire ? EAffiliation::All : EAffiliation::Enemies, true, GetActorLocation());
+	UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(GetOwner(), ProjectileEffectsToApply, GetActorLocation(), ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), bFriendlyFire ? EAffiliation::All : EAffiliation::Enemies, true, GetActorLocation());
 	K2_HandleExplosion();
 }

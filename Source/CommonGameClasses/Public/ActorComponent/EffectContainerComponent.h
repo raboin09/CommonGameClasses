@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "API/Effect.h"
 #include "Components/ActorComponent.h"
-#include "Types/AbilityTypes.h"
+#include "Types/CommonAbilityTypes.h"
 #include "EffectContainerComponent.generated.h"
 
 USTRUCT()
@@ -19,6 +19,7 @@ struct FTickingEffect
 		TickModulus = -1;
 		RemainingTickActivations = -1;
 		TickID = -1;
+		ExpirationTime = -1.f;
 	}
 
 	FTickingEffect(TScriptInterface<IEffect> IncomingEffect, int32 InTickModulus, int32 InExpirationTime, int32 InTickID)
@@ -27,6 +28,7 @@ struct FTickingEffect
 		RemainingTickActivations = InExpirationTime;
 		TickingEffect = IncomingEffect;
 		TickID = InTickID;
+		ExpirationTime = -1.f;
 	}
 
 	bool operator==(const FTickingEffect& OtherEffect) const

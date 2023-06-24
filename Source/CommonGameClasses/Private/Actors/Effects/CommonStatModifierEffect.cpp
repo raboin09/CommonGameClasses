@@ -3,8 +3,8 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Utils/CombatUtils.h"
-#include "Utils/EffectUtils.h"
+#include "Utils/CommonCombatUtils.h"
+#include "Utils/CommonEffectUtils.h"
 
 void ACommonStatModifierEffect::ActivateEffect()
 {
@@ -42,7 +42,7 @@ void ACommonStatModifierEffect::K2_ApplyStatChange_Implementation(float Modified
 
 float ACommonStatModifierEffect::CalculateHeadshotDamage(float ModifiedStatValue) const
 {
-	if(StatEffectDataObj->bAddDamageForHeadshots && UCombatUtils::IsBoneNameHead(EffectContext.SurfaceHit.BoneName))
+	if(StatEffectDataObj->bAddDamageForHeadshots && UCommonCombatUtils::IsBoneNameHead(EffectContext.SurfaceHit.BoneName))
 	{
 		return ModifiedStatValue * StatEffectDataObj->HeadshotModifier;
 	}
@@ -117,20 +117,20 @@ void ACommonStatModifierEffect::Internal_HealthDamage(float ModifiedStatValue) c
 	HitReactEvent.HitResult = EffectContext.SurfaceHit;
 	HitReactEvent.DeathReactType = StatEffectDataObj->DeathImpulse;
 	HitReactEvent.HitReactType = StatEffectDataObj->HitImpulse;
-	UEffectUtils::TryApplyDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
+	UCommonEffectUtils::TryApplyDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
 }
 
 void ACommonStatModifierEffect::Internal_HealthMaxWounds(float ModifiedStatValue)
 {
-	UEffectUtils::TryAddMaxWoundsToActor(EffectContext.ReceivingActor, ModifiedStatValue);
+	UCommonEffectUtils::TryAddMaxWoundsToActor(EffectContext.ReceivingActor, ModifiedStatValue);
 	AActor* ReceivingActor = EffectContext.ReceivingActor;
 	ReversalFunc = [ModifiedStatValue, ReceivingActor]
 	{
-		UEffectUtils::TryAddMaxWoundsToActor(ReceivingActor, ModifiedStatValue);
+		UCommonEffectUtils::TryAddMaxWoundsToActor(ReceivingActor, ModifiedStatValue);
 	};
 }
 
 void ACommonStatModifierEffect::Internal_HealthHeal(float ModifiedStatValue) const
 {
-	UEffectUtils::TryApplyHealToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, ModifiedStatValue);
+	UCommonEffectUtils::TryApplyHealToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, ModifiedStatValue);
 }

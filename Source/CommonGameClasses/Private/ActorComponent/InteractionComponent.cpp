@@ -2,8 +2,8 @@
 
 #include "ActorComponent/InteractionComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CoreTypes.h"
-#include "Utils/InteractUtils.h"
+#include "Types/CommonCoreTypes.h"
+#include "Utils/CommonInteractUtils.h"
 
 UInteractionComponent::UInteractionComponent()
 {
@@ -63,7 +63,7 @@ void UInteractionComponent::SwitchOutlineOnAllMeshes(bool bShouldOutline)
 	{
 		if(CurrMesh)
 		{
-			const int32 OutlineColorInt = UInteractUtils::GetOutlineInt(GetOwner());
+			const int32 OutlineColorInt = UCommonInteractUtils::GetOutlineInt(GetOwner());
 			CurrMesh->SetRenderCustomDepth(bShouldOutline);
 			CurrMesh->SetCustomDepthStencilValue(OutlineColorInt);
 		}

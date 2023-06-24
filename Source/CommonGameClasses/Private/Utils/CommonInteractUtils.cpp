@@ -1,15 +1,15 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Utils/InteractUtils.h"
+#include "Utils/CommonInteractUtils.h"
 
 #include "ActorComponent/InteractionComponent.h"
 #include "Character/CommonPlayerCharacter.h"
 #include "GameFramework/Character.h"
-#include "Utils/CombatUtils.h"
-#include "Utils/CoreUtils.h"
+#include "Utils/CommonCombatUtils.h"
+#include "Utils/CommonCoreUtils.h"
 
-bool UInteractUtils::AreActorsAllies(const AActor* FirstActor, const AActor* SecondActor)
+bool UCommonInteractUtils::AreActorsAllies(const AActor* FirstActor, const AActor* SecondActor)
 {
 	if(IsActorNeutral(FirstActor))
 	{
@@ -23,7 +23,7 @@ bool UInteractUtils::AreActorsAllies(const AActor* FirstActor, const AActor* Sec
 	return GetAffiliationOfActor(FirstActor) == GetAffiliationOfActor(SecondActor);
 }
 
-bool UInteractUtils::AreActorsEnemies(AActor* FirstActor, AActor* SecondActor)
+bool UCommonInteractUtils::AreActorsEnemies(AActor* FirstActor, AActor* SecondActor)
 {
 	if(IsActorNeutral(FirstActor))
 	{
@@ -37,17 +37,17 @@ bool UInteractUtils::AreActorsEnemies(AActor* FirstActor, AActor* SecondActor)
 	return GetAffiliationOfActor(FirstActor) != GetAffiliationOfActor(SecondActor);
 }
 
-bool UInteractUtils::IsActorDestructible(const AActor* FirstActor)
+bool UCommonInteractUtils::IsActorDestructible(const AActor* FirstActor)
 {
 	return GetAffiliationOfActor(FirstActor) == EAffiliation::Destructible;
 }
 
-bool UInteractUtils::IsActorNeutral(const AActor* FirstActor)
+bool UCommonInteractUtils::IsActorNeutral(const AActor* FirstActor)
 {
 	return GetAffiliationOfActor(FirstActor) == EAffiliation::Neutral;
 }
 
-EAffiliation UInteractUtils::GetAffiliationOfActor(const AActor* InActor)
+EAffiliation UCommonInteractUtils::GetAffiliationOfActor(const AActor* InActor)
 {
 	if(!InActor)
 	{
@@ -59,7 +59,7 @@ EAffiliation UInteractUtils::GetAffiliationOfActor(const AActor* InActor)
 	}
 	return EAffiliation::None;
 }
-EAffiliation UInteractUtils::GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor)
+EAffiliation UCommonInteractUtils::GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor)
 {
 	if(IsActorNeutral(ContextActor))
 	{
@@ -71,7 +71,7 @@ EAffiliation UInteractUtils::GetAffiliationRelatedToPlayerCharacter(AActor* Cont
 		return EAffiliation::Enemies;
 	}
 
-	AActor* PlayerCharacter = UCoreUtils::GetCommonPlayerCharacter(ContextActor);
+	AActor* PlayerCharacter = UCommonCoreUtils::GetCommonPlayerCharacter(ContextActor);
 	if(AreActorsAllies(PlayerCharacter, ContextActor))
 	{
 		return EAffiliation::Allies;
@@ -85,7 +85,7 @@ EAffiliation UInteractUtils::GetAffiliationRelatedToPlayerCharacter(AActor* Cont
 }
 
 
-int32 UInteractUtils::GetOutlineInt(const AActor* InActor)
+int32 UCommonInteractUtils::GetOutlineInt(const AActor* InActor)
 {
 	switch(GetAffiliationOfActor(InActor))
 	{

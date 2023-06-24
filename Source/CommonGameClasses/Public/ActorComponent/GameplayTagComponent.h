@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "Components/ActorComponent.h"
 #include "GameplayTagComponent.generated.h"
 

@@ -6,9 +6,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Utils/CombatUtils.h"
+#include "Utils/CommonCombatUtils.h"
 #include "Sound/SoundCue.h"
-#include "Utils/EffectUtils.h"
+#include "Utils/CommonEffectUtils.h"
 
 
 ACommonEffect::ACommonEffect()
@@ -83,7 +83,7 @@ bool ACommonEffect::Internal_IsValidHeadshot() const
 	{
 		bPlayerControlled = CastedPawn->IsPlayerControlled();	
 	}
-	return UCombatUtils::IsBoneNameHead(EffectContext.SurfaceHit.BoneName) && !bPlayerControlled;
+	return UCommonCombatUtils::IsBoneNameHead(EffectContext.SurfaceHit.BoneName) && !bPlayerControlled;
 }
 
 void ACommonEffect::PlayEffectFX()
@@ -117,7 +117,7 @@ UFXSystemAsset* ACommonEffect::K2_GetEffectParticleSystem_Implementation()
 		return nullptr;
 	}
 	const UPhysicalMaterial* PhysicalMaterial = EffectContext.SurfaceHit.PhysMaterial.Get();
-	return UEffectUtils::GetVFXAssetFromKey(EffectDataObj->ImpactVFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
+	return UCommonEffectUtils::GetVFXAssetFromKey(EffectDataObj->ImpactVFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
 }
 
 USoundCue* ACommonEffect::K2_GetEffectSound_Implementation()
@@ -127,5 +127,5 @@ USoundCue* ACommonEffect::K2_GetEffectSound_Implementation()
 		return nullptr;
 	}
 	const UPhysicalMaterial* PhysicalMaterial = EffectContext.SurfaceHit.PhysMaterial.Get();
-	return UEffectUtils::GetSFXAssetFromKey(EffectDataObj->ImpactSFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
+	return UCommonEffectUtils::GetSFXAssetFromKey(EffectDataObj->ImpactSFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
 }

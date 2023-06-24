@@ -7,8 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Quest/QuestStateMachine.h"
 #include "Quest/Transition_QuestSection.h"
-#include "Utils/CoreUtils.h"
-#include "Utils/WorldUtils.h"
+#include "Utils/CommonCoreUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
 UQuestManagerComponent::UQuestManagerComponent()
 {
@@ -19,8 +19,8 @@ UQuestManagerComponent::UQuestManagerComponent()
 void UQuestManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	UWorldUtils::QuestRelevantActors.Empty();
-	UGameplayStatics::GetAllActorsWithInterface(this, UQuestable::StaticClass(), UWorldUtils::QuestRelevantActors);
+	UCommonWorldUtils::QuestRelevantActors.Empty();
+	UGameplayStatics::GetAllActorsWithInterface(this, UQuestable::StaticClass(), UCommonWorldUtils::QuestRelevantActors);
 }
 
 void UQuestManagerComponent::TryAddActorToActiveQuests(AActor* InActor)
@@ -30,7 +30,7 @@ void UQuestManagerComponent::TryAddActorToActiveQuests(AActor* InActor)
 		return;
 	}
 	
-	if(UQuestManagerComponent* QuestManagerComponent = UCoreUtils::GetQuestManager(InActor))
+	if(UQuestManagerComponent* QuestManagerComponent = UCommonCoreUtils::GetQuestManager(InActor))
 	{
 		QuestManagerComponent->AddActorToActiveQuests(InActor);
 	}
@@ -38,7 +38,7 @@ void UQuestManagerComponent::TryAddActorToActiveQuests(AActor* InActor)
 
 void UQuestManagerComponent::GiveQuestClassToPlayer(const UObject* WorldContextObject, TSubclassOf<UQuestStateMachine> QuestClass)
 {
-	if(UQuestManagerComponent* QuestManagerComponent = UCoreUtils::GetQuestManager(WorldContextObject))
+	if(UQuestManagerComponent* QuestManagerComponent = UCommonCoreUtils::GetQuestManager(WorldContextObject))
 	{
 		QuestManagerComponent->ActivateQuestInstance(QuestClass);
 	}

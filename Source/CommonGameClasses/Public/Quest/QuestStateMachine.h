@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SMInstance.h"
-#include "Types/QuestTypes.h"
+#include "Types/CommonQuestTypes.h"
 #include "QuestStateMachine.generated.h"
 
 class UTransition_QuestSection;

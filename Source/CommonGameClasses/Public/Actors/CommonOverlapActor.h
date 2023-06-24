@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "CommonActor.h"
 #include "ActorComponent/GameplayTagComponent.h"
-#include "Types/TagTypes.h"
+#include "Types/CommonTagTypes.h"
 #include "CommonOverlapActor.generated.h"
 
 /**

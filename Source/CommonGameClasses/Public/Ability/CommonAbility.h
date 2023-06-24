@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/Ability.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "CommonAbility.generated.h"
 
 class IResourceContainer;

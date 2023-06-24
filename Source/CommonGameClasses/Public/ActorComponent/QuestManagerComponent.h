@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Quest/QuestStateMachine.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "QuestManagerComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))

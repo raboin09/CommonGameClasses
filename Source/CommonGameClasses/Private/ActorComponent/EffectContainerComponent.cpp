@@ -7,8 +7,8 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Utils/CombatUtils.h"
-#include "Utils/WorldUtils.h"
+#include "Utils/CommonCombatUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
 DECLARE_CYCLE_STAT(TEXT("CommonClasses_EffectContainerTick"), STAT_CommonClasses_StatsEffectContainerTicks, STATGROUP_StatSystem);
 
@@ -47,10 +47,10 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	FTransform SpawnTransform = FTransform(Impact.Location);
 	if (bShouldRotateHitResult)
 	{
-		SpawnTransform = FTransform(UCombatUtils::GetRotationFromComponentHit(Impact), Impact.ImpactPoint);
+		SpawnTransform = FTransform(UCommonCombatUtils::GetRotationFromComponentHit(Impact), Impact.ImpactPoint);
 	}
 
-	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor, Cast<APawn>(InstigatingActor));
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor, Cast<APawn>(InstigatingActor));
 	if (!EffectActor)
 	{
 		return nullptr;
@@ -62,7 +62,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	EffectContext.SurfaceHit = Impact;
 	EffectContext.HitDirection = Impact.ImpactNormal;
 	EffectActor->SetEffectContext(EffectContext);
-	UWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	return EffectActor;
 }
 
@@ -81,7 +81,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubcl
 
 	const FTransform& SpawnTransform = GetOwner()->GetActorTransform();
 
-	ACommonEffect* EffectActor = UWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass);
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass);
 	if (!EffectActor)
 	{
 		return nullptr;
@@ -92,7 +92,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubcl
 	EffectContext.InstigatingActor = InstigatingActor;
 	EffectContext.ReceivingActor = GetOwner();
 	EffectActor->SetEffectContext(EffectContext);
-	UWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	return EffectActor;
 }
 

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/ActivationMechanism.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "K2_AbilityActivation.generated.h"
 
 UCLASS(Abstract, Blueprintable)

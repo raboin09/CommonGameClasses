@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "ResourceComponent.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "EnergyComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )

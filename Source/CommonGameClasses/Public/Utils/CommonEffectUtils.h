@@ -3,17 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/CombatTypes.h"
+#include "Types/CommonCombatTypes.h"
 #include "Types/CommonTypes.h"
-#include "Types/ResourceTypes.h"
 #include "UObject/Object.h"
-#include "EffectUtils.generated.h"
+#include "CommonEffectUtils.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class COMMONGAMECLASSES_API UEffectUtils : public UObject
+class COMMONGAMECLASSES_API UCommonEffectUtils : public UObject
 {
 	GENERATED_BODY()
 

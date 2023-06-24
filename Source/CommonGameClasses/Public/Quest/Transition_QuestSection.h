@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "SMTransitionInstance.h"
-#include "Types/EventDeclarations.h"
-#include "Types/QuestTypes.h"
+#include "Types/CommonEventDeclarations.h"
+#include "Types/CommonQuestTypes.h"
 #include "Transition_QuestSection.generated.h"
 
 /**

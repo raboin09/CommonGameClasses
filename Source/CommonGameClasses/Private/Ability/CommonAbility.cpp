@@ -6,11 +6,11 @@
 #include "API/Ability/TriggerMechanism.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Types/TagTypes.h"
+#include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
 #include "GameFramework/PlayerState.h"
-#include "Types/AbilityTypes.h"
-#include "Utils/WorldUtils.h"
+#include "Types/CommonAbilityTypes.h"
+#include "Utils/CommonWorldUtils.h"
 
 ACommonAbility::ACommonAbility()
 {
@@ -230,8 +230,8 @@ AActor* ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<AActor> In
 	{
 		return nullptr;
 	}
-	AActor* SpawnedActor = UWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<AActor>(InMechanismClass, this, GetInstigator());
-	UWorldUtils::FinishSpawningActor_Deferred(SpawnedActor, FTransform());
+	AActor* SpawnedActor = UCommonWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<AActor>(InMechanismClass, this, GetInstigator());
+	UCommonWorldUtils::FinishSpawningActor_Deferred(SpawnedActor, FTransform());
 	return SpawnedActor;
 }
 

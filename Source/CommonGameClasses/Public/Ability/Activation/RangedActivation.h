@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/ActivationMechanism.h"
-#include "Types/AbilityTypes.h"
+#include "Types/CommonAbilityTypes.h"
 #include "RangedActivation.generated.h"
 
 class UFXSystemComponent;

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "API/Ability/ResourceContainer.h"
 #include "Components/ActorComponent.h"
-#include "Types/ResourceTypes.h"
+#include "Types/CommonResourceTypes.h"
 #include "ResourceComponent.generated.h"
 
 

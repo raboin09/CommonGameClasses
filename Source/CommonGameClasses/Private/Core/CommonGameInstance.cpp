@@ -2,11 +2,9 @@
 
 
 #include "Core/CommonGameInstance.h"
-#include "Core/CompetitorDeckManagerImpl.h"
 #include "Core/LevelLoadingManagerImpl.h"
-#include "Core/MatchmakingManagerImpl.h"
-#include "Utils/CoreUtils.h"
-#include "Utils/WorldUtils.h"
+#include "Utils/CommonCoreUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
 UCommonGameInstance::UCommonGameInstance()
 {
@@ -21,12 +19,8 @@ void UCommonGameInstance::Init()
 void UCommonGameInstance::Internal_SetupManagers()
 {
 	// Create concrete impl objects to bind to each other's events
-	LevelLoadingManager = UCoreUtils::CreateInterfaceOfType<ULevelLoadingManagerImpl, ILevelLoadingManager>(this);
-	MatchmakingManager = UCoreUtils::CreateInterfaceOfType<UMatchmakingManagerImpl, IMatchmakingManager>(this);
-	CompetitorDeckManager = UCoreUtils::CreateInterfaceOfType<UCompetitorDeckManagerImpl, ICompetitorDeckManager>(this);
+	LevelLoadingManager = UCommonCoreUtils::CreateInterfaceOfType<ULevelLoadingManagerImpl, ILevelLoadingManager>(this);
 
-	const FName HandeLevelLoadFunctionName = "HandleNewLevelLoadEvent";	
-	LevelLoadingManager->OnNewLevelLoaded().AddUFunction(MatchmakingManager.GetObject(), HandeLevelLoadFunctionName);
-	LevelLoadingManager->OnNewLevelLoaded().AddStatic(&UWorldUtils::HandleNewLevelLoadEvent);
+	LevelLoadingManager->OnNewLevelLoaded().AddStatic(&UCommonWorldUtils::HandleNewLevelLoadEvent);
 	LevelLoadingManager->InitLoadingManager(BasePostProcessWorld);
 }

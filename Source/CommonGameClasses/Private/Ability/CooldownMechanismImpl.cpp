@@ -1,7 +1,5 @@
 ﻿#include "Ability/CooldownMechanismImpl.h"
 
-#include "Types/CoreTypes.h"
-
 void UCooldownMechanismImpl::StartCooldownTimer(const float CooldownDuration)
 {
 	TotalCooldownTime = CooldownDuration;

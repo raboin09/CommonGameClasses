@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Types/ResourceTypes.h"
+#include "Types/CommonResourceTypes.h"
 
 void FResourcePoolContainer::ZeroizeResourceContainer()
 {

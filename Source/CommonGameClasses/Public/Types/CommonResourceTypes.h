@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ResourceTypes.generated.h"
+#include "CommonResourceTypes.generated.h"
 
 USTRUCT(BlueprintType)
 struct FResourcePool

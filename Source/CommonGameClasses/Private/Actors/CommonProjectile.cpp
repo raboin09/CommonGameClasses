@@ -9,8 +9,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Utils/EffectUtils.h"
-#include "Utils/InteractUtils.h"
+#include "Utils/CommonEffectUtils.h"
+#include "Utils/CommonInteractUtils.h"
 
 ACommonProjectile::ACommonProjectile() 
 {
@@ -80,7 +80,7 @@ void ACommonProjectile::InitVelocity(const FVector& ShootDirection) const
 
 void ACommonProjectile::K2_HandleImpact_Implementation(const FHitResult& HitResult)
 {
-	UEffectUtils::ApplyEffectsToHitResult(ProjectileEffectsToApply, HitResult, GetInstigator());
+	UCommonEffectUtils::ApplyEffectsToHitResult(ProjectileEffectsToApply, HitResult, GetInstigator());
 }
 
 void ACommonProjectile::OnImpact(const FHitResult& HitResult)
@@ -97,7 +97,7 @@ void ACommonProjectile::OnImpact(const FHitResult& HitResult)
 		return;
 	}
 
-	if(HitActor->FindComponentByClass<UEffectContainerComponent>() && !UInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
+	if(HitActor->FindComponentByClass<UEffectContainerComponent>() && !UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
 		K2_HandleImpact(HitResult);
 	} else

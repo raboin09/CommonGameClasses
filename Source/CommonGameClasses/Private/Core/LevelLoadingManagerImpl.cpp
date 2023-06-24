@@ -7,9 +7,9 @@
 #include "Character/CommonPlayerCharacter.h"
 #include "Engine/LevelStreaming.h"
 #include "Kismet/GameplayStatics.h"
-#include "Types/TagTypes.h"
-#include "Utils/CoreUtils.h"
-#include "Utils/WorldUtils.h"
+#include "Types/CommonTagTypes.h"
+#include "Utils/CommonCoreUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
 ULevelLoadingManagerImpl::ULevelLoadingManagerImpl()
 {
@@ -20,7 +20,7 @@ ULevelLoadingManagerImpl::ULevelLoadingManagerImpl()
 void ULevelLoadingManagerImpl::InitLoadingManager(TSoftObjectPtr<UWorld> PostProcessLevel)
 {
 	PersistentWorld = GetWorld();
-	UWorldUtils::PersistentWorld = PersistentWorld;
+	UCommonWorldUtils::PersistentWorld = PersistentWorld;
 	BasePostProcessWorld = PostProcessLevel;
 	Internal_LoadBasePostProcessLevel();
 }
@@ -45,13 +45,13 @@ void ULevelLoadingManagerImpl::Internal_ApplyLoadingStateToPlayerCharacter(const
 {
 	if (bAddingTags)
 	{
-		UGameplayTagComponent::AddTagToActor(UCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_LOADING);
-		UGameplayTagComponent::AddTagToActor(UCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_STUNNED);
+		UGameplayTagComponent::AddTagToActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_LOADING);
+		UGameplayTagComponent::AddTagToActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_STUNNED);
 	}
 	else
 	{
-		UGameplayTagComponent::RemoveTagFromActor(UCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_LOADING);
-		UGameplayTagComponent::RemoveTagFromActor(UCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_STUNNED);
+		UGameplayTagComponent::RemoveTagFromActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_LOADING);
+		UGameplayTagComponent::RemoveTagFromActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_STUNNED);
 	}
 }
 

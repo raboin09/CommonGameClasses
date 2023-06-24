@@ -5,7 +5,7 @@
 #include "Actors/CommonProjectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Utils/WorldUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
 AProjectileActivation::AProjectileActivation()
 {
@@ -63,7 +63,7 @@ ACommonProjectile* AProjectileActivation::Internal_SpawnProjectile(const FVector
 
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
-	if (ACommonProjectile* Projectile = UWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonProjectile>(ProjectileClass, this, GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonProjectile>(ProjectileClass, this, GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
 	{		
 		Projectile->InitVelocity(ProjectileVelocity);
 		Projectile->SetLifeSpan(ProjectileLife);
@@ -74,7 +74,7 @@ ACommonProjectile* AProjectileActivation::Internal_SpawnProjectile(const FVector
 		{
 			Projectile->IgnoreActor(TempActor);
 		}
-		UWorldUtils::FinishSpawningActor_Deferred(Projectile, SpawnTrans);
+		UCommonWorldUtils::FinishSpawningActor_Deferred(Projectile, SpawnTrans);
 		return Projectile;
 	}
 	return nullptr;

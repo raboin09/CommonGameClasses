@@ -3,12 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "API/Interactable.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ActorComponent/QuestManagerComponent.h"
-#include "API/Managers/CompetitorDeckManager.h"
 #include "Core/CommonGameInstance.h"
-#include "CoreUtils.generated.h"
+#include "CommonCoreUtils.generated.h"
 
 class ACommonPlayerCharacter;
 class ACommonPlayerController;
@@ -17,7 +15,7 @@ class ACommonPlayerController;
  * 
  */
 UCLASS()
-class COMMONGAMECLASSES_API UCoreUtils : public UBlueprintFunctionLibrary
+class COMMONGAMECLASSES_API UCommonCoreUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 	
@@ -37,8 +35,6 @@ public:
 	static UQuestManagerComponent* GetQuestManager(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Gladius|CoreUtils")
 	static UCommonGameInstance* GetCommonGameInstance(const UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static TScriptInterface<ICompetitorDeckManager> GetCompetitorDeckManager(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static TScriptInterface<ILevelLoadingManager> GetLevelLoadingManager(const UObject* ContextObject);
 

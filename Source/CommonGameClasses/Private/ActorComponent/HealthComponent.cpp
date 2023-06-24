@@ -3,7 +3,7 @@
 
 #include "ActorComponent/HealthComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CoreTypes.h"
+#include "Types/CommonCoreTypes.h"
 
 UHealthComponent::UHealthComponent()
 {

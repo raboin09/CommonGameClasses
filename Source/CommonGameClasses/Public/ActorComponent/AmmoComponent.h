@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ResourceComponent.h"
-#include "Types/EventDeclarations.h"
+#include "Types/CommonEventDeclarations.h"
 #include "AmmoComponent.generated.h"
 
 

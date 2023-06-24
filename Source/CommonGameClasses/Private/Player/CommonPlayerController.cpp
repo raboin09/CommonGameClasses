@@ -8,7 +8,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ActorComponent/QuestManagerComponent.h"
-#include "Utils/InteractUtils.h"
+#include "Utils/CommonInteractUtils.h"
 
 ACommonPlayerController::ACommonPlayerController()
 {
@@ -158,7 +158,7 @@ bool ACommonPlayerController::IsInRangeOfInteractable(const UInteractionComponen
 	}
 
 	const float DistanceToProtagonist = FVector::Dist(InteractionComponent->GetOwnerLocation(), PlayerCharacter->GetActorLocation());
-	switch (UInteractUtils::GetAffiliationOfActor(InteractionComponent->GetOwner()))
+	switch (UCommonInteractUtils::GetAffiliationOfActor(InteractionComponent->GetOwner()))
 	{
 	case EAffiliation::Allies:
 	case EAffiliation::Neutral:

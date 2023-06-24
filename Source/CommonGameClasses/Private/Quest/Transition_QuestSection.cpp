@@ -6,7 +6,7 @@
 #include "API/Questable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Quest/QuestStateMachine.h"
-#include "Utils/WorldUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
 bool UTransition_QuestSection::CanEnterTransition_Implementation() const
 {
@@ -48,7 +48,7 @@ void UTransition_QuestSection::ActivateAllObjectivesOfClass(UClass* ObjectiveCla
 		return;
 	}
 	
-	for(AActor* CurrActor : UWorldUtils::QuestRelevantActors)
+	for(AActor* CurrActor : UCommonWorldUtils::QuestRelevantActors)
 	{
 		if(!CurrActor)
 		{
@@ -79,7 +79,7 @@ void UTransition_QuestSection::DeactivateAllObjectivesOfClass(UClass* ObjectiveC
 {
 	if(ObjectiveClass)
 	{
-		for(AActor* CurrActor : UWorldUtils::QuestRelevantActors)
+		for(AActor* CurrActor : UCommonWorldUtils::QuestRelevantActors)
 		{
 			DeactivateQuestObjectiveActor(CurrActor);
 		}

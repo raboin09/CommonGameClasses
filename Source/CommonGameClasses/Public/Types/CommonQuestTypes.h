@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SMInstance.h"
-#include "QuestTypes.generated.h"
+#include "CommonQuestTypes.generated.h"
 
 UENUM(BlueprintType)
 enum class EQuestObjectiveAction : uint8

@@ -3,9 +3,34 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/CoreTypes.h"
-#include "Types/EventDeclarations.h"
+#include "Engine/DataTable.h"
+#include "Types/CommonEventDeclarations.h"
 #include "LevelLoadingManager.generated.h"
+
+USTRUCT(BlueprintType)
+struct FLevelLoadContext : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	FLevelLoadContext()
+	{
+		bShouldCameraFade = true;
+	}
+
+	FLevelLoadContext(const bool bInShouldCameraFade)
+	{
+		bShouldCameraFade = bInShouldCameraFade;
+	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bShouldCameraFade;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UWorld> PostProcessLevelToLoad;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UWorld> BaseLevelToLoad;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UWorld> LightingLevelToLoad;
+};
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
