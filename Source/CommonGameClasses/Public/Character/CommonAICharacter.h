@@ -17,7 +17,7 @@ class COMMONGAMECLASSES_API ACommonAICharacter : public ACommonCharacter, public
 {
 	GENERATED_BODY()
 public:
-	ACommonAICharacter();
+	ACommonAICharacter(const FObjectInitializer& ObjectInitializer);
 	FORCEINLINE virtual UBehaviorTree* GetDefaultBehavior() const { return DefaultBehaviorTree; }
 	
 	//////////////////////////////////////

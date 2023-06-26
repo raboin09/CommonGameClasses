@@ -5,7 +5,7 @@
 #include "ActorComponent/InteractionComponent.h"
 #include "AI/CommonAIController.h"
 
-ACommonAICharacter::ACommonAICharacter()
+ACommonAICharacter::ACommonAICharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	AIControllerClass = ACommonAIController::StaticClass();

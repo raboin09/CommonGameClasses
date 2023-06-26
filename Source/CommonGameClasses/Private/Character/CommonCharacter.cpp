@@ -4,13 +4,14 @@
 #include "Character/CommonCharacter.h"
 #include "ActorComponent/GameplayTagComponent.h"
 
-ACommonCharacter::ACommonCharacter()
+ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	GameplayTagComponent = CreateDefaultSubobject<UGameplayTagComponent>(TEXT("GameplayTagComponent"));
-	ManaComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("ManaComponent"));
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainerComponent"));
+	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
+	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
 }
 
 void ACommonCharacter::PostInitializeComponents()
@@ -22,6 +23,15 @@ void ACommonCharacter::PostInitializeComponents()
 void ACommonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if(!AbilityComponent)
+	{
+		return;
+	}
+	
+	for(auto Ability : DefaultAbilities)
+	{
+		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);		
+	}
 }
 
 void ACommonCharacter::HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload)

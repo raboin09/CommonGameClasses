@@ -10,15 +10,15 @@ void AMontageTrigger::PressTrigger()
 {
 	if(UGameplayTagComponent::ActorHasGameplayTag(GetInstigator(), TAG_ABILITY_COMBO_WINDOW_ENABLED))
 	{
-		UGameplayTagComponent::AddTagToActor(GetInstigator(), TAG_ABILITY_COMBO_ACTIVATED);
-		UGameplayTagComponent::RemoveTagFromActor(GetInstigator(), TAG_ABILITY_COMBO_WINDOW_ENABLED);
+		UGameplayTagComponent::AddTagToActor(GetOwner(), TAG_ABILITY_COMBO_ACTIVATED);
+		UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_ABILITY_COMBO_WINDOW_ENABLED);
 		Internal_IncrementComboCounter();
-		if(!UGameplayTagComponent::ActorHasGameplayTag(GetInstigator(), TAG_ABILITY_ACTIVE))
+		if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_ACTIVE))
 		{
 			Internal_StartMontage();
 		}
 	}
-	else if(!UGameplayTagComponent::ActorHasGameplayTag(GetInstigator(), TAG_ABILITY_ATTACK_COMMITTED) && !UGameplayTagComponent::ActorHasGameplayTag(GetInstigator(), TAG_ABILITY_ACTIVE))
+	else if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_ACTIVE))
 	{
 		Internal_StartMontage();
 	}
@@ -29,7 +29,8 @@ void AMontageTrigger::ReleaseTrigger()
 	FTriggerEventPayload ReleaseTriggerEventPayload;
 	ReleaseTriggerEventPayload.ActivationLevel = 0;
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
-	TriggerDeactivatedEvent.Broadcast(ReleaseTriggerEventPayload);
+	ReleaseTriggerEventPayload.bMontageDrivesActivation = true;
+	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
 }
 
 void AMontageTrigger::ResetTrigger()
@@ -82,7 +83,8 @@ void AMontageTrigger::Internal_StartMontage()
 	PressTriggerEventPayload.ActivationLevel = ComboSectionIncrement;
 	// Activation waits for montage notify to start
 	PressTriggerEventPayload.bStartActivationImmediately = false;
-	TriggerActivatedEvent.Broadcast(PressTriggerEventPayload);
+	PressTriggerEventPayload.bMontageDrivesActivation = true;
+	TriggerPressedEvent.Broadcast(PressTriggerEventPayload);
 }
 
 void AMontageTrigger::Internal_IncrementComboCounter()

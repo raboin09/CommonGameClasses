@@ -30,7 +30,7 @@ public:
 	FORCEINLINE FAbilityActivationEvent& OnActivation() { return AbilityActivationEvent; }
 	FORCEINLINE FAbilityDeactivationEvent& OnDeactivation() { return AbilityDeactivationEvent; }
 
-protected:
+protected:	
 	FAbilityActivationEvent AbilityActivationEvent;
 	FAbilityDeactivationEvent AbilityDeactivationEvent;
 };

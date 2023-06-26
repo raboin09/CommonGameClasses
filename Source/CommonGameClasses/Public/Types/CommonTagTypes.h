@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+#define TAG_SLOT_MAIN FGameplayTag::RequestGameplayTag("Slot.Main")
+
 #define TAG_ABILITY_ON_COOLDOWN FGameplayTag::RequestGameplayTag("AbilityEvent.OnCooldown")
 #define TAG_ABILITY_ACTIVATED FGameplayTag::RequestGameplayTag("AbilityEvent.Activated")
 #define TAG_ABILITY_REQUESTING_START FGameplayTag::RequestGameplayTag("AbilityEvent.RequestingStart")

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActorComponent/AbilityComponent.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/Ability.h"
 #include "Types/CommonEventDeclarations.h"
@@ -21,7 +22,7 @@ public:
 	ACommonAbility();
 	virtual bool TryStartAbility() override;
 	virtual bool TryEndAbility() override;
-	virtual void CommitAbility() override;
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -29,9 +30,9 @@ protected:
 	float CooldownDuration = 1.f;
 	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (ClampMin="0"))
 	int32 ResourceCost = 0;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (EditCondition = "ResourceCost > 0", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (EditCondition = "ResourceCost > 0"))
 	EResourceContainerLocation ResourceContainerLocation;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceCost > 0 && (ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceCost > 0 && (ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
 	TSubclassOf<UActorComponent> ResourceContainerClass;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.TriggerMechanism"))
 	TSubclassOf<AActor> TriggerMechanismClass;
@@ -40,6 +41,10 @@ protected:
 	
 	UPROPERTY(VisibleDefaultsOnly, Category="CUSTOM|Ability")
 	USphereComponent* AbilityRoot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Ability")
+	UStaticMeshComponent* AbilityStaticMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Ability")
+	USkeletalMeshComponent* AbilitySkeletalMesh;
 
 private:	
 	void SetTriggerMechanism(const TSubclassOf<AActor> InTriggerClass);
@@ -49,22 +54,24 @@ private:
 
 	void Internal_SetResourceContainerToObject(UObject* ContainerObject);
 	void Internal_SetResourceContainerToComponent(const AActor* PotentialActor);
-	bool Internal_StartNormalAbility() const;
+	bool Internal_StartNormalAbility();
 	AActor* Internal_CreateNewMechanism(const TSubclassOf<AActor> InMechanismClass, const UClass* InterfaceClass);
 	void Internal_BindMechanismEventsToAbility();
+
+	void InitWeaponMesh(UMeshComponent* InMeshComp) const;
 
 	UFUNCTION()
 	void HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload) const;
 	UFUNCTION()
 	void HandleAbilityDeactivationEvent(const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload) const;
 	UFUNCTION()
-	void HandleTriggerActivationEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload) const;
+	void HandleTriggerPressedEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload) const;
 	UFUNCTION()
-	void HandleTriggerDeactivationEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload) const;
+	void HandleTriggerReleasedEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload);
 	UFUNCTION()
-	void HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent) const;
+	void HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent);
 	UFUNCTION()
-	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent) const;
+	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent);
 
 	UPROPERTY()
 	TScriptInterface<ICooldownMechanism> CooldownMechanism;
@@ -74,6 +81,9 @@ private:
 	TScriptInterface<ITriggerMechanism> TriggerMechanism;
 	UPROPERTY()
 	TScriptInterface<IActivationMechanism> ActivationMechanism;
+
 	UPROPERTY()
-	AActor* OwningActor;
+	UAbilityComponent* OwningAbilityComponent;
+	UPROPERTY()
+	APawn* OwningPawn;
 }; 

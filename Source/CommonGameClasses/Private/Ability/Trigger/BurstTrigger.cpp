@@ -17,7 +17,7 @@ void ABurstTrigger::ReleaseTrigger()
 	FTriggerEventPayload ReleaseTriggerEventPayload;
 	ReleaseTriggerEventPayload.ActivationLevel = 0;
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
-	TriggerDeactivatedEvent.Broadcast(ReleaseTriggerEventPayload);
+	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
 }
 
 void ABurstTrigger::Internal_BurstFireTick()
@@ -31,5 +31,5 @@ void ABurstTrigger::Internal_BurstFireTick()
 	FTriggerEventPayload PressTriggerEventPayload;
 	PressTriggerEventPayload.ActivationLevel = BurstFireCount;
 	PressTriggerEventPayload.bStartActivationImmediately = true;
-	TriggerActivatedEvent.Broadcast(PressTriggerEventPayload);
+	TriggerPressedEvent.Broadcast(PressTriggerEventPayload);
 }

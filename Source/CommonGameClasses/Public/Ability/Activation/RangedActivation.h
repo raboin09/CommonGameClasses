@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActivationBase.h"
 #include "Actors/CommonActor.h"
-#include "API/Ability/ActivationMechanism.h"
 #include "Types/CommonAbilityTypes.h"
 #include "RangedActivation.generated.h"
 
@@ -12,7 +12,7 @@ class UFXSystemComponent;
 class AAIController;
 
 UCLASS(Abstract, NotBlueprintable)
-class COMMONGAMECLASSES_API ARangedActivation : public ACommonActor, public IActivationMechanism
+class COMMONGAMECLASSES_API ARangedActivation : public AActivationBase
 {
 	GENERATED_BODY()
 
@@ -42,8 +42,6 @@ protected:
 	TArray<TSubclassOf<AActor>> AbilityEffects;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
-	EMeshType MeshType;
 	// Socket where the muzzle or hand is
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
 	FName MeshSocketName;
@@ -63,7 +61,6 @@ protected:
 	
 private:
 	void Internal_AssignOwningController();
-	void Internal_AssignOwningMesh();
 	
 	void Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace);
 
@@ -79,8 +76,6 @@ private:
 	const AAIController* OwningAIController;
 	UPROPERTY()
 	const APlayerController* OwningPlayerController;
-	UPROPERTY()
-	UMeshComponent* MeshComponentRef;
 
 public:
 	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };

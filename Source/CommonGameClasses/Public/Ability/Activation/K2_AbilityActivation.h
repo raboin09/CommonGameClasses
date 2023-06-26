@@ -3,13 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Actors/CommonActor.h"
-#include "API/Ability/ActivationMechanism.h"
+#include "ActivationBase.h"
 #include "Types/CommonEventDeclarations.h"
 #include "K2_AbilityActivation.generated.h"
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API AK2_AbilityActivation : public ACommonActor, public IActivationMechanism
+class COMMONGAMECLASSES_API AK2_AbilityActivation : public AActivationBase
 {
 	GENERATED_BODY()
 

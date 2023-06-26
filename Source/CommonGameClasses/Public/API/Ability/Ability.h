@@ -25,5 +25,4 @@ public:
 	virtual bool TryStartAbility() PURE_VIRTUAL(IAbility::TryStartAbility, return false;)
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
 	virtual bool TryEndAbility() PURE_VIRTUAL(IAbility::TryEndAbility, return false;)
-	virtual void CommitAbility() PURE_VIRTUAL(IAbility::CommitAbility, )
 };

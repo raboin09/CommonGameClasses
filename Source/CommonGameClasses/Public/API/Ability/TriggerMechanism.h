@@ -25,10 +25,10 @@ public:
 	// Most don't need this, only for combo + montage abilities 
 	virtual void ResetTrigger() {}
 	
-	FORCEINLINE FTriggerEvent& OnTriggerActivated() { return TriggerActivatedEvent; }
-	FORCEINLINE FTriggerEvent& OnTriggerDeactivated() { return TriggerDeactivatedEvent; }
+	FORCEINLINE FTriggerEvent& OnTriggerPressed() { return TriggerPressedEvent; }
+	FORCEINLINE FTriggerEvent& OnTriggerReleased() { return TriggerReleasedEvent; }
 
 protected:
-	FTriggerEvent TriggerActivatedEvent;
-	FTriggerEvent TriggerDeactivatedEvent;
+	FTriggerEvent TriggerPressedEvent;
+	FTriggerEvent TriggerReleasedEvent;
 };

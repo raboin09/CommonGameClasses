@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Ability/CommonAbility.h"
+#include "ActorComponent/AbilityComponent.h"
+#include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/EffectContainerComponent.h"
-#include "ActorComponent/EnergyComponent.h"
 #include "API/Taggable.h"
-#include "Types/CommonTypes.h"
 #include "GameFramework/Character.h"
+#include "Types/CommonTagTypes.h"
 #include "CommonCharacter.generated.h"
 
 struct FGameplayTag;
@@ -22,16 +24,28 @@ class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggab
 	GENERATED_BODY()
 
 public:
-	ACommonCharacter();
+	ACommonCharacter(const FObjectInitializer& ObjectInitializer);
 
 	FORCEINLINE TScriptInterface<IMountable> GetCurrentMount() const { return CurrentMount; }
-	FORCEINLINE UCommonCharacterMovementComponent* GetMyMovementComponent() const { return MyCharacterMovementComponent; }
+	
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload) override;
+
+	UFUNCTION(BlueprintCallable)
+	void TEST_FIRE_WEAPON()
+	{
+		AbilityComponent->TryStartAbilityInSlot(TAG_SLOT_MAIN);
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	void TEST_STOP_FIRE_WEAPON()
+	{
+		AbilityComponent->TryStopAbilityInSlot(TAG_SLOT_MAIN);
+	}
 	
 	////////////////////////////////
 	/// Common Events
@@ -47,15 +61,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
 	TArray<FGameplayTag> DefaultGameplayTags;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
+	TMap<FGameplayTag, TSubclassOf<ACommonAbility>> DefaultAbilities;
 
 	UPROPERTY()
-	UEnergyComponent* ManaComponent;
+	UAbilityComponent* AbilityComponent;
 	UPROPERTY()
 	UEffectContainerComponent* EffectContainerComponent;
+	UPROPERTY()
+	UCharacterAnimationComponent* CharacterAnimationComponent;
 	UPROPERTY()
 	UGameplayTagComponent* GameplayTagComponent;
 	UPROPERTY()
 	TScriptInterface<IMountable> CurrentMount;
-	UPROPERTY()
-	UCommonCharacterMovementComponent* MyCharacterMovementComponent;
 };

@@ -7,8 +7,42 @@
 #include "GameplayTagContainer.h"
 #include "CommonResourceTypes.h"
 #include "CommonQuestTypes.h"
+#include "API/Ability/Ability.h"
 #include "CommonEventDeclarations.generated.h"
 
+///////////////////////////
+// ABILITY ADDED
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FNewAbilityAddedPayload
+{
+	GENERATED_BODY()
+	FNewAbilityAddedPayload(){}
+	FNewAbilityAddedPayload(const TScriptInterface<IAbility> InAddedAbility) : AddedAbility(InAddedAbility)	{ }
+
+	UPROPERTY()
+	TScriptInterface<IAbility> AddedAbility;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewAbilityAdded, const FNewAbilityAddedPayload&, NewAbilityAddedPayload);
+
+///////////////////////////
+// ABILITY REMOVED
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FAbilityRemovedPayload
+{
+	GENERATED_BODY()
+	FAbilityRemovedPayload(){}
+	FAbilityRemovedPayload(const TScriptInterface<IAbility> InAbility) : RemovedAbility(InAbility) { }
+
+	UPROPERTY()
+	TScriptInterface<IAbility> RemovedAbility;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityRemoved, const FAbilityRemovedPayload&, AbilityRemovedPayload);
+
+///////////////////////////
+// NEW LEVEL LOADED
+///////////////////////////
 USTRUCT(BlueprintType)
 struct FNewLevelLoadedEventPayload
 {
@@ -90,16 +124,23 @@ struct FTriggerEventPayload
 
 	FTriggerEventPayload(bool bRunActivation, int32 ActivationLevel) : bStartActivationImmediately(bRunActivation), ActivationLevel(ActivationLevel) { }
 
-	// Should Activation run after this trigger event (activation can happen after the trigger is released instead of trigger pulled, e.g. Bow) 
+	// Should Activation run immediately after this trigger event
+	// Activation can happen after the trigger is released instead of trigger pulled (e.g. Bow), so it should be false
+	// For other things (like hitscan guns and buffs/AoE abilities), should be true
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bStartActivationImmediately = false;
+	bool bStartActivationImmediately = true;
+
+	// If a Montage handles activation instead of the Ability
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bMontageDrivesActivation = false;
+	
 	// How long has this trigger been pulled (charge/release guns and burst) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ActivationLevel = 0;
+	
 	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ActivationSourceLocation = FVector::ZeroVector;
-	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ActivationDestinationLocation = FVector::ZeroVector;
 };
@@ -113,10 +154,12 @@ struct FAbilityActivationEventPayload
 {
 	GENERATED_BODY()
 
-	FAbilityActivationEventPayload()
-	{
-		
-	}
+	FAbilityActivationEventPayload() { }	
+	FAbilityActivationEventPayload(bool bShouldStartCooldown) : bShouldStartCooldown(bShouldStartCooldown) { }
+
+	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bShouldStartCooldown = true;
 };
 DECLARE_EVENT_OneParam(IActivationMechanism, FAbilityActivationEvent, const FAbilityActivationEventPayload&);
 

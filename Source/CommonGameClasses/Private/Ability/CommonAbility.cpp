@@ -10,33 +10,74 @@
 #include "API/Ability/ResourceContainer.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
+#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonWorldUtils.h"
 
 ACommonAbility::ACommonAbility()
 {
 	AbilityRoot = CreateDefaultSubobject<USphereComponent>(TEXT("SphereRoot"));
 	SetRootComponent(AbilityRoot);
+
+	AbilitySkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AbilitySkeletalMesh"));
+	InitWeaponMesh(AbilitySkeletalMesh);
+
+	AbilityStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AbilityStaticMesh"));
+	InitWeaponMesh(AbilityStaticMesh);
+}
+
+void ACommonAbility::InitWeaponMesh(UMeshComponent* InMeshComp) const
+{
+	if(!InMeshComp)
+	{
+		return;
+	}
+	
+	InMeshComp->bReceivesDecals = false;
+	InMeshComp->CastShadow = true;
+	InMeshComp->SetCollisionObjectType(ECC_WorldDynamic);
+	InMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	InMeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	InMeshComp->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
+	InMeshComp->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+	InMeshComp->SetupAttachment(AbilityRoot);
+}
+
+
+void ACommonAbility::BeginPlay()
+{
+	Super::BeginPlay();
+	OwningPawn = GetInstigator();
+	SetCooldownMechanism();
+	SetActivationMechanism(ActivationMechanismClass);
+	SetResourceContainerObject();
+	SetTriggerMechanism(TriggerMechanismClass);
+	Internal_BindMechanismEventsToAbility();
+	if(!OwningPawn)
+	{
+		return;
+	}
+	OwningAbilityComponent = OwningPawn->FindComponentByClass<UAbilityComponent>();
 }
 
 bool ACommonAbility::TryStartAbility()
 {
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwningActor, TAG_ABILITY_REQUESTING_START))
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_REQUESTING_START))
 	{
 		return false;
 	}
-
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwningActor, TAG_ABILITY_COMBO_WINDOW_ENABLED))
+	
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_COMBO_WINDOW_ENABLED))
 	{
 		if(TriggerMechanism && ActivationMechanism)
 		{
-			UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_COMBO_ACTIVATED);
-			UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_COMBO_WINDOW_ENABLED);
+			UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_COMBO_ACTIVATED);
+			UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_COMBO_WINDOW_ENABLED);
 			return Internal_StartNormalAbility();
 		}		
 		return false;
 	}
-
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwningActor, TAG_ABILITY_ON_COOLDOWN))
+	
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_ON_COOLDOWN))
 	{
 		return false;
 	}
@@ -46,26 +87,17 @@ bool ACommonAbility::TryStartAbility()
 		// If there's no trigger or activation, is this really an ability?
 		if(!ActivationMechanism)
 		{
-			check(false)
 			return false;
 		}
 		
 		// Activate instantly, no trigger exists
-		UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_REQUESTING_START);
+		UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_REQUESTING_START);
 		ActivationMechanism->Activate(FTriggerEventPayload());
 		return true;
 	}
 
 	// It's a standard ability with a Trigger, Activation, and (maybe) a Cost so proceed to the normal activation sequence
 	return Internal_StartNormalAbility();
-}
-
-void ACommonAbility::CommitAbility()
-{
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwningActor, TAG_ABILITY_REQUESTING_START))
-	{
-		UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_COMMITTED);	
-	}
 }
 
 bool ACommonAbility::TryEndAbility()
@@ -119,16 +151,19 @@ void ACommonAbility::SetResourceContainerObject()
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Resource is located in Instigator or a component contained in Instigator
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	APawn* OwningPawn = GetInstigator();
-	if(!OwningPawn) return;
+	if(!OwningPawn)
+	{
+		return;
+	}
+	
 	if(ResourceContainerLocation == EResourceContainerLocation::Instigator)
 	{
-		Internal_SetResourceContainerToObject(OwningPawn);
+		Internal_SetResourceContainerToObject(this);
 		return;
 	}
 	if(ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent)
 	{
-		Internal_SetResourceContainerToComponent(OwningPawn);
+		Internal_SetResourceContainerToComponent(this);
 		return;
 	}
 	
@@ -183,20 +218,9 @@ void ACommonAbility::SetActivationMechanism(const TSubclassOf<AActor> InActivati
 	ActivationMechanism.SetObject(TempObj);
 }
 
-void ACommonAbility::BeginPlay()
+bool ACommonAbility::Internal_StartNormalAbility()
 {
-	Super::BeginPlay();
-	SetCooldownMechanism();
-	SetActivationMechanism(ActivationMechanismClass);
-	SetResourceContainerObject();
-	SetTriggerMechanism(TriggerMechanismClass);
-	Internal_BindMechanismEventsToAbility();
-	OwningActor = GetInstigator();
-}
-
-bool ACommonAbility::Internal_StartNormalAbility() const
-{
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwningActor, TAG_ABILITY_COMMITTED))
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_COMMITTED))
 	{
 		return false;
 	}
@@ -204,7 +228,7 @@ bool ACommonAbility::Internal_StartNormalAbility() const
 	// If no costs are required, press trigger instantly. No need for resources.
 	if(!ResourceContainer)
 	{
-		UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_REQUESTING_START);
+		UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_REQUESTING_START);
 		TriggerMechanism->PressTrigger();
 		return true;
 	}
@@ -212,7 +236,7 @@ bool ACommonAbility::Internal_StartNormalAbility() const
 	// Golden path if/else
 	if(ResourceContainer->TrySpendResource(ResourceCost))
 	{
-		UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_REQUESTING_START);
+		UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_REQUESTING_START);
 		TriggerMechanism->PressTrigger();
 		return true;
 	}
@@ -230,7 +254,7 @@ AActor* ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<AActor> In
 	{
 		return nullptr;
 	}
-	AActor* SpawnedActor = UCommonWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<AActor>(InMechanismClass, this, GetInstigator());
+	AActor* SpawnedActor = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<AActor>(InMechanismClass, this, OwningPawn);
 	UCommonWorldUtils::FinishSpawningActor_Deferred(SpawnedActor, FTransform());
 	return SpawnedActor;
 }
@@ -245,8 +269,8 @@ void ACommonAbility::Internal_BindMechanismEventsToAbility()
 	
 	if(TriggerMechanism)
 	{		
-		TriggerMechanism->OnTriggerActivated().AddUObject(this, &ACommonAbility::HandleTriggerActivationEvent);
-		TriggerMechanism->OnTriggerDeactivated().AddUObject(this, &ACommonAbility::HandleTriggerDeactivationEvent);
+		TriggerMechanism->OnTriggerPressed().AddUObject(this, &ACommonAbility::HandleTriggerPressedEvent);
+		TriggerMechanism->OnTriggerReleased().AddUObject(this, &ACommonAbility::HandleTriggerReleasedEvent);
 	}
 
 	if(ActivationMechanism)
@@ -258,32 +282,52 @@ void ACommonAbility::Internal_BindMechanismEventsToAbility()
 
 void ACommonAbility::HandleAbilityDeactivationEvent(const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload) const
 {
+	
 }
 
 void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload) const
 {
 	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
-	if(CooldownMechanism)
+	if(AbilityActivationEventPayload.bShouldStartCooldown && CooldownMechanism)
 	{
 		CooldownMechanism->StartCooldownTimer(CooldownDuration);
 	}
 }
 
-void ACommonAbility::HandleTriggerActivationEvent(const FTriggerEventPayload& TriggeredEventPayload) const
-{	
-	if(ActivationMechanism && TriggeredEventPayload.bStartActivationImmediately)
+void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& TriggeredEventPayload) const
+{
+	if(!ActivationMechanism)
+	{
+		return;
+	}
+	
+	if(TriggeredEventPayload.bStartActivationImmediately)
 	{
 		// Pass some info from the Trigger to Activation (needed for things like charge-up weapons, throwing grenades with a predicted location, etc)
 		ActivationMechanism->Activate(TriggeredEventPayload);
+	} else
+	{
+		if(!OwningAbilityComponent || !TriggeredEventPayload.bMontageDrivesActivation)
+		{
+			return;
+		}
+		
+		// Some activations don't start until an external event happens (e.g. montage notifies), so we store it
+		// in the parent AbilityComponent
+		FAwaitingActivationDetails AwaitingActivationDetails;
+		AwaitingActivationDetails.AbilityTagComponent = GameplayTagComponent;
+		AwaitingActivationDetails.MechanismAwaitingActivation = ActivationMechanism;
+		AwaitingActivationDetails.ActivationLevel = TriggeredEventPayload.ActivationLevel;
+		OwningAbilityComponent->SetMechanismAwaitingActivation(AwaitingActivationDetails);
 	}
 }
 
-void ACommonAbility::HandleTriggerDeactivationEvent(const FTriggerEventPayload& TriggeredEventPayload) const
+void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& TriggeredEventPayload)
 {
-	UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_REQUESTING_START);
-	UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_COMMITTED);
+	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_REQUESTING_START);
+	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_COMMITTED);
 	
-	if(!ActivationMechanism)
+	if(!ActivationMechanism || TriggeredEventPayload.bMontageDrivesActivation)
 	{
 		return;
 	}
@@ -298,17 +342,18 @@ void ACommonAbility::HandleTriggerDeactivationEvent(const FTriggerEventPayload& 
 	}
 }
 
-void ACommonAbility::HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent) const
+void ACommonAbility::HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent)
 {
-	UGameplayTagComponent::AddTagToActor(OwningActor, TAG_ABILITY_ON_COOLDOWN);
+	UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_ON_COOLDOWN);
 }
 
-void ACommonAbility::HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent) const
+void ACommonAbility::HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent)
 {
-	UGameplayTagComponent::RemoveTagFromActor(OwningActor, TAG_ABILITY_ON_COOLDOWN);
+	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_ON_COOLDOWN);
 	
-	// If it's a burst trigger (machine gun), try to activate it immediately
-	if(TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown() && UGameplayTagComponent::ActorHasGameplayTag(OwningActor, TAG_ABILITY_REQUESTING_START))
+	// If it's a burst trigger (3-round burst machine gun), try to activate it immediately after it's cooldown
+	// BurstTrigger shoots 1-2-3 fast Activation ticks, cools down, then fires again. This is what triggers the refiring after the cooldown.
+	if(TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown() && UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_REQUESTING_START))
 	{
 		Internal_StartNormalAbility();	
 	}

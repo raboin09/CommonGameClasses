@@ -27,7 +27,6 @@ void ARangedActivation::BeginPlay()
 {
 	Super::BeginPlay();
 	Internal_AssignOwningController();
-	Internal_AssignOwningMesh();
 }
 
 void ARangedActivation::Internal_AssignOwningController()
@@ -44,27 +43,6 @@ void ARangedActivation::Internal_AssignOwningController()
 	} else if(const AAIController* TempAIController = Cast<AAIController>(CurrentInsigator->GetController()))
 	{
 		OwningAIController = TempAIController;
-	}
-}
-
-void ARangedActivation::Internal_AssignOwningMesh()
-{	
-	// Find the first non-null mesh component that we come across
-	if(MeshType == EMeshType::InstigatorMesh)
-	{
-		// Check if Instigator is a char, if so then GetMesh(). Otherwise, find first skel mesh
-		if(const ACharacter* CharRef = Cast<ACharacter>(GetInstigator()))
-		{
-			MeshComponentRef = CharRef->GetMesh();
-		} else
-		{
-			MeshComponentRef = GetInstigator()->FindComponentByClass<USkeletalMeshComponent>();	
-		}
-	} else if (MeshType == EMeshType::AbilityMesh)
-	{
-		// Find the first SkeletalMesh, if it's nullptr then find the first StaticMesh
-		MeshComponentRef = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-		MeshComponentRef = MeshComponentRef ? MeshComponentRef : GetOwner()->FindComponentByClass<UStaticMeshComponent>();
 	}
 }
 

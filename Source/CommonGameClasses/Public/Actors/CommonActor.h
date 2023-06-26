@@ -31,7 +31,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
 	TArray<FGameplayTag> DefaultGameplayTags;
 
-private:
 	UPROPERTY()
 	UGameplayTagComponent* GameplayTagComponent;
 };

@@ -28,7 +28,7 @@ protected:
 	UAnimMontage* MontageToPlay;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	int32 MaxComboSections = 3;
-	UPROPERTY(EditDefaultsOnly, Category="Genestealer|Weapon|Animation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	bool bRandomizeMontages = false;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	bool bShouldPlayerLockOnToNearestTarget = false;
