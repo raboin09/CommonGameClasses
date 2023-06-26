@@ -7,7 +7,7 @@
 #include "Types/CommonTagTypes.h"
 
 void AMontageTrigger::PressTrigger()
-{
+{	
 	if(UGameplayTagComponent::ActorHasGameplayTag(GetInstigator(), TAG_ABILITY_COMBO_WINDOW_ENABLED))
 	{
 		UGameplayTagComponent::AddTagToActor(GetOwner(), TAG_ABILITY_COMBO_ACTIVATED);
@@ -20,6 +20,10 @@ void AMontageTrigger::PressTrigger()
 	}
 	else if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_ACTIVE))
 	{
+		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_COMMITTED))
+		{
+			return;
+		}
 		Internal_StartMontage();
 	}
 }

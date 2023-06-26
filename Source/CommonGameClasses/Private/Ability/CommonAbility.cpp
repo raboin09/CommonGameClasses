@@ -219,12 +219,7 @@ void ACommonAbility::SetActivationMechanism(const TSubclassOf<AActor> InActivati
 }
 
 bool ACommonAbility::Internal_StartNormalAbility()
-{
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_COMMITTED))
-	{
-		return false;
-	}
-	
+{	
 	// If no costs are required, press trigger instantly. No need for resources.
 	if(!ResourceContainer)
 	{
@@ -325,8 +320,6 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& TriggeredEventPayload)
 {
 	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_REQUESTING_START);
-	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_COMMITTED);
-	
 	if(!ActivationMechanism || TriggeredEventPayload.bMontageDrivesActivation)
 	{
 		return;
