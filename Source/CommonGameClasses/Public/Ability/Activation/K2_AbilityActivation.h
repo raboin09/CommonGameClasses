@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActivationBase.h"
+#include "BaseActivation.h"
 #include "Types/CommonEventDeclarations.h"
 #include "K2_AbilityActivation.generated.h"
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API AK2_AbilityActivation : public AActivationBase
+class COMMONGAMECLASSES_API UK2_AbilityActivation : public UBaseActivation
 {
 	GENERATED_BODY()
 

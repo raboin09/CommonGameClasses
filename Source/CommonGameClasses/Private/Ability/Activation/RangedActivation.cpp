@@ -6,30 +6,26 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-ARangedActivation::ARangedActivation()
-{
-	PrimaryActorTick.bCanEverTick = false;
-}
 
-void ARangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
+void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
 	Fire(TriggerEventPayload.ActivationLevel);
 	K2_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
 }
 
-void ARangedActivation::Deactivate()
+void URangedActivation::Deactivate()
 {
 	AbilityDeactivationEvent.Broadcast({});
 }
 
-void ARangedActivation::BeginPlay()
+void URangedActivation::InitActivationMechanism()
 {
-	Super::BeginPlay();
+	Super::InitActivationMechanism();
 	Internal_AssignOwningController();
 }
 
-void ARangedActivation::Internal_AssignOwningController()
+void URangedActivation::Internal_AssignOwningController()
 {
 	const APawn* CurrentInsigator = GetInstigator();
 	if(!CurrentInsigator)
@@ -46,7 +42,7 @@ void ARangedActivation::Internal_AssignOwningController()
 	}
 }
 
-void ARangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
+void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
 {
 	const FVector AimDirection = Internal_GetAimDirection();
 	StartTrace = Internal_GetStartTraceLocation(AimDirection);
@@ -60,7 +56,7 @@ void ARangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 	
 }
 
-FVector ARangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const
+FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const
 {
 	switch (LineTraceDirection) {
 		case ELineTraceDirection::Camera:
@@ -72,7 +68,7 @@ FVector ARangedActivation::Internal_GetStartTraceLocation(const FVector AimDirec
 	}
 }
 
-FVector ARangedActivation::Internal_GetCameraStartLocation(const FVector AimDirection) const
+FVector URangedActivation::Internal_GetCameraStartLocation(const FVector AimDirection) const
 {
 	if (!OwningPlayerController)
 	{
@@ -84,7 +80,7 @@ FVector ARangedActivation::Internal_GetCameraStartLocation(const FVector AimDire
 	return OutStartTrace + AimDirection * ((GetInstigator()->GetActorLocation() - OutStartTrace) | AimDirection);
 }
 
-FVector ARangedActivation::Internal_GetAimDirection() const
+FVector URangedActivation::Internal_GetAimDirection() const
 {
 	switch (LineTraceDirection)
 	{
@@ -101,7 +97,7 @@ FVector ARangedActivation::Internal_GetAimDirection() const
 	}
 }
 
-FVector ARangedActivation::Internal_GetFiringSpreadDirection(const FVector AimDirection)
+FVector URangedActivation::Internal_GetFiringSpreadDirection(const FVector AimDirection)
 {
 	const int32 RandomSeed = FMath::Rand();
 	const FRandomStream WeaponRandomStream(RandomSeed);
@@ -111,7 +107,7 @@ FVector ARangedActivation::Internal_GetFiringSpreadDirection(const FVector AimDi
 	return WeaponRandomStream.VRandCone(AimDirection, ConeHalfAngle, ConeHalfAngle);
 }
 
-FVector ARangedActivation::Internal_GetMouseAim() const
+FVector URangedActivation::Internal_GetMouseAim() const
 {
 	if(!OwningPlayerController)
 	{
@@ -124,7 +120,7 @@ FVector ARangedActivation::Internal_GetMouseAim() const
 	return FVector(TempAimDir.X, TempAimDir.Y, SocketRot.Z);
 }
 
-FHitResult ARangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact)
+FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact)
 {
 	if (Impact.bBlockingHit)
 	{
@@ -141,7 +137,7 @@ FHitResult ARangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 	return Impact;
 }
 
-FVector ARangedActivation::GetRaycastOriginRotation() const
+FVector URangedActivation::GetRaycastOriginRotation() const
 {
 	if (MeshType == EMeshType::AbilityMesh)
 	{
@@ -165,7 +161,7 @@ FVector ARangedActivation::GetRaycastOriginRotation() const
 	return FVector::ZeroVector;
 }
 
-FVector ARangedActivation::GetRaycastOriginLocation() const
+FVector URangedActivation::GetRaycastOriginLocation() const
 {
 	if (MeshType == EMeshType::AbilityMesh)
 	{
@@ -188,7 +184,7 @@ FVector ARangedActivation::GetRaycastOriginLocation() const
 	return FVector::ZeroVector;
 }
 
-FHitResult ARangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)
+FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)
 {
 	FVector StartTrace, EndTrace;
 	Internal_GetTraceLocations(StartTrace, EndTrace);
@@ -211,11 +207,10 @@ FHitResult ARangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, F
 	return Hit;
 }
 
-TArray<AActor*> ARangedActivation::GetActorsToIgnoreCollision()
+TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision()
 {
 	TArray<AActor*> IgnoredActors;
 	IgnoredActors.Add(GetInstigator());
-	IgnoredActors.Add(this);
 	// If instigator is a Character, ignore their mount (if any)
 	if(const ACommonCharacter* CastedChar = Cast<ACommonCharacter>(GetInstigator()))
 	{

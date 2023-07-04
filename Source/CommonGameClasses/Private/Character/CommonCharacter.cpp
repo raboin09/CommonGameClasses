@@ -3,6 +3,7 @@
 
 #include "Character/CommonCharacter.h"
 #include "ActorComponent/GameplayTagComponent.h"
+#include "Utils/CommonWorldUtils.h"
 
 ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(CharacterMovementComponentName))
 {
@@ -32,6 +33,7 @@ void ACommonCharacter::BeginPlay()
 	{
 		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);		
 	}
+	UCommonWorldUtils::TryAddActorToTrackedArrays(this);
 }
 
 void ACommonCharacter::HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload)

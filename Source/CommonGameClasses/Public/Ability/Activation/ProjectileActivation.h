@@ -9,21 +9,21 @@
 class ACommonProjectile;
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API AProjectileActivation : public ARangedActivation
+class COMMONGAMECLASSES_API UProjectileActivation : public URangedActivation
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	AProjectileActivation();
+	UProjectileActivation();
 
 protected:	
 	virtual void Fire(int32 ActivationLevel = -1) override;
 	virtual ACommonProjectile* HandleProjectileFire();
 	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	TSubclassOf<ACommonProjectile> ProjectileClass;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON", meta=(ClampMin = "1", EditCondition = "ProjectileClass != nullptr", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = "1", EditCondition = "ProjectileClass != nullptr", EditConditionHides))
 	float ProjectileLife = 10.f;
 
 private:

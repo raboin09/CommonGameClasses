@@ -11,7 +11,7 @@
 
 struct FResourceContainerDefaults;
 
-UCLASS(Abstract, NotBlueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(Abstract, DefaultToInstanced, EditInlineNew, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API UResourceComponent : public UActorComponent, public IResourceContainer
 {
 	GENERATED_BODY()
@@ -32,14 +32,14 @@ protected:
 	virtual bool CanSpendResourceAmount(const float RequestedAmount);
 	virtual float CalculateResourceCost(const float RequestedAmount) const PURE_VIRTUAL(UResourceComponent::CalculateResourceCost, return 0.f;)
 
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(EditAnywhere)
 	int32 NumberOfResourcePools = 1;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(EditAnywhere)
 	float StartingResourcesPerPool = 100.f;
 	// Give RegenAmount every RegenRate seconds
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(EditAnywhere)
 	float RegenAmount = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(EditAnywhere)
 	float RegenRate = 1.f;
 	
 	UPROPERTY()

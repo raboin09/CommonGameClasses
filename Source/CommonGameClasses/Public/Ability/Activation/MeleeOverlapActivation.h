@@ -3,20 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Ability/Activation/ActivationBase.h"
+#include "Ability/Activation/BaseActivation.h"
 #include "API/Ability/ActivationMechanism.h"
 #include "GameFramework/Actor.h"
 #include "MeleeOverlapActivation.generated.h"
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API AMeleeOverlapActivation : public AActivationBase
+class COMMONGAMECLASSES_API UMeleeOverlapActivation : public UBaseActivation
 {
 	GENERATED_BODY()
 
 public:
-	AMeleeOverlapActivation();
-	virtual void BeginPlay() override;
-	
+	virtual void InitActivationMechanism() override;	
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
 
@@ -30,13 +28,13 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_StopWeaponTrace();
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Fire")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	float TraceRadius = 35.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Fire")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bCanHitMultipleEnemies = true;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Fire")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bFriendlyFire = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Animation")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	FString SocketPrefix = "R_";
 	UPROPERTY(BlueprintReadOnly)
 	FName CachedComboSection;
@@ -61,6 +59,4 @@ private:
 	FTimerHandle Timer_Raycasting;
 	
 	bool bRecordedHit;
-public:
-	FORCEINLINE virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) override { MeshComponentRef = InMeshComponent; }
 };

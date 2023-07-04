@@ -1,17 +1,12 @@
 ﻿#include "Ability/Trigger/BurstTrigger.h"
 
-ABurstTrigger::ABurstTrigger()
-{
-	PrimaryActorTick.bCanEverTick = false;
-}
-
-void ABurstTrigger::PressTrigger()
+void UBurstTrigger::PressTrigger()
 {
 	bTriggerHeld = true;
-	GetWorldTimerManager().SetTimer(TimerHandle_BurstFire, this, &ABurstTrigger::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_BurstFire, this, &UBurstTrigger::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);
 }
 
-void ABurstTrigger::ReleaseTrigger()
+void UBurstTrigger::ReleaseTrigger()
 {
 	bTriggerHeld = false;
 	FTriggerEventPayload ReleaseTriggerEventPayload;
@@ -20,12 +15,12 @@ void ABurstTrigger::ReleaseTrigger()
 	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
 }
 
-void ABurstTrigger::Internal_BurstFireTick()
+void UBurstTrigger::Internal_BurstFireTick()
 {
 	if(++BurstFireCount > NumberOfShotsPerFire)
 	{
 		BurstFireCount = 0;
-		GetWorldTimerManager().ClearTimer(TimerHandle_BurstFire);
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_BurstFire);
 		return;
 	}
 	FTriggerEventPayload PressTriggerEventPayload;

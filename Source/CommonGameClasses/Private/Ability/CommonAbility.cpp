@@ -10,13 +10,14 @@
 #include "API/Ability/ResourceContainer.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
-#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonWorldUtils.h"
 
 ACommonAbility::ACommonAbility()
 {
 	AbilityRoot = CreateDefaultSubobject<USphereComponent>(TEXT("SphereRoot"));
 	SetRootComponent(AbilityRoot);
+
+	// ResourceContainerInstancedObj = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
 
 	AbilitySkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AbilitySkeletalMesh"));
 	InitWeaponMesh(AbilitySkeletalMesh);
@@ -47,10 +48,9 @@ void ACommonAbility::BeginPlay()
 {
 	Super::BeginPlay();
 	OwningPawn = GetInstigator();
-	SetCooldownMechanism();
-	SetActivationMechanism(ActivationMechanismClass);
+	SetActivationMechanism();
 	SetResourceContainerObject();
-	SetTriggerMechanism(TriggerMechanismClass);
+	SetTriggerMechanism();
 	Internal_BindMechanismEventsToAbility();
 	if(!OwningPawn)
 	{
@@ -110,26 +110,16 @@ bool ACommonAbility::TryEndAbility()
 	return true;
 }
 
-void ACommonAbility::SetTriggerMechanism(const TSubclassOf<AActor> InTriggerClass)
+void ACommonAbility::SetTriggerMechanism()
 {
-	UObject* TempObj = Internal_CreateNewMechanism(InTriggerClass, UTriggerMechanism::StaticClass());
-	if(!TempObj)
+	UObject* TempObj = Internal_CreateNewMechanism(TriggerMechanismClass, UTriggerMechanism::StaticClass());
+	if(!TempObj || !TempObj->IsA(UBaseTrigger::StaticClass()))
 	{
 		return;
 	}
-	TriggerMechanism.SetInterface(Cast<ITriggerMechanism>(TempObj));
-	TriggerMechanism.SetObject(TempObj);
-}
-
-void ACommonAbility::SetCooldownMechanism()
-{
-	UCooldownMechanismImpl* SpawnedActor = NewObject<UCooldownMechanismImpl>(this);
-	if(!SpawnedActor)
-	{
-		return;
-	}
-	CooldownMechanism.SetInterface(Cast<ICooldownMechanism>(SpawnedActor));
-	CooldownMechanism.SetObject(SpawnedActor);
+	TriggerMechanism = Cast<UBaseTrigger>(TempObj);
+	TriggerMechanism->SetInstigator(GetInstigator());
+	TriggerMechanism->SetOwner(this);
 }
 
 void ACommonAbility::SetResourceContainerObject()
@@ -194,12 +184,6 @@ void ACommonAbility::SetResourceContainerObject()
 	}	
 }
 
-void ACommonAbility::Internal_SetResourceContainerToObject(UObject* ContainerObject)
-{
-	ResourceContainer.SetInterface(Cast<IResourceContainer>(ContainerObject));
-	ResourceContainer.SetObject(ContainerObject);
-}
-
 void ACommonAbility::Internal_SetResourceContainerToComponent(const AActor* PotentialActor)
 {
 	if(!PotentialActor)
@@ -207,15 +191,23 @@ void ACommonAbility::Internal_SetResourceContainerToComponent(const AActor* Pote
 	Internal_SetResourceContainerToObject(PotentialActor->GetComponentByClass(ResourceContainerClass));
 }
 
-void ACommonAbility::SetActivationMechanism(const TSubclassOf<AActor> InActivationClass)
+void ACommonAbility::Internal_SetResourceContainerToObject(UObject* ContainerObject)
 {
-	UObject* TempObj = Internal_CreateNewMechanism(InActivationClass, UActivationMechanism::StaticClass());
-	if(!TempObj)
+	ResourceContainer.SetInterface(Cast<IResourceContainer>(ContainerObject));
+	ResourceContainer.SetObject(ContainerObject);
+}
+
+void ACommonAbility::SetActivationMechanism()
+{
+	UObject* TempObj = Internal_CreateNewMechanism(ActivationMechanismClass, UActivationMechanism::StaticClass());
+	if(!TempObj || !TempObj->IsA(UBaseActivation::StaticClass()))
 	{
 		return;
 	}
-	ActivationMechanism.SetInterface(Cast<IActivationMechanism>(TempObj));
-	ActivationMechanism.SetObject(TempObj);
+	ActivationMechanism = Cast<UBaseActivation>(TempObj);
+	ActivationMechanism->InitActivationMechanism();
+	ActivationMechanism->SetInstigator(GetInstigator());
+	ActivationMechanism->SetOwner(this);
 }
 
 bool ACommonAbility::Internal_StartNormalAbility()
@@ -238,7 +230,7 @@ bool ACommonAbility::Internal_StartNormalAbility()
 	return false;
 }
 
-AActor* ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<AActor> InMechanismClass, const UClass* InterfaceClass)
+UObject* ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<UObject> InMechanismClass, const UClass* InterfaceClass)
 {
 	if(!InMechanismClass || !InterfaceClass)
 	{
@@ -249,9 +241,8 @@ AActor* ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<AActor> In
 	{
 		return nullptr;
 	}
-	AActor* SpawnedActor = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<AActor>(InMechanismClass, this, OwningPawn);
-	UCommonWorldUtils::FinishSpawningActor_Deferred(SpawnedActor, FTransform());
-	return SpawnedActor;
+	UObject* SpawnedObj = NewObject<UObject>(this, InMechanismClass);
+	return SpawnedObj;
 }
 
 void ACommonAbility::Internal_BindMechanismEventsToAbility()
@@ -285,7 +276,7 @@ void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventP
 	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
 	if(AbilityActivationEventPayload.bShouldStartCooldown && CooldownMechanism)
 	{
-		CooldownMechanism->StartCooldownTimer(CooldownDuration);
+		CooldownMechanism->StartCooldownTimer();
 	}
 }
 

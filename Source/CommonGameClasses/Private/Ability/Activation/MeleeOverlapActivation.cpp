@@ -10,14 +10,9 @@
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
-AMeleeOverlapActivation::AMeleeOverlapActivation()
+void UMeleeOverlapActivation::InitActivationMechanism()
 {
-	PrimaryActorTick.bCanEverTick = false;
-}
-
-void AMeleeOverlapActivation::BeginPlay()
-{
-	Super::BeginPlay();
+	Super::InitActivationMechanism();
 	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_STATE_ACTIVE);
 	HitActors.Empty();
 	for(const FName& Socket : MeshComponentRef->GetAllSocketNames())
@@ -29,7 +24,7 @@ void AMeleeOverlapActivation::BeginPlay()
 	}
 }
 
-void AMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
+void UMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
 	if (!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_STATE_ACTIVE)) {
 		HitActors.Empty();
@@ -41,9 +36,8 @@ void AMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventP
 	AbilityActivationEvent.Broadcast(ActivationEventPayload);
 }
 
-void AMeleeOverlapActivation::Deactivate()
+void UMeleeOverlapActivation::Deactivate()
 {
-	COMMON_PRINTSCREEN("Deactivating")
 	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_STATE_ACTIVE))
 	{
 		Internal_StopAttack();
@@ -53,26 +47,27 @@ void AMeleeOverlapActivation::Deactivate()
 	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_ABILITY_COMMITTED);
 }
 
-void AMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()
+void UMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()
 {
 	if(!MeshComponentRef)
 	{
+		COMMON_PRINTSCREEN("Bad Mesh")
 		return;
 	}
 	K2_StartWeaponTrace();
 
 	Internal_SetCurrentSocketLocations();
-	GetWorldTimerManager().SetTimer(Timer_Raycasting, this, &AMeleeOverlapActivation::Internal_CheckForCollisionHit, .001f, true);
+	GetWorld()->GetTimerManager().SetTimer(Timer_Raycasting, this, &UMeleeOverlapActivation::Internal_CheckForCollisionHit, .001f, true);
 }
 
-void AMeleeOverlapActivation::Internal_StopCollisionRaycastingTick()
+void UMeleeOverlapActivation::Internal_StopCollisionRaycastingTick()
 {
-	GetWorldTimerManager().ClearTimer(Timer_Raycasting);
+	GetWorld()->GetTimerManager().ClearTimer(Timer_Raycasting);
 	K2_StopWeaponTrace();
 	CachedComboSection = "";
 }
 
-void AMeleeOverlapActivation::Internal_CheckForCollisionHit()
+void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 {
 	if(!MeshComponentRef || !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_STATE_ACTIVE))
 	{
@@ -92,7 +87,7 @@ void AMeleeOverlapActivation::Internal_CheckForCollisionHit()
 		FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, GetInstigator());
 		TraceParams.bReturnPhysicalMaterial = true;
 		FHitResult Hit(ForceInit);
-		TArray<AActor*> IgnoreActors = { GetInstigator(), this, GetOwner() };
+		TArray<AActor*> IgnoreActors = { GetInstigator(), GetOwner() };
 		const FVector StartTrace = *Sockets.Find(Key);
 		const FVector EndTrace = MeshComponentRef->GetSocketLocation(FName(Key));
 		UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoreActors, EDrawDebugTrace::ForDuration, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
@@ -132,7 +127,7 @@ void AMeleeOverlapActivation::Internal_CheckForCollisionHit()
 	Internal_SetCurrentSocketLocations();
 }
 
-void AMeleeOverlapActivation::Internal_SetCurrentSocketLocations()
+void UMeleeOverlapActivation::Internal_SetCurrentSocketLocations()
 {
 	TArray<FString> Keys;
 	Sockets.GetKeys(Keys);
@@ -142,7 +137,7 @@ void AMeleeOverlapActivation::Internal_SetCurrentSocketLocations()
 	}	
 }
 
-void AMeleeOverlapActivation::Internal_StartAttack()
+void UMeleeOverlapActivation::Internal_StartAttack()
 {
 	const APawn* CurrInstigator = GetInstigator();
 	if(!CurrInstigator)
@@ -157,7 +152,7 @@ void AMeleeOverlapActivation::Internal_StartAttack()
 	K2_WeaponActivated();
 }
 
-void AMeleeOverlapActivation::Internal_StopAttack()
+void UMeleeOverlapActivation::Internal_StopAttack()
 {
 	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_STATE_ACTIVE);
 	HitActors.Empty();

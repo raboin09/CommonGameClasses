@@ -8,18 +8,18 @@
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
-void AHitscanActivation::Fire(int32 ActivationLevel)
+void UHitscanActivation::Fire(int32 ActivationLevel)
 {
 	Internal_FireShot();
 }
 
-void AHitscanActivation::Internal_FireShot()
+void UHitscanActivation::Internal_FireShot()
 {
 	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), 20.f);
 	K2_ProcessInstantHit(Impact);
 }
 
-void AHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& Impact)
+void UHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& Impact)
 {
 	const AActor* HitActor = Impact.GetActor();
 	K2_PlayTrailFX(HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
@@ -37,7 +37,7 @@ void AHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& I
 	}
 }
 
-void AHitscanActivation::Internal_PlayWeaponMissEffectFX(const FHitResult& Impact)
+void UHitscanActivation::Internal_PlayWeaponMissEffectFX(const FHitResult& Impact)
 {
 	for(const TSubclassOf<AActor> CurrEffectClass : AbilityEffects)
 	{

@@ -25,8 +25,7 @@ void UAbilityComponent::AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityCla
 	{
 		return;
 	}
-	AActor* AbilityObj = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<AActor>(AbilityClass, GetOwner());
-	AbilityObj->SetInstigator(Cast<ACharacter>(GetOwner()));
+	AActor* AbilityObj = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<AActor>(AbilityClass, GetOwner(), Cast<APawn>(GetOwner()));
 	UCommonWorldUtils::FinishSpawningActor_Deferred(AbilityObj, GetOwner()->GetTransform());
 	TScriptInterface<IAbility> SpawnedAbility;
 	SpawnedAbility.SetObject(AbilityObj);

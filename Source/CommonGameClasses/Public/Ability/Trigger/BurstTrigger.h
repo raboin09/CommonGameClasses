@@ -3,24 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Actors/CommonActor.h"
+#include "BaseTrigger.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "BurstTrigger.generated.h"
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API ABurstTrigger : public ACommonActor, public ITriggerMechanism
+class COMMONGAMECLASSES_API UBurstTrigger : public UBaseTrigger
 {
 	GENERATED_BODY()
 public:
-	ABurstTrigger();
 	virtual void PressTrigger() override;
 	virtual void ReleaseTrigger() override;
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return bTriggerHeld; }
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	int32 NumberOfShotsPerFire = 3;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	float TimeBetweenBurstShots = .1f;
 	
 private:	

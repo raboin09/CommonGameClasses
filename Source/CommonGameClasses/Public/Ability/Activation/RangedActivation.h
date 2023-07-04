@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActivationBase.h"
+#include "BaseActivation.h"
 #include "Actors/CommonActor.h"
 #include "Types/CommonAbilityTypes.h"
 #include "RangedActivation.generated.h"
@@ -12,20 +12,16 @@ class UFXSystemComponent;
 class AAIController;
 
 UCLASS(Abstract, NotBlueprintable)
-class COMMONGAMECLASSES_API ARangedActivation : public AActivationBase
+class COMMONGAMECLASSES_API URangedActivation : public UBaseActivation
 {
 	GENERATED_BODY()
 
 public:
-	ARangedActivation();
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
-	FORCEINLINE virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) override { MeshComponentRef = InMeshComponent; } 
+	virtual void InitActivationMechanism() override;
 
 protected:
-	// AActor
-	virtual void BeginPlay() override;
-
 	// Ranged Activation 
 	virtual void Fire(int32 ActivationLevel = -1) PURE_VIRTUAL(ARangedActivation::Fire,)
 
@@ -38,25 +34,25 @@ protected:
 	TArray<AActor*> GetActorsToIgnoreCollision();
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
 	// Socket where the muzzle or hand is
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bAimOriginIsPlayerEyesInsteadOfWeapon;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	float TraceRange = 1000.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bHasFiringSpread = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float TraceSpread = 5.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float FiringSpreadIncrement = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float FiringSpreadMax = 10.f;
 	
 private:

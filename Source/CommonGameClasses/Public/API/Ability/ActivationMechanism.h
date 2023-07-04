@@ -23,14 +23,22 @@ class COMMONGAMECLASSES_API IActivationMechanism
 
 public:
 	// Activation level is for things like charge-up weapons, combos, etc
+	virtual void InitActivationMechanism() PURE_VIRTUAL(IActivationMechanism::InitActivationMechanism,)
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(IActivationMechanism::Activate,)
 	virtual void Deactivate() PURE_VIRTUAL(IActivationMechanism::Deactivate,)
-	virtual void SetAbilityMesh(UMeshComponent* InMeshComponent) PURE_VIRTUAL(IActivationMechanism::SetAbilityMesh, )
 	
 	FORCEINLINE FAbilityActivationEvent& OnActivation() { return AbilityActivationEvent; }
 	FORCEINLINE FAbilityDeactivationEvent& OnDeactivation() { return AbilityDeactivationEvent; }
+	
+	FORCEINLINE virtual void SetInstigator(APawn* InPawn) { PawnInstigator = InPawn; }
+	FORCEINLINE virtual APawn* GetInstigator() const { return PawnInstigator; }
+	FORCEINLINE virtual void SetOwner(AActor* InActor) { AbilityOwner = InActor; }
+	FORCEINLINE virtual AActor* GetOwner() const { return AbilityOwner; }
+	
+protected:
+	AActor* AbilityOwner = nullptr;
+	APawn* PawnInstigator = nullptr;
 
-protected:	
 	FAbilityActivationEvent AbilityActivationEvent;
 	FAbilityDeactivationEvent AbilityDeactivationEvent;
 };

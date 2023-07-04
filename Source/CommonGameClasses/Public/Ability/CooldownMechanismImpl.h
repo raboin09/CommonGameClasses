@@ -10,15 +10,19 @@
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(BlueprintType, EditInlineNew, DefaultToInstanced)
 class COMMONGAMECLASSES_API UCooldownMechanismImpl : public UObject, public ICooldownMechanism
 {
 	GENERATED_BODY()
 
 public:
-	virtual void StartCooldownTimer(const float CooldownDuration) override;
+	virtual void StartCooldownTimer() override;
 	virtual void StopCooldownTimer() override;
 	virtual void PauseCooldownTimer() override;
+
+protected:
+	UPROPERTY(EditAnywhere, Category="Cooldown")
+	float CooldownDuration = 1.f;
 	
 private:
 	void Internal_CooldownTick();

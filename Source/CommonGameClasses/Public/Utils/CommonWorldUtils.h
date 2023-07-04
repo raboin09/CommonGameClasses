@@ -22,24 +22,26 @@ public:
 	static TArray<AActor*> QuestRelevantActors;
 	static TArray<AActor*> AlliedActors;
 	static TArray<AActor*> EnemyActors;
+
+	static TMap<const EAffiliation, TArray<AActor*>> ActorsOfAffiliation;
+	static TMap<UClass*, TArray<AActor*>> ActorsOfClass;
 	
 	static UWorld* PersistentWorld;
 	static UWorld* CurrentStreamedWorld;
-
+	
 	UFUNCTION()
 	static void HandleNewLevelLoadEvent(const FNewLevelLoadedEventPayload& NewLevelLoadedPayload); 
 	
-	static void TryAddActorToTeamArray(AActor* InActor, EAffiliation AbsoluteAffiliation);
-	static void TryAddActorToQuestableArray(AActor* InActor);
+	static void TryAddActorToTrackedArrays(AActor* InActor);
 	static void TryRemoveActorFromQuestableArray(AActor* InActor);
 
 	////////////////////////////////////////////////////////////////////
 	/// Get all actors of world
 	////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SpawnUtils")
-	static TArray<AActor*> GetAllActorsOfClassInPersistentWorld(TSubclassOf<AActor> ActorClass);
+	static TArray<AActor*> Persistent_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SpawnUtils")
-	static TArray<AActor*> GetAllActorsOfClassInCurrentStreamedWorld(TSubclassOf<AActor> ActorClass);
+	static TArray<AActor*> CurrentStreamed_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass);
 
 	////////////////////////////////////////////////////////////////////
 	/// K2 Spawn deferred
@@ -75,6 +77,7 @@ public:
 	}
 	
 private:
+	
 	template<typename T>
 	FORCEINLINE static T* Internal_TemplatedSpawnActorFromClass(UWorld* World, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
@@ -86,5 +89,5 @@ private:
 	}
 
 	static AActor* Internal_SpawnActorFromClass(UWorld* World, UClass* Class, const FTransform& SpawnTransform);
-	static TArray<AActor*> Internal_GetAllActorsFromWorld(UWorld* World, TSubclassOf<AActor> ActorClass);
+	static TArray<AActor*> Internal_GetAllActorsFromWorld(TSubclassOf<AActor> ActorClass, bool bInPersistentWorld);
 };

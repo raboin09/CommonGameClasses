@@ -16,7 +16,7 @@ class UTriggerMechanism : public UInterface
 class COMMONGAMECLASSES_API ITriggerMechanism
 {
 	GENERATED_BODY()
-public:
+public:	
 	virtual void PressTrigger() PURE_VIRTUAL(ITriggerMechanism::PressTrigger,)
 	virtual void ReleaseTrigger() PURE_VIRTUAL(ITriggerMechanism::ReleaseTrigger,)
 	
@@ -27,8 +27,16 @@ public:
 	
 	FORCEINLINE FTriggerEvent& OnTriggerPressed() { return TriggerPressedEvent; }
 	FORCEINLINE FTriggerEvent& OnTriggerReleased() { return TriggerReleasedEvent; }
-
+	
+	FORCEINLINE virtual void SetInstigator(APawn* InPawn) { PawnInstigator = InPawn; }
+	FORCEINLINE virtual APawn* GetInstigator() const { return PawnInstigator; }
+	FORCEINLINE virtual void SetOwner(AActor* InActor) { AbilityOwner = InActor; }
+	FORCEINLINE virtual AActor* GetOwner() const { return AbilityOwner; }
+	
 protected:
+	AActor* AbilityOwner = nullptr;
+	APawn* PawnInstigator = nullptr;
+	
 	FTriggerEvent TriggerPressedEvent;
 	FTriggerEvent TriggerReleasedEvent;
 };

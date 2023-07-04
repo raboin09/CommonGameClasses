@@ -23,7 +23,7 @@ class COMMONGAMECLASSES_API ICooldownMechanism
 
 public:
 	UFUNCTION()
-	virtual void StartCooldownTimer(const float CooldownDuration) = 0;
+	virtual void StartCooldownTimer() = 0;
 	UFUNCTION()
 	virtual void StopCooldownTimer() = 0;
 	UFUNCTION()

@@ -2,32 +2,57 @@
 
 #include "Utils/CommonWorldUtils.h"
 #include "EngineUtils.h"
+#include "ActorComponent/InteractionComponent.h"
 #include "API/Questable.h"
+#include "Kismet/KismetMathLibrary.h"
 
 TArray<AActor*> UCommonWorldUtils::QuestRelevantActors = {};
-TArray<AActor*> UCommonWorldUtils::AlliedActors = {};
-TArray<AActor*> UCommonWorldUtils::EnemyActors = {};
+
+TMap<const EAffiliation, TArray<AActor*>> UCommonWorldUtils::ActorsOfAffiliation = {};
+TMap<UClass*, TArray<AActor*>> UCommonWorldUtils::ActorsOfClass = {};
+
 UWorld* UCommonWorldUtils::PersistentWorld = nullptr;
 UWorld* UCommonWorldUtils::CurrentStreamedWorld = nullptr;
 
-void UCommonWorldUtils::TryAddActorToTeamArray(AActor* InActor, EAffiliation AbsoluteAffiliation)
+void UCommonWorldUtils::TryAddActorToTrackedArrays(AActor* InActor)
 {
-	switch (AbsoluteAffiliation) {
-		case EAffiliation::Allies:
-			AlliedActors.AddUnique(InActor);
-			break;
-		case EAffiliation::Enemies:
-			EnemyActors.AddUnique(InActor);
-			break;
-		case EAffiliation::Neutral:
-		case EAffiliation::Destructible:
-		default: break;
+	if(!InActor)
+	{
+		return;
 	}
-}
 
-void UCommonWorldUtils::TryAddActorToQuestableArray(AActor* InActor)
-{
-	if(!InActor || !InActor->GetClass() || !InActor->GetClass()->ImplementsInterface(UQuestable::StaticClass()))
+	// Add to affiliation-relevant arrays 
+	if(const UInteractionComponent* InteractionComponent = InActor->FindComponentByClass<UInteractionComponent>())
+	{
+		const EAffiliation Affiliation = InteractionComponent->Affiliation;
+		if(!ActorsOfAffiliation.Contains(Affiliation))
+		{
+			ActorsOfAffiliation.Add(Affiliation, {InActor});
+		} else
+		{
+			TArray<AActor*>& AffiliatedActors = *ActorsOfAffiliation.Find(Affiliation);
+			AffiliatedActors.Add(InActor);		
+		}
+	}
+
+	const TSubclassOf<AActor> ActorClass = InActor->GetClass();
+	if(!ActorClass)
+	{
+		return;
+	}
+
+	// Add to class-relevant array
+	if(!ActorsOfClass.Contains(ActorClass))
+	{
+		ActorsOfClass.Add(ActorClass, {InActor});
+	} else
+	{
+		TArray<AActor*>& ClassActors = *ActorsOfClass.Find(ActorClass);
+		ClassActors.Add(InActor);		
+	}
+
+	// Add to quest-relevant arrays
+	if(!ActorClass->ImplementsInterface(UQuestable::StaticClass()))
 	{
 		return;
 	}
@@ -43,14 +68,14 @@ void UCommonWorldUtils::TryRemoveActorFromQuestableArray(AActor* InActor)
 	QuestRelevantActors.Remove(InActor);
 }
 
-TArray<AActor*> UCommonWorldUtils::GetAllActorsOfClassInPersistentWorld(TSubclassOf<AActor> ActorClass)
+TArray<AActor*> UCommonWorldUtils::Persistent_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass)
 {
-	return Internal_GetAllActorsFromWorld(PersistentWorld, ActorClass);
+	return Internal_GetAllActorsFromWorld(ActorClass, true);
 }
 
-TArray<AActor*> UCommonWorldUtils::GetAllActorsOfClassInCurrentStreamedWorld(TSubclassOf<AActor> ActorClass)
+TArray<AActor*> UCommonWorldUtils::CurrentStreamed_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass)
 {
-	return Internal_GetAllActorsFromWorld(CurrentStreamedWorld, ActorClass);
+	return Internal_GetAllActorsFromWorld(ActorClass, false);
 }
 
 AActor* UCommonWorldUtils::K2_SpawnActorToCurrentStreamedWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner, APawn* Instigator, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride)
@@ -96,20 +121,33 @@ AActor* UCommonWorldUtils::Internal_SpawnActorFromClass(UWorld* World, UClass* C
 	return World->SpawnActor<AActor>(Class, SpawnTransform);
 }
 
-TArray<AActor*> UCommonWorldUtils::Internal_GetAllActorsFromWorld(UWorld* World, TSubclassOf<AActor> ActorClass)
+TArray<AActor*> UCommonWorldUtils::Internal_GetAllActorsFromWorld(TSubclassOf<AActor> ActorClass, bool bInPersistentWorld)
 {
-	TArray<AActor*> OutActors;
-	if(!World)
+	if(!ActorClass)
 	{
-		return OutActors;
+		return {};
 	}
 	
-	if (ActorClass)
+	TArray<AActor*> OutActors;	
+	for(const TTuple<UClass*, TArray<AActor*>> ClassEntry : ActorsOfClass)
 	{
-		for(TActorIterator<AActor> It(World, ActorClass); It; ++It)
+		const TSubclassOf<UObject> CurrClass = ClassEntry.Key;
+		if(!CurrClass || !UKismetMathLibrary::ClassIsChildOf(CurrClass, ActorClass))
 		{
-			AActor* Actor = *It;
-			OutActors.Add(Actor);
+			continue;
+		}
+
+		for(AActor* PotentialActor : ClassEntry.Value)
+		{
+			if(!PotentialActor)
+			{
+				continue;
+			}
+			
+			if(bInPersistentWorld == PotentialActor->IsInPersistentLevel())
+			{
+				OutActors.Add(PotentialActor);
+			}
 		}
 	}
 	return OutActors;

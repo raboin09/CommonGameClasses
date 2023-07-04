@@ -3,12 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActivationBase.h"
+#include "BaseActivation.h"
 #include "AreaOfEffectActivation.generated.h"
 
-UCLASS()
-class COMMONGAMECLASSES_API AAreaOfEffectActivation : public AActivationBase
+UCLASS(Abstract, Blueprintable)
+class COMMONGAMECLASSES_API UAreaOfEffectActivation : public UBaseActivation
 {
 	GENERATED_BODY()
-	
 };

@@ -7,24 +7,24 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonWorldUtils.h"
 
-AProjectileActivation::AProjectileActivation()
+UProjectileActivation::UProjectileActivation()
 {
 	bHasFiringSpread = false;
 }
 
-void AProjectileActivation::Fire(int32 ActivationLevel)
+void UProjectileActivation::Fire(int32 ActivationLevel)
 {
 	HandleProjectileFire();
 }
 
-ACommonProjectile* AProjectileActivation::HandleProjectileFire()
+ACommonProjectile* UProjectileActivation::HandleProjectileFire()
 {
 	FVector Origin, ProjectileVelocity;
 	Internal_AimAndShootProjectile(Origin, ProjectileVelocity);
 	return Internal_SpawnProjectile(Origin, ProjectileVelocity);
 }
 
-void AProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& ProjectileVelocity)
+void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& ProjectileVelocity)
 {
 	OutSpawnOrigin = GetRaycastOriginLocation();
 	constexpr float RaycastCircleRadius = 20.f;
@@ -58,12 +58,12 @@ void AProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 	}
 }
 
-ACommonProjectile* AProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity)
+ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity)
 {
 
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
-	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonProjectile>(ProjectileClass, this, GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonProjectile>(ProjectileClass, GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
 	{		
 		Projectile->InitVelocity(ProjectileVelocity);
 		Projectile->SetLifeSpan(ProjectileLife);

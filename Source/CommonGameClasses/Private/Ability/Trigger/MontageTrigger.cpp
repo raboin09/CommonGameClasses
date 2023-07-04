@@ -6,9 +6,9 @@
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTagTypes.h"
 
-void AMontageTrigger::PressTrigger()
+void UMontageTrigger::PressTrigger()
 {	
-	if(UGameplayTagComponent::ActorHasGameplayTag(GetInstigator(), TAG_ABILITY_COMBO_WINDOW_ENABLED))
+	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_COMBO_WINDOW_ENABLED))
 	{
 		UGameplayTagComponent::AddTagToActor(GetOwner(), TAG_ABILITY_COMBO_ACTIVATED);
 		UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_ABILITY_COMBO_WINDOW_ENABLED);
@@ -28,7 +28,7 @@ void AMontageTrigger::PressTrigger()
 	}
 }
 
-void AMontageTrigger::ReleaseTrigger()
+void UMontageTrigger::ReleaseTrigger()
 {
 	FTriggerEventPayload ReleaseTriggerEventPayload;
 	ReleaseTriggerEventPayload.ActivationLevel = 0;
@@ -37,12 +37,12 @@ void AMontageTrigger::ReleaseTrigger()
 	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
 }
 
-void AMontageTrigger::ResetTrigger()
+void UMontageTrigger::ResetTrigger()
 {
 	Internal_ResetComboCounter();
 }
 
-FAnimMontagePlayData AMontageTrigger::Internal_GetPlayData() const
+FAnimMontagePlayData UMontageTrigger::Internal_GetPlayData() const
 {
 	FAnimMontagePlayData PlayData;	
 	PlayData.MontageToPlay = MontageToPlay;
@@ -50,7 +50,7 @@ FAnimMontagePlayData AMontageTrigger::Internal_GetPlayData() const
 	return PlayData;
 }
 
-FName AMontageTrigger::Internal_GetNextMontageSection() const
+FName UMontageTrigger::Internal_GetNextMontageSection() const
 {
 	if(bRandomizeMontages)
 	{
@@ -59,7 +59,7 @@ FName AMontageTrigger::Internal_GetNextMontageSection() const
 	return FName(ComboPrefix + FString::FromInt(ComboSectionIncrement));
 }
 
-void AMontageTrigger::Internal_StartMontage()
+void UMontageTrigger::Internal_StartMontage()
 {
 	const APawn* CurrentInstigator = GetInstigator();
 	if(!CurrentInstigator)
@@ -91,7 +91,7 @@ void AMontageTrigger::Internal_StartMontage()
 	TriggerPressedEvent.Broadcast(PressTriggerEventPayload);
 }
 
-void AMontageTrigger::Internal_IncrementComboCounter()
+void UMontageTrigger::Internal_IncrementComboCounter()
 {
 	if(++ComboSectionIncrement > MaxComboSections)
 	{
@@ -99,7 +99,7 @@ void AMontageTrigger::Internal_IncrementComboCounter()
 	}
 }
 
-void AMontageTrigger::Internal_ResetComboCounter()
+void UMontageTrigger::Internal_ResetComboCounter()
 {
 	ComboSectionIncrement = 1;
 }

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Actors/CommonActor.h"
+#include "BaseTrigger.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "MontageTrigger.generated.h"
 
 struct FAnimMontagePlayData;
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API AMontageTrigger : public ACommonActor, public ITriggerMechanism
+class COMMONGAMECLASSES_API UMontageTrigger : public UBaseTrigger
 {
 	GENERATED_BODY()
 
@@ -24,15 +24,15 @@ public:
 	void K2_AfterPressedTrigger();
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	UAnimMontage* MontageToPlay;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	int32 MaxComboSections = 3;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	bool bRandomizeMontages = false;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	bool bShouldPlayerLockOnToNearestTarget = false;
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	FName CachedComboSection;
 	
 private:

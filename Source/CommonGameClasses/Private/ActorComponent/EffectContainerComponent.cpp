@@ -307,14 +307,14 @@ void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterfa
 	{
 		return;
 	}
-	const UClass* IncomingClass = IncomingEffect.GetObject()->GetClass();
+	UClass* IncomingClass = IncomingEffect.GetObject()->GetClass();
 	const FTickingEffect NewTickingEffect = Internal_GenerateTickingEffectStruct(IncomingEffect);
 	const bool bEffectCanStack = IncomingEffect->GetEffectInitializationData().bEffectCanStack;
 	if(bEffectCanStack || !HasEffectClassAlready(IncomingClass))
 	{
 		// TickingEffects can accept new effect
 		EffectsToTick.Add(NewTickingEffect.TickID, NewTickingEffect);
-		CurrentEffectClasses.Add(IncomingEffect.GetObject()->GetClass());
+		CurrentEffectClasses.Add(IncomingClass);
 	} else
 	{
 		// Replace old ticking effect with new one

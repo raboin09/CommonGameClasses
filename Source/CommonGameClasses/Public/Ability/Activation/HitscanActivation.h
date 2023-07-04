@@ -7,7 +7,7 @@
 #include "HitscanActivation.generated.h"
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API AHitscanActivation : public ARangedActivation
+class COMMONGAMECLASSES_API UHitscanActivation : public URangedActivation
 {
 	GENERATED_BODY()
 
