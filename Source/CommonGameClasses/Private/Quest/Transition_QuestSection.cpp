@@ -4,6 +4,7 @@
 #include "Quest/Transition_QuestSection.h"
 
 #include "API/Questable.h"
+#include "Core/CommonGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Quest/QuestStateMachine.h"
 #include "Utils/CommonWorldUtils.h"
@@ -47,8 +48,14 @@ void UTransition_QuestSection::ActivateAllObjectivesOfClass(UClass* ObjectiveCla
 	{
 		return;
 	}
+
+	ACommonGameMode* GameMode = Cast<ACommonGameMode>(UGameplayStatics::GetGameMode(this));
+	if (!GameMode)
+	{
+		return;
+	}
 	
-	for(AActor* CurrActor : UCommonWorldUtils::QuestRelevantActors)
+	for(AActor* CurrActor : GameMode->QuestRelevantActors)
 	{
 		if(!CurrActor)
 		{
@@ -79,7 +86,13 @@ void UTransition_QuestSection::DeactivateAllObjectivesOfClass(UClass* ObjectiveC
 {
 	if(ObjectiveClass)
 	{
-		for(AActor* CurrActor : UCommonWorldUtils::QuestRelevantActors)
+		ACommonGameMode* GameMode = Cast<ACommonGameMode>(UGameplayStatics::GetGameMode(this));
+		if (!GameMode)
+		{
+			return;
+		}
+		
+		for(AActor* CurrActor : GameMode->QuestRelevantActors)
 		{
 			DeactivateQuestObjectiveActor(CurrActor);
 		}

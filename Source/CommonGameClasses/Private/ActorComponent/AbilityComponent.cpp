@@ -5,9 +5,7 @@
 
 #include "API/Ability/ActivationMechanism.h"
 #include "GameFramework/Character.h"
-#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonWorldUtils.h"
-
 
 UAbilityComponent::UAbilityComponent()
 {
@@ -31,6 +29,16 @@ void UAbilityComponent::AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityCla
 	SpawnedAbility.SetObject(AbilityObj);
 	SpawnedAbility.SetInterface(Cast<IAbility>(AbilityObj));
 	SlottedAbilities.Add(SlotTag, SpawnedAbility);
+	if(const ACharacter* CharOwner = Cast<ACharacter>(GetOwner()))
+	{
+		SpawnedAbility->InitAbility(CharOwner->GetMesh());
+	} else if(const APawn* PawnOwner = Cast<ACharacter>(GetOwner()))
+	{
+		if(UMeshComponent* MeshComp = PawnOwner->FindComponentByClass<UMeshComponent>())
+		{
+			SpawnedAbility->InitAbility(MeshComp);
+		}
+	}
 }
 
 void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag& SlotTag)
@@ -70,7 +78,6 @@ void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate)
 	} else
 	{
 		MechanismToActivate->Deactivate();		
-		AwaitingActivationDetails = FAwaitingActivationDetails();
 	}	
 }
 

@@ -3,7 +3,7 @@
 
 #include "Actors/CommonActor.h"
 #include "ActorComponent/GameplayTagComponent.h"
-#include "Utils/CommonWorldUtils.h"
+#include "Core/CommonGameMode.h"
 
 ACommonActor::ACommonActor()
 {
@@ -15,7 +15,7 @@ void ACommonActor::BeginPlay()
 {
 	Super::BeginPlay();
 	UGameplayTagComponent::AddTagsToActor(this, DefaultGameplayTags);
-	UCommonWorldUtils::TryAddActorToTrackedArrays(this);
+	ACommonGameMode::TryAddActorToTrackedArrays(this);
 }
 
 void ACommonActor::HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload)

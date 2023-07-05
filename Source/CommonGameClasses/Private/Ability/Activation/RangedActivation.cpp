@@ -19,9 +19,9 @@ void URangedActivation::Deactivate()
 	AbilityDeactivationEvent.Broadcast({});
 }
 
-void URangedActivation::InitActivationMechanism()
+void URangedActivation::InitActivationMechanism(UMeshComponent* OwnerMeshComponent)
 {
-	Super::InitActivationMechanism();
+	Super::InitActivationMechanism(OwnerMeshComponent);
 	Internal_AssignOwningController();
 }
 
@@ -139,49 +139,20 @@ FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 
 FVector URangedActivation::GetRaycastOriginRotation() const
 {
-	if (MeshType == EMeshType::AbilityMesh)
+	if(!MeshComponentRef)
 	{
-		if(!MeshComponentRef)
-			return FVector::ZeroVector;
-		return MeshComponentRef->GetSocketRotation(MeshSocketName).Vector();
+		return FVector::ZeroVector;	
 	}
-	
-	if(MeshType == EMeshType::InstigatorMesh)
-	{
-		// Could be reduced to just UMeshComponent, but it's better to check Skeletal meshes first for Characters
-		if(const USkeletalMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<USkeletalMeshComponent>())
-		{
-			return InstigatorMesh->GetSocketRotation(MeshSocketName).Vector();
-		}
-		if (const UStaticMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<UStaticMeshComponent>())
-		{
-			return InstigatorMesh->GetSocketRotation(MeshSocketName).Vector();
-		}
-	}	
-	return FVector::ZeroVector;
+	return MeshComponentRef->GetSocketRotation(MeshSocketName).Vector();
 }
 
 FVector URangedActivation::GetRaycastOriginLocation() const
 {
-	if (MeshType == EMeshType::AbilityMesh)
+	if(!MeshComponentRef)
 	{
-		if(!MeshComponentRef)
-			return FVector::ZeroVector;
-		return MeshComponentRef->GetSocketLocation(MeshSocketName);
+		return FVector::ZeroVector;	
 	}
-
-	if(MeshType == EMeshType::InstigatorMesh)
-	{
-		if(const USkeletalMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<USkeletalMeshComponent>())
-		{
-			return InstigatorMesh->GetSocketLocation(MeshSocketName);
-		}
-		if (const UStaticMeshComponent* InstigatorMesh = GetInstigator()->FindComponentByClass<UStaticMeshComponent>())
-		{
-			return InstigatorMesh->GetSocketLocation(MeshSocketName);
-		}
-	}	
-	return FVector::ZeroVector;
+	return MeshComponentRef->GetSocketLocation(MeshSocketName);
 }
 
 FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)

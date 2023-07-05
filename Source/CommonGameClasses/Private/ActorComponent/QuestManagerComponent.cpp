@@ -3,6 +3,7 @@
 
 #include "ActorComponent/QuestManagerComponent.h"
 #include "API/Questable.h"
+#include "Core/CommonGameMode.h"
 #include "SMSystem/Public/SMUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "Quest/QuestStateMachine.h"
@@ -19,8 +20,7 @@ UQuestManagerComponent::UQuestManagerComponent()
 void UQuestManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	UCommonWorldUtils::QuestRelevantActors.Empty();
-	UGameplayStatics::GetAllActorsWithInterface(this, UQuestable::StaticClass(), UCommonWorldUtils::QuestRelevantActors);
+	ACommonGameMode::EmptyQuestRelevantArray(this);
 }
 
 void UQuestManagerComponent::TryAddActorToActiveQuests(AActor* InActor)

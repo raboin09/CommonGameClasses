@@ -23,7 +23,7 @@ class COMMONGAMECLASSES_API IActivationMechanism
 
 public:
 	// Activation level is for things like charge-up weapons, combos, etc
-	virtual void InitActivationMechanism() PURE_VIRTUAL(IActivationMechanism::InitActivationMechanism,)
+	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IActivationMechanism::InitActivationMechanism,)
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(IActivationMechanism::Activate,)
 	virtual void Deactivate() PURE_VIRTUAL(IActivationMechanism::Deactivate,)
 	

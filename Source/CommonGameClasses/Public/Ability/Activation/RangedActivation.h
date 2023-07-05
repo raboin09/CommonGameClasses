@@ -19,7 +19,7 @@ class COMMONGAMECLASSES_API URangedActivation : public UBaseActivation
 public:
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
-	virtual void InitActivationMechanism() override;
+	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) override;
 
 protected:
 	// Ranged Activation 

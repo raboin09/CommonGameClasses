@@ -8,17 +8,16 @@
 #include "Kismet/GameplayStatics.h"
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
-#include "Utils/CommonWorldUtils.h"
+#include "Types/CommonTypes.h"
 
 ACommonAbility::ACommonAbility()
 {
 	AbilityRoot = CreateDefaultSubobject<USphereComponent>(TEXT("SphereRoot"));
 	SetRootComponent(AbilityRoot);
-
-	// ResourceContainerInstancedObj = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
-
+	
 	AbilitySkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AbilitySkeletalMesh"));
 	InitWeaponMesh(AbilitySkeletalMesh);
 
@@ -43,20 +42,19 @@ void ACommonAbility::InitWeaponMesh(UMeshComponent* InMeshComp) const
 	InMeshComp->SetupAttachment(AbilityRoot);
 }
 
-
 void ACommonAbility::BeginPlay()
 {
 	Super::BeginPlay();
-	OwningPawn = GetInstigator();
+	Internal_SetMeshToUse();
 	SetActivationMechanism();
 	SetResourceContainerObject();
 	SetTriggerMechanism();
 	Internal_BindMechanismEventsToAbility();
-	if(!OwningPawn)
+	if(!GetInstigator())
 	{
 		return;
 	}
-	OwningAbilityComponent = OwningPawn->FindComponentByClass<UAbilityComponent>();
+	OwningAbilityComponent = GetInstigator()->FindComponentByClass<UAbilityComponent>();
 }
 
 bool ACommonAbility::TryStartAbility()
@@ -110,6 +108,49 @@ bool ACommonAbility::TryEndAbility()
 	return true;
 }
 
+void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
+{
+	if(!OwnerMeshComponent)
+	{
+		return;
+	}
+	MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);	
+}
+
+void ACommonAbility::Internal_SetMeshToUse()
+{
+	if(MeshType == EMeshType::AbilityMesh)
+	{
+		if(AbilitySkeletalMesh && AbilitySkeletalMesh->GetSkeletalMeshAsset())
+		{
+			MeshToUse = AbilitySkeletalMesh;
+		}
+	
+		if(AbilityStaticMesh && AbilityStaticMesh->GetStaticMesh())
+		{
+			MeshToUse = AbilityStaticMesh;
+		}
+	}
+	else if (MeshType == EMeshType::InstigatorMesh)
+	{
+		APawn* CurrInstigator = GetInstigator();
+		if(!CurrInstigator)
+		{
+			return;
+		}
+
+		if(const ACharacter* CharOwner = Cast<ACharacter>(CurrInstigator))
+		{
+			MeshToUse =  CharOwner->GetMesh();
+		}
+
+		if(UMeshComponent* MeshComp = CurrInstigator->FindComponentByClass<UMeshComponent>())
+		{
+			MeshToUse =  MeshComp;
+		}
+	}
+}
+
 void ACommonAbility::SetTriggerMechanism()
 {
 	UObject* TempObj = Internal_CreateNewMechanism(TriggerMechanismClass, UTriggerMechanism::StaticClass());
@@ -141,7 +182,8 @@ void ACommonAbility::SetResourceContainerObject()
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Resource is located in Instigator or a component contained in Instigator
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(!OwningPawn)
+	const APawn* CurrInstigator = GetInstigator();
+	if(!CurrInstigator)
 	{
 		return;
 	}
@@ -160,27 +202,29 @@ void ACommonAbility::SetResourceContainerObject()
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Resource is located in Instigator's Controller or a component contained in Instigator's Controller
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(ResourceContainerLocation == EResourceContainerLocation::PlayerController && OwningPawn->Controller)
+	AController* Controller = CurrInstigator->Controller;
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerController && Controller)
 	{
-		Internal_SetResourceContainerToObject(OwningPawn->Controller);
+		Internal_SetResourceContainerToObject(Controller);
 		return;
 	}
-	if(ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent && OwningPawn->Controller)
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent && Controller)
 	{
-		Internal_SetResourceContainerToComponent(OwningPawn->Controller);
+		Internal_SetResourceContainerToComponent(Controller);
 		return;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Resource is located in Instigator's PlayerState or a component contained in Instigator's PlayerState
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(ResourceContainerLocation == EResourceContainerLocation::PlayerState && OwningPawn->GetPlayerState())
+	APlayerState* PlayerState = CurrInstigator->GetPlayerState();
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerState && PlayerState)
 	{
-		Internal_SetResourceContainerToObject(OwningPawn->GetPlayerState());
+		Internal_SetResourceContainerToObject(PlayerState);
 	}
-	if(ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent && OwningPawn->GetPlayerState())
+	if(ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent && PlayerState)
 	{
-		Internal_SetResourceContainerToComponent(OwningPawn->GetPlayerState());
+		Internal_SetResourceContainerToComponent(PlayerState);
 	}	
 }
 
@@ -205,9 +249,9 @@ void ACommonAbility::SetActivationMechanism()
 		return;
 	}
 	ActivationMechanism = Cast<UBaseActivation>(TempObj);
-	ActivationMechanism->InitActivationMechanism();
 	ActivationMechanism->SetInstigator(GetInstigator());
 	ActivationMechanism->SetOwner(this);
+	ActivationMechanism->InitActivationMechanism(GetAbilityMesh());
 }
 
 bool ACommonAbility::Internal_StartNormalAbility()

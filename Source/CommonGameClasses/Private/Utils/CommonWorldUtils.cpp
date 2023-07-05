@@ -2,81 +2,11 @@
 
 #include "Utils/CommonWorldUtils.h"
 #include "EngineUtils.h"
-#include "ActorComponent/InteractionComponent.h"
-#include "API/Questable.h"
+#include "Ability/CommonAbility.h"
 #include "Kismet/KismetMathLibrary.h"
-
-TArray<AActor*> UCommonWorldUtils::QuestRelevantActors = {};
-
-TMap<const EAffiliation, TArray<AActor*>> UCommonWorldUtils::ActorsOfAffiliation = {};
-TMap<UClass*, TArray<AActor*>> UCommonWorldUtils::ActorsOfClass = {};
 
 UWorld* UCommonWorldUtils::PersistentWorld = nullptr;
 UWorld* UCommonWorldUtils::CurrentStreamedWorld = nullptr;
-
-void UCommonWorldUtils::TryAddActorToTrackedArrays(AActor* InActor)
-{
-	if(!InActor)
-	{
-		return;
-	}
-
-	// Add to affiliation-relevant arrays 
-	if(const UInteractionComponent* InteractionComponent = InActor->FindComponentByClass<UInteractionComponent>())
-	{
-		const EAffiliation Affiliation = InteractionComponent->Affiliation;
-		if(!ActorsOfAffiliation.Contains(Affiliation))
-		{
-			ActorsOfAffiliation.Add(Affiliation, {InActor});
-		} else
-		{
-			TArray<AActor*>& AffiliatedActors = *ActorsOfAffiliation.Find(Affiliation);
-			AffiliatedActors.Add(InActor);		
-		}
-	}
-
-	const TSubclassOf<AActor> ActorClass = InActor->GetClass();
-	if(!ActorClass)
-	{
-		return;
-	}
-
-	// Add to class-relevant array
-	if(!ActorsOfClass.Contains(ActorClass))
-	{
-		ActorsOfClass.Add(ActorClass, {InActor});
-	} else
-	{
-		TArray<AActor*>& ClassActors = *ActorsOfClass.Find(ActorClass);
-		ClassActors.Add(InActor);		
-	}
-
-	// Add to quest-relevant arrays
-	if(!ActorClass->ImplementsInterface(UQuestable::StaticClass()))
-	{
-		return;
-	}
-	QuestRelevantActors.AddUnique(InActor);
-}
-
-void UCommonWorldUtils::TryRemoveActorFromQuestableArray(AActor* InActor)
-{
-	if(!InActor || !InActor->GetClass() || !InActor->GetClass()->ImplementsInterface(UQuestable::StaticClass()))
-	{
-		return;
-	}
-	QuestRelevantActors.Remove(InActor);
-}
-
-TArray<AActor*> UCommonWorldUtils::Persistent_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass)
-{
-	return Internal_GetAllActorsFromWorld(ActorClass, true);
-}
-
-TArray<AActor*> UCommonWorldUtils::CurrentStreamed_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass)
-{
-	return Internal_GetAllActorsFromWorld(ActorClass, false);
-}
 
 AActor* UCommonWorldUtils::K2_SpawnActorToCurrentStreamedWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner, APawn* Instigator, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride)
 {
@@ -121,33 +51,21 @@ AActor* UCommonWorldUtils::Internal_SpawnActorFromClass(UWorld* World, UClass* C
 	return World->SpawnActor<AActor>(Class, SpawnTransform);
 }
 
-TArray<AActor*> UCommonWorldUtils::Internal_GetAllActorsFromWorld(TSubclassOf<AActor> ActorClass, bool bInPersistentWorld)
+TArray<AActor*> UCommonWorldUtils::GetAllActorsOfClassOfWorld(TSubclassOf<AActor> ActorClass, bool bStreamedWorld)
 {
-	if(!ActorClass)
+	TArray<AActor*> OutActors;
+	const UWorld* World = bStreamedWorld ? CurrentStreamedWorld : PersistentWorld;
+	if(!World)
 	{
 		return {};
 	}
 	
-	TArray<AActor*> OutActors;	
-	for(const TTuple<UClass*, TArray<AActor*>> ClassEntry : ActorsOfClass)
+	if (ActorClass)
 	{
-		const TSubclassOf<UObject> CurrClass = ClassEntry.Key;
-		if(!CurrClass || !UKismetMathLibrary::ClassIsChildOf(CurrClass, ActorClass))
+		for(TActorIterator<AActor> It(World, ActorClass); It; ++It)
 		{
-			continue;
-		}
-
-		for(AActor* PotentialActor : ClassEntry.Value)
-		{
-			if(!PotentialActor)
-			{
-				continue;
-			}
-			
-			if(bInPersistentWorld == PotentialActor->IsInPersistentLevel())
-			{
-				OutActors.Add(PotentialActor);
-			}
+			AActor* Actor = *It;
+			OutActors.Add(Actor);
 		}
 	}
 	return OutActors;

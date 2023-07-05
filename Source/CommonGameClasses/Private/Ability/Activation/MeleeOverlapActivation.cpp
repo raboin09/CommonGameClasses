@@ -10,9 +10,9 @@
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
-void UMeleeOverlapActivation::InitActivationMechanism()
+void UMeleeOverlapActivation::InitActivationMechanism(UMeshComponent* OwnerMeshComponent)
 {
-	Super::InitActivationMechanism();
+	Super::InitActivationMechanism(OwnerMeshComponent);
 	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_STATE_ACTIVE);
 	HitActors.Empty();
 	for(const FName& Socket : MeshComponentRef->GetAllSocketNames())
@@ -44,14 +44,12 @@ void UMeleeOverlapActivation::Deactivate()
 	}
 	FAbilityDeactivationEventPayload DeactivationEventPayload;
 	AbilityDeactivationEvent.Broadcast(DeactivationEventPayload);
-	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_ABILITY_COMMITTED);
 }
 
 void UMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()
 {
 	if(!MeshComponentRef)
 	{
-		COMMON_PRINTSCREEN("Bad Mesh")
 		return;
 	}
 	K2_StartWeaponTrace();
@@ -90,7 +88,8 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 		TArray<AActor*> IgnoreActors = { GetInstigator(), GetOwner() };
 		const FVector StartTrace = *Sockets.Find(Key);
 		const FVector EndTrace = MeshComponentRef->GetSocketLocation(FName(Key));
-		UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoreActors, EDrawDebugTrace::ForDuration, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+		EDrawDebugTrace::Type DebugTrace = EDrawDebugTrace::None;
+		UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoreActors, DebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
 		if(!Hit.bBlockingHit)
 		{
 			continue;

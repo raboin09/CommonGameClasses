@@ -24,7 +24,7 @@ void UCommitAbilityNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UA
 void UCommitAbilityNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
-	const UAbilityComponent* AbilityComponent = GetAbilityComponentFromOwner(MeshComp);
+	UAbilityComponent* AbilityComponent = GetAbilityComponentFromOwner(MeshComp);
 	if(!AbilityComponent)
 	{
 		return;
@@ -35,4 +35,5 @@ void UCommitAbilityNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAni
 		return;
 	}
 	UGameplayTagComponent::RemoveTagFromActor(nullptr, TAG_ABILITY_COMMITTED, AbilityTagComponent);
+	AbilityComponent->ResetAwaitingActivationDetails();
 }

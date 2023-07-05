@@ -14,7 +14,7 @@ class COMMONGAMECLASSES_API UMeleeOverlapActivation : public UBaseActivation
 	GENERATED_BODY()
 
 public:
-	virtual void InitActivationMechanism() override;	
+	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) override;	
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
 

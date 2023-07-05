@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Types/CommonTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonWorldUtils.generated.h"
 
@@ -15,33 +14,18 @@ UCLASS()
 class COMMONGAMECLASSES_API UCommonWorldUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-public:
-	//////////////////////////
-	// Static Variables
-	//////////////////////////
-	static TArray<AActor*> QuestRelevantActors;
-	static TArray<AActor*> AlliedActors;
-	static TArray<AActor*> EnemyActors;
-
-	static TMap<const EAffiliation, TArray<AActor*>> ActorsOfAffiliation;
-	static TMap<UClass*, TArray<AActor*>> ActorsOfClass;
-	
+public:	
 	static UWorld* PersistentWorld;
 	static UWorld* CurrentStreamedWorld;
 	
 	UFUNCTION()
 	static void HandleNewLevelLoadEvent(const FNewLevelLoadedEventPayload& NewLevelLoadedPayload); 
-	
-	static void TryAddActorToTrackedArrays(AActor* InActor);
-	static void TryRemoveActorFromQuestableArray(AActor* InActor);
 
 	////////////////////////////////////////////////////////////////////
 	/// Get all actors of world
 	////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SpawnUtils")
-	static TArray<AActor*> Persistent_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SpawnUtils")
-	static TArray<AActor*> CurrentStreamed_GetAllActorsOfClass(TSubclassOf<AActor> ActorClass);
+	static TArray<AActor*> GetAllActorsOfClassOfWorld(TSubclassOf<AActor> ActorClass, bool bStreamedWorld = false);
 
 	////////////////////////////////////////////////////////////////////
 	/// K2 Spawn deferred
@@ -89,5 +73,4 @@ private:
 	}
 
 	static AActor* Internal_SpawnActorFromClass(UWorld* World, UClass* Class, const FTransform& SpawnTransform);
-	static TArray<AActor*> Internal_GetAllActorsFromWorld(TSubclassOf<AActor> ActorClass, bool bInPersistentWorld);
 };

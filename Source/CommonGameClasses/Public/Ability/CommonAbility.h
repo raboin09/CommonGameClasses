@@ -10,6 +10,7 @@
 #include "Actors/CommonActor.h"
 #include "API/Ability/Ability.h"
 #include "Trigger/BaseTrigger.h"
+#include "Types/CommonAbilityTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonAbility.generated.h"
 
@@ -26,15 +27,21 @@ public:
 	ACommonAbility();
 	virtual bool TryStartAbility() override;
 	virtual bool TryEndAbility() override;
+	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) override;
+	FORCEINLINE virtual UMeshComponent* GetAbilityMesh() const override { return MeshToUse; }
 	
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (ClampMin = "0"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Mesh")
+	EMeshType MeshType = EMeshType::AbilityMesh;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Mesh")
+	FName AttachmentSocket = "hand_r";
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (ClampMin = "0"))
 	float ResourceCost = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (EditCondition = "ResourceCost > 0"))
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (EditCondition = "ResourceCost > 0"))
 	EResourceContainerLocation ResourceContainerLocation;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "(ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "(ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
 	TSubclassOf<UActorComponent> ResourceContainerClass;
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM|Ability")
 	TObjectPtr<UCooldownMechanismImpl> CooldownMechanism;
@@ -50,7 +57,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Ability")
 	USkeletalMeshComponent* AbilitySkeletalMesh;
 
-private:	
+private:
+	void Internal_SetMeshToUse();
 	void SetTriggerMechanism();
 	void SetResourceContainerObject();
 	void SetActivationMechanism();
@@ -77,6 +85,8 @@ private:
 	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent);
 
 	UPROPERTY()
+	UMeshComponent* MeshToUse;
+	UPROPERTY()
 	TScriptInterface<IResourceContainer> ResourceContainer;
 	UPROPERTY()
 	TObjectPtr<UBaseTrigger> TriggerMechanism;
@@ -84,6 +94,4 @@ private:
 	TObjectPtr<UBaseActivation> ActivationMechanism;
 	UPROPERTY()
 	UAbilityComponent* OwningAbilityComponent;
-	UPROPERTY()
-	APawn* OwningPawn;
 }; 
