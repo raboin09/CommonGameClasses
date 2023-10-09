@@ -18,12 +18,12 @@ void ACommonActor::BeginPlay()
 	ACommonGameMode::TryAddActorToTrackedArrays(this);
 }
 
-void ACommonActor::HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload)
+void ACommonActor::HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload)
 {
 	K2_HandleTagAdded(TagAddedEventPayload);
 }
 
-void ACommonActor::HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload)
+void ACommonActor::HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload)
 {
 	K2_HandleTagRemoved(TagRemovedEventPayload);
 }

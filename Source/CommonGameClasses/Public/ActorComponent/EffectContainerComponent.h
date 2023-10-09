@@ -65,7 +65,7 @@ protected:
 private:
 	TScriptInterface<IEffect> CreateEffectInstance(TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor) const;
 
-	void Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect);
+	bool Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect);
 	void Internal_ApplyEffect(TScriptInterface<IEffect> IncomingEffect);
 	void Internal_RemoveEffectsWithTags(const TArray<FGameplayTag>& InTags, TScriptInterface<IEffect> IncomingEffect);
 	
@@ -74,7 +74,6 @@ private:
 	void Internal_TryStartTicking();
 	void Internal_StopTicking();
 	
-	bool CanApplyEffect(TScriptInterface<IEffect> IncomingEffect) const;
 	int32 GetTickingEffectIndex(const UClass* EffectClass);
 	bool HasEffectClassAlready(const UClass* EffectClass) const;
 	static int32 GenerateModulus(EEffectInterval EffectInterval);

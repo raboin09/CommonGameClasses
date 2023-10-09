@@ -33,7 +33,7 @@ public:
 	static UHealthComponent* GetHealthComponentFromActor(UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UQuestManagerComponent* GetQuestManager(const UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Gladius|CoreUtils")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UCommonGameInstance* GetCommonGameInstance(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static TScriptInterface<ILevelLoadingManager> GetLevelLoadingManager(const UObject* ContextObject);

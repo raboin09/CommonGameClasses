@@ -17,8 +17,8 @@ class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable
 
 public:
 	ACommonActor();
-	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload) override;
-	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload) override;
+	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
+	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload);

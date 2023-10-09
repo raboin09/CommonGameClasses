@@ -35,7 +35,7 @@ class COMMONGAMECLASSES_API ACommonStatModifierEffect : public ACommonEffect
 	GENERATED_BODY()
 	
 protected:
-	virtual void ActivateEffect() override;
+	virtual bool TryActivateEffect() override;
 	virtual void DestroyEffect() override;
 
 	// Optionally override one of these in child classes

@@ -88,7 +88,7 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 		TArray<AActor*> IgnoreActors = { GetInstigator(), GetOwner() };
 		const FVector StartTrace = *Sockets.Find(Key);
 		const FVector EndTrace = MeshComponentRef->GetSocketLocation(FName(Key));
-		EDrawDebugTrace::Type DebugTrace = EDrawDebugTrace::None;
+		EDrawDebugTrace::Type DebugTrace = EDrawDebugTrace::ForDuration;
 		UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoreActors, DebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
 		if(!Hit.bBlockingHit)
 		{

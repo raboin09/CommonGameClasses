@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ConditionTree.h"
 #include "API/Effect.h"
 #include "NiagaraSystem.h"
 #include "Engine/DataTable.h"
 #include "GameFramework/Actor.h"
 #include "CommonEffect.generated.h"
 
-UCLASS(Blueprintable, BlueprintType, EditInlineNew, DefaultToInstanced)
+UCLASS(Blueprintable, BlueprintType, EditInlineNew)
 class COMMONGAMECLASSES_API UEffectData : public UObject
 {
 	GENERATED_BODY()
@@ -21,15 +22,17 @@ public:
 		// ImpactSFXRowHandle.DataTable = LoadObject<UDataTable>(nullptr, UTF8_TO_TCHAR("DataTable'/Game/_CUSTOM/Data/CUSTOM_ImpactSFX.CUSTOM_ImpactSFX'"));
 	}
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	FEffectInitializationData EffectData;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="Initialization Data")
+	FEffectInitializationData InitializationData;
+	UPROPERTY(EditDefaultsOnly, Instanced, Category="Conditions")
+	UConditionTreeNode* Conditions;
+	UPROPERTY(EditDefaultsOnly, Category="FX")
 	bool bAttachVFXToActor = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="FX")
 	FDataTableRowHandle ImpactVFXRowHandle;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="FX")
 	FDataTableRowHandle ImpactSFXRowHandle;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Modifiers")
+	UPROPERTY(EditDefaultsOnly, Category="Modifiers")
 	TMap<FGameplayTag, FModifierExpression> EffectModifiers;
 };
 
@@ -42,23 +45,24 @@ class COMMONGAMECLASSES_API ACommonEffect : public AActor, public IEffect
 	
 public:	
 	ACommonEffect();
+	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	//////////////////////////
 	/// IEffect overrides
 	//////////////////////////
-	FORCEINLINE virtual void SetEffectContext(const FEffectContext& InContext) override { EffectContext = InContext; };
-	FORCEINLINE virtual const FEffectInitializationData& GetEffectInitializationData() override { return EffectDataObj->EffectData; };
-	FORCEINLINE virtual const TArray<FGameplayTag>& GetBlockedTags() const override { return EffectDataObj->EffectData.ValidTargets.BlockedTags; }
-	FORCEINLINE virtual const TArray<FGameplayTag>& GetEffectTags() const override { return EffectDataObj->EffectData.EffectTags; }
-	FORCEINLINE virtual const TArray<FGameplayTag>& GetRequiredTags() const override { return EffectDataObj->EffectData.ValidTargets.RequiredTags; }
-	FORCEINLINE virtual const TArray<FGameplayTag>& GetRemoveEffectTags() const override { return EffectDataObj->EffectData.RemoveEffectsWithTags; }
+	FORCEINLINE virtual const FEffectInitializationData& GetEffectInitializationData() override { return EffectData->InitializationData; };
+	FORCEINLINE virtual const TArray<FGameplayTag>& GetEffectTags() const override { return EffectData->InitializationData.EffectTags; }
+	FORCEINLINE virtual const TArray<FGameplayTag>& GetRemoveEffectTags() const override { return EffectData->InitializationData.RemoveEffectsWithTags; }
+	virtual void SetEffectContext(const FEffectContext& InContext) override;
 	virtual void PlayEffectFX() override;
-	virtual void ActivateEffect() override;
+	virtual bool TryActivateEffect() override;
 	virtual void DestroyEffect() override;
-	
+
 protected:
 
+	virtual bool CanActivateEffect();
+	
 	//////////////////////////
 	/// BaseEffect code
 	//////////////////////////
@@ -80,13 +84,12 @@ protected:
 	virtual USoundCue* K2_GetEffectSound_Implementation();
 	
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = "CUSTOM")
-	UEffectData* EffectDataObj;
+	UEffectData* EffectData;
 	UPROPERTY(BlueprintReadOnly, Category = "CUSTOM")
-	FEffectContext EffectContext;
-
+	FEffectContext EffectContext;	
 	UPROPERTY(Transient)
 	UFXSystemComponent* EffectVFX;
-	int32 tickcount;
+
 private:
 	void Internal_PlayEffectSound();
 	void Internal_PlayEffectParticleSystem();
@@ -94,6 +97,9 @@ private:
 
 	// Add and remove tags
 	void Internal_AddAndRemoveTagsFromReceiver_Activation();
-	// If Effect added tags and EffectDataObj has bShouldRemoveAppliedTagsWhenDestroyed, remove applied tags
-	void Internal_AddAndRemoveTagsFromReceiver_Deactivation();	
+	// If Effect added tags and EffectData has bShouldRemoveAppliedTagsWhenDestroyed, remove applied tags
+	void Internal_AddAndRemoveTagsFromReceiver_Deactivation();
+	
+	FORCEINLINE virtual const TArray<FGameplayTag>& GetBlockedTags() const { return EffectData->InitializationData.ValidTargets.BlockedTags; }
+	FORCEINLINE virtual const TArray<FGameplayTag>& GetRequiredTags() const { return EffectData->InitializationData.ValidTargets.RequiredTags; }
 };

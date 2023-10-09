@@ -17,10 +17,20 @@ ACommonEffect::ACommonEffect()
 	SetAutoDestroyWhenFinished(false);
 }
 
+void ACommonEffect::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void ACommonEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	K2_OnDestroyEffect();
 	Super::EndPlay(EndPlayReason);
+}
+
+void ACommonEffect::SetEffectContext(const FEffectContext& InContext)
+{
+	EffectContext = InContext;
 }
 
 void ACommonEffect::Internal_PlayEffectSound()
@@ -34,7 +44,7 @@ void ACommonEffect::Internal_PlayEffectSound()
 void ACommonEffect::Internal_PlayEffectParticleSystem()
 {
 	const bool bReceivingActorIsPawn = EffectContext.ReceivingActor ? EffectContext.ReceivingActor->IsA(APawn::StaticClass()) : false;
-	const bool bShouldAttachVFX = EffectDataObj ? EffectDataObj->bAttachVFXToActor : false; 
+	const bool bShouldAttachVFX = EffectData ? EffectData->bAttachVFXToActor : false; 
 	if(!bShouldAttachVFX || !bReceivingActorIsPawn)
 	{
 		if(UNiagaraSystem* CastedNiagaraSystem = Cast<UNiagaraSystem>(K2_GetEffectParticleSystem()))
@@ -69,7 +79,7 @@ void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Activation()
 
 void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
 {
-	if(!EffectDataObj || !EffectDataObj->EffectData.bShouldReverseEffectsOnDestroy)
+	if(!EffectData || !EffectData->InitializationData.bShouldReverseChangesAfterDestroy)
 	{
 		return;
 	}
@@ -92,11 +102,35 @@ void ACommonEffect::PlayEffectFX()
 	Internal_PlayEffectParticleSystem();
 }
 
-void ACommonEffect::ActivateEffect()
+bool ACommonEffect::CanActivateEffect()
 {
+	if (UGameplayTagComponent::ActorHasAnyGameplayTags(EffectContext.ReceivingActor, GetBlockedTags()))
+	{
+		return false;
+	}
+
+	if (!UGameplayTagComponent::ActorHasAllGameplayTags(EffectContext.ReceivingActor, GetRequiredTags()))
+	{
+		return false;
+	}
+
+	if(EffectData && EffectData->Conditions)
+	{
+		return EffectData->Conditions->AreConditionsTrue(EffectContext);
+	}
+	return true;
+}
+
+bool ACommonEffect::TryActivateEffect()
+{
+	if(!CanActivateEffect())
+	{
+		return false;
+	}
 	PlayEffectFX();
 	Internal_AddAndRemoveTagsFromReceiver_Activation();
 	K2_OnActivateEffect();
+	return true;
 }
 
 void ACommonEffect::DestroyEffect()
@@ -112,20 +146,20 @@ void ACommonEffect::DestroyEffect()
 
 UFXSystemAsset* ACommonEffect::K2_GetEffectParticleSystem_Implementation()
 {
-	if(!EffectDataObj || EffectDataObj->ImpactVFXRowHandle.IsNull())
+	if(!EffectData || EffectData->ImpactVFXRowHandle.IsNull())
 	{
 		return nullptr;
 	}
 	const UPhysicalMaterial* PhysicalMaterial = EffectContext.SurfaceHit.PhysMaterial.Get();
-	return UCommonEffectUtils::GetVFXAssetFromKey(EffectDataObj->ImpactVFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
+	return UCommonEffectUtils::GetVFXAssetFromKey(EffectData->ImpactVFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
 }
 
 USoundCue* ACommonEffect::K2_GetEffectSound_Implementation()
 {
-	if(!EffectDataObj || EffectDataObj->ImpactSFXRowHandle.IsNull())
+	if(!EffectData || EffectData->ImpactSFXRowHandle.IsNull())
 	{
 		return nullptr;
 	}
 	const UPhysicalMaterial* PhysicalMaterial = EffectContext.SurfaceHit.PhysMaterial.Get();
-	return UCommonEffectUtils::GetSFXAssetFromKey(EffectDataObj->ImpactSFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
+	return UCommonEffectUtils::GetSFXAssetFromKey(EffectData->ImpactSFXRowHandle, PhysicalMaterial, Internal_IsValidHeadshot());
 }

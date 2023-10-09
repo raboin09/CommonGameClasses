@@ -196,7 +196,7 @@ struct FGameplayTagAddedEventPayload
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag AddedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload)
+DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload&)
 
 ///////////////////////////////////////
 // Gameplay tag removed
@@ -216,7 +216,7 @@ struct FGameplayTagRemovedEventPayload
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag RemovedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload)
+DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload&)
 
 ///////////////////////////
 // DEATH EVENT

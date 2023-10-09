@@ -111,7 +111,7 @@ void UCommonEffectUtils::ApplyEffectAtLocation(AActor* InstigatingActor, TSubcla
 	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	if(bActivateImmediately)
 	{
-		EffectActor->ActivateEffect();
+		EffectActor->TryActivateEffect();
 	}
 }
 

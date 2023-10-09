@@ -27,7 +27,7 @@ public:
 	void ApplyHeal(const float RawHeal, AActor* InstigatingActor = nullptr);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void AddMaxWounds(float MaxWoundsToAdd);
-	
+	FORCEINLINE float GetCurrentHealth() const { return ResourcePoolContainer.GetSumOfAllResourcePools(); } 
 private:	
 	FCurrentWoundHealthChanged CurrentHealthChanged;
 	FMaxWoundsChanged MaxWoundsChanged;

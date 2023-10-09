@@ -61,8 +61,8 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	EffectContext.ReceivingActor = Impact.GetActor();
 	EffectContext.SurfaceHit = Impact;
 	EffectContext.HitDirection = Impact.ImpactNormal;
-	EffectActor->SetEffectContext(EffectContext);
 	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	EffectActor->SetEffectContext(EffectContext);
 	return EffectActor;
 }
 
@@ -153,18 +153,19 @@ void UEffectContainerComponent::Internal_RemoveEffectsWithTags(const TArray<FGam
 	}
 }
 
-void UEffectContainerComponent::Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect)
+bool UEffectContainerComponent::Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect)
 {
 	if(!IncomingEffect)
 	{
-		return;
+		return false;
 	}
-	
-	Internal_RemoveEffectsWithTags(IncomingEffect->GetRemoveEffectTags(), IncomingEffect);
-	if (CanApplyEffect(IncomingEffect))
+
+	if(IncomingEffect->TryActivateEffect())
 	{
-		IncomingEffect->ActivateEffect();
+		Internal_RemoveEffectsWithTags(IncomingEffect->GetRemoveEffectTags(), IncomingEffect);
+		return true;
 	}
+	return false;
 }
 
 void UEffectContainerComponent::Internal_TickEffects()
@@ -192,6 +193,7 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 
 	const FEffectInitializationData& EffectInitializationData = CurrentEffect->GetEffectInitializationData();
 
+	// No need to run an Apply_Once effect
 	// Check if ApplyOnce effect has expired
 	if(EffectInitializationData.EffectInterval == EEffectInterval::Apply_Once)
 	{
@@ -215,7 +217,12 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 		return;
 	}
-	Internal_TryActivateEffect(CurrentEffect);
+	
+	const bool bWasSuccessfulActivation = Internal_TryActivateEffect(CurrentEffect);
+	if(bWasSuccessfulActivation && EffectInitializationData.bDestroyAfterFirstActivation)
+	{
+		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
+	}
 }
 
 void UEffectContainerComponent::Internal_TryStartTicking()
@@ -237,25 +244,6 @@ void UEffectContainerComponent::Internal_StopTicking()
 	}
 	CachedWorld->GetTimerManager().ClearTimer(Timer_EffectTicker);
 	bIsTicking = false;
-}
-
-bool UEffectContainerComponent::CanApplyEffect(TScriptInterface<IEffect> IncomingEffect) const
-{
-	if (!IncomingEffect)
-	{
-		return false;
-	}
-	
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(GetOwner(), IncomingEffect->GetBlockedTags()))
-	{
-		return false;
-	}
-
-	if (!UGameplayTagComponent::ActorHasAllGameplayTags(GetOwner(), IncomingEffect->GetRequiredTags()))
-	{
-		return false;
-	}
-	return true;
 }
 
 int32 UEffectContainerComponent::GetTickingEffectIndex(const UClass* EffectClass)
@@ -335,7 +323,7 @@ void UEffectContainerComponent::Internal_ActivateEffect(const FTickingEffect& In
 	{
 		return;
 	}
-	IncomingEffect.TickingEffect->ActivateEffect();
+	IncomingEffect.TickingEffect->TryActivateEffect();
 }
 
 void UEffectContainerComponent::Internal_DestroyEffect(TScriptInterface<IEffect> IncomingEffect, int32 TickID)

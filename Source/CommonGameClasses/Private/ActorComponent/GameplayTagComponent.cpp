@@ -18,15 +18,14 @@ void UGameplayTagComponent::AddTag(const FGameplayTag& TagToAdd)
 {
 	GameplayTagContainer.AddTag(TagToAdd);
 	GameplayTagAddedEvent.Broadcast(TagToAdd);
-	// Trigger event
 }
 
 void UGameplayTagComponent::RemoveTag(const FGameplayTag& TagToRemove)
 {
 	GameplayTagContainer.RemoveTag(TagToRemove);
 	GameplayTagRemovedEvent.Broadcast(TagToRemove);
-	// Trigger event
 }
+
 
 ////////////////////////////////////////////
 // Static Functions
@@ -89,6 +88,15 @@ UGameplayTagComponent* UGameplayTagComponent::GetGameplayTagComponentFromActor(A
 		return nullptr;
 	}
 	return InActor->FindComponentByClass<UGameplayTagComponent>();
+}
+
+bool UGameplayTagComponent::ComponentHasNameTag(UActorComponent* InComp, FName InTag)
+{
+	if(InComp)
+	{
+		return InComp->ComponentHasTag(InTag);
+	}
+	return false;
 }
 
 bool UGameplayTagComponent::ActorHasAnyGameplayTags(AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)

@@ -1,5 +1,5 @@
 ﻿#include "Ability/Trigger/MontageTrigger.h"
-#include "ActorComponent/CharacterAnimationComponent.h"
+#include "Animation/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
 #include "Kismet/KismetMathLibrary.h"

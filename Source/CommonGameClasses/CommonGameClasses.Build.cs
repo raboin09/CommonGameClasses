@@ -43,7 +43,7 @@ public class CommonGameClasses : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
+				"SlateCore", "AnimGraphRuntime"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

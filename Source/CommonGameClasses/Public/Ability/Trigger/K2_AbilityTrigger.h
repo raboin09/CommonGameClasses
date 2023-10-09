@@ -18,20 +18,20 @@ class COMMONGAMECLASSES_API UK2_AbilityTrigger : public UBaseTrigger
 protected:
 	FORCEINLINE virtual void PressTrigger() override
 	{
-		const FTriggerEventPayload TriggerEventPayload{true, 5};
+		FTriggerEventPayload TriggerEventPayload{true, 5};
 		K2_PressTrigger(TriggerEventPayload);
 	}	
 	FORCEINLINE virtual void ReleaseTrigger() override
 	{
-		const FTriggerEventPayload TriggerEventPayload;
+		FTriggerEventPayload TriggerEventPayload;
 		K2_ReleaseTrigger(TriggerEventPayload);
 	}	
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return K2_ShouldRetriggerAbilityAfterCooldown(); }
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2_PressTrigger(const FTriggerEventPayload& TriggerEventPayload);
+	void K2_PressTrigger(FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2_ReleaseTrigger(const FTriggerEventPayload& TriggerEventPayload);
+	void K2_ReleaseTrigger(FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	bool K2_ShouldRetriggerAbilityAfterCooldown() const;
 };

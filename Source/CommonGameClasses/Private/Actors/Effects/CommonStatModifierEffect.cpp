@@ -6,16 +6,19 @@
 #include "Utils/CommonCombatUtils.h"
 #include "Utils/CommonEffectUtils.h"
 
-void ACommonStatModifierEffect::ActivateEffect()
+bool ACommonStatModifierEffect::TryActivateEffect()
 {
-	K2_ApplyStatChange(CalculateModifierValues());
-	Super::ActivateEffect();
+	if(CanActivateEffect())
+	{
+		K2_ApplyStatChange(CalculateModifierValues());	
+	}
+	return Super::TryActivateEffect();
 }
 
 void ACommonStatModifierEffect::DestroyEffect()
 {
 	Super::DestroyEffect();
-	if(EffectDataObj->EffectData.bShouldReverseEffectsOnDestroy)
+	if(EffectData->InitializationData.bShouldReverseChangesAfterDestroy)
 	{
 		ReversalFunc();
 	}
@@ -52,11 +55,11 @@ float ACommonStatModifierEffect::CalculateHeadshotDamage(float ModifiedStatValue
 float ACommonStatModifierEffect::CalculateModifierValues() const
 {
 	TArray<FGameplayTag> ModifierKeys;
-	EffectDataObj->EffectModifiers.GetKeys(ModifierKeys);
+	EffectData->EffectModifiers.GetKeys(ModifierKeys);
 	float ModifiedValue = StatEffectDataObj->BaseModifierValue;
 	for(const FGameplayTag& CurrentTag : ModifierKeys)
 	{
-		CalculateModifier(*EffectDataObj->EffectModifiers.Find(CurrentTag), CurrentTag, ModifiedValue);
+		CalculateModifier(*EffectData->EffectModifiers.Find(CurrentTag), CurrentTag, ModifiedValue);
 	}
 	return ModifiedValue;
 }

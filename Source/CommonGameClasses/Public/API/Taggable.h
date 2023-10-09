@@ -14,16 +14,15 @@ class UTaggable : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
+
+
 class COMMONGAMECLASSES_API ITaggable
 {
 	GENERATED_BODY()
 	
-public:
+public:	
 	UFUNCTION()
-	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload) PURE_VIRTUAL(ITaggable::HandleTagAdded, )
+	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) PURE_VIRTUAL(ITaggable::HandleTagAdded, )
 	UFUNCTION()
-	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload) PURE_VIRTUAL(ITaggable::HandleTagRemoved, )
+	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) PURE_VIRTUAL(ITaggable::HandleTagRemoved, )
 };
