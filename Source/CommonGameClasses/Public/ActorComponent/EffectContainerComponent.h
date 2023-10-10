@@ -76,9 +76,9 @@ private:
 	
 	int32 GetTickingEffectIndex(const UClass* EffectClass);
 	bool HasEffectClassAlready(const UClass* EffectClass) const;
-	static int32 GenerateModulus(EEffectInterval EffectInterval);
-	static double ConvertIntervalToNumTicks(EEffectInterval EffectInterval);
-	static int32 GenerateNumTicks(EEffectInterval EffectInterval, double Duration);
+	static int32 GenerateModulus(EEffectTickInterval EffectInterval);
+	static double ConvertIntervalToNumTicks(EEffectTickInterval EffectInterval);
+	static int32 GenerateNumTicks(EEffectTickInterval EffectInterval, double Duration);
 	
 	FORCEINLINE TArray<int32> GetKeys() const { TArray<int32> Keys; EffectsToTick.GetKeys(Keys); return Keys; }
 	void Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect);

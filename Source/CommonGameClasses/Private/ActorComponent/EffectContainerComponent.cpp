@@ -104,32 +104,13 @@ void UEffectContainerComponent::Internal_ApplyEffect(TScriptInterface<IEffect> I
 	}
 	const FEffectInitializationData& EffectInitData = IncomingEffect->GetEffectInitializationData();
 
-	if(EffectInitData.bInfinite)
+	if(EffectInitData.DurationType == EEffectDurationType::Instant)
 	{
-		Internal_AddEffectToTickContainer(IncomingEffect);
+		Internal_TryActivateEffect(IncomingEffect);
+		Internal_DestroyEffect(IncomingEffect, -1);
 	} else
 	{
-		switch (EffectInitData.EffectInterval)
-		{
-		case EEffectInterval::Instant:
-			{
-				Internal_TryActivateEffect(IncomingEffect);
-				Internal_DestroyEffect(IncomingEffect, -1);
-				break;
-			}
-		case EEffectInterval::Apply_Once:
-		case EEffectInterval::Apply_Every_Quarter_Second:
-		case EEffectInterval::Apply_Every_Half_Second:
-		case EEffectInterval::Apply_Every_Second:
-		case EEffectInterval::Apply_Every_Two_Seconds:
-		case EEffectInterval::Apply_Every_Three_Seconds:
-		case EEffectInterval::Apply_Every_Five_Seconds:
-			{
-				Internal_AddEffectToTickContainer(IncomingEffect);
-				break;
-			}
-		default: ;
-		}
+		Internal_AddEffectToTickContainer(IncomingEffect);
 	}
 }
 
@@ -195,7 +176,7 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 
 	// No need to run an Apply_Once effect
 	// Check if ApplyOnce effect has expired
-	if(EffectInitializationData.EffectInterval == EEffectInterval::Apply_Once)
+	if(EffectInitializationData.TickInterval == EEffectTickInterval::Apply_Once)
 	{
 		if(TickingEffect.ExpirationTime <= CachedWorld->GetTimeSeconds())
 		{
@@ -211,7 +192,7 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 		return;
 	}
 	
-	const bool bIsInfinite = EffectInitializationData.bInfinite;
+	const bool bIsInfinite = EffectInitializationData.DurationType == EEffectDurationType::Infinite;
 	if (!bIsInfinite && --TickingEffect.RemainingTickActivations < 0)
 	{
 		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
@@ -219,7 +200,7 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 	}
 	
 	const bool bWasSuccessfulActivation = Internal_TryActivateEffect(CurrentEffect);
-	if(bWasSuccessfulActivation && EffectInitializationData.bDestroyAfterFirstActivation)
+	if(bWasSuccessfulActivation && EffectInitializationData.DurationType == EEffectDurationType::FirstActivation)
 	{
 		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 	}
@@ -276,15 +257,16 @@ FTickingEffect UEffectContainerComponent::Internal_GenerateTickingEffectStruct(T
 {
 	const FEffectInitializationData& EffectInitializationData = IncomingEffect->GetEffectInitializationData();
 	FTickingEffect TickingEffect;
-	TickingEffect.TickModulus = GenerateModulus(EffectInitializationData.EffectInterval);
+	TickingEffect.TickModulus = GenerateModulus(EffectInitializationData.TickInterval);
 	TickingEffect.TickID = TickIDCounter++;
 	TickingEffect.TickingEffect = IncomingEffect;
-	if(!EffectInitializationData.bInfinite)
+	const bool bIsInfiniteEffect = EffectInitializationData.DurationType == EEffectDurationType::Infinite;
+	if(!bIsInfiniteEffect)
 	{
 		// Expiration is generally only used for ApplyOnce
 		TickingEffect.ExpirationTime = CachedWorld->GetTimeSeconds() + EffectInitializationData.EffectDuration;
 		// RemainingTickActivations is only used for periodic activations (Once every .25/.5/1/2/5 seconds)
-		TickingEffect.RemainingTickActivations = GenerateNumTicks(EffectInitializationData.EffectInterval, EffectInitializationData.EffectDuration);
+		TickingEffect.RemainingTickActivations = GenerateNumTicks(EffectInitializationData.TickInterval, EffectInitializationData.EffectDuration);
 	}
 	return TickingEffect;
 }
@@ -309,8 +291,8 @@ void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterfa
 		EffectsToTick.Add(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
 	}
 	
-	// Activate the ApplyOnce once 
-	if(IncomingEffect->GetEffectInitializationData().EffectInterval == EEffectInterval::Apply_Once)
+	// Activate the Apply_Once effects only once when added to the tick container 
+	if(IncomingEffect->GetEffectInitializationData().TickInterval == EEffectTickInterval::Apply_Once)
 	{
 		Internal_ActivateEffect(NewTickingEffect);
 	}
@@ -353,21 +335,21 @@ void UEffectContainerComponent::Internal_DestroyEffect(TScriptInterface<IEffect>
 	IncomingEffect->DestroyEffect();
 }
 
-double UEffectContainerComponent::ConvertIntervalToNumTicks(EEffectInterval EffectInterval)
+double UEffectContainerComponent::ConvertIntervalToNumTicks(EEffectTickInterval EffectInterval)
 {
 	switch (EffectInterval)
 	{
-	case EEffectInterval::Apply_Every_Quarter_Second: return .25;
-	case EEffectInterval::Apply_Every_Half_Second: return .5;
-	case EEffectInterval::Apply_Every_Second: return 1;
-	case EEffectInterval::Apply_Every_Two_Seconds: return 2;
-	case EEffectInterval::Apply_Every_Three_Seconds: return 3;
-	case EEffectInterval::Apply_Every_Five_Seconds: return 5;
+	case EEffectTickInterval::Apply_Every_Quarter_Second: return .25;
+	case EEffectTickInterval::Apply_Every_Half_Second: return .5;
+	case EEffectTickInterval::Apply_Every_Second: return 1;
+	case EEffectTickInterval::Apply_Every_Two_Seconds: return 2;
+	case EEffectTickInterval::Apply_Every_Three_Seconds: return 3;
+	case EEffectTickInterval::Apply_Every_Five_Seconds: return 5;
 	default: return -1;
 	}
 }
 
-int32 UEffectContainerComponent::GenerateNumTicks(EEffectInterval EffectInterval, double Duration)
+int32 UEffectContainerComponent::GenerateNumTicks(EEffectTickInterval EffectInterval, double Duration)
 {
 	const double Interval = ConvertIntervalToNumTicks(EffectInterval);
 	double Remainder = 0;
@@ -375,16 +357,16 @@ int32 UEffectContainerComponent::GenerateNumTicks(EEffectInterval EffectInterval
 	return NumTicks;
 }
 
-int32 UEffectContainerComponent::GenerateModulus(EEffectInterval EffectInterval)
+int32 UEffectContainerComponent::GenerateModulus(EEffectTickInterval EffectInterval)
 {
 	switch (EffectInterval)
 	{
-	case EEffectInterval::Apply_Every_Quarter_Second: return 1;
-	case EEffectInterval::Apply_Every_Half_Second: return 2;
-	case EEffectInterval::Apply_Every_Second: return 8;
-	case EEffectInterval::Apply_Every_Two_Seconds: return 16;
-	case EEffectInterval::Apply_Every_Three_Seconds: return 24;
-	case EEffectInterval::Apply_Every_Five_Seconds: return 40;
+	case EEffectTickInterval::Apply_Every_Quarter_Second: return 1;
+	case EEffectTickInterval::Apply_Every_Half_Second: return 2;
+	case EEffectTickInterval::Apply_Every_Second: return 8;
+	case EEffectTickInterval::Apply_Every_Two_Seconds: return 16;
+	case EEffectTickInterval::Apply_Every_Three_Seconds: return 24;
+	case EEffectTickInterval::Apply_Every_Five_Seconds: return 40;
 	default: return -1;
 	}
 }
