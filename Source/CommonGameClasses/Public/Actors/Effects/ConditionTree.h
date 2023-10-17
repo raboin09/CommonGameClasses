@@ -8,7 +8,7 @@
 #include "ConditionTree.generated.h"
 
 UENUM(BlueprintType)
-enum class ELeafOperator : uint8
+enum class EMathLeafOperator : uint8
 {
 	Equal UMETA(DisplayName = "=="),
 	NotEqual UMETA(DisplayName = "!="),
@@ -74,8 +74,6 @@ class COMMONGAMECLASSES_API UConditionLeafNode : public UConditionExpression
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Condition")
 	EPropertyOwner PropertyOwner;
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
-	ELeafOperator Operator;
 };
 
 UCLASS()
@@ -87,6 +85,8 @@ protected:
 	virtual bool AreConditionsTrue(const FEffectContext& InEffectContext) const override;
 	float GetProperty(const FEffectContext& InEffectContext) const;
 
+	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	EMathLeafOperator Operator;
 	UPROPERTY(EditDefaultsOnly, Category="Condition")
 	EFloatOperand FloatProperty;
 	UPROPERTY(EditDefaultsOnly, Category="Condition")

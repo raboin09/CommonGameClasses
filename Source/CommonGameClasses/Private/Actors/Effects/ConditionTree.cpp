@@ -33,12 +33,12 @@ bool UConditionTreeNode::AreConditionsTrue(const FEffectContext& InEffectContext
 bool UFloatLeafNode::AreConditionsTrue(const FEffectContext& InEffectContext) const
 {
 	switch (Operator) {
-		case ELeafOperator::Equal: return GetProperty(InEffectContext) == Value;
-		case ELeafOperator::NotEqual: return GetProperty(InEffectContext) != Value;
-		case ELeafOperator::GreaterThan: return GetProperty(InEffectContext) > Value;
-		case ELeafOperator::GreaterThanOrEqual: return GetProperty(InEffectContext) >= Value;
-		case ELeafOperator::LessThan: return GetProperty(InEffectContext) < Value;
-		case ELeafOperator::LessThanOrEqual: return GetProperty(InEffectContext) <= Value;
+		case EMathLeafOperator::Equal: return GetProperty(InEffectContext) == Value;
+		case EMathLeafOperator::NotEqual: return GetProperty(InEffectContext) != Value;
+		case EMathLeafOperator::GreaterThan: return GetProperty(InEffectContext) > Value;
+		case EMathLeafOperator::GreaterThanOrEqual: return GetProperty(InEffectContext) >= Value;
+		case EMathLeafOperator::LessThan: return GetProperty(InEffectContext) < Value;
+		case EMathLeafOperator::LessThanOrEqual: return GetProperty(InEffectContext) <= Value;
 		default: return false;
 	}
 }
