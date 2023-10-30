@@ -38,7 +38,7 @@ class COMMONGAMECLASSES_API ACommonOverlapActor : public ACommonActor
 	
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON")
-	FORCEINLINE bool IsActive() { return UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_ACTIVE); }
+	FORCEINLINE bool IsActive() { return UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Active); }
 	
 	virtual void BeginPlay() override;
 

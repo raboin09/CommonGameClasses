@@ -2,14 +2,13 @@
 
 
 #include "Actors/CommonInteractableTrigger.h"
-#include "SMUtils.h"
-#include "ActorComponent//QuestManagerComponent.h"
 #include "GameFramework/Character.h"
 
 ACommonInteractableTrigger::ACommonInteractableTrigger()
 {
 	bDiesAfterOverlap = true;
-
+	TriggerMachine = nullptr;
+	
 	CollisionComp->SetCollisionObjectType(ECC_WorldDynamic);
 	CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -24,7 +23,7 @@ void ACommonInteractableTrigger::K2_HandleEndOverlapEvent_Implementation(AActor*
 	
 	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && CanPickup(CastedChar))
 	{
-		TriggerMachine->Stop();
+		// TriggerMachine->Stop();
 	}
 
 }
@@ -48,11 +47,11 @@ void ACommonInteractableTrigger::ConsumePickup(ACharacter* ConsumingChar)
 	
 	if(!TriggerMachine)
 	{
-		TriggerMachine = USMBlueprintUtils::CreateStateMachineInstance(TriggerLogicClass, this);
+		// TriggerMachine = USMBlueprintUtils::CreateStateMachineInstance(TriggerLogicClass, this);
 	}	
 
 	if(TriggerMachine)
 	{
-		TriggerMachine->Start();
+		// TriggerMachine->Start();
 	}
 }

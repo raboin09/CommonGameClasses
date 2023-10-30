@@ -4,7 +4,6 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Perception/AISenseConfig_Sight.h"
 
 ACommonAIController::ACommonAIController()

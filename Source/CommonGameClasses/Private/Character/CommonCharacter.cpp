@@ -2,7 +2,6 @@
 
 
 #include "Character/CommonCharacter.h"
-
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Animation/CharacterAnimationComponent.h"
@@ -13,7 +12,7 @@
 #include "Utils/CommonCombatUtils.h"
 
 
-ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(CharacterMovementComponentName))
+ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCharacterMovementComponent>(CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -69,7 +68,7 @@ void ACommonCharacter::K2_OnDeath_Implementation()
 	{
 		return;
 	}
-	UGameplayTagComponent::AddTagToActor(this, TAG_STATE_DEAD);
+	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Dead);
 	GetMesh()->SetRenderCustomDepth(false);
 	DetachFromControllerPendingDestroy();
 	SetLifeSpan(5.f);
@@ -233,7 +232,7 @@ void ACommonCharacter::Internal_TryPlayHitReact(const FDamageHitReactEvent& HitR
 	
 	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Chainsaw || HitReactEvent.DeathReactType == EHitReactType::HitReact_Chainsaw)
 	{
-		PlayData.MontageToPlay = K2_GetHitReactAnimation(TAG_HITREACT_CHAINSAW);
+		PlayData.MontageToPlay = K2_GetHitReactAnimation(CommonGameAnimation::HitReactChainsaw);
 		PlayData.bShouldBlendOut = false;
 	} else
 	{
@@ -254,15 +253,15 @@ FGameplayTag ACommonCharacter::Internal_GetHitDirectionTag(const FVector& Origin
 	{
 		if (DistanceToRightLeftPlane >= 0)
 		{
-			return TAG_HITREACT_FRONT;
+			return CommonGameAnimation::HitReactFront;
 		}
-		return TAG_HITREACT_BACK;
+		return CommonGameAnimation::HitReactBack;
 	}
 	if (DistanceToFrontBackPlane >= 0)
 	{
-		return TAG_HITREACT_RIGHT;
+		return CommonGameAnimation::HitReactRight;
 	}
-	return TAG_HITREACT_LEFT;
+	return CommonGameAnimation::HitReactLeft;
 }
 
 void ACommonCharacter::Internal_StopAllAnimMontages() const
@@ -305,11 +304,12 @@ float ACommonCharacter::Internal_PlayMontage(const FAnimMontagePlayData& AnimMon
 	AnimMontagePlayData.MontageToPlay->bEnableAutoBlendOut = AnimMontagePlayData.bShouldBlendOut;
 	if(AnimMontagePlayData.bForceInPlace)
 	{
-		if(UCommonAnimInstance* BaseAnimInstance = Cast<UCommonAnimInstance>(GetMesh()->GetAnimInstance()))
-		{
-			const int32 SectionIndex = AnimMontagePlayData.MontageToPlay->GetSectionIndex(AnimMontagePlayData.MontageSection);
-			BaseAnimInstance->DisableRootMotionModeForDuration(AnimMontagePlayData.MontageToPlay->GetSectionLength(SectionIndex));
-		}
+		UKismetSystemLibrary::PrintString(this, "Make ALS for in place CommonCharacter::309");
+		// if(UCommonAnimInstance* BaseAnimInstance = Cast<UCommonAnimInstance>(GetMesh()->GetAnimInstance()))
+		// {
+		// 	const int32 SectionIndex = AnimMontagePlayData.MontageToPlay->GetSectionIndex(AnimMontagePlayData.MontageSection);
+		// 	BaseAnimInstance->DisableRootMotionModeForDuration(AnimMontagePlayData.MontageToPlay->GetSectionLength(SectionIndex));
+		// }
 	}	
 	return PlayAnimMontage(AnimMontagePlayData.MontageToPlay, AnimMontagePlayData.PlayRate, AnimMontagePlayData.MontageSection);
 }

@@ -5,7 +5,6 @@
 #include "API/Ability/CooldownMechanism.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "Components/SphereComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
 #include "GameFramework/Character.h"
@@ -59,23 +58,23 @@ void ACommonAbility::BeginPlay()
 
 bool ACommonAbility::TryStartAbility()
 {
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_REQUESTING_START))
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::RequestingStart))
 	{
 		return false;
 	}
 	
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_COMBO_WINDOW_ENABLED))
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::ComboWindowEnabled))
 	{
 		if(TriggerMechanism && ActivationMechanism)
 		{
-			UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_COMBO_ACTIVATED);
-			UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_COMBO_WINDOW_ENABLED);
+			UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::ComboActivated);
+			UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::ComboWindowEnabled);
 			return Internal_StartNormalAbility();
 		}		
 		return false;
 	}
 	
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_ON_COOLDOWN))
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::OnCooldown))
 	{
 		return false;
 	}
@@ -89,7 +88,7 @@ bool ACommonAbility::TryStartAbility()
 		}
 		
 		// Activate instantly, no trigger exists
-		UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_REQUESTING_START);
+		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
 		ActivationMechanism->Activate(FTriggerEventPayload());
 		return true;
 	}
@@ -259,7 +258,7 @@ bool ACommonAbility::Internal_StartNormalAbility()
 	// If no costs are required, press trigger instantly. No need for resources.
 	if(!ResourceContainer)
 	{
-		UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_REQUESTING_START);
+		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
 		TriggerMechanism->PressTrigger();
 		return true;
 	}
@@ -267,7 +266,7 @@ bool ACommonAbility::Internal_StartNormalAbility()
 	// Golden path if/else
 	if(ResourceContainer->TrySpendResource(ResourceCost))
 	{
-		UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_REQUESTING_START);
+		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
 		TriggerMechanism->PressTrigger();
 		return true;
 	}
@@ -354,7 +353,7 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 
 void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& TriggeredEventPayload)
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_REQUESTING_START);
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::RequestingStart);
 	if(!ActivationMechanism || TriggeredEventPayload.bMontageDrivesActivation)
 	{
 		return;
@@ -372,16 +371,16 @@ void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& Trig
 
 void ACommonAbility::HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent)
 {
-	UGameplayTagComponent::AddTagToActor(this, TAG_ABILITY_ON_COOLDOWN);
+	UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::OnCooldown);
 }
 
 void ACommonAbility::HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent)
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, TAG_ABILITY_ON_COOLDOWN);
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::OnCooldown);
 	
 	// If it's a burst trigger (3-round burst machine gun), try to activate it immediately after it's cooldown
 	// BurstTrigger shoots 1-2-3 fast Activation ticks, cools down, then fires again. This is what triggers the refiring after the cooldown.
-	if(TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown() && UGameplayTagComponent::ActorHasGameplayTag(this, TAG_ABILITY_REQUESTING_START))
+	if(TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown() && UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::RequestingStart))
 	{
 		Internal_StartNormalAbility();	
 	}

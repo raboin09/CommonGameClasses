@@ -28,7 +28,7 @@ ACommonInteractableActor::ACommonInteractableActor()
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	
 	bDiesAfterOverlap = true;
-	DefaultGameplayTags.Add(TAG_STATE_ACTIVE);
+	DefaultGameplayTags.Add(CommonGameState::Active);
 	DeathBuffer = 2.f;
 }
 

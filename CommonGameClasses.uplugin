@@ -34,10 +34,6 @@
 		{
 			"Name": "EnhancedInput",
 			"Enabled": true
-		},
-		{
-			"Name": "SMSystem",
-			"Enabled": true
 		}
 	]
 }

@@ -2,6 +2,7 @@
 #include "Animation/CharacterAnimationComponent.h"
 
 #include "GameFramework/Character.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 
 
@@ -16,6 +17,8 @@ float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayDat
 	{
 		return -1.f;
 	}
+	// TODO Refactor anim
+	UKismetSystemLibrary::PrintString(this,"Make ALS play anim montage, MontageTrigger::71");
 	return OwnerCharacter->PlayAnimMontage(AnimMontageData.MontageToPlay);
 }
 
@@ -26,42 +29,5 @@ void UCharacterAnimationComponent::BeginPlay()
 	if(!OwnerCharacter)
 	{
 		return;
-	}
-	
-	OwningTagComponent = OwnerCharacter->FindComponentByClass<UGameplayTagComponent>();
-	if(OwningTagComponent)
-	{
-		OwningTagComponent->OnGameplayTagAdded().AddUObject(this, &UCharacterAnimationComponent::HandleTagAdded);
-	}
-	
-	if(!OwnerCharacter->GetMesh())
-	{
-		return;
-	}
-	OwnerAnimInstance = Cast<UCommonAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance());
-}
-
-void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(OwnerAnimInstance)
-	{
-		OwnerAnimInstance->RotationMethod = RotationMethod;
-	}
-}
-
-void UCharacterAnimationComponent::HandleTagAdded(const FGameplayTagAddedEventPayload& GameplayTagAddedEventPayload)
-{
-	if(!OwnerAnimInstance)
-	{
-		return;
-	}
-	
-	if(GameplayTagAddedEventPayload.AddedTag.MatchesTag(TAG_ANIM_BASEPOSE))
-	{
-		OwnerAnimInstance->BasePose = GameplayTagAddedEventPayload.AddedTag;
-	} else if(GameplayTagAddedEventPayload.AddedTag.MatchesTag(TAG_ANIM_OVERLAYPOSE))
-	{
-		OwnerAnimInstance->OverlayPose = GameplayTagAddedEventPayload.AddedTag;
 	}
 }

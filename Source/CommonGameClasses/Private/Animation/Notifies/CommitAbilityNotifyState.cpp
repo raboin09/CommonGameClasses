@@ -16,7 +16,7 @@ void UCommitAbilityNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UA
 	if(!AbilityTagComponent){
 		return;
 	}
-	UGameplayTagComponent::AddTagToActor(nullptr, TAG_ABILITY_COMMITTED, AbilityTagComponent);
+	UGameplayTagComponent::AddTagToActor(nullptr, CommonGameAbilityEvent::Committed, AbilityTagComponent);
 }
 
 void UCommitAbilityNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -32,6 +32,6 @@ void UCommitAbilityNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAni
 	if(!AbilityTagComponent){
 		return;
 	}
-	UGameplayTagComponent::RemoveTagFromActor(nullptr, TAG_ABILITY_COMMITTED, AbilityTagComponent);
+	UGameplayTagComponent::RemoveTagFromActor(nullptr, CommonGameAbilityEvent::Committed, AbilityTagComponent);
 	AbilityComponent->ResetAwaitingActivationDetails();
 }

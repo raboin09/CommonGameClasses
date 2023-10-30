@@ -30,8 +30,7 @@ public class CommonGameClasses : ModuleRules
 				"NavigationSystem",
 				"GameplayTasks",
 				"AIModule",
-				"Niagara",
-				"SMSystem"
+				"Niagara"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -43,7 +42,8 @@ public class CommonGameClasses : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore", "AnimGraphRuntime"
+				"SlateCore",
+				"AnimGraphRuntime"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

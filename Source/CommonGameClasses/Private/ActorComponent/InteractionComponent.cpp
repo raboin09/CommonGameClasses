@@ -1,14 +1,13 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ActorComponent/InteractionComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonInteractUtils.h"
 
 UInteractionComponent::UInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+	CachedInstigatingActor = nullptr;
 }
 
 void UInteractionComponent::BeginPlay()

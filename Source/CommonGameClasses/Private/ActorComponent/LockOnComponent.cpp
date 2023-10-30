@@ -152,7 +152,7 @@ AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> P
 	TArray<AActor*> HitActors;
 	for(FHitResult TempHit : PotentialHitResults)
 	{
-		if(!UGameplayTagComponent::ActorHasGameplayTag(TempHit.GetActor(), TAG_STATE_DEAD))
+		if(!UGameplayTagComponent::ActorHasGameplayTag(TempHit.GetActor(), CommonGameState::Dead))
 		{
 			HitActors.Add(TempHit.GetActor());
 		}

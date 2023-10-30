@@ -1,26 +1,29 @@
 ﻿#include "Ability/Trigger/MontageTrigger.h"
-#include "Animation/CharacterAnimationComponent.h"
+
+#include <Animation/CharacterAnimationComponent.h>
+
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTagTypes.h"
 
 void UMontageTrigger::PressTrigger()
 {	
-	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_COMBO_WINDOW_ENABLED))
+	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::ComboWindowEnabled))
 	{
-		UGameplayTagComponent::AddTagToActor(GetOwner(), TAG_ABILITY_COMBO_ACTIVATED);
-		UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_ABILITY_COMBO_WINDOW_ENABLED);
+		UGameplayTagComponent::AddTagToActor(GetOwner(), CommonGameAbilityEvent::ComboActivated);
+		UGameplayTagComponent::RemoveTagFromActor(GetOwner(), CommonGameAbilityEvent::ComboWindowEnabled);
 		Internal_IncrementComboCounter();
-		if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_ACTIVE))
+		if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
 		{
 			Internal_StartMontage();
 		}
 	}
-	else if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_ACTIVE))
+	else if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
 	{
-		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_ABILITY_COMMITTED))
+		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Committed))
 		{
 			return;
 		}

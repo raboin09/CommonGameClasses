@@ -83,7 +83,7 @@ TArray<AActor*> ACommonGameMode::GetAllActorsOfClass_TrackedOnly(const UObject* 
 	}
 	
 	TArray<AActor*> OutActors;	
-	for(const TTuple<UClass*, FWorldActorTrackerEntry> ClassEntry : GameMode->ActorsOfClass)
+	for(const TTuple<UClass*, FWorldActorTrackerEntry>& ClassEntry : GameMode->ActorsOfClass)
 	{
 		const TSubclassOf<UObject> CurrClass = ClassEntry.Key;
 		if(!CurrClass || !UKismetMathLibrary::ClassIsChildOf(CurrClass, ActorClass))

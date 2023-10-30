@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "API/Ability/Ability.h"
 #include "ActorComponent/GameplayTagComponent.h"
+#include "API/Ability/ActivationMechanism.h"
 #include "AbilityComponent.generated.h"
 
 USTRUCT()

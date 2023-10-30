@@ -3,8 +3,6 @@
 
 #include "ActorComponent/ResourceComponent.h"
 
-#include "Types/CommonCoreTypes.h"
-
 UResourceComponent::UResourceComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;

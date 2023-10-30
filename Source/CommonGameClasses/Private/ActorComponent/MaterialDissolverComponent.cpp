@@ -13,6 +13,7 @@ UMaterialDissolverComponent::UMaterialDissolverComponent()
 	DissolveCurveFloat = LoadObject<UCurveFloat>(nullptr, UTF8_TO_TCHAR("/Script/Engine.CurveFloat'/CommonGameClasses/CommonCurves/COMMON_Curve_Dissolve.COMMON_Curve_Dissolve'"));
 	DissolveParameterName = "Dissolve Amount";
 	ColorParameterName = "Color";
+	MeshComponent = nullptr;
 }
 
 void UMaterialDissolverComponent::InitDissolveableMesh(UMeshComponent* InMesh)

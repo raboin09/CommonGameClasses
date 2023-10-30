@@ -1,10 +1,5 @@
 ﻿#include "Ability/Activation/HitscanActivation.h"
-
-#include "NiagaraFunctionLibrary.h"
 #include "ActorComponent/EffectContainerComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Utils/CommonCombatUtils.h"
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 

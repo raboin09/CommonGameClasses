@@ -68,7 +68,7 @@ public:
 	FORCEINLINE void AssignNewMountable(UObject* InMountableObject, const FHitResult& InHitResult);
 	FORCEINLINE TScriptInterface<IMountable> GetCurrentMount() const { return CurrentMount; }
 	FORCEINLINE bool IsMounted() const { return CurrentMount != nullptr; }
-	FORCEINLINE bool CanGetInCover() { return !UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_CANNOT_MOUNT); }
+	FORCEINLINE bool CanGetInCover() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::CannotMount); }
 protected:
 	UPROPERTY()
 	TScriptInterface<IMountable> CurrentMount;
@@ -77,7 +77,7 @@ protected:
 	/// Knockbacks and Hit Reacts
 	////////////////////////////////
 public:
-	FORCEINLINE bool IsRagdoll() { return UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_RAGDOLL); };
+	FORCEINLINE bool IsRagdoll() { return UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Ragdoll); };
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	UAnimMontage* K2_GetHitReactAnimation(const FGameplayTag& HitReactDirection) const;
@@ -126,5 +126,5 @@ private:
 	/// FORCEINLINE
 	/////////////////////////////////
 public:
-	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_DEAD); }
+	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Dead); }
 };
