@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SMInstance.h"
 #include "CommonQuestTypes.generated.h"
 
 UENUM(BlueprintType)
@@ -53,10 +54,10 @@ struct FQuestData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class UObject> QuestStateMachineClass;
+	TSubclassOf<class USMInstance> QuestStateMachineClass;
 
 	UPROPERTY()
-	class UObject* QuestStateMachineInstance = nullptr;
+	class UQuestStateMachine* QuestStateMachineInstance = nullptr;
 	
 	int32 QuestID = -1;
 };

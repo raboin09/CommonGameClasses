@@ -12,13 +12,14 @@
 #include "Trigger/BaseTrigger.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonEventDeclarations.h"
+#include "Types/CommonTagTypes.h"
 #include "CommonAbility.generated.h"
 
 class IResourceContainer;
 class USphereComponent;
 enum class EResourceContainerLocation : uint8;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM|Ability"))
 class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility
 {
 	GENERATED_BODY()
@@ -33,6 +34,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Mesh")
+	FGameplayTag AbilityOverlay = FGameplayTag(CommonGameAnimation::Unarmed);
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Mesh")
 	EMeshType MeshType = EMeshType::AbilityMesh;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Mesh")

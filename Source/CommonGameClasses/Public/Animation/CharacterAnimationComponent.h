@@ -19,7 +19,10 @@ public:
 	UCharacterAnimationComponent();
 	
 	float TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
-
+	void SetAnimationOverlay(const FGameplayTag& NewOverlay);
+	void StartRagdolling();
+	void StopRagdolling();
+	
 protected:
 	virtual void BeginPlay() override;
 

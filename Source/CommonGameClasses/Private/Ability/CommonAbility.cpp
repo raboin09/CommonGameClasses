@@ -1,6 +1,7 @@
 ﻿#include "Ability/CommonAbility.h"
 #include "Ability/CooldownMechanismImpl.h"
 #include "ActorComponent/GameplayTagComponent.h"
+#include "Animation/CharacterAnimationComponent.h"
 #include "API/Ability/ActivationMechanism.h"
 #include "API/Ability/CooldownMechanism.h"
 #include "API/Ability/TriggerMechanism.h"
@@ -109,11 +110,16 @@ bool ACommonAbility::TryEndAbility()
 
 void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
 {
+	if(UCharacterAnimationComponent* CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>())
+	{
+		CharacterAnimationComponent->SetAnimationOverlay(AbilityOverlay);
+	}
+	
 	if(!OwnerMeshComponent)
 	{
 		return;
 	}
-	MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);	
+	MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);
 }
 
 void ACommonAbility::Internal_SetMeshToUse()

@@ -30,12 +30,15 @@ public class CommonGameClasses : ModuleRules
 				"NavigationSystem",
 				"GameplayTasks",
 				"AIModule",
-				"Niagara"
-				// ... add other public dependencies that you statically link with here ...
+				"Niagara",
+				"ALS", 
+				"ALSCamera",
+				"SMSystem", 
+				"EnhancedInput"
 			}
 			);
-			
-		
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -44,16 +47,7 @@ public class CommonGameClasses : ModuleRules
 				"Slate",
 				"SlateCore",
 				"AnimGraphRuntime"
-				// ... add private dependencies that you statically link with here ...	
 			}
-			);
-		
-		
-		DynamicallyLoadedModuleNames.AddRange(
-			new string[]
-			{
-				// ... add any modules that your module loads dynamically here ...
-			}
-			);
+		);
 	}
 }

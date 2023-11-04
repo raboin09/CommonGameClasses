@@ -51,5 +51,6 @@ namespace CommonGameAnimation
 	UE_DEFINE_GAMEPLAY_TAG(HitReactFront, FName{TEXTVIEW("Animation.HitReact.Front")})
 	UE_DEFINE_GAMEPLAY_TAG(HitReactRight, FName{TEXTVIEW("Animation.HitReact.Right")})
 	UE_DEFINE_GAMEPLAY_TAG(HitReactBack, FName{TEXTVIEW("Animation.HitReact.Back")})
-	UE_DEFINE_GAMEPLAY_TAG(HitReactChainsaw, FName{TEXTVIEW("Animation.HitReact.Chainsaw")})	
+	UE_DEFINE_GAMEPLAY_TAG(HitReactChainsaw, FName{TEXTVIEW("Animation.HitReact.Chainsaw")})
+	UE_DEFINE_GAMEPLAY_TAG(Unarmed, FName{TEXTVIEW("Animation.Overlay.Unarmed")})
 }

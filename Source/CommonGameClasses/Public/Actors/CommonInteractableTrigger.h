@@ -24,7 +24,7 @@ protected:
 	virtual void ConsumePickup(ACharacter* ConsumingChar) override;
 
 	UPROPERTY()
-	UObject* TriggerMachine;
+	USMInstance* TriggerMachine;
 	UPROPERTY(EditInstanceOnly, Category="CUSTOM|Trigger")
-	TSubclassOf<UObject> TriggerLogicClass;
+	TSubclassOf<USMInstance> TriggerLogicClass;
 };

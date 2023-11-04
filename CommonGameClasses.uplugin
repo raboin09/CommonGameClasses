@@ -22,7 +22,10 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"AIModule",
-				"PhysicsCore"
+				"PhysicsCore",
+				"ALS",
+				"ALSCamera",
+				"SMSystem"
 			]
 		}
 	],
@@ -33,6 +36,14 @@
 		},
 		{
 			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "SMSystem",
+			"Enabled": true
+		},
+		{
+			"Name": "ALS",
 			"Enabled": true
 		}
 	]
