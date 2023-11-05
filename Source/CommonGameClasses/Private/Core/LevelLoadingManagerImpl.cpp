@@ -45,13 +45,13 @@ void ULevelLoadingManagerImpl::Internal_ApplyLoadingStateToPlayerCharacter(const
 {
 	if (bAddingTags)
 	{
-		UGameplayTagComponent::AddTagToActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_LOADING);
-		UGameplayTagComponent::AddTagToActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_STUNNED);
+		UGameplayTagComponent::AddTagToActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), CommonGameState::Loading);
+		UGameplayTagComponent::AddTagToActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), CommonGameState::Stunned);
 	}
 	else
 	{
-		UGameplayTagComponent::RemoveTagFromActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_LOADING);
-		UGameplayTagComponent::RemoveTagFromActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), TAG_STATE_STUNNED);
+		UGameplayTagComponent::RemoveTagFromActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), CommonGameState::Loading);
+		UGameplayTagComponent::RemoveTagFromActor(UCommonCoreUtils::GetCommonPlayerCharacter(this), CommonGameState::Stunned);
 	}
 }
 

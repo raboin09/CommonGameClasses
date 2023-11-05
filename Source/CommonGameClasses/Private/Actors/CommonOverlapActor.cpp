@@ -3,11 +3,12 @@
 
 #include "Actors/CommonOverlapActor.h"
 #include "Components/ShapeComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 ACommonOverlapActor::ACommonOverlapActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bDiesAfterOverlap = false;
+	DeathBuffer = 0;
 }
 
 void ACommonOverlapActor::BeginPlay()
@@ -23,11 +24,11 @@ void ACommonOverlapActor::BeginPlay()
 
 	if(bActivateOnStart)
 	{
-		UGameplayTagComponent::AddTagToActor(this, TAG_STATE_ACTIVE);
+		UGameplayTagComponent::AddTagToActor(this, CommonGameState::Active);
 	}
 
 	// Add ACTIVE tag to activate at start
-	if(!UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_ACTIVE))
+	if(!UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Active))
 	{
 		Deactivate();
 	} else
@@ -57,7 +58,7 @@ void ACommonOverlapActor::HandleActorDeath()
 void ACommonOverlapActor::Activate()
 {
 	HitActors.Empty();
-	UGameplayTagComponent::AddTagToActor(this, TAG_STATE_ACTIVE);
+	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Active);
 	if(UShapeComponent* ShapeComponent = GetCollisionComponent())
 	{
 		ShapeComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -68,7 +69,7 @@ void ACommonOverlapActor::Activate()
 
 void ACommonOverlapActor::Deactivate()
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, TAG_STATE_ACTIVE);
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameState::Active);
 	if(UShapeComponent* ShapeComponent = GetCollisionComponent())
 	{
 		ShapeComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);

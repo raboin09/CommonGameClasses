@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AlsCharacter.h"
 #include "Ability/CommonAbility.h"
 #include "API/Taggable.h"
-#include "GameFramework/Character.h"
 #include "Types/CommonTagTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "CommonCharacter.generated.h"
@@ -17,7 +17,7 @@ class UGameplayTagComponent;
 class UCommonCharacterMovementComponent;
 
 UCLASS(Abstract, NotBlueprintable)
-class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggable
+class COMMONGAMECLASSES_API ACommonCharacter : public AAlsCharacter, public ITaggable
 {
 	GENERATED_BODY()
 
@@ -27,7 +27,6 @@ public:
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
@@ -68,7 +67,7 @@ public:
 	FORCEINLINE void AssignNewMountable(UObject* InMountableObject, const FHitResult& InHitResult);
 	FORCEINLINE TScriptInterface<IMountable> GetCurrentMount() const { return CurrentMount; }
 	FORCEINLINE bool IsMounted() const { return CurrentMount != nullptr; }
-	FORCEINLINE bool CanGetInCover() { return !UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_CANNOT_MOUNT); }
+	FORCEINLINE bool CanGetInCover() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::CannotMount); }
 protected:
 	UPROPERTY()
 	TScriptInterface<IMountable> CurrentMount;
@@ -76,20 +75,13 @@ protected:
 	////////////////////////////////
 	/// Knockbacks and Hit Reacts
 	////////////////////////////////
-public:
-	FORCEINLINE bool IsRagdoll() { return UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_RAGDOLL); };
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	UAnimMontage* K2_GetHitReactAnimation(const FGameplayTag& HitReactDirection) const;
-	virtual void RagdollStart();
-	virtual void RagdollEnd();
 	
 private:
-	void SetActorLocationDuringRagdoll();
-	void Internal_RagdollUpdate();
 	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
 	void Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bShouldRecoverFromKnockback = true);
-	void Internal_TryCharacterKnockbackRecovery();
 	void Internal_TryPlayHitReact(const FDamageHitReactEvent& HitReactEvent);
 	FGameplayTag Internal_GetHitDirectionTag(const FVector& OriginatingLocation) const;
 
@@ -118,13 +110,10 @@ protected:
 private:
 	void Internal_StopAllAnimMontages() const;
 	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
-
-	const FName NAME_PELVIS = "pelvis";
-	const FName NAME_ROOT = "root";
 	
 	/////////////////////////////////
 	/// FORCEINLINE
 	/////////////////////////////////
 public:
-	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, TAG_STATE_DEAD); }
+	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Dead); }
 };

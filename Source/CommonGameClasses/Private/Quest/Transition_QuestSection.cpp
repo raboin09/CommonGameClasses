@@ -1,13 +1,12 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Quest/Transition_QuestSection.h"
 
 #include "API/Questable.h"
 #include "Core/CommonGameMode.h"
-#include "Kismet/GameplayStatics.h"
 #include "Quest/QuestStateMachine.h"
-#include "Utils/CommonWorldUtils.h"
+#include "Utils/CommonCoreUtils.h"
 
 bool UTransition_QuestSection::CanEnterTransition_Implementation() const
 {
@@ -49,7 +48,7 @@ void UTransition_QuestSection::ActivateAllObjectivesOfClass(UClass* ObjectiveCla
 		return;
 	}
 
-	ACommonGameMode* GameMode = Cast<ACommonGameMode>(UGameplayStatics::GetGameMode(this));
+	ACommonGameMode* GameMode = UCommonCoreUtils::GetCommonGameMode(this);
 	if (!GameMode)
 	{
 		return;
@@ -86,7 +85,7 @@ void UTransition_QuestSection::DeactivateAllObjectivesOfClass(UClass* ObjectiveC
 {
 	if(ObjectiveClass)
 	{
-		ACommonGameMode* GameMode = Cast<ACommonGameMode>(UGameplayStatics::GetGameMode(this));
+		ACommonGameMode* GameMode = UCommonCoreUtils::GetCommonGameMode(this);
 		if (!GameMode)
 		{
 			return;

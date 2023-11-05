@@ -39,6 +39,11 @@ bool UCommonCoreUtils::IsObjectPlayerControlled(const UObject* Object)
 	return false;
 }
 
+ACommonGameMode* UCommonCoreUtils::GetCommonGameMode(const UObject* ContextObject)
+{
+	return Cast<ACommonGameMode>(UGameplayStatics::GetGameMode(ContextObject));
+}
+
 UInteractionComponent* UCommonCoreUtils::GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject)
 {
 	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))

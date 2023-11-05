@@ -3,7 +3,6 @@
 
 #include "Actors/CommonInteractableTrigger.h"
 #include "SMUtils.h"
-#include "ActorComponent//QuestManagerComponent.h"
 #include "GameFramework/Character.h"
 
 ACommonInteractableTrigger::ACommonInteractableTrigger()
@@ -13,6 +12,8 @@ ACommonInteractableTrigger::ACommonInteractableTrigger()
 	CollisionComp->SetCollisionObjectType(ECC_WorldDynamic);
 	CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+	TriggerMachine = nullptr;
 }
 
 void ACommonInteractableTrigger::K2_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)

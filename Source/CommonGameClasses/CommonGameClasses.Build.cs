@@ -31,29 +31,23 @@ public class CommonGameClasses : ModuleRules
 				"GameplayTasks",
 				"AIModule",
 				"Niagara",
-				"SMSystem"
-				// ... add other public dependencies that you statically link with here ...
+				"ALS", 
+				"ALSCamera",
+				"SMSystem", 
+				"EnhancedInput"
 			}
 			);
-			
-		
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore", "AnimGraphRuntime"
-				// ... add private dependencies that you statically link with here ...	
+				"SlateCore",
+				"AnimGraphRuntime"
 			}
-			);
-		
-		
-		DynamicallyLoadedModuleNames.AddRange(
-			new string[]
-			{
-				// ... add any modules that your module loads dynamically here ...
-			}
-			);
+		);
 	}
 }

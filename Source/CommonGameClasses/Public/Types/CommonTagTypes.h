@@ -3,49 +3,62 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NativeGameplayTags.h"
 
-#define TAG_SLOT_MAIN FGameplayTag::RequestGameplayTag("Slot.Main")
+namespace CommonGameSlot
+{
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(SlotMain)
+}
 
-#define TAG_ACTOR_COVER FGameplayTag::RequestGameplayTag("ActorType.Cover")
+namespace CommonGameActorType
+{
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ActorTypeCover)	
+}
 
-#define TAG_ABILITY_ON_COOLDOWN FGameplayTag::RequestGameplayTag("AbilityEvent.OnCooldown")
-#define TAG_ABILITY_ACTIVATED FGameplayTag::RequestGameplayTag("AbilityEvent.Activated")
-#define TAG_ABILITY_REQUESTING_START FGameplayTag::RequestGameplayTag("AbilityEvent.RequestingStart")
-#define TAG_ABILITY_COMMITTED FGameplayTag::RequestGameplayTag("AbilityEvent.Committed")
-#define TAG_ABILITY_COMBO_WINDOW_ENABLED FGameplayTag::RequestGameplayTag("AbilityEvent.ComboWindowEnabled")
-#define TAG_ABILITY_COMBO_ACTIVATED FGameplayTag::RequestGameplayTag("AbilityEvent.ComboActivated")
-#define TAG_ABILITY_ACTIVE FGameplayTag::RequestGameplayTag("State.Active")
+namespace CommonGameAbilityEvent
+{
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(OnCooldown)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Activated)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(RequestingStart)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Committed)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ComboWindowEnabled)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ComboActivated)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Active)
+}
 
-#define TAG_STATE_ACTIVE FGameplayTag::RequestGameplayTag("State.Active")
-#define TAG_STATE_AIMING FGameplayTag::RequestGameplayTag("State.Aiming")
-#define TAG_STATE_STUNNED FGameplayTag::RequestGameplayTag("State.Stunned")
-#define TAG_STATE_IMMOVABLE FGameplayTag::RequestGameplayTag("State.Immovable")
-#define TAG_STATE_CANNOT_SPRINT FGameplayTag::RequestGameplayTag("State.CannotSprint")
-#define TAG_STATE_ALOOF FGameplayTag::RequestGameplayTag("State.Aloof")
-#define TAG_STATE_LOADING FGameplayTag::RequestGameplayTag("State.Loading")
-#define TAG_STATE_ARMOR_PIERCING FGameplayTag::RequestGameplayTag("State.ArmorPiercing")
-#define TAG_STATE_DEAD FGameplayTag::RequestGameplayTag("State.Dead")
-#define TAG_STATE_FIRING FGameplayTag::RequestGameplayTag("State.Firing")
-#define TAG_STATE_READY FGameplayTag::RequestGameplayTag("State.Ready")
-#define TAG_STATE_RAGDOLL FGameplayTag::RequestGameplayTag("State.Ragdoll")
-#define TAG_STATE_IN_COVER FGameplayTag::RequestGameplayTag("State.InCover")
-#define TAG_STATE_CANNOT_MOUNT FGameplayTag::RequestGameplayTag("State.CannotMount")
-#define TAG_STATE_IN_COMBAT FGameplayTag::RequestGameplayTag("State.InCombat")
+namespace CommonGameState
+{
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Active)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Aiming)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stunned)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Immovable)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CannotSprint)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Aloof)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Loading)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ArmorPiercing)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dead)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Firing)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ready)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ragdoll)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InCover)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CannotMount)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InCombat)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CoverLeftPeek)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CoverLeftEdge)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CoverRightPeek)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CoverRightEdge)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CoverRolledOut)
+}
 
-#define TAG_COVER_LEFTPEEK FGameplayTag::RequestGameplayTag("State.InCover.LeftPeek")
-#define TAG_COVER_LEFTEDGE FGameplayTag::RequestGameplayTag("State.InCover.LeftEdge")
-#define TAG_COVER_RIGHTPEEK FGameplayTag::RequestGameplayTag("State.InCover.RightPeek")
-#define TAG_COVER_RIGHTEDGE FGameplayTag::RequestGameplayTag("State.InCover.RightEdge")
-#define TAG_COVER_ROLLEDOUT FGameplayTag::RequestGameplayTag("State.InCover.RolledOut")
-
-#define TAG_HITREACT_LEFT FGameplayTag::RequestGameplayTag("Animation.HitReact.Left")
-#define TAG_HITREACT_FRONT FGameplayTag::RequestGameplayTag("Animation.HitReact.Front")
-#define TAG_HITREACT_RIGHT FGameplayTag::RequestGameplayTag("Animation.HitReact.Right")
-#define TAG_HITREACT_BACK FGameplayTag::RequestGameplayTag("Animation.HitReact.Back")
-#define TAG_HITREACT_CHAINSAW FGameplayTag::RequestGameplayTag("Animation.HitReact.Chainsaw")
-
-#define TAG_ANIM_BASEPOSE FGameplayTag::RequestGameplayTag("Animation.BasePose")
-#define TAG_ANIM_BASEPOSE_UNARMED FGameplayTag::RequestGameplayTag("Animation.BasePose.Default")
-#define TAG_ANIM_OVERLAYPOSE FGameplayTag::RequestGameplayTag("Animation.OverlayPose")
+namespace CommonGameAnimation
+{
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Unarmed)
+	
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HitReactLeft)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HitReactFront)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HitReactRight)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HitReactBack)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HitReactChainsaw)	
+}
 
 #define TAG_NAME_COVERMESH FName("CoverMesh")

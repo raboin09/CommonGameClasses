@@ -42,7 +42,7 @@ public:
 		return CardsInDeck[FMath::RandRange(0, CardsInDeck.Num() - 1)].Card;
 	}
 
-	FORCEINLINE const TArray<FGuid>& GetAllCardHashes() const
+	FORCEINLINE TArray<FGuid> GetAllCardHashes() const
 	{
 		TArray<FGuid> ListOfIndices;
 		for(TCardEntry CardEntry : CardsInDeck)

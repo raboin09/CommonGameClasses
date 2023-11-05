@@ -2,12 +2,15 @@
 #include "Animation/CharacterAnimationComponent.h"
 
 #include "GameFramework/Character.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 
 
 UCharacterAnimationComponent::UCharacterAnimationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	OwnerCharacter = nullptr;
+	OwningTagComponent = nullptr;
 }
 
 float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
@@ -19,49 +22,27 @@ float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayDat
 	return OwnerCharacter->PlayAnimMontage(AnimMontageData.MontageToPlay);
 }
 
-void UCharacterAnimationComponent::BeginPlay()
+void UCharacterAnimationComponent::SetAnimationOverlay(const FGameplayTag& NewOverlay)
 {
-	Super::BeginPlay();
-	OwnerCharacter = Cast<ACommonCharacter>(GetOwner());
 	if(!OwnerCharacter)
 	{
 		return;
 	}
-	
-	OwningTagComponent = OwnerCharacter->FindComponentByClass<UGameplayTagComponent>();
-	if(OwningTagComponent)
-	{
-		OwningTagComponent->OnGameplayTagAdded().AddUObject(this, &UCharacterAnimationComponent::HandleTagAdded);
-	}
-	
-	if(!OwnerCharacter->GetMesh())
-	{
-		return;
-	}
-	OwnerAnimInstance = Cast<UCommonAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance());
+	OwnerCharacter->SetOverlayMode(NewOverlay);
 }
 
-void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UCharacterAnimationComponent::StartRagdolling()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(OwnerAnimInstance)
-	{
-		OwnerAnimInstance->RotationMethod = RotationMethod;
-	}
+	
 }
 
-void UCharacterAnimationComponent::HandleTagAdded(const FGameplayTagAddedEventPayload& GameplayTagAddedEventPayload)
+void UCharacterAnimationComponent::StopRagdolling()
 {
-	if(!OwnerAnimInstance)
-	{
-		return;
-	}
 	
-	if(GameplayTagAddedEventPayload.AddedTag.MatchesTag(TAG_ANIM_BASEPOSE))
-	{
-		OwnerAnimInstance->BasePose = GameplayTagAddedEventPayload.AddedTag;
-	} else if(GameplayTagAddedEventPayload.AddedTag.MatchesTag(TAG_ANIM_OVERLAYPOSE))
-	{
-		OwnerAnimInstance->OverlayPose = GameplayTagAddedEventPayload.AddedTag;
-	}
+}
+
+void UCharacterAnimationComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	OwnerCharacter = Cast<ACommonCharacter>(GetOwner());
 }

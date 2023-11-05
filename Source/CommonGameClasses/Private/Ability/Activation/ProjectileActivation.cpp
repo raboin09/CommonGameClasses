@@ -1,10 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Ability/Activation/ProjectileActivation.h"
 #include "Actors/CommonProjectile.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonWorldUtils.h"
 
 UProjectileActivation::UProjectileActivation()

@@ -5,7 +5,6 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonCoreTypes.h"
 #include "Types/CommonTagTypes.h"
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
@@ -13,7 +12,7 @@
 void UMeleeOverlapActivation::InitActivationMechanism(UMeshComponent* OwnerMeshComponent)
 {
 	Super::InitActivationMechanism(OwnerMeshComponent);
-	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_STATE_ACTIVE);
+	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), CommonGameAbilityEvent::Active);
 	HitActors.Empty();
 	for(const FName& Socket : MeshComponentRef->GetAllSocketNames())
 	{
@@ -26,9 +25,9 @@ void UMeleeOverlapActivation::InitActivationMechanism(UMeshComponent* OwnerMeshC
 
 void UMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
-	if (!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_STATE_ACTIVE)) {
+	if (!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active)) {
 		HitActors.Empty();
-		UGameplayTagComponent::AddTagToActor(GetOwner(), TAG_STATE_ACTIVE);
+		UGameplayTagComponent::AddTagToActor(GetOwner(), CommonGameAbilityEvent::Active);
 		Internal_StartCollisionRaycastingTick();
 	}
 	FAbilityActivationEventPayload ActivationEventPayload;
@@ -38,7 +37,7 @@ void UMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventP
 
 void UMeleeOverlapActivation::Deactivate()
 {
-	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_STATE_ACTIVE))
+	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
 	{
 		Internal_StopAttack();
 	}
@@ -67,7 +66,7 @@ void UMeleeOverlapActivation::Internal_StopCollisionRaycastingTick()
 
 void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 {
-	if(!MeshComponentRef || !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_STATE_ACTIVE))
+	if(!MeshComponentRef || !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
 	{
 		return;
 	}
@@ -98,7 +97,7 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 		AActor* HitActor = Hit.GetActor();
 		if(HitActor && !HitActors.Contains(HitActor) && HitActor->FindComponentByClass<UEffectContainerComponent>())
 		{
-			if(bCanHitMultipleEnemies && UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), TAG_STATE_DEAD))
+			if(bCanHitMultipleEnemies && UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Dead))
 			{
 				break;
 			}
@@ -153,7 +152,7 @@ void UMeleeOverlapActivation::Internal_StartAttack()
 
 void UMeleeOverlapActivation::Internal_StopAttack()
 {
-	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), TAG_STATE_ACTIVE);
+	UGameplayTagComponent::RemoveTagFromActor(GetOwner(), CommonGameAbilityEvent::Active);
 	HitActors.Empty();
 	bRecordedHit = false;
 	Internal_StopCollisionRaycastingTick();

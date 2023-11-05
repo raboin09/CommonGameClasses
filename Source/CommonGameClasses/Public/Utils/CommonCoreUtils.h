@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ActorComponent/QuestManagerComponent.h"
 #include "Core/CommonGameInstance.h"
+#include "Core/CommonGameMode.h"
 #include "CommonCoreUtils.generated.h"
 
 class ACommonPlayerCharacter;
@@ -21,6 +22,8 @@ class COMMONGAMECLASSES_API UCommonCoreUtils : public UBlueprintFunctionLibrary
 	
 public:
 	static bool IsObjectPlayerControlled(const UObject* Object);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
+	static ACommonGameMode* GetCommonGameMode(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static ACommonPlayerCharacter* GetCommonPlayerCharacter(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")

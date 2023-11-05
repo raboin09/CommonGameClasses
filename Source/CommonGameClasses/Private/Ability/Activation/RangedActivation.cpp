@@ -2,8 +2,6 @@
 #include "GameFramework/PlayerController.h"
 #include "AIController.h"
 #include "Character/CommonCharacter.h"
-#include "GameFramework/Character.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
