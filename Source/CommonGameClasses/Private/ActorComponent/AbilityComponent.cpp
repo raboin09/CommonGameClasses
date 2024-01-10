@@ -5,6 +5,7 @@
 
 #include "API/Ability/ActivationMechanism.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonWorldUtils.h"
 
 UAbilityComponent::UAbilityComponent()
@@ -25,9 +26,7 @@ void UAbilityComponent::AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityCla
 	}
 	AActor* AbilityObj = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<AActor>(AbilityClass, GetOwner(), Cast<APawn>(GetOwner()));
 	UCommonWorldUtils::FinishSpawningActor_Deferred(AbilityObj, GetOwner()->GetTransform());
-	TScriptInterface<IAbility> SpawnedAbility;
-	SpawnedAbility.SetObject(AbilityObj);
-	SpawnedAbility.SetInterface(Cast<IAbility>(AbilityObj));
+	const TScriptInterface<IAbility> SpawnedAbility = AbilityObj;
 	SlottedAbilities.Add(SlotTag, SpawnedAbility);
 	if(const ACharacter* CharOwner = Cast<ACharacter>(GetOwner()))
 	{

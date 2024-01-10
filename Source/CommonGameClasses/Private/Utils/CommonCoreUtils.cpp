@@ -5,7 +5,6 @@
 
 #include "ActorComponent/HealthComponent.h"
 #include "Player/CommonPlayerController.h"
-#include "Character/CommonCharacter.h"
 #include "Character/CommonPlayerCharacter.h"
 #include "Core/CommonGameInstance.h"
 #include "Kismet/GameplayStatics.h"
@@ -37,6 +36,20 @@ bool UCommonCoreUtils::IsObjectPlayerControlled(const UObject* Object)
 		return CastedPawn->IsPlayerControlled();
 	}
 	return false;
+}
+
+UActorTrackingSubsystem* UCommonCoreUtils::GetActorTrackingSubsystem(const UObject* ContextObject)
+{
+	if(!ContextObject)
+	{
+		return nullptr;
+	}
+	
+	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(ContextObject->GetWorld()))
+	{
+		return ActorTrackingSubsystem;
+	}
+	return nullptr;
 }
 
 ACommonGameMode* UCommonCoreUtils::GetCommonGameMode(const UObject* ContextObject)

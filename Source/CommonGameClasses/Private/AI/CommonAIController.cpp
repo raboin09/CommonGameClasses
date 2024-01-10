@@ -1,5 +1,7 @@
 ﻿
 #include "AI/CommonAIController.h"
+
+#include "ActorComponent/BotBehaviorComponent.h"
 #include "Character/CommonAICharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -10,7 +12,6 @@ ACommonAIController::ACommonAIController()
 {
 	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackBoardComp"));
 	BrainComponent = BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorComp"));
-
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(FName("AIPerceptionComp"));
 	Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(FName("Sight Config"));
 	Sight->SightRadius = 2000.f;
@@ -25,13 +26,19 @@ ACommonAIController::ACommonAIController()
 void ACommonAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	AIPawn = Cast<ACommonAICharacter>(InPawn);
-	if(!AIPawn)
+	if(!InPawn)
 	{
 		return;
 	}
-	InitAIComponents(AIPawn->GetDefaultBehavior());
-	InitPerceptionComponents();
+	
+	const UBotBehaviorComponent* BotBehaviorComponent = InPawn->FindComponentByClass<UBotBehaviorComponent>();
+	if(!BotBehaviorComponent)
+	{
+		return;
+	}
+	
+	InitPerceptionComponents(BotBehaviorComponent);
+	InitAIBehavior(BotBehaviorComponent->GetDefaultBehavior());
 }
 
 void ACommonAIController::OnUnPossess()
@@ -40,14 +47,9 @@ void ACommonAIController::OnUnPossess()
 	Super::OnUnPossess();
 }
 
-void ACommonAIController::Internal_OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
+void ACommonAIController::InitAIBehavior(UBehaviorTree* BehaviorTree) const
 {
-
-}
-
-void ACommonAIController::InitAIComponents(UBehaviorTree* BehaviorTree)
-{
-	if(!AIPawn || !BehaviorTree)
+	if(!BehaviorTree)
 	{
 		return;
 	}
@@ -60,11 +62,11 @@ void ACommonAIController::InitAIComponents(UBehaviorTree* BehaviorTree)
 	BehaviorTreeComponent->StartTree(*BehaviorTree);
 }
 
-void ACommonAIController::InitPerceptionComponents()
+void ACommonAIController::InitPerceptionComponents(const UBotBehaviorComponent* BotBehaviorComponent)
 {
 	if(AIPerceptionComponent)
 	{
 		AIPerceptionComponent->OnPerceptionUpdated.RemoveAll(this);
-		AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ACommonAIController::Internal_OnPerceptionUpdated);
+		AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(BotBehaviorComponent, &UBotBehaviorComponent::HandlePerceptionUpdated);
 	}
 }

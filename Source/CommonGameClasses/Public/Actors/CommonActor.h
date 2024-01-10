@@ -10,7 +10,7 @@
 struct FGameplayTag;
 class UGameplayTagComponent;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM"), PrioritizeCategories = "CUSTOM")
 class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable
 {
 	GENERATED_BODY()

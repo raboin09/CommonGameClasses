@@ -3,7 +3,7 @@
 
 #include "ActorComponent/QuestManagerComponent.h"
 #include "API/Questable.h"
-#include "Core/CommonGameMode.h"
+#include "Core/ActorTrackingSubsystem.h"
 #include "SMSystem/Public/SMUtils.h"
 #include "Quest/QuestStateMachine.h"
 #include "Quest/Transition_QuestSection.h"
@@ -18,7 +18,10 @@ UQuestManagerComponent::UQuestManagerComponent()
 void UQuestManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	ACommonGameMode::EmptyQuestRelevantArray(this);
+	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UCommonCoreUtils::GetActorTrackingSubsystem(this))
+	{
+		ActorTrackingSubsystem->EmptyQuestRelevantArray();	
+	}
 }
 
 void UQuestManagerComponent::TryAddActorToActiveQuests(AActor* InActor)

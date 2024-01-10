@@ -7,18 +7,18 @@
 #include "Character/CommonCharacter.h"
 #include "CommonAICharacter.generated.h"
 
-class UBehaviorTree;
+class UInteractionComponent;
+class UBotBehaviorComponent;
 
 /**
  * 
  */
-UCLASS(Abstract, Blueprintable)
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM"), PrioritizeCategories = "CUSTOM")
 class COMMONGAMECLASSES_API ACommonAICharacter : public ACommonCharacter, public IInteractable
 {
 	GENERATED_BODY()
 public:
 	ACommonAICharacter(const FObjectInitializer& ObjectInitializer);
-	FORCEINLINE virtual UBehaviorTree* GetDefaultBehavior() const { return DefaultBehaviorTree; }
 	
 	//////////////////////////////////////
 	// Interactable Overrides
@@ -34,9 +34,9 @@ protected:
 	void K2_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UInteractionComponent* InteractionComponent;
-	UPROPERTY(EditAnywhere, Category="COMMON|Defaults")
-	UBehaviorTree* DefaultBehaviorTree;
+	UBotBehaviorComponent* BotBehaviorComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInteractionComponent* InteractionComponent;
 };

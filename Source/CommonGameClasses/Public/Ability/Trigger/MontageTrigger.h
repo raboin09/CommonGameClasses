@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseComplexTrigger.h"
 #include "BaseTrigger.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "MontageTrigger.generated.h"
@@ -10,7 +11,7 @@
 struct FAnimMontagePlayData;
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API UMontageTrigger : public UBaseTrigger
+class COMMONGAMECLASSES_API UMontageTrigger : public UBaseComplexTrigger
 {
 	GENERATED_BODY()
 

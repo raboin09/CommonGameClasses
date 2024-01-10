@@ -2,12 +2,14 @@
 
 
 #include "Character/CommonAICharacter.h"
+#include "ActorComponent/BotBehaviorComponent.h"
 #include "ActorComponent/InteractionComponent.h"
 #include "AI/CommonAIController.h"
 
 ACommonAICharacter::ACommonAICharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	BotBehaviorComponent = CreateDefaultSubobject<UBotBehaviorComponent>(TEXT("BotBehaviorComponent"));
 	AIControllerClass = ACommonAIController::StaticClass();
 }
 
