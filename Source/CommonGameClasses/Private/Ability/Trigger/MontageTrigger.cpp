@@ -1,11 +1,8 @@
 ﻿#include "Ability/Trigger/MontageTrigger.h"
-
-#include <Animation/CharacterAnimationComponent.h>
-
+#include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTagTypes.h"
 

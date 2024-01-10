@@ -17,7 +17,7 @@ void UBurstTrigger::ReleaseTrigger()
 
 void UBurstTrigger::Internal_BurstFireTick()
 {
-	if(++BurstFireCount > NumberOfShotsPerFire)
+	if(++BurstFireCount > NumberOfActivations)
 	{
 		BurstFireCount = 0;
 		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_BurstFire);

@@ -4,10 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "BaseTrigger.h"
-#include "API/Ability/TriggerMechanism.h"
 #include "BurstTrigger.generated.h"
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(BlueprintType, EditInlineNew, DefaultToInstanced)
 class COMMONGAMECLASSES_API UBurstTrigger : public UBaseTrigger
 {
 	GENERATED_BODY()
@@ -17,9 +16,12 @@ public:
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return bTriggerHeld; }
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	int32 NumberOfShotsPerFire = 3;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
+	// Number of times the ability will be activated after the trigger is pressed (e.g. a shotgun would have 6, a 3-round burst rifle would have 3)
+	UPROPERTY(EditAnywhere, Category="Trigger")
+	int32 NumberOfActivations = 3;
+	// The delay (if any) before activating again (e.g. a shotgun would be 0 as all the pellets fire instantaneously, a 3-round burst rifle would be
+	// something like .1)
+	UPROPERTY(EditAnywhere, Category="Trigger")
 	float TimeBetweenBurstShots = .1f;
 	
 private:	

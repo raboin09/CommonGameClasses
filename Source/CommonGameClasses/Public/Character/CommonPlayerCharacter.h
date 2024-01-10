@@ -10,7 +10,7 @@
 #include "Character/CommonCharacter.h"
 #include "CommonPlayerCharacter.generated.h"
 
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM"))
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM", "CUSTOM|Defaults"), PrioritizeCategories = "CUSTOM")
 class COMMONGAMECLASSES_API ACommonPlayerCharacter : public ACommonCharacter
 {
 	GENERATED_BODY()

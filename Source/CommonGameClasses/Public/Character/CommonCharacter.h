@@ -7,7 +7,6 @@
 #include "Ability/CommonAbility.h"
 #include "API/Taggable.h"
 #include "Types/CommonTagTypes.h"
-#include "Types/CommonCharacterAnimTypes.h"
 #include "CommonCharacter.generated.h"
 
 struct FGameplayTag;
@@ -15,8 +14,12 @@ class IMountable;
 class UHealthComponent;
 class UGameplayTagComponent;
 class UCommonCharacterMovementComponent;
+class UEffectContainerComponent;
+class UCharacterAnimationComponent;
 
-UCLASS(Abstract, NotBlueprintable)
+UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("CUSTOM", "CUSTOM|Defaults"), PrioritizeCategories = "CUSTOM",
+	AutoCollapseCategories=("Actor Tick", "Component Tick", "Tags", "Physics", "Asset User Data", "Collision", "Lighting", "Activation", "Variable", "Cooking", "Rendering", "Clothing"),
+	HideCategories=("Replication", "Component Replication", "Skin Weights", "HLOD", "Path Tracing", "Mobile", "Navigation", "Virtual Texture"))
 class COMMONGAMECLASSES_API ACommonCharacter : public AAlsCharacter, public ITaggable
 {
 	GENERATED_BODY()
@@ -51,12 +54,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
 	TMap<FGameplayTag, TSubclassOf<ACommonAbility>> DefaultAbilities;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UAbilityComponent* AbilityComponent;
+	UPROPERTY(BlueprintReadOnly)
+	UCharacterAnimationComponent* CharacterAnimationComponent;
 	UPROPERTY()
-	class UEffectContainerComponent* EffectContainerComponent;
-	UPROPERTY()
-	class UCharacterAnimationComponent* CharacterAnimationComponent;
+	UEffectContainerComponent* EffectContainerComponent;
 	UPROPERTY()
 	UGameplayTagComponent* GameplayTagComponent;
 
@@ -75,27 +78,15 @@ protected:
 	////////////////////////////////
 	/// Knockbacks and Hit Reacts
 	////////////////////////////////
-protected:
+public:
 	UFUNCTION(BlueprintImplementableEvent)
 	UAnimMontage* K2_GetHitReactAnimation(const FGameplayTag& HitReactDirection) const;
 	
 private:
-	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
-	void Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bShouldRecoverFromKnockback = true);
-	void Internal_TryPlayHitReact(const FDamageHitReactEvent& HitReactEvent);
-	FGameplayTag Internal_GetHitDirectionTag(const FVector& OriginatingLocation) const;
-
+	UPROPERTY(Transient)
 	FTimerHandle TimerHandle_HideWeapons;
-	FTimerHandle TimerHandle_Ragdoll;	
 	UPROPERTY(Transient)
 	EHitReactType LastKnownHitReact;
-
-	EVisibilityBasedAnimTickOption DefVisBasedTickOp;
-	bool bRagdollOnGround = false;
-	bool bRagdollFaceUp = false;
-	bool bPreRagdollURO = false;
-	FVector LastRagdollVelocity = FVector::ZeroVector;
-	FVector TargetRagdollLocation = FVector::ZeroVector;
 	
 	/////////////////////////////////
 	/// Animation
@@ -104,16 +95,10 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	UAnimMontage* K2_GetGetUpAnimation(bool bIsFaceUp) const;
 	
-	float TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
-	float ForcePlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
-	void ForceStopAnimMontage(UAnimMontage* AnimMontage);
-private:
-	void Internal_StopAllAnimMontages() const;
-	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
-	
 	/////////////////////////////////
 	/// FORCEINLINE
 	/////////////////////////////////
 public:
 	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Dead); }
+	FORCEINLINE UGameplayTagComponent* GetGameplayTagComponent() const { return GameplayTagComponent; } 
 };

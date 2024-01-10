@@ -27,7 +27,7 @@ void ACommonPlayerCharacter::CalcCamera(const float DeltaTime, FMinimalViewInfo&
 void ACommonPlayerCharacter::NotifyControllerChanged()
 {
 	Super::NotifyControllerChanged();
-	const auto* PreviousPlayer{Cast<APlayerController>(PreviousController)};
+	const APlayerController* PreviousPlayer = Cast<APlayerController>(PreviousController);
 	if (IsValid(PreviousPlayer))
 	{
 		auto* InputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PreviousPlayer->GetLocalPlayer())};
@@ -37,14 +37,14 @@ void ACommonPlayerCharacter::NotifyControllerChanged()
 		}
 	}
 
-	auto* NewPlayer{Cast<APlayerController>(GetController())};
+	APlayerController* NewPlayer = Cast<APlayerController>(GetController());
 	if (IsValid(NewPlayer))
 	{
 		NewPlayer->InputYawScale_DEPRECATED = 1.0f;
 		NewPlayer->InputPitchScale_DEPRECATED = 1.0f;
 		NewPlayer->InputRollScale_DEPRECATED = 1.0f;
 
-		auto* InputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(NewPlayer->GetLocalPlayer())};
+		UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(NewPlayer->GetLocalPlayer());
 		if (IsValid(InputSubsystem))
 		{
 			FModifyContextOptions Options;
@@ -61,7 +61,7 @@ void ACommonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 {
 	Super::SetupPlayerInputComponent(Input);
 
-	auto* EnhancedInput{Cast<UEnhancedInputComponent>(Input)};
+	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(Input);
 	if (IsValid(EnhancedInput))
 	{
 		EnhancedInput->BindAction(LookMouseAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnLookMouse);
@@ -74,7 +74,7 @@ void ACommonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 
 void ACommonPlayerCharacter::Input_OnLookMouse(const FInputActionValue& ActionValue)
 {
-	const auto Value{ActionValue.Get<FVector2D>()};
+	const FVector2D Value = ActionValue.Get<FVector2D>();
 
 	AddControllerPitchInput(Value.Y * LookUpMouseSensitivity);
 	AddControllerYawInput(Value.X * LookRightMouseSensitivity);
@@ -82,7 +82,7 @@ void ACommonPlayerCharacter::Input_OnLookMouse(const FInputActionValue& ActionVa
 
 void ACommonPlayerCharacter::Input_OnLook(const FInputActionValue& ActionValue)
 {
-	const auto Value{ActionValue.Get<FVector2D>()};
+	const FVector2D Value = ActionValue.Get<FVector2D>();
 
 	AddControllerPitchInput(Value.Y * LookUpRate);
 	AddControllerYawInput(Value.X * LookRightRate);
@@ -90,10 +90,10 @@ void ACommonPlayerCharacter::Input_OnLook(const FInputActionValue& ActionValue)
 
 void ACommonPlayerCharacter::Input_OnMove(const FInputActionValue& ActionValue)
 {
-	const auto Value{UAlsMath::ClampMagnitude012D(ActionValue.Get<FVector2D>())};
+	const FVector2D Value = UAlsMath::ClampMagnitude012D(ActionValue.Get<FVector2D>());
 
-	const auto ForwardDirection{UAlsMath::AngleToDirectionXY(UE_REAL_TO_FLOAT(GetViewState().Rotation.Yaw))};
-	const auto RightDirection{UAlsMath::PerpendicularCounterClockwiseXY(ForwardDirection)};
+	const FVector ForwardDirection = UAlsMath::AngleToDirectionXY(UE_REAL_TO_FLOAT(GetViewState().Rotation.Yaw));
+	const FVector RightDirection = UAlsMath::PerpendicularCounterClockwiseXY(ForwardDirection);
 
 	AddMovementInput(ForwardDirection * Value.Y + RightDirection * Value.X);
 }

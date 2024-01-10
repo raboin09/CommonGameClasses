@@ -6,6 +6,7 @@
 #include "API/Ability/Ability.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "API/Ability/ActivationMechanism.h"
+#include "Types/CommonTagTypes.h"
 #include "AbilityComponent.generated.h"
 
 USTRUCT()
@@ -30,9 +31,13 @@ class COMMONGAMECLASSES_API UAbilityComponent : public UActorComponent
 public:
 	UAbilityComponent();
 
+	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityClass, const FGameplayTag& SlotTag);
+	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void TryStartAbilityInSlot(const FGameplayTag& SlotTag);
+	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void TryStopAbilityInSlot(const FGameplayTag& SlotTag);
+
 	void TryActivateAwaitingMechanism(bool bShouldActivate);
 	
 protected:

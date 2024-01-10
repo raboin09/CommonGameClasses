@@ -4,6 +4,7 @@
 #include "Quest/Transition_QuestSection.h"
 
 #include "API/Questable.h"
+#include "Core/ActorTrackingSubsystem.h"
 #include "Core/CommonGameMode.h"
 #include "Quest/QuestStateMachine.h"
 #include "Utils/CommonCoreUtils.h"
@@ -48,24 +49,23 @@ void UTransition_QuestSection::ActivateAllObjectivesOfClass(UClass* ObjectiveCla
 		return;
 	}
 
-	ACommonGameMode* GameMode = UCommonCoreUtils::GetCommonGameMode(this);
-	if (!GameMode)
+	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UCommonCoreUtils::GetActorTrackingSubsystem(this))
 	{
-		return;
+		for(AActor* CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
+		{
+			if(!CurrActor)
+			{
+				continue;
+			}
+		
+			if(QuestSectionData.ObjectiveTag.IsNone() || CurrActor->ActorHasTag(QuestSectionData.ObjectiveTag))
+			{
+				ActivateQuestObjectiveActor(CurrActor);	
+			}
+		}
 	}
 	
-	for(AActor* CurrActor : GameMode->QuestRelevantActors)
-	{
-		if(!CurrActor)
-		{
-			continue;
-		}
-		
-		if(QuestSectionData.ObjectiveTag.IsNone() || CurrActor->ActorHasTag(QuestSectionData.ObjectiveTag))
-		{
-			ActivateQuestObjectiveActor(CurrActor);	
-		}
-	}
+
 }
 
 void UTransition_QuestSection::ActivateQuestObjectiveActor(AActor* InActor)
@@ -90,8 +90,10 @@ void UTransition_QuestSection::DeactivateAllObjectivesOfClass(UClass* ObjectiveC
 		{
 			return;
 		}
+
+		UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(GameMode->GetWorld());
 		
-		for(AActor* CurrActor : GameMode->QuestRelevantActors)
+		for(AActor* CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
 		{
 			DeactivateQuestObjectiveActor(CurrActor);
 		}

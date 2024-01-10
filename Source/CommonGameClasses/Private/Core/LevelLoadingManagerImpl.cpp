@@ -15,6 +15,8 @@ ULevelLoadingManagerImpl::ULevelLoadingManagerImpl()
 {
 	TimeToWaitBeforeFadingInCamera = 2.f;
 	CameraFadeLength = 2.f;
+	PersistentWorld = nullptr;
+	CurrentStreamedWorld = nullptr;
 }
 
 void ULevelLoadingManagerImpl::InitLoadingManager(TSoftObjectPtr<UWorld> PostProcessLevel)
@@ -35,7 +37,7 @@ void ULevelLoadingManagerImpl::LoadLevelTypeWithContext(const FLevelLoadContext&
 		Internal_PlayCameraFade(false);
 	}
 	
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_WaitBeforeLevelChange, [=]
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_WaitBeforeLevelChange, [=, this]
 	{
 		Internal_LoadNewLevelWithContext(LevelLoadContext);
 	}, ChangeLevelDelay + .1f, false);
@@ -124,7 +126,7 @@ void ULevelLoadingManagerImpl::Internal_PostLevelLoad()
 {
 	if (CurrentLevelContext.bShouldCameraFade)
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle_WaitBeforeLevelChange, [=]
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_WaitBeforeLevelChange, [=, this]
 		{
 			Internal_PlayCameraFade(true);
 		}, TimeToWaitBeforeFadingInCamera, false);

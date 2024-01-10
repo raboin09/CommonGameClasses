@@ -1,7 +1,7 @@
 ﻿#include "Ability/CommonAbility.h"
 #include "Ability/CooldownMechanismImpl.h"
+#include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
-#include "Animation/CharacterAnimationComponent.h"
 #include "API/Ability/ActivationMechanism.h"
 #include "API/Ability/CooldownMechanism.h"
 #include "API/Ability/TriggerMechanism.h"
@@ -115,7 +115,7 @@ void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
 		CharacterAnimationComponent->SetAnimationOverlay(AbilityOverlay);
 	}
 	
-	if(!OwnerMeshComponent)
+	if(!OwnerMeshComponent || !MeshToUse)
 	{
 		return;
 	}
@@ -154,16 +154,31 @@ void ACommonAbility::Internal_SetMeshToUse()
 			MeshToUse =  MeshComp;
 		}
 	}
+
+	// Fallback in case nothing else is found
+	if(!MeshToUse)
+	{
+		if(UMeshComponent* MeshComp = GetInstigator()->FindComponentByClass<UMeshComponent>())
+		{
+			MeshToUse =  MeshComp;
+		}
+	}
 }
 
 void ACommonAbility::SetTriggerMechanism()
 {
-	UObject* TempObj = Internal_CreateNewMechanism(TriggerMechanismClass, UTriggerMechanism::StaticClass());
-	if(!TempObj || !TempObj->IsA(UBaseTrigger::StaticClass()))
+	if(SimpleTriggerInstance)
 	{
-		return;
+		TriggerMechanism = SimpleTriggerInstance;
+	} else
+	{
+		UObject* TempObj = Internal_CreateNewMechanism(ComplexTriggerClass, UTriggerMechanism::StaticClass());
+		if(!TempObj || !TempObj->IsA(UBaseTrigger::StaticClass()))
+		{
+			return;
+		}
+		TriggerMechanism = Cast<UBaseTrigger>(TempObj);	
 	}
-	TriggerMechanism = Cast<UBaseTrigger>(TempObj);
 	TriggerMechanism->SetInstigator(GetInstigator());
 	TriggerMechanism->SetOwner(this);
 }
