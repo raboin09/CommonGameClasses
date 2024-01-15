@@ -27,3 +27,9 @@ void ACommonAICharacter::HandleMeshOutlining(const FInteractionOutlinedEventPayl
 {
 	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
 }
+
+void ACommonAICharacter::HandleDeath()
+{
+	Super::HandleDeath();
+	InteractionComponent->SwitchOutlineOnAllMeshes(false);
+}

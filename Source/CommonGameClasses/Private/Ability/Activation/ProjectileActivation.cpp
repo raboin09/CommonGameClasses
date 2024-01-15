@@ -24,8 +24,7 @@ ACommonProjectile* UProjectileActivation::HandleProjectileFire()
 void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& ProjectileVelocity)
 {
 	OutSpawnOrigin = GetRaycastOriginLocation();
-	constexpr float RaycastCircleRadius = 20.f;
-	if (FHitResult Impact = WeaponTrace(ShouldLineTrace(), RaycastCircleRadius); Impact.bBlockingHit)
+	if (FHitResult Impact = WeaponTrace(ShouldLineTrace(), TraceRadius); Impact.bBlockingHit)
 	{
 		const FVector AdjustedDir = (Impact.ImpactPoint - OutSpawnOrigin).GetSafeNormal();
 		bool bWeaponPenetration = false;
@@ -38,7 +37,7 @@ void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 		{
 			FVector MuzzleStartTrace = OutSpawnOrigin - GetRaycastOriginRotation() * 25.0f;
 			FVector MuzzleEndTrace = OutSpawnOrigin;
-			if (FHitResult MuzzleImpact = WeaponTrace(ShouldLineTrace(), RaycastCircleRadius, MuzzleStartTrace, MuzzleEndTrace); MuzzleImpact.bBlockingHit)
+			if (FHitResult MuzzleImpact = WeaponTrace(ShouldLineTrace(), TraceRadius, MuzzleStartTrace, MuzzleEndTrace); MuzzleImpact.bBlockingHit)
 			{
 				bWeaponPenetration = true;
 			}

@@ -15,17 +15,17 @@ class UBaseStatsModifierData : public UObject
 public:
 	UBaseStatsModifierData() {}
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly)
 	EEffectStatType StatToModify = EEffectStatType::Health_Damage;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly)
 	float BaseModifierValue;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage", EditConditionHides))
 	bool bAddDamageForHeadshots = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage && bAddDamageForHeadshots", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage && bAddDamageForHeadshots", EditConditionHides))
 	float HeadshotModifier = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage", EditConditionHides))
 	EHitReactType HitImpulse;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage", EditConditionHides))
 	EHitReactType DeathImpulse;
 };
 
@@ -43,7 +43,7 @@ protected:
 	void K2_ApplyStatChange(float ModifiedStatValue);
 	virtual void K2_ApplyStatChange_Implementation(float ModifiedStatValue);
 
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM")
 	UBaseStatsModifierData* StatEffectDataObj;
 
 	TFunction<void()> ReversalFunc;

@@ -5,7 +5,6 @@
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
-#include "API/Mountable.h"
 #include "Core/ActorTrackingSubsystem.h"
 #include "Utils/CommonCoreUtils.h"
 
@@ -55,26 +54,14 @@ void ACommonCharacter::HandleTagRemoved(const FGameplayTagRemovedEventPayload& T
 	K2_HandleTagRemoved(TagRemovedEventPayload);
 }
 
-void ACommonCharacter::K2_OnDeath_Implementation()
+void ACommonCharacter::HandleDeath()
 {
 	if (!IsAlive())
 	{
 		return;
 	}
 	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Dead);
-	GetMesh()->SetRenderCustomDepth(false);
 	DetachFromControllerPendingDestroy();
-	SetLifeSpan(5.f);
-}
-
-void ACommonCharacter::AssignNewMountable(UObject* InMountableObject, const FHitResult& InHitResult)
-{
-	if(IMountable* Mount = Cast<IMountable>(InMountableObject))
-	{
-		Mount->OccupyMount(this, FVector::ZeroVector, InHitResult.ImpactNormal);
-		TScriptInterface<IMountable> NewCover;
-		NewCover.SetObject(InMountableObject);
-		NewCover.SetInterface(Mount);
-		CurrentMount = NewCover;
-	}
+	AbilityComponent->DestroyAbilities();
+	K2_OnDeath();
 }

@@ -2,6 +2,8 @@
 
 
 #include "ActorComponent/HealthComponent.h"
+
+#include "ActorComponent/CharacterAnimationComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCoreTypes.h"
 
@@ -35,11 +37,14 @@ float UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingAct
 	}
 
 	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
+	float Delta;
 	if(!CanSpendResourceAmount(RawDamage))
 	{
-		return false;
+		Delta = ResourcePoolContainer.GetMaxSumOfAllResourcePools();
+	} else
+	{
+		Delta = CalculateResourceCost(RawDamage);
 	}
-	const float Delta = CalculateResourceCost(RawDamage);
 	const float ActualResourcesTaken = ResourcePoolContainer.ConsumeResources(Delta);
 	const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
 	if(ResourcePoolContainer.HasResources())
@@ -67,6 +72,7 @@ float UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingAct
 		DeathEventPayload.HitResult = HitReactEvent.HitResult;
 		ActorDeath.Broadcast(DeathEventPayload);
 	}
+	
 	return ActualResourcesTaken;
 }
 

@@ -21,6 +21,7 @@ protected:
 private:
 	void BroadcastEnergyChangedEvent() const;
 	
+	UPROPERTY(BlueprintAssignable)
 	FEnergyAmountChangedEvent EnergyAmountChanged;
 
 public:

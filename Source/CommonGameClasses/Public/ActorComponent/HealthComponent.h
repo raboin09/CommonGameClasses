@@ -27,13 +27,21 @@ public:
 	void ApplyHeal(const float RawHeal, AActor* InstigatingActor = nullptr);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void AddMaxWounds(float MaxWoundsToAdd);
-	FORCEINLINE float GetCurrentHealth() const { return ResourcePoolContainer.GetSumOfAllResourcePools(); } 
-private:	
+
+protected:
+	UPROPERTY(BlueprintAssignable)
 	FCurrentWoundHealthChanged CurrentHealthChanged;
+	UPROPERTY(BlueprintAssignable)
 	FMaxWoundsChanged MaxWoundsChanged;
+	UPROPERTY(BlueprintAssignable)
 	FActorDeath ActorDeath;
 	
-public:	
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
+	FORCEINLINE float GetCurrentHealth() const { return ResourcePoolContainer.GetSumOfAllResourcePools(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
+	FORCEINLINE float GetMaxHealth() const { return ResourcePoolContainer.GetMaxSumOfAllResourcePools(); }
+	
 	FORCEINLINE FMaxWoundsChanged& OnMaxWoundsChanged() { return MaxWoundsChanged; }
 	FORCEINLINE FActorDeath& OnActorDeath() { return ActorDeath; }
 	FORCEINLINE FCurrentWoundHealthChanged& OnCurrentWoundHealthChanged() { return CurrentHealthChanged; }

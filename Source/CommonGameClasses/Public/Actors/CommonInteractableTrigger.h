@@ -20,7 +20,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_ConsumePickup(ACharacter* ConsumingChar);
 	virtual void K2_HandleEndOverlapEvent_Implementation(AActor* ExitingActor) override;
-	virtual bool CanPickup(ACharacter* PotentialChar) override;
+	virtual bool K2_CanPickup_Implementation(ACharacter* PotentialChar) override;
 	virtual void ConsumePickup(ACharacter* ConsumingChar) override;
 
 	UPROPERTY()

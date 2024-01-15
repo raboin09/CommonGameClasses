@@ -25,6 +25,9 @@ public:
 	virtual bool TryStartAbility() PURE_VIRTUAL(IAbility::TryStartAbility, return false;)
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
 	virtual bool TryEndAbility() PURE_VIRTUAL(IAbility::TryEndAbility, return false;)
-	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IAbility::InitAbility, )
+	
 	virtual UMeshComponent* GetAbilityMesh() const PURE_VIRTUAL(IAbility::GetAbilityMesh, return nullptr; )
+
+	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IAbility::InitAbility, )
+	virtual void DestroyAbility() PURE_VIRTUAL(IAbility::DestroyAbility, )
 };

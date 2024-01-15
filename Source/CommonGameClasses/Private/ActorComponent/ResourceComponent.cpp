@@ -47,7 +47,7 @@ void UResourceComponent::GiveResource(const float AmountToGive)
 
 bool UResourceComponent::CanSpendResourceAmount(const float RequestedAmount)
 {
-	return ResourcePoolContainer.HasResources() && ResourcePoolContainer.GetSumOfAllResourcePools() > RequestedAmount;
+	return ResourcePoolContainer.HasResources() && ResourcePoolContainer.GetSumOfAllResourcePools() >= RequestedAmount;
 }
 
 void UResourceComponent::Internal_StartRegenTimer()

@@ -23,14 +23,14 @@ void ACommonInteractableTrigger::K2_HandleEndOverlapEvent_Implementation(AActor*
 		return;
 	}
 	
-	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && CanPickup(CastedChar))
+	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && K2_CanPickup(CastedChar))
 	{
 		TriggerMachine->Stop();
 	}
 
 }
 
-bool ACommonInteractableTrigger::CanPickup(ACharacter* PotentialChar)
+bool ACommonInteractableTrigger::K2_CanPickup_Implementation(ACharacter* PotentialChar)
 {
 	if(PotentialChar && PotentialChar->IsPlayerControlled())
 	{

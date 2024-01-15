@@ -1,6 +1,7 @@
 ﻿#include "Ability/Activation/RangedActivation.h"
 #include "GameFramework/PlayerController.h"
 #include "AIController.h"
+#include "ActorComponent/MountManagerComponent.h"
 #include "Character/CommonCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -164,8 +165,8 @@ FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, F
 	FHitResult Hit(ForceInit);
 	TArray<AActor*> IgnoreActors; 
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
-	auto DrawDebugTrace = EDrawDebugTrace::None;
 	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
+	auto DrawDebugTrace = EDrawDebugTrace::None;
 	if(bLineTrace)
 	{
 		UKismetSystemLibrary::LineTraceSingle(this, StartTrace, EndTrace, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 10.f);
@@ -181,9 +182,9 @@ TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision()
 	TArray<AActor*> IgnoredActors;
 	IgnoredActors.Add(GetInstigator());
 	// If instigator is a Character, ignore their mount (if any)
-	if(const ACommonCharacter* CastedChar = Cast<ACommonCharacter>(GetInstigator()))
+	if(const UMountManagerComponent* MountManager = GetInstigator()->FindComponentByClass<UMountManagerComponent>())
 	{
-		if(AActor* CastedMount = Cast<AActor>(CastedChar->GetCurrentMount().GetObject()))
+		if(AActor* CastedMount = Cast<AActor>(MountManager->GetCurrentMount().GetObject()))
 		{
 			IgnoredActors.AddUnique(CastedMount);
 		}

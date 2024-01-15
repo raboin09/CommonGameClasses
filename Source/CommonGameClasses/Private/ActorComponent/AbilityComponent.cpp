@@ -13,6 +13,17 @@ UAbilityComponent::UAbilityComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+void UAbilityComponent::DestroyAbilities()
+{
+	for(auto KeyVal : SlottedAbilities)
+	{
+		if(const TScriptInterface<IAbility> Ability = KeyVal.Value)
+		{
+			Ability->DestroyAbility();
+		}
+	}
+}
+
 void UAbilityComponent::BeginPlay()
 {
 	Super::BeginPlay();

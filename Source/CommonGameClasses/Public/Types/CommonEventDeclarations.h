@@ -11,7 +11,7 @@
 #include "CommonEventDeclarations.generated.h"
 
 ///////////////////////////
-// ABILITY ADDED
+// Ability added
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FNewAbilityAddedPayload
@@ -26,7 +26,7 @@ struct FNewAbilityAddedPayload
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewAbilityAdded, const FNewAbilityAddedPayload&, NewAbilityAddedPayload);
 
 ///////////////////////////
-// ABILITY REMOVED
+// Ability removed
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FAbilityRemovedPayload
@@ -41,7 +41,7 @@ struct FAbilityRemovedPayload
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityRemoved, const FAbilityRemovedPayload&, AbilityRemovedPayload);
 
 ///////////////////////////
-// NEW LEVEL LOADED
+// New level added
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FNewLevelLoadedEventPayload
@@ -196,7 +196,7 @@ struct FGameplayTagAddedEventPayload
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag AddedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload&)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload&, GameplayTagAddedEventPayload);
 
 ///////////////////////////////////////
 // Gameplay tag removed
@@ -216,10 +216,10 @@ struct FGameplayTagRemovedEventPayload
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag RemovedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload&)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload&, GameplayTagRemovedEventPayload);
 
 ///////////////////////////
-// DEATH EVENT
+// Death event
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FActorDeathEventPayload
@@ -237,7 +237,7 @@ struct FActorDeathEventPayload
 	UPROPERTY()
 	FDamageHitReactEvent HitReactEvent = FDamageHitReactEvent();
 };
-DECLARE_EVENT_OneParam(UHealthComponent, FActorDeath, const FActorDeathEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorDeath, const FActorDeathEventPayload&, ActorDeathEventPayload);
 
 ///////////////////////////
 // MAX WOUNDS EVENT
@@ -254,7 +254,7 @@ struct FMaxWoundsEventPayload
 	UPROPERTY()
 	float Delta = 0.f;
 };
-DECLARE_EVENT_OneParam(UHealthComponent, FMaxWoundsChanged, const FMaxWoundsEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMaxWoundsChanged, const FMaxWoundsEventPayload&, MaxWoundsEventPayload);
 
 ///////////////////////////
 // CURRENT WOUND EVENT
@@ -285,10 +285,10 @@ struct FCurrentWoundEventPayload
 	UPROPERTY()
 	AActor* InstigatingActor = nullptr;
 };
-DECLARE_EVENT_OneParam(UHealthComponent, FCurrentWoundHealthChanged, const FCurrentWoundEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCurrentWoundHealthChanged, const FCurrentWoundEventPayload&, CurrentWoundEventPayload);
 
 ///////////////////////////////////////
-// QUEST EVENT
+// Quest Event
 ///////////////////////////////////////
 USTRUCT(BlueprintType)
 struct FQuestObjectiveEventPayload
@@ -316,7 +316,7 @@ struct FQuestObjectiveEventPayload
 DECLARE_EVENT_OneParam(UQuestObjectiveComponent, FQuestObjectiveEvent, const FQuestObjectiveEventPayload&);
 
 ///////////////////////////////////////
-// QUEST UPDATE
+// Quest Update
 ///////////////////////////////////////
 
 USTRUCT(BlueprintType)
@@ -365,7 +365,7 @@ struct FEnergyChangedEventPayload
 	UPROPERTY(BlueprintReadOnly)
 	float MaxEnergy;
 };
-DECLARE_EVENT_OneParam(UManaComponent, FEnergyAmountChangedEvent, const FEnergyChangedEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEnergyAmountChangedEvent, const FEnergyChangedEventPayload&, EnergyChangedEventPayload);
 
 ///////////////////////////
 // AMMO AMOUNT CHANGED
@@ -392,7 +392,7 @@ struct FAmmoAmountChangedPayload
 	int32 MaxAmmo;
 	
 };
-DECLARE_EVENT_OneParam(UAmmoComponent, FAmmoAmountChangedEvent, const FAmmoAmountChangedPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAmmoAmountChangedEvent, const FAmmoAmountChangedPayload&, AmmoAmountChangedPayload);
 
 ///////////////////////////
 // AMMO AMOUNT CHANGED
@@ -405,11 +405,11 @@ struct FOutOfAmmoEventPayload
 	UPROPERTY()
 	bool bCompletelyOutOfAmmo = false;
 };
-DECLARE_EVENT_OneParam(UAmmoComponent, FOutOfAmmoEvent, const FOutOfAmmoEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOutOfAmmoEvent, const FOutOfAmmoEventPayload&, OutOfAmmoEventPayload);
 
-///////////////////////////
-// INTERACTION EVENT OCCURRED
-///////////////////////////
+//////////////////////////////
+// Interaction event occurred
+//////////////////////////////
 USTRUCT(BlueprintType)
 struct FInteractionStartedEventPayload
 {
@@ -431,9 +431,9 @@ struct FInteractionStartedEventPayload
 };
 DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionStartedEvent, const FInteractionStartedEventPayload);
 
-///////////////////////////
-// INTERACTION EVENT OCCURRED
-///////////////////////////
+//////////////////////////////
+// Interaction event occurred
+//////////////////////////////
 USTRUCT(BlueprintType)
 struct FInteractionInitiatedEventPayload
 {
@@ -453,9 +453,9 @@ struct FInteractionInitiatedEventPayload
 };
 DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionInitiatedEvent, const FInteractionInitiatedEventPayload);
 
-///////////////////////////
-// INTERACTION EVENT OCCURRED
-///////////////////////////
+/////////////////////////////////////
+// Interaction outline event occurred
+/////////////////////////////////////
 USTRUCT(BlueprintType)
 struct FInteractionOutlinedEventPayload
 {

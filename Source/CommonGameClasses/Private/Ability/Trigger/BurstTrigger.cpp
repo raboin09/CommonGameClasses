@@ -3,7 +3,16 @@
 void UBurstTrigger::PressTrigger()
 {
 	bTriggerHeld = true;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_BurstFire, this, &UBurstTrigger::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);
+	if(TimeBetweenBurstShots <= 0.f)
+	{
+		for(int ActivationCount = 0; ActivationCount < NumberOfActivations; ++ActivationCount)
+		{
+			Internal_BurstFireTick();
+		}
+	} else
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BurstFire, this, &UBurstTrigger::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);	
+	}
 }
 
 void UBurstTrigger::ReleaseTrigger()

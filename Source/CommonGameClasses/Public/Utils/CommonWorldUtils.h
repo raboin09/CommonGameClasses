@@ -51,7 +51,7 @@ public:
 	template<typename T>
 	FORCEINLINE static T* SpawnActorToPersistentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
-		return Internal_TemplatedSpawnActorFromClass<T>(PersistentWorld, ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
+		return Internal_TemplatedSpawnActorFromClass<T>(PersistentWorld ? PersistentWorld : Owner->GetWorld(), ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
 	}
 	
 	template<typename T>

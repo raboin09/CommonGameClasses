@@ -21,6 +21,7 @@ ACommonAIController::ACommonAIController()
 	Sight->DetectionByAffiliation.bDetectFriendlies = true;
 	Sight->DetectionByAffiliation.bDetectNeutrals = true;
 	AIPerceptionComponent->ConfigureSense(*Sight);
+	bAttachToPawn = true;
 }
 
 void ACommonAIController::OnPossess(APawn* InPawn)
@@ -45,6 +46,17 @@ void ACommonAIController::OnUnPossess()
 {
 	BehaviorTreeComponent->StopTree();
 	Super::OnUnPossess();
+}
+
+FVector ACommonAIController::GetFocalPointOnActor(const AActor* Actor) const
+{
+	const auto* FocusedPawn{Cast<APawn>(Actor)};
+	if (IsValid(FocusedPawn))
+	{
+		return FocusedPawn->GetPawnViewLocation();
+	}
+
+	return Super::GetFocalPointOnActor(Actor);
 }
 
 void ACommonAIController::InitAIBehavior(UBehaviorTree* BehaviorTree) const

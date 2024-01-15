@@ -9,8 +9,8 @@ void UGameplayTagComponent::BeginPlay()
 	Super::BeginPlay();
 	if(ITaggable* Taggable = Cast<ITaggable>(GetOwner()))
 	{
-		GameplayTagAddedEvent.AddRaw(Taggable, &ITaggable::HandleTagAdded);
-		GameplayTagRemovedEvent.AddRaw(Taggable, &ITaggable::HandleTagRemoved);	
+		GameplayTagAddedEvent.AddDynamic(Taggable, &ITaggable::HandleTagAdded);
+		GameplayTagRemovedEvent.AddDynamic(Taggable, &ITaggable::HandleTagRemoved);	
 	}
 }
 

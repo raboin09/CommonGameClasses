@@ -51,7 +51,7 @@ void ACommonInteractableActor::K2_HandleOverlapEvent_Implementation(AActor* Othe
 {
 	if(ACharacter* CastedChar = Cast<ACharacter>(OtherActor))
 	{
-		if(CanPickup(CastedChar))
+		if(K2_CanPickup(CastedChar))
 		{
 			ConsumePickup(CastedChar);
 			if(bDiesAfterOverlap)
@@ -61,6 +61,11 @@ void ACommonInteractableActor::K2_HandleOverlapEvent_Implementation(AActor* Othe
 			Super::K2_HandleOverlapEvent_Implementation(OtherActor, HitResult);
 		}
 	}
+}
+
+bool ACommonInteractableActor::K2_CanPickup_Implementation(ACharacter* PotentialChar)
+{
+	return true;
 }
 
 void ACommonInteractableActor::ConsumePickup(ACharacter* ConsumingChar)

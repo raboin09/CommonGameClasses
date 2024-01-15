@@ -9,6 +9,7 @@
 #include "Types/CommonTagTypes.h"
 #include "CommonCharacter.generated.h"
 
+class UMountManagerComponent;
 struct FGameplayTag;
 class IMountable;
 class UHealthComponent;
@@ -33,14 +34,15 @@ protected:
 
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
+	UFUNCTION(BlueprintCallable)
+	virtual void HandleDeath();
 	
 	////////////////////////////////
 	/// Common Events
 	////////////////////////////////
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "COMMON|Character")
+	UFUNCTION(BlueprintImplementableEvent, Category = "COMMON|Character")
 	void K2_OnDeath();
-	virtual void K2_OnDeath_Implementation();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
@@ -62,18 +64,6 @@ protected:
 	UEffectContainerComponent* EffectContainerComponent;
 	UPROPERTY()
 	UGameplayTagComponent* GameplayTagComponent;
-
-	////////////////////////////////
-	/// Mounts
-	////////////////////////////////
-public:
-	FORCEINLINE void AssignNewMountable(UObject* InMountableObject, const FHitResult& InHitResult);
-	FORCEINLINE TScriptInterface<IMountable> GetCurrentMount() const { return CurrentMount; }
-	FORCEINLINE bool IsMounted() const { return CurrentMount != nullptr; }
-	FORCEINLINE bool CanGetInCover() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::CannotMount); }
-protected:
-	UPROPERTY()
-	TScriptInterface<IMountable> CurrentMount;
 
 	////////////////////////////////
 	/// Knockbacks and Hit Reacts

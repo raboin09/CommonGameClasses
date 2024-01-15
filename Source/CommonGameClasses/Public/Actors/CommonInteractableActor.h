@@ -45,7 +45,11 @@ protected:
 	virtual void PostInitializeComponents() override;	
 	virtual void K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult) override;
 	FORCEINLINE virtual UMeshComponent* GetMesh_Implementation() const override { return PickupBase; }
-	virtual bool CanPickup(ACharacter* PotentialChar) PURE_VIRTUAL(ACommonInteractableActor::CanPickup, return false;)
+	
+	UFUNCTION(BlueprintNativeEvent)
+	bool K2_CanPickup(ACharacter* PotentialChar);
+	virtual bool K2_CanPickup_Implementation(ACharacter* PotentialChar);
+	
 	virtual void ConsumePickup(ACharacter* ConsumingChar);
 
 	UPROPERTY(EditAnywhere, Category="CUSTOM")

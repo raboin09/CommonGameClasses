@@ -32,6 +32,9 @@ public:
 	UAbilityComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
+	void DestroyAbilities();
+	
+	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityClass, const FGameplayTag& SlotTag);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void TryStartAbilityInSlot(const FGameplayTag& SlotTag);
@@ -48,9 +51,12 @@ private:
 	
 	UPROPERTY()
 	TMap<FGameplayTag, TScriptInterface<IAbility>> SlottedAbilities;
-
+	UPROPERTY()
 	FAwaitingActivationDetails AwaitingActivationDetails;
+
+	UPROPERTY(BlueprintAssignable)
 	FNewAbilityAdded NewAbilityAdded;
+	UPROPERTY(BlueprintAssignable)
 	FAbilityRemoved AbilityRemoved;
 
 public:

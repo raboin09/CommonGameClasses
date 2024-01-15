@@ -21,9 +21,11 @@ public:
 	float TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
 	void StopAnimMontage(UAnimMontage* Montage = nullptr);
 	float ForcePlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
-	
+
 	void SetAnimationOverlay(const FGameplayTag& NewOverlay);
+	UFUNCTION(BlueprintCallable)
 	void StartRagdolling();
+	UFUNCTION(BlueprintCallable)
 	void StopRagdolling();
 	
 protected:
@@ -31,6 +33,11 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UFUNCTION()
+	void HandleCurrentWoundChangedEvent(const FCurrentWoundEventPayload& CurrentWoundEventPayload);
+	UFUNCTION()
+	void HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload);
+	
 	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
 	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
 	void Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bShouldRecoverFromKnockback = true);

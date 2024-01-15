@@ -16,7 +16,9 @@ class COMMONGAMECLASSES_API UGameplayTagComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	virtual void BeginPlay() override;
+	
 	////////////////////////////////////////////
 	// Static Functions
 	////////////////////////////////////////////
@@ -52,11 +54,13 @@ public:
 	
 	void RemoveTag(const FGameplayTag& TagToRemove);
 	void AddTag(const FGameplayTag& TagToAdd);
-	virtual void BeginPlay() override;
+
+protected:
+	UPROPERTY(BlueprintAssignable)
+	FGameplayTagAddedEvent GameplayTagAddedEvent;
+	UPROPERTY(BlueprintAssignable)
+	FGameplayTagRemovedEvent GameplayTagRemovedEvent;
 	
 private:	
 	FGameplayTagContainer GameplayTagContainer;
-
-	FGameplayTagAddedEvent GameplayTagAddedEvent;
-	FGameplayTagRemovedEvent GameplayTagRemovedEvent;
 };

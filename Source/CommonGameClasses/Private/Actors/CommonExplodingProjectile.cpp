@@ -42,6 +42,6 @@ void ACommonExplodingProjectile::OnImpact(const FHitResult& HitResult)
 void ACommonExplodingProjectile::Internal_Explode()
 {
 	bExplodedAlready = true;
-	UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(GetOwner(), ProjectileEffectsToApply, GetActorLocation(), ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), bFriendlyFire ? EAffiliation::All : EAffiliation::Enemies, true, GetActorLocation());
+	UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(GetInstigator(), ProjectileEffectsToApply, GetActorLocation(), ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), bFriendlyFire ? EAffiliation::All : EAffiliation::Enemies, true, GetActorLocation());
 	K2_HandleExplosion();
 }

@@ -19,7 +19,8 @@ bool UCommonInteractUtils::AreActorsAllies(const AActor* FirstActor, const AActo
 	if(IsActorNeutral(SecondActor))
 	{
 		return false;
-	}	
+	}
+	
 	return GetAffiliationOfActor(FirstActor) == GetAffiliationOfActor(SecondActor);
 }
 
@@ -53,10 +54,17 @@ EAffiliation UCommonInteractUtils::GetAffiliationOfActor(const AActor* InActor)
 	{
 		return EAffiliation::None;
 	}
+	
 	if(const UInteractionComponent* InteractionComponent = InActor->FindComponentByClass<UInteractionComponent>())
 	{
 		return InteractionComponent->Affiliation;
 	}
+	
+	if(UCommonCoreUtils::GetCommonPlayerCharacter(InActor) == InActor)
+	{
+		return EAffiliation::Allies;
+	}
+	
 	return EAffiliation::None;
 }
 EAffiliation UCommonInteractUtils::GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor)

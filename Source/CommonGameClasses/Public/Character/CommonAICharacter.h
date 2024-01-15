@@ -26,6 +26,11 @@ public:
 	virtual void HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload) override;
 	virtual void HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload) override;
 	virtual void HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload) override;
+
+	//////////////////////////////////////
+	// ACommonCharacter Overrides
+	//////////////////////////////////////
+	virtual void HandleDeath() override;
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
@@ -35,6 +40,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 
+	
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UBotBehaviorComponent* BotBehaviorComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

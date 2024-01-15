@@ -122,6 +122,11 @@ void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
 	MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);
 }
 
+void ACommonAbility::DestroyAbility()
+{
+	Destroy();
+}
+
 void ACommonAbility::Internal_SetMeshToUse()
 {
 	if(MeshType == EMeshType::AbilityMesh)

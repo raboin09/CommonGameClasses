@@ -22,12 +22,14 @@ public:
 	ACommonAIController();
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
-
+	virtual FVector GetFocalPointOnActor(const AActor* Actor) const override;
+	
 	////////////////////////////////
 	/// Common Functions
 	////////////////////////////////
 public:
 	// Start a new behavior tree for the possessed bot
+	UFUNCTION(BlueprintCallable)
 	void InitAIBehavior(UBehaviorTree* BehaviorTree) const;
 	
 private:

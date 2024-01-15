@@ -1,6 +1,8 @@
 ﻿
 #include "ActorComponent/CharacterAnimationComponent.h"
 
+#include "ActorComponent/HealthComponent.h"
+#include "ActorComponent/MountManagerComponent.h"
 #include "GameFramework/Character.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
@@ -31,6 +33,25 @@ void UCharacterAnimationComponent::BeginPlay()
 		return;
 	}
 	OwningTagComponent = OwnerCharacter->GetGameplayTagComponent();
+	if(UHealthComponent* HealthComponent = OwnerCharacter->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->OnCurrentWoundHealthChanged().AddDynamic(this, &UCharacterAnimationComponent::HandleCurrentWoundChangedEvent);
+		HealthComponent->OnActorDeath().AddDynamic(this, &UCharacterAnimationComponent::HandleActorDeathEvent);
+	}
+}
+
+void UCharacterAnimationComponent::HandleCurrentWoundChangedEvent(const FCurrentWoundEventPayload& CurrentWoundEventPayload)
+{
+	if(!CurrentWoundEventPayload.bNaturalChange)
+	{
+		return;
+	}
+	Internal_TryStartCharacterKnockback(CurrentWoundEventPayload.DamageHitReactEvent, true);
+}
+
+void UCharacterAnimationComponent::HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload)
+{
+	Internal_TryStartCharacterKnockback(DeathEventPayload.HitReactEvent, false);
 }
 
 float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
@@ -103,9 +124,12 @@ float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayD
 void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange)
 {
 	// TODO Add condition for knocking character off of mount on hit reactions
-	if(OwnerCharacter->IsMounted())
+	if(const UMountManagerComponent* MountManager = GetOwner()->FindComponentByClass<UMountManagerComponent>())
 	{
-		return;
+		if(MountManager->IsMounted())
+		{
+			return;
+		}	
 	}
 	
 	StartRagdolling();
@@ -136,10 +160,12 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 	{
 		ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(EHitReactType::Knockback_VeryLight);
 	}
-	else if(bShouldRecoverFromKnockback && ImpulseValue == 0.f)
+	
+	else if((bShouldRecoverFromKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Immovable))
 	{
 		return;
 	}
+	
 	const float KnockdownDuration = UCommonCombatUtils::GetKnockbackRecoveryTime(HitReactEvent.HitReactType);
 	const FName HitBoneName = UCommonCombatUtils::GetNearestValidBoneForImpact(HitReactEvent.HitResult.BoneName);
 	Internal_ApplyCharacterKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);

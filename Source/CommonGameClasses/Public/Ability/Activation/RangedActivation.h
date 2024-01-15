@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BaseActivation.h"
 #include "Actors/CommonActor.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonAbilityTypes.h"
 #include "RangedActivation.generated.h"
 
@@ -39,13 +40,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
 	// Socket where the muzzle or hand is
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(EditCondition = "LineTraceDirection == ELineTraceDirection::Mesh", EditConditionHides))
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
-	bool bAimOriginIsPlayerEyesInsteadOfWeapon;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = 0.f))
 	float TraceRange = 1000.f;
-
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	float TraceRadius = 20.f;
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bHasFiringSpread = false;
 	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
@@ -54,6 +54,9 @@ protected:
 	float FiringSpreadIncrement = 1.0f;
 	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float FiringSpreadMax = 10.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	bool bDrawDebugTrace = false;
 	
 private:
 	void Internal_AssignOwningController();

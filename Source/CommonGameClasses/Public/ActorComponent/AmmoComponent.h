@@ -33,12 +33,14 @@ protected:
 	bool bInfiniteClip = false;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bAmmoRegenerates = false;
+
+	UPROPERTY(BlueprintAssignable)
+	FAmmoAmountChangedEvent AmmoAmountChanged;
+	UPROPERTY(BlueprintAssignable)
+	FOutOfAmmoEvent OutOfAmmo;
 	
 private:
 	void BroadcastAmmoUsage();
-	
-	FAmmoAmountChangedEvent AmmoAmountChanged;
-	FOutOfAmmoEvent OutOfAmmo;
 
 public:
 	FORCEINLINE FAmmoAmountChangedEvent& OnAmmoAmountChanged() { return AmmoAmountChanged; }
