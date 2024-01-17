@@ -27,6 +27,9 @@ class COMMONGAMECLASSES_API ACommonCharacter : public AAlsCharacter, public ITag
 
 public:	
 	ACommonCharacter(const FObjectInitializer& ObjectInitializer);
+
+	UFUNCTION(BlueprintNativeEvent)
+	float GetMaxSpeedRatio() const;
 	
 protected:
 	virtual void PostInitializeComponents() override;
@@ -36,6 +39,8 @@ protected:
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	UFUNCTION(BlueprintCallable)
 	virtual void HandleDeath();
+	UFUNCTION(BlueprintCallable)
+	void SetMoveSpeedRatioIncrease(float Ratio);
 	
 	////////////////////////////////
 	/// Common Events
@@ -47,7 +52,7 @@ protected:
 	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload);
-
+	
 	////////////////////////////////
 	/// Common Variables
 	////////////////////////////////
@@ -60,6 +65,8 @@ protected:
 	UAbilityComponent* AbilityComponent;
 	UPROPERTY(BlueprintReadOnly)
 	UCharacterAnimationComponent* CharacterAnimationComponent;
+	UPROPERTY(BlueprintReadOnly)
+	UCommonCharacterMovementComponent* CommonCharacterMovementComponent;
 	UPROPERTY()
 	UEffectContainerComponent* EffectContainerComponent;
 	UPROPERTY()

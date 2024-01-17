@@ -18,11 +18,9 @@ public:
 	virtual void BeginPlay() override;
 	
 	virtual float CalculateResourceCost(const float RequestedAmount) const override;
-	virtual bool TrySpendResource(const float RequestedAmount) override;
-	virtual void GiveResource(const float AmountToGive) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
-	float TakeDamage(const float RawDamage, AActor* InstigatingActor, const FDamageHitReactEvent& HitReactEvent);
+	void TakeDamage(const float RawDamage, AActor* InstigatingActor, const FDamageHitReactEvent& HitReactEvent);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void ApplyHeal(const float RawHeal, AActor* InstigatingActor = nullptr);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
@@ -38,9 +36,9 @@ protected:
 	
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
-	FORCEINLINE float GetCurrentHealth() const { return ResourcePoolContainer.GetSumOfAllResourcePools(); }
+	FORCEINLINE float GetCurrentHealth() const { return GetAvailableResourceAmount(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
-	FORCEINLINE float GetMaxHealth() const { return ResourcePoolContainer.GetMaxSumOfAllResourcePools(); }
+	FORCEINLINE float GetMaxHealth() const { return GetMaxResourceAmount(); }
 	
 	FORCEINLINE FMaxWoundsChanged& OnMaxWoundsChanged() { return MaxWoundsChanged; }
 	FORCEINLINE FActorDeath& OnActorDeath() { return ActorDeath; }

@@ -28,16 +28,16 @@ void ACommonStatModifierEffect::DestroyEffect()
 void ACommonStatModifierEffect::K2_ApplyStatChange_Implementation(float ModifiedStatValue)
 {
 	switch (StatEffectDataObj->StatToModify) {
-	case EEffectStatType::Health_MaxWounds:
+	case EEffectStatType::MaxHealth:
 		Internal_HealthMaxWounds(ModifiedStatValue);
 		break;
-	case EEffectStatType::Health_Heal:
+	case EEffectStatType::HealHealth:
 		Internal_HealthHeal(ModifiedStatValue);
 		break;
-	case EEffectStatType::Health_Damage:
+	case EEffectStatType::Damage:
 		Internal_HealthDamage(ModifiedStatValue);
 		break;
-	case EEffectStatType::Movespeed:
+	case EEffectStatType::MoveSpeed:
 		Internal_MovespeedStatChange(ModifiedStatValue);
 		break;
 	default:;

@@ -16,7 +16,7 @@ public:
 	UBaseStatsModifierData() {}
 	
 	UPROPERTY(EditDefaultsOnly)
-	EEffectStatType StatToModify = EEffectStatType::Health_Damage;
+	EEffectStatType StatToModify = EEffectStatType::Damage;
 	UPROPERTY(EditDefaultsOnly)
 	float BaseModifierValue;
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Health_Damage", EditConditionHides))

@@ -4,6 +4,7 @@
 #include "Actors/Effects/ConditionTree.h"
 
 #include "ActorComponent/HealthComponent.h"
+#include "ActorComponent/ShieldEnergyComponent.h"
 
 AActor* UConditionExpression::GetPropertyOwner(EPropertyOwner PropertyOwner, const FEffectContext& InEffectContext) const
 {
@@ -58,6 +59,14 @@ float UFloatLeafNode::GetProperty(const FEffectContext& InEffectContext) const
 			if(const UHealthComponent* HealthComponent = PropertyOwnerActor->GetComponentByClass<UHealthComponent>())
 			{
 				return HealthComponent->GetCurrentHealth();
+			}
+			return 0.f;
+		}
+	case EFloatOperand::CurrentShield:
+		{
+			if(const UShieldEnergyComponent* ShieldEnergyComponent = PropertyOwnerActor->GetComponentByClass<UShieldEnergyComponent>())
+			{
+				return ShieldEnergyComponent->GetCurrentEnergy();
 			}
 			return 0.f;
 		}

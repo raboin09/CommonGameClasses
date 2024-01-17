@@ -11,10 +11,18 @@ class COMMONGAMECLASSES_API UEnergyComponent : public UResourceComponent
 
 public:	
 	UEnergyComponent();
+	
+	///////////////////////////////////
+	/// IResourceContainer overrides
+	////////////////////////////////////
 	virtual bool TrySpendResource(const float RequestedAmount) override;
 	virtual void GiveResource(const float AmountToGive) override;
-	virtual float CalculateResourceCost(const float RequestedAmount) const override;
 
+	///////////////////////////////////
+	/// ResourceComponent overrides
+	////////////////////////////////////
+	virtual float CalculateResourceCost(const float RequestedAmount) const override;
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -25,5 +33,9 @@ private:
 	FEnergyAmountChangedEvent EnergyAmountChanged;
 
 public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
+	FORCEINLINE float GetCurrentEnergy() const { return GetAvailableResourceAmount(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
+	FORCEINLINE float GetMaxEnergy() const { return GetMaxResourceAmount(); }
 	FORCEINLINE virtual FEnergyAmountChangedEvent& OnEnergyChanged() { return EnergyAmountChanged; }
 };

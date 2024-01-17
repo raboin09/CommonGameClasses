@@ -36,7 +36,8 @@ enum class EPropertyOwner : uint8
 UENUM(BlueprintType)
 enum class EFloatOperand : uint8
 {
-	CurrentHealth
+	CurrentHealth,
+	CurrentShield
 };
 
 UCLASS(Abstract, NotBlueprintable, BlueprintType, EditInlineNew)

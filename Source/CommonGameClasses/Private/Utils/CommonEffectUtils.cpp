@@ -7,6 +7,7 @@
 #include "Engine/DataTable.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/EffectContainerComponent.h"
+#include "ActorComponent/ShieldEnergyComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCombatTypes.h"
 #include "Utils/CommonInteractUtils.h"
@@ -200,11 +201,16 @@ void UCommonEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AAc
 {
 	if(!ReceivingActor)
 		return;
-	UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>();
-	
-	if (!HealthComponent)
-		return;
-	HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
+
+	if(UShieldEnergyComponent* ShieldEnergyComponent = ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
+	{
+		Damage = ShieldEnergyComponent->TakeShieldDamage(Damage, InstigatingActor, HitReactEvent);
+	}
+
+	if(UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
+	}
 }
 
 UFXSystemAsset* UCommonEffectUtils::GetVFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)

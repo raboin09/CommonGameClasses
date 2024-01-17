@@ -25,6 +25,9 @@ public:
 	virtual bool TrySpendResource(const float RequestedAmount) override;
 	virtual void GiveResource(const float AmountToGive) override;
 
+	FORCEINLINE virtual float GetAvailableResourceAmount() const override { return ResourcePoolContainer.GetSumOfAllResourcePools(); }
+	FORCEINLINE virtual float GetMaxResourceAmount() const override { return ResourcePoolContainer.GetMaxSumOfAllResourcePools(); }
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -5,11 +5,13 @@
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
+#include "ActorComponent/CommonCharacterMovementComponent.h"
 #include "Core/ActorTrackingSubsystem.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonCoreUtils.h"
 
 
-ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super {ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(CharacterMovementComponentName)}
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -17,6 +19,12 @@ ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) 
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainerComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
+	CommonCharacterMovementComponent = Cast<UCommonCharacterMovementComponent>(GetCharacterMovement());
+}
+
+float ACommonCharacter::GetMaxSpeedRatio_Implementation() const
+{
+	return 1.f;
 }
 
 void ACommonCharacter::PostInitializeComponents()
@@ -64,4 +72,13 @@ void ACommonCharacter::HandleDeath()
 	DetachFromControllerPendingDestroy();
 	AbilityComponent->DestroyAbilities();
 	K2_OnDeath();
+}
+
+void ACommonCharacter::SetMoveSpeedRatioIncrease(float Ratio)
+{
+	if(!CommonCharacterMovementComponent)
+	{
+		return;
+	}
+	CommonCharacterMovementComponent->SetWalkSpeedRatio(Ratio);
 }
