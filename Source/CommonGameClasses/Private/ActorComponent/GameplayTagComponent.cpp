@@ -4,6 +4,11 @@
 #include "BlueprintGameplayTagLibrary.h"
 #include "Character/CommonCharacter.h"
 
+UGameplayTagComponent::UGameplayTagComponent()
+{
+	PrimaryComponentTick.bCanEverTick = false;
+}
+
 void UGameplayTagComponent::BeginPlay()
 {
 	Super::BeginPlay();

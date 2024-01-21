@@ -11,37 +11,43 @@
 
 ULockOnComponent::ULockOnComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	LockOnTransitionCurve = nullptr;
+	bUseControllerRotation = false;
+	bDrawDebug = false;
+	SelectedActor = nullptr;
 }
 
 void ULockOnComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FOnTimelineFloat CoverLerpFunction;
-	CoverLerpFunction.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionUpdate);
-	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, CoverLerpFunction);
+	FOnTimelineFloat InterpUpdateFunction;
+	InterpUpdateFunction.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionUpdate);
+	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, InterpUpdateFunction);
 	LockOnInterpTimeline.SetLooping(false);
 
-	FOnTimelineEvent CoverLerpFinishedEvent;
-	CoverLerpFinishedEvent.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionFinished);
-	LockOnInterpTimeline.SetTimelineFinishedFunc(CoverLerpFinishedEvent);
+	FOnTimelineEvent InterpFinishedFunction;
+	InterpFinishedFunction.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionFinished);
+	LockOnInterpTimeline.SetTimelineFinishedFunc(InterpFinishedFunction);
 }
 
-void ULockOnComponent::InterpToBestTargetForMeleeAttack(TFunction<void()> InFinishedFunction)
+void ULockOnComponent::InterpToBestTargetForMeleeAttack(const TFunction<void()>& InFinishedFunction)
 {
 	InterpToActor(Internal_TraceForTarget(), InFinishedFunction);
 }
 
-void ULockOnComponent::InterpToActor(AActor* ActorToInterpTo, TFunction<void()> InFinishedFunction)
+void ULockOnComponent::InterpToActor(AActor* ActorToInterpTo, const TFunction<void()>& InFinishedFunction)
 {
+	SetComponentTickEnabled(true);
 	SelectedActor = ActorToInterpTo;
 	if(!SelectedActor)
 	{
 		return;
 	}
 	
-	OnFinishedFunction = InFinishedFunction;	
+	OnFinishedFunction = InFinishedFunction;
 	if(AActor* SourceActor = GetOwner(); bUseControllerRotation)
 	{
 		SourceActor->SetActorRotation(Internal_GetControllerAndActorBlendedRotation(SourceActor));
@@ -95,6 +101,7 @@ void ULockOnComponent::Internal_InterpTransitionFinished()
 		OnFinishedFunction();
 	}
 	OnFinishedFunction.Reset();
+	SetComponentTickEnabled(false);
 }
 
 AActor* ULockOnComponent::Internal_TraceForTarget() const
@@ -142,7 +149,7 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 	return Internal_FindBestTargetFromActors(OutHitResults);
 }
 
-AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults) const
+AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults)
 {
 	if(PotentialHitResults.Num() <= 0)
 	{
@@ -160,7 +167,7 @@ AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> P
 	return HitActors[0];
 }
 
-FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor) const
+FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor)
 {
 	const APlayerController* PlayerController = nullptr;
 	if(const APawn* PawnObj = Cast<APawn>(SourceActor))

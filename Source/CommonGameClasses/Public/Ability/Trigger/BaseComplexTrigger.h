@@ -14,4 +14,10 @@ UCLASS(Abstract, NotBlueprintable, BlueprintType)
 class COMMONGAMECLASSES_API UBaseComplexTrigger : public UBaseTrigger
 {
 	GENERATED_BODY()
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void K2_HandlePressedTrigger();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void K2_HandleReleasedTrigger();
 };

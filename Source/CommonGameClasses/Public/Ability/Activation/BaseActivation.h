@@ -19,7 +19,4 @@ public:
 protected:	
 	UPROPERTY()
 	UMeshComponent* MeshComponentRef = nullptr;
-
-private:
-	void InitAssignMeshComponentRef();
 };

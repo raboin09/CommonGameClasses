@@ -8,7 +8,7 @@
 #include "ActivationMechanism.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UActivationMechanism : public UInterface
 {
 	GENERATED_BODY()

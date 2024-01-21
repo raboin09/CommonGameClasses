@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/CommonEventDeclarations.h"
 #include "UObject/Interface.h"
 #include "Ability.generated.h"
 
@@ -21,13 +22,18 @@ class COMMONGAMECLASSES_API IAbility
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	FORCEINLINE FAbilityFinishedEquip& OnAbilityFinishedEquip() { return AbilityFinishedEquip; }
+	
+	virtual void EquipAbility() PURE_VIRTUAL(IAbility::EquipAbility, )
+	virtual void UnEquipAbility() PURE_VIRTUAL(IAbility::UnEquipAbility, )
+	
 	virtual bool TryStartAbility() PURE_VIRTUAL(IAbility::TryStartAbility, return false;)
-	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
 	virtual bool TryEndAbility() PURE_VIRTUAL(IAbility::TryEndAbility, return false;)
 	
 	virtual UMeshComponent* GetAbilityMesh() const PURE_VIRTUAL(IAbility::GetAbilityMesh, return nullptr; )
-
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IAbility::InitAbility, )
 	virtual void DestroyAbility() PURE_VIRTUAL(IAbility::DestroyAbility, )
+
+protected:
+	FAbilityFinishedEquip AbilityFinishedEquip;
 };

@@ -15,6 +15,8 @@ DECLARE_CYCLE_STAT(TEXT("CommonClasses_EffectContainerTick"), STAT_CommonClasses
 UEffectContainerComponent::UEffectContainerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	bIsTicking = false;
+	CachedWorld = nullptr;
 }
 
 void UEffectContainerComponent::TryApplyEffectToContainerFromHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
@@ -50,7 +52,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 		SpawnTransform = FTransform(UCommonCombatUtils::GetRotationFromComponentHit(Impact), Impact.ImpactPoint);
 	}
 
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor, Cast<APawn>(InstigatingActor));
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor, Cast<APawn>(InstigatingActor));
 	if (!EffectActor)
 	{
 		return nullptr;
@@ -81,7 +83,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubcl
 
 	const FTransform& SpawnTransform = GetOwner()->GetActorTransform();
 
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<ACommonEffect>(BaseEffectClass);
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass);
 	if (!EffectActor)
 	{
 		return nullptr;

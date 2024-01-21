@@ -29,6 +29,8 @@ class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbilit
 	
 public:
 	ACommonAbility();
+	virtual void EquipAbility() override;
+	virtual void UnEquipAbility() override;
 	virtual bool TryStartAbility() override;
 	virtual bool TryEndAbility() override;
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) override;
@@ -37,6 +39,18 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void HandleEquipFinished();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	UAnimMontage* K2_GetEquipAnim();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void K2_HandleEquip();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void K2_HandleEquipFinished();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void K2_HandleUnEquip();
 
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Animation")
 	FGameplayTag AbilityOverlay = FGameplayTag(CommonGameAnimation::Unarmed);
@@ -73,6 +87,8 @@ protected:
 
 private:
 	void Internal_SetMeshToUse();
+	void Internal_HideMesh(bool bShouldHide) const;
+	
 	void SetTriggerMechanism();
 	void SetResourceContainerObject();
 	void SetActivationMechanism();
@@ -86,9 +102,9 @@ private:
 	void InitWeaponMesh(UMeshComponent* InMeshComp) const;
 
 	UFUNCTION()
-	void HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload) const;
+	void HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload);
 	UFUNCTION()
-	void HandleAbilityDeactivationEvent(const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload) const;
+	void HandleAbilityDeactivationEvent(const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload);
 	UFUNCTION()
 	void HandleTriggerPressedEvent(const FTriggerEventPayload& AbilityTriggeredEventPayload) const;
 	UFUNCTION()
@@ -108,4 +124,6 @@ private:
 	TObjectPtr<UBaseActivation> ActivationMechanism;
 	UPROPERTY()
 	UAbilityComponent* OwningAbilityComponent;
+	UPROPERTY()
+	FTimerHandle Timer_OnEquipFinished;
 }; 

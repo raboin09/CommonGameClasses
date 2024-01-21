@@ -8,24 +8,14 @@
 
 void UMontageTrigger::PressTrigger()
 {	
-	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::ComboWindowEnabled))
+	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::ComboActivated))
 	{
-		UGameplayTagComponent::AddTagToActor(GetOwner(), CommonGameAbilityEvent::ComboActivated);
-		UGameplayTagComponent::RemoveTagFromActor(GetOwner(), CommonGameAbilityEvent::ComboWindowEnabled);
 		Internal_IncrementComboCounter();
-		if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
-		{
-			Internal_StartMontage();
-		}
-	}
-	else if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
+	} else
 	{
-		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Committed))
-		{
-			return;
-		}
-		Internal_StartMontage();
+		Internal_ResetComboCounter();
 	}
+	Internal_StartMontage();
 }
 
 void UMontageTrigger::ReleaseTrigger()
@@ -35,6 +25,7 @@ void UMontageTrigger::ReleaseTrigger()
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
 	ReleaseTriggerEventPayload.bMontageDrivesActivation = true;
 	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
+	K2_HandleReleasedTrigger();
 }
 
 void UMontageTrigger::ResetTrigger()
@@ -70,18 +61,17 @@ void UMontageTrigger::Internal_StartMontage()
 	if(UCharacterAnimationComponent* CharacterAnimationComponent = CurrentInstigator->FindComponentByClass<UCharacterAnimationComponent>())
 	{
 		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
-		CachedComboSection = PlayData.MontageSection;
-		CharacterAnimationComponent->TryPlayAnimMontage(PlayData);
+		CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
 	}
 	
-	if(bShouldPlayerLockOnToNearestTarget)
+	if(bShouldPlayerLockOnToNearestTarget && CurrentInstigator->IsPlayerControlled())
 	{
-		if(ULockOnComponent* LockOnComponent = CurrentInstigator->FindComponentByClass<ULockOnComponent>(); LockOnComponent && CurrentInstigator->IsPlayerControlled())
+		if(ULockOnComponent* LockOnComponent = CurrentInstigator->FindComponentByClass<ULockOnComponent>())
 		{
 			LockOnComponent->InterpToBestTargetForMeleeAttack();
 		}
 	}
-	K2_AfterPressedTrigger();
+	K2_HandlePressedTrigger();
 
 	FTriggerEventPayload PressTriggerEventPayload;
 	PressTriggerEventPayload.ActivationLevel = ComboSectionIncrement;

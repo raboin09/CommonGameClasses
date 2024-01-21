@@ -7,8 +7,36 @@
 #include "GameplayTagContainer.h"
 #include "CommonResourceTypes.h"
 #include "CommonQuestTypes.h"
-#include "API/Ability/Ability.h"
 #include "CommonEventDeclarations.generated.h"
+
+class IAbility;
+
+///////////////////////////
+// Ability equipped
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FAbilityFinishedEquipPayload
+{
+	GENERATED_BODY()
+	FAbilityFinishedEquipPayload(){}
+	FAbilityFinishedEquipPayload(const TScriptInterface<IAbility> InEquippedAbility) : EquippedAbility(InEquippedAbility)	{ }
+	
+	UPROPERTY()
+	TScriptInterface<IAbility> EquippedAbility;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityFinishedEquip, const FAbilityFinishedEquipPayload&, AbilityFinishedEquipPayload);
+
+USTRUCT(BlueprintType)
+struct FNewAbilityEquippedPayload
+{
+	GENERATED_BODY()
+	FNewAbilityEquippedPayload(){}
+	FNewAbilityEquippedPayload(const TScriptInterface<IAbility> InEquippedAbility) : NewEquippedAbility(InEquippedAbility)	{ }
+	
+	UPROPERTY()
+	TScriptInterface<IAbility> NewEquippedAbility;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewAbilityEquipped, const FNewAbilityEquippedPayload&, NewAbilityEquippedPayload);
 
 ///////////////////////////
 // Ability added

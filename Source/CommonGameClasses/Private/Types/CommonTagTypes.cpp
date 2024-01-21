@@ -2,7 +2,8 @@
 
 namespace CommonGameSlot
 {
-	UE_DEFINE_GAMEPLAY_TAG(SlotMain, FName{TEXTVIEW("Slot.Main")})	
+	UE_DEFINE_GAMEPLAY_TAG(SlotMain, FName{TEXTVIEW("Slot.Main")})
+	UE_DEFINE_GAMEPLAY_TAG(SlotAlt, FName{TEXTVIEW("Slot.Alt")})	
 }
 
 namespace CommonGameActorType
@@ -12,13 +13,16 @@ namespace CommonGameActorType
 
 namespace CommonGameAbilityEvent
 {
+	UE_DEFINE_GAMEPLAY_TAG(StartAbilityAfterEquip, FName{TEXTVIEW("AbilityEvent.StartAbilityAfterEquip")})
+	UE_DEFINE_GAMEPLAY_TAG(Equipping, FName{TEXTVIEW("AbilityEvent.Equipping")})
 	UE_DEFINE_GAMEPLAY_TAG(OnCooldown, FName{TEXTVIEW("AbilityEvent.OnCooldown")})
 	UE_DEFINE_GAMEPLAY_TAG(Activated, FName{TEXTVIEW("AbilityEvent.Activated")})
 	UE_DEFINE_GAMEPLAY_TAG(RequestingStart, FName{TEXTVIEW("AbilityEvent.RequestingStart")})
 	UE_DEFINE_GAMEPLAY_TAG(Committed, FName{TEXTVIEW("AbilityEvent.Committed")})
 	UE_DEFINE_GAMEPLAY_TAG(ComboWindowEnabled, FName{TEXTVIEW("AbilityEvent.ComboWindowEnabled")})
 	UE_DEFINE_GAMEPLAY_TAG(ComboActivated, FName{TEXTVIEW("AbilityEvent.ComboActivated")})
-	UE_DEFINE_GAMEPLAY_TAG(Active, FName{TEXTVIEW("AbilityEvent.Active")})	
+	UE_DEFINE_GAMEPLAY_TAG(Active, FName{TEXTVIEW("AbilityEvent.Active")})
+	UE_DEFINE_GAMEPLAY_TAG(AutoStartAbility, FName{TEXTVIEW("AbilityEvent.AutoRestartAbility")})
 }
 
 namespace CommonGameState

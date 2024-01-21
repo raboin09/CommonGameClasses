@@ -7,7 +7,7 @@
 #include "UObject/Interface.h"
 #include "TriggerMechanism.generated.h"
 
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UTriggerMechanism : public UInterface
 {
 	GENERATED_BODY()

@@ -14,26 +14,17 @@ UCLASS()
 class COMMONGAMECLASSES_API UCommonWorldUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-public:	
-	static UWorld* PersistentWorld;
-	static UWorld* CurrentStreamedWorld;
+public:
+	static UWorld* CurrentWorld;
 	
 	UFUNCTION()
 	static void HandleNewLevelLoadEvent(const FNewLevelLoadedEventPayload& NewLevelLoadedPayload); 
 
 	////////////////////////////////////////////////////////////////////
-	/// Get all actors of world
-	////////////////////////////////////////////////////////////////////
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SpawnUtils")
-	static TArray<AActor*> GetAllActorsOfClassOfWorld(TSubclassOf<AActor> ActorClass, bool bStreamedWorld = false);
-
-	////////////////////////////////////////////////////////////////////
 	/// K2 Spawn deferred
 	////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
-	static AActor* K2_SpawnActorToCurrentStreamedWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
-	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
-	static AActor* K2_SpawnActorToPersistentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+	static AActor* K2_SpawnActorToCurrentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 	UFUNCTION(BlueprintCallable)
 	static void FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform);
 
@@ -41,36 +32,42 @@ public:
 	/// K2 Spawn instantly
 	////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable)
-	static AActor* K2_SpawnActorToCurrentStreamedWorld(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform);
-	UFUNCTION(BlueprintCallable)
-	static AActor* K2_SpawnActorToPersistentWorld(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform);
+	static AActor* K2_SpawnActorToCurrentWorld(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 
 	////////////////////////////////////////////////////////////////////
 	/// Native Spawn deferred
 	////////////////////////////////////////////////////////////////////
 	template<typename T>
-	FORCEINLINE static T* SpawnActorToPersistentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
+	FORCEINLINE static T* SpawnActorToCurrentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
-		return Internal_TemplatedSpawnActorFromClass<T>(PersistentWorld ? PersistentWorld : Owner->GetWorld(), ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
-	}
-	
-	template<typename T>
-	FORCEINLINE static T* SpawnActorToCurrentStreamedWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
-	{
-		return Internal_TemplatedSpawnActorFromClass<T>(CurrentStreamedWorld, ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
+		return Internal_TemplatedSpawnActorFromClass_Deferred<T>(ClassToSpawn, Owner, Instigator, CollisionHandlingOverride);
 	}
 	
 private:
 	
 	template<typename T>
-	FORCEINLINE static T* Internal_TemplatedSpawnActorFromClass(UWorld* World, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
+	FORCEINLINE static T* Internal_TemplatedSpawnActorFromClass_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
-		if(!World)
+		if(!CurrentWorld && (!Owner || !Owner->GetWorld()))
 		{
 			return nullptr;
 		}
-		return World->SpawnActorDeferred<T>(ClassToSpawn, FTransform(), Owner, Instigator, CollisionHandlingOverride);
+		UWorld* WorldToSpawnTo = CurrentWorld ? CurrentWorld : Owner->GetWorld();
+		return WorldToSpawnTo->SpawnActorDeferred<T>(ClassToSpawn, FTransform(), Owner, Instigator, CollisionHandlingOverride);
 	}
 
-	static AActor* Internal_SpawnActorFromClass(UWorld* World, UClass* Class, const FTransform& SpawnTransform);
+	template<typename T>
+	static T* Internal_TemplatedSpawnActorFromClass(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
+	{
+		if(!CurrentWorld && (!Owner || !Owner->GetWorld()))
+		{
+			return nullptr;
+		}
+		UWorld* WorldToSpawnTo = CurrentWorld ? CurrentWorld : Owner->GetWorld();
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = Owner;
+		SpawnParameters.Instigator = Instigator;
+		SpawnParameters.SpawnCollisionHandlingOverride = CollisionHandlingOverride;
+		return WorldToSpawnTo->SpawnActor<T>(ClassToSpawn, SpawnTransform, SpawnParameters);
+	}
 };

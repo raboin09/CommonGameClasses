@@ -7,6 +7,13 @@
 #include "Utils/CommonCombatUtils.h"
 #include "Utils/CommonEffectUtils.h"
 
+UBaseStatsModifierData::UBaseStatsModifierData()
+{
+	BaseModifierValue = 0;
+	HitImpulse = EHitReactType::None;
+	DeathImpulse = EHitReactType::None;
+}
+
 bool ACommonStatModifierEffect::TryActivateEffect()
 {
 	if(CanActivateEffect())
@@ -19,7 +26,7 @@ bool ACommonStatModifierEffect::TryActivateEffect()
 void ACommonStatModifierEffect::DestroyEffect()
 {
 	Super::DestroyEffect();
-	if(EffectData->InitializationData.bShouldReverseChangesAfterDestroy)
+	if(EffectData->InitializationData.bShouldReverseChangesAfterDestroy && ReversalFunc)
 	{
 		ReversalFunc();
 	}

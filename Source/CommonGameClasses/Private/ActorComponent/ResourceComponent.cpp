@@ -3,6 +3,10 @@
 
 #include "ActorComponent/ResourceComponent.h"
 
+#include "ActorComponent/GameplayTagComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Types/CommonTagTypes.h"
+
 UResourceComponent::UResourceComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -24,11 +28,12 @@ bool UResourceComponent::TrySpendResource(const float RequestedAmount)
 {
 	if(!CanSpendResourceAmount(RequestedAmount))
 	{
+		UKismetSystemLibrary::PrintString(this, "Cant spend");
 		return false;
 	}
 	const float Delta = CalculateResourceCost(RequestedAmount);
 	const float ActualResourcesTaken = ResourcePoolContainer.ConsumeResources(Delta);
-	if(!bIsRegenTicking)
+	if(!bIsRegenTicking && !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Dead))
 	{
 		Internal_StartRegenTimer();	
 	}

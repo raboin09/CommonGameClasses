@@ -59,7 +59,7 @@ ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector
 
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
-	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentStreamedWorld_Deferred<ACommonProjectile>(ProjectileClass, GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(ProjectileClass, GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
 	{		
 		Projectile->InitVelocity(ProjectileVelocity);
 		Projectile->SetLifeSpan(ProjectileLife);

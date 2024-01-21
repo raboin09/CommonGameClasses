@@ -7,11 +7,10 @@
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/CommonCharacterMovementComponent.h"
 #include "Core/ActorTrackingSubsystem.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonCoreUtils.h"
 
 
-ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super {ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(CharacterMovementComponentName)}
+ACommonCharacter ::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super {ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(CharacterMovementComponentName)}
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -45,6 +44,7 @@ void ACommonCharacter::BeginPlay()
 	{
 		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);		
 	}
+	AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);
 	
 	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UCommonCoreUtils::GetActorTrackingSubsystem(this))
 	{
@@ -71,7 +71,7 @@ void ACommonCharacter::HandleDeath()
 	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Dead);
 	DetachFromControllerPendingDestroy();
 	AbilityComponent->DestroyAbilities();
-	K2_OnDeath();
+	K2_HandleDeath();
 }
 
 void ACommonCharacter::SetMoveSpeedRatioIncrease(float Ratio)

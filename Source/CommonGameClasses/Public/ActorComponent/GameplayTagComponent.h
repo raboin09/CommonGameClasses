@@ -17,6 +17,7 @@ class COMMONGAMECLASSES_API UGameplayTagComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UGameplayTagComponent();
 	virtual void BeginPlay() override;
 	
 	////////////////////////////////////////////

@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "BaseComplexTrigger.h"
-#include "BaseTrigger.h"
-#include "API/Ability/TriggerMechanism.h"
 #include "MontageTrigger.generated.h"
 
 struct FAnimMontagePlayData;
@@ -20,9 +18,6 @@ public:
 	virtual void ReleaseTrigger() override;
 	virtual void ResetTrigger() override;
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return false; }
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void K2_AfterPressedTrigger();
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
@@ -33,8 +28,6 @@ protected:
 	bool bRandomizeMontages = false;
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	bool bShouldPlayerLockOnToNearestTarget = false;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	FName CachedComboSection;
 	
 private:
 	FAnimMontagePlayData Internal_GetPlayData() const;

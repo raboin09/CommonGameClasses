@@ -9,20 +9,15 @@
 #include "Kismet/GameplayStatics.h"
 #include "Types/CommonTagTypes.h"
 #include "Utils/CommonCoreUtils.h"
-#include "Utils/CommonWorldUtils.h"
 
 ULevelLoadingManagerImpl::ULevelLoadingManagerImpl()
 {
 	TimeToWaitBeforeFadingInCamera = 2.f;
 	CameraFadeLength = 2.f;
-	PersistentWorld = nullptr;
-	CurrentStreamedWorld = nullptr;
 }
 
 void ULevelLoadingManagerImpl::InitLoadingManager(TSoftObjectPtr<UWorld> PostProcessLevel)
 {
-	PersistentWorld = GetWorld();
-	UCommonWorldUtils::PersistentWorld = PersistentWorld;
 	BasePostProcessWorld = PostProcessLevel;
 	Internal_LoadBasePostProcessLevel();
 }
@@ -131,6 +126,6 @@ void ULevelLoadingManagerImpl::Internal_PostLevelLoad()
 			Internal_PlayCameraFade(true);
 		}, TimeToWaitBeforeFadingInCamera, false);
 	}
-	CurrentStreamedWorld = CurrentLevelContext.BaseLevelToLoad->GetWorld();
-	NewLevelLoadedEvent.Broadcast(FNewLevelLoadedEventPayload(CurrentStreamedWorld));
+	UWorld* CurrentWorld = CurrentLevelContext.BaseLevelToLoad->GetWorld();
+	NewLevelLoadedEvent.Broadcast(FNewLevelLoadedEventPayload(CurrentWorld));
 }

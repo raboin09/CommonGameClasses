@@ -20,7 +20,6 @@ void UCommonGameInstance::Internal_SetupManagers()
 {
 	// Create concrete impl objects to bind to each other's events
 	LevelLoadingManager = UCommonCoreUtils::CreateInterfaceOfType<ULevelLoadingManagerImpl, ILevelLoadingManager>(this);
-
 	LevelLoadingManager->OnNewLevelLoaded().AddStatic(&UCommonWorldUtils::HandleNewLevelLoadEvent);
 	LevelLoadingManager->InitLoadingManager(BasePostProcessWorld);
 }

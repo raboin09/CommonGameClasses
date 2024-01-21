@@ -16,8 +16,8 @@ public:
 	ULockOnComponent();
 	virtual void BeginPlay() override;
 	
-	void InterpToBestTargetForMeleeAttack(TFunction<void()> InFinishedFunction = TFunction<void()>());
-	void InterpToActor(AActor* ActorToInterpTo, TFunction<void()> InFinishedFunction = TFunction<void()>());
+	void InterpToBestTargetForMeleeAttack(const TFunction<void()>& InFinishedFunction = TFunction<void()>());
+	void InterpToActor(AActor* ActorToInterpTo, const TFunction<void()>& InFinishedFunction = TFunction<void()>());
 	
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -41,8 +41,8 @@ protected:
 	
 private:
 	AActor* Internal_TraceForTarget() const;
-	AActor* Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults) const;
-	FRotator Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor) const;
+	static AActor* Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults);
+	static FRotator Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor);
 	
 	void Internal_StartInterpTransition();
 	UFUNCTION()

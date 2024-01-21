@@ -37,29 +37,18 @@ void UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingActo
 		return;
 	}
 
-	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
-	
+	float ActualDamageToApply = RawDamage;
 	// If incoming damage is NOT lethal, apply damage and return. Otherwise, broadcast death event.
-	if(CanSpendResourceAmount(RawDamage))
+	if(!CanSpendResourceAmount(RawDamage))
 	{
-		TrySpendResource(RawDamage);
-		const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
-		FCurrentWoundEventPayload WoundEventPayload;
-		WoundEventPayload.InstigatingActor = InstigatingActor;
-		WoundEventPayload.ReceivingActor = GetOwner();
-		WoundEventPayload.NewWound = NewWound;
-		WoundEventPayload.OldWound = OldWound;
-		WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
-		WoundEventPayload.Delta = RawDamage;
-		WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
-		WoundEventPayload.bNaturalChange = true;
-		WoundEventPayload.bWasDamage = true;
-		WoundEventPayload.DamageHitReactEvent = HitReactEvent;
-		WoundEventPayload.DamageHitReactEvent.DamageTaken = RawDamage;
-		CurrentHealthChanged.Broadcast(WoundEventPayload);
-	} else
+		ActualDamageToApply = GetCurrentHealth();
+	}
+
+	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
+	TrySpendResource(ActualDamageToApply);
+	
+	if(GetAvailableResourceAmount() <= 0)
 	{
-		TrySpendResource(GetCurrentHealth());
 		FActorDeathEventPayload DeathEventPayload;
 		DeathEventPayload.DyingDamage = RawDamage;
 		DeathEventPayload.DyingActor = GetOwner();
@@ -67,6 +56,21 @@ void UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingActo
 		DeathEventPayload.HitReactEvent = HitReactEvent;
 		DeathEventPayload.HitResult = HitReactEvent.HitResult;
 		ActorDeath.Broadcast(DeathEventPayload);	
+	} else {
+		const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
+		FCurrentWoundEventPayload WoundEventPayload;
+		WoundEventPayload.InstigatingActor = InstigatingActor;
+		WoundEventPayload.ReceivingActor = GetOwner();
+		WoundEventPayload.NewWound = NewWound;
+		WoundEventPayload.OldWound = OldWound;
+		WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
+		WoundEventPayload.Delta = ActualDamageToApply;
+		WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
+		WoundEventPayload.bNaturalChange = true;
+		WoundEventPayload.bWasDamage = true;
+		WoundEventPayload.DamageHitReactEvent = HitReactEvent;
+		WoundEventPayload.DamageHitReactEvent.DamageTaken = RawDamage;
+		CurrentHealthChanged.Broadcast(WoundEventPayload);
 	}
 }
 

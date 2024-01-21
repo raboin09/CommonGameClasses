@@ -47,7 +47,7 @@ protected:
 	////////////////////////////////
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "COMMON|Character")
-	void K2_OnDeath();
+	void K2_HandleDeath();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")

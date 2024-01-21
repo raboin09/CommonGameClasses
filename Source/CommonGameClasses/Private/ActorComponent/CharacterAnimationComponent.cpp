@@ -11,6 +11,7 @@
 UCharacterAnimationComponent::UCharacterAnimationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 	OwnerCharacter = nullptr;
 	OwningTagComponent = nullptr;
 }
@@ -99,6 +100,7 @@ void UCharacterAnimationComponent::StartRagdolling()
 	}
 	OwningTagComponent->AddTag(CommonGameState::Ragdoll);
 	OwnerCharacter->StartRagdolling();
+	SetComponentTickEnabled(true);
 }
 
 void UCharacterAnimationComponent::StopRagdolling()
@@ -109,6 +111,7 @@ void UCharacterAnimationComponent::StopRagdolling()
 	}
 	OwningTagComponent->RemoveTag(CommonGameState::Ragdoll);
 	OwnerCharacter->StopRagdolling();
+	SetComponentTickEnabled(false);
 }
 
 float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData)

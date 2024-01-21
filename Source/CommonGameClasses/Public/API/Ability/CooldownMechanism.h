@@ -8,7 +8,7 @@
 #include "CooldownMechanism.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UCooldownMechanism : public UInterface
 {
 	GENERATED_BODY()

@@ -62,8 +62,4 @@ private:
 
 	UPROPERTY()
 	TSoftObjectPtr<UWorld> BasePostProcessWorld;
-	UPROPERTY()
-	UWorld* CurrentStreamedWorld;
-	UPROPERTY()
-	UWorld* PersistentWorld;
 };

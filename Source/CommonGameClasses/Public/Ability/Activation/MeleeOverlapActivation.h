@@ -20,24 +20,30 @@ public:
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_WeaponActivated();
+	void K2_HandleMontageActivation();
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_PlayHitEffects(FHitResult HitResult);
+	void K2_HandleMontageDeactivation();
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_StartWeaponTrace();
+	void K2_HandleValidHit(FHitResult HitResult);
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_StopWeaponTrace();
+	void K2_HandleWeaponTraceStart();
+	UFUNCTION(BlueprintImplementableEvent)
+	void K2_HandleWeaponTraceEnd();
 	
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
-	float TraceRadius = 35.f;
+	float TraceRadius = 10.f;
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bCanHitMultipleEnemies = true;
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bFriendlyFire = false;
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
-	FString SocketPrefix = "R_";
-	UPROPERTY(BlueprintReadOnly)
-	FName CachedComboSection;
+	FName Socket_TraceStart = "TraceStart";
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	FName Socket_TraceEnd = "TraceEnd";
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	float TraceTickRate = .01f;
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	TArray<TSubclassOf<AActor>> AbilityEffects;
 	
 private:
 	UFUNCTION()
@@ -46,17 +52,13 @@ private:
 	void Internal_StopCollisionRaycastingTick();
 	UFUNCTION()
 	void Internal_CheckForCollisionHit();
-	void Internal_SetCurrentSocketLocations();
 	void Internal_StartAttack();
 	void Internal_StopAttack();
-	
+
 	UPROPERTY(Transient)
 	TArray<AActor*> HitActors;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
-	TArray<TSubclassOf<AActor>> AbilityEffects;
-
-	TMap<FString, FVector> Sockets;
-	FTimerHandle Timer_Raycasting;
-	
+	UPROPERTY(Transient)
 	bool bRecordedHit;
+	
+	FTimerHandle Timer_Raycasting;
 };
