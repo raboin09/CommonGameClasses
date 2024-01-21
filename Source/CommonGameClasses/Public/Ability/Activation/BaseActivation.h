@@ -17,6 +17,6 @@ public:
 	virtual void Deactivate() override PURE_VIRTUAL(AActivationBase::Deactivate, )
 
 protected:	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UMeshComponent* MeshComponentRef = nullptr;
 };

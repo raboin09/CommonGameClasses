@@ -35,20 +35,32 @@ void ACommonStatModifierEffect::DestroyEffect()
 void ACommonStatModifierEffect::K2_ApplyStatChange_Implementation(float ModifiedStatValue)
 {
 	switch (StatEffectDataObj->StatToModify) {
-	case EEffectStatType::MaxHealth:
-		Internal_HealthMaxWounds(ModifiedStatValue);
-		break;
-	case EEffectStatType::HealHealth:
-		Internal_HealthHeal(ModifiedStatValue);
-		break;
-	case EEffectStatType::Damage:
-		Internal_HealthDamage(ModifiedStatValue);
-		break;
-	case EEffectStatType::MoveSpeed:
-		Internal_MovespeedStatChange(ModifiedStatValue);
-		break;
-	default:;
+		case EEffectStatType::ShieldHeal:
+			UKismetSystemLibrary::PrintString(this, "SHIELD HEAL");
+			Internal_ShieldHeal(ModifiedStatValue);
+			break;
+		case EEffectStatType::MaxHealth:
+			Internal_HealthMaxWounds(ModifiedStatValue);
+			break;
+		case EEffectStatType::HealHealth:
+			Internal_HealthHeal(ModifiedStatValue);
+			break;
+		case EEffectStatType::Damage_All:
+			Internal_AllDamage(ModifiedStatValue);
+			break;
+		case EEffectStatType::MoveSpeed:
+			Internal_MovespeedStatChange(ModifiedStatValue);
+			break;
+		case EEffectStatType::Damage_Health:
+			Internal_HealthDamage(ModifiedStatValue);
+			break;
+		case EEffectStatType::Damage_Shield:
+			Internal_ShieldDamage(ModifiedStatValue);
+			break;
+		default:
+			;
 	}
+	UKismetSystemLibrary::PrintString(this, "Case Done");
 }
 
 float ACommonStatModifierEffect::CalculateHeadshotDamage(float ModifiedStatValue) const
@@ -119,16 +131,22 @@ void ACommonStatModifierEffect::Internal_MovespeedStatChange(float ModifiedStatV
 	}
 }
 
+void ACommonStatModifierEffect::Internal_AllDamage(float ModifiedStatValue) const
+{
+	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
+	UCommonEffectUtils::TryApplyDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
+}
+
 void ACommonStatModifierEffect::Internal_HealthDamage(float ModifiedStatValue) const
 {
-	FDamageHitReactEvent HitReactEvent;
-	HitReactEvent.DamageTaken = CalculateHeadshotDamage(ModifiedStatValue);
-	const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(EffectContext.SurfaceHit.TraceStart, EffectContext.ReceivingActor->GetActorLocation());
-	HitReactEvent.HitDirection = LookAt.Vector().GetSafeNormal();
-	HitReactEvent.HitResult = EffectContext.SurfaceHit;
-	HitReactEvent.DeathReactType = StatEffectDataObj->DeathImpulse;
-	HitReactEvent.HitReactType = StatEffectDataObj->HitImpulse;
-	UCommonEffectUtils::TryApplyDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
+	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
+	UCommonEffectUtils::TryApplyHealthDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
+}
+
+void ACommonStatModifierEffect::Internal_ShieldDamage(float ModifiedStatValue) const
+{
+	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
+	UCommonEffectUtils::TryApplyShieldDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
 }
 
 void ACommonStatModifierEffect::Internal_HealthMaxWounds(float ModifiedStatValue)
@@ -141,7 +159,25 @@ void ACommonStatModifierEffect::Internal_HealthMaxWounds(float ModifiedStatValue
 	};
 }
 
+FDamageHitReactEvent ACommonStatModifierEffect::Internal_GenerateHitReactEvent(float ModifiedStatValue) const
+{
+	FDamageHitReactEvent HitReactEvent;
+	HitReactEvent.DamageTaken = CalculateHeadshotDamage(ModifiedStatValue);
+	const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(EffectContext.SurfaceHit.TraceStart, EffectContext.ReceivingActor->GetActorLocation());
+	HitReactEvent.HitDirection = LookAt.Vector().GetSafeNormal();
+	HitReactEvent.HitResult = EffectContext.SurfaceHit;
+	HitReactEvent.DeathReactType = StatEffectDataObj->DeathImpulse;
+	HitReactEvent.HitReactType = StatEffectDataObj->HitImpulse;
+	return HitReactEvent;
+}
+
 void ACommonStatModifierEffect::Internal_HealthHeal(float ModifiedStatValue) const
 {
-	UCommonEffectUtils::TryApplyHealToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, ModifiedStatValue);
+	UCommonEffectUtils::TryApplyHealthHealToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, ModifiedStatValue);
+}
+
+void ACommonStatModifierEffect::Internal_ShieldHeal(float ModifiedStatValue) const
+{
+	UKismetSystemLibrary::PrintString(this, "Stat Heal");
+	UCommonEffectUtils::TryApplyShieldHealToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, ModifiedStatValue);
 }

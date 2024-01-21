@@ -38,13 +38,15 @@ struct FDamageHitReactEvent
 
 
 UENUM(BlueprintType)
-enum class EEffectStatType : uint8 
+enum class EEffectStatType
 {
 	MaxHealth,
-	Damage,
+	Damage_All,
+	Damage_Health,
+	Damage_Shield,
 	HealHealth,
-	HealShield,
-	MoveSpeed
+	MoveSpeed,
+	ShieldHeal,
 };
 
 USTRUCT(BlueprintType)

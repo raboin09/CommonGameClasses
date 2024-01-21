@@ -274,7 +274,7 @@ void ACommonAbility::SetResourceContainerObject()
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Resource is located in Instigator or a component contained in Instigator
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	const APawn* CurrInstigator = GetInstigator();
+	APawn* CurrInstigator = GetInstigator();
 	if (!CurrInstigator)
 	{
 		return;
@@ -282,12 +282,12 @@ void ACommonAbility::SetResourceContainerObject()
 
 	if (ResourceContainerLocation == EResourceContainerLocation::Instigator)
 	{
-		Internal_SetResourceContainerToObject(this);
+		Internal_SetResourceContainerToObject(CurrInstigator);
 		return;
 	}
 	if (ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent)
 	{
-		Internal_SetResourceContainerToComponent(this);
+		Internal_SetResourceContainerToComponent(CurrInstigator);
 		return;
 	}
 

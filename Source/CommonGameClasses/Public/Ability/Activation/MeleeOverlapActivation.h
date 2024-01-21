@@ -44,6 +44,8 @@ protected:
 	float TraceTickRate = .01f;
 	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
+	UPROPERTY(EditDefaultsOnly, Category="Activation|Debug")
+	bool bDrawDebug = false;
 	
 private:
 	UFUNCTION()

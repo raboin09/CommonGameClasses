@@ -122,7 +122,6 @@ void UCommonEffectUtils::ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<
 	{
 		return;
 	}
-
 	UEffectContainerComponent* EffectContainerComponent = ReceivingActor->FindComponentByClass<UEffectContainerComponent>();
 	if (!EffectContainerComponent)
 	{
@@ -186,17 +185,6 @@ void UCommonEffectUtils::TryAddMaxWoundsToActor(const AActor* ReceivingActor, fl
 	HealthComponent->AddMaxWounds(MaxWoundsToAdd);
 }
 
-void UCommonEffectUtils::TryApplyHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
-{
-	if(!ReceivingActor)
-		return;
-	UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>();
-	
-	if (!HealthComponent)
-		return;
-	HealthComponent->ApplyHeal(Heal, InstigatingActor);
-}
-
 void UCommonEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
 {
 	if(!ReceivingActor)
@@ -210,6 +198,52 @@ void UCommonEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AAc
 	if(UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>())
 	{
 		HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
+	}
+}
+
+void UCommonEffectUtils::TryApplyHealthDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
+{
+	if(!ReceivingActor)
+		return;
+
+	if(UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
+	}
+
+}
+
+void UCommonEffectUtils::TryApplyHealthHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
+{
+	if(!ReceivingActor)
+		return;
+
+	if(UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->ApplyHeal(Heal, InstigatingActor);
+	}
+}
+
+void UCommonEffectUtils::TryApplyShieldDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
+{
+	if(!ReceivingActor)
+		return;
+	
+	if(UShieldEnergyComponent* ShieldEnergyComponent = ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
+	{
+		ShieldEnergyComponent->TakeShieldDamage(Damage, InstigatingActor, HitReactEvent);
+	}
+}
+
+void UCommonEffectUtils::TryApplyShieldHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
+{
+	if(!ReceivingActor)
+		return;
+	
+	if(UShieldEnergyComponent* ShieldEnergyComponent = ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
+	{
+		UKismetSystemLibrary::PrintString(ReceivingActor, "TRY");
+		ShieldEnergyComponent->ApplyShieldHeal(Heal);
 	}
 }
 

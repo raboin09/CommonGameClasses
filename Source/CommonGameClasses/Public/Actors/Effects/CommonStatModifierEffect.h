@@ -16,7 +16,7 @@ public:
 	UBaseStatsModifierData();
 
 	UPROPERTY(EditDefaultsOnly)
-	EEffectStatType StatToModify = EEffectStatType::Damage;
+	EEffectStatType StatToModify = EEffectStatType::Damage_All;
 	UPROPERTY(EditDefaultsOnly)
 	float BaseModifierValue;
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage", EditConditionHides))
@@ -54,7 +54,11 @@ private:
 	void CalculateModifier(const FModifierExpression& ModifierExpression, const FGameplayTag& ModifierTag, float& ModifiedBaseValue) const;
 
 	void Internal_MovespeedStatChange(float ModifiedStatValue);
+	void Internal_AllDamage(float ModifiedStatValue) const;
 	void Internal_HealthDamage(float ModifiedStatValue) const;
+	void Internal_ShieldDamage(float ModifiedStatValue) const;
 	void Internal_HealthHeal(float ModifiedStatValue) const;
+	void Internal_ShieldHeal(float ModifiedStatValue) const;
 	void Internal_HealthMaxWounds(float ModifiedStatValue);
+	FDamageHitReactEvent Internal_GenerateHitReactEvent(float ModifiedStatValue) const;
 };

@@ -31,9 +31,11 @@ public:
 	FORCEINLINE FAbilityDeactivationEvent& OnDeactivation() { return AbilityDeactivationEvent; }
 	
 	FORCEINLINE virtual void SetInstigator(APawn* InPawn) { PawnInstigator = InPawn; }
-	FORCEINLINE virtual APawn* GetInstigator() const { return PawnInstigator; }
+	UFUNCTION(BlueprintCallable)
+	virtual APawn* GetInstigator() const { return PawnInstigator; }
 	FORCEINLINE virtual void SetOwner(AActor* InActor) { AbilityOwner = InActor; }
-	FORCEINLINE virtual AActor* GetOwner() const { return AbilityOwner; }
+	UFUNCTION(BlueprintCallable)
+	virtual AActor* GetOwner() const { return AbilityOwner; }
 	
 protected:
 	AActor* AbilityOwner = nullptr;

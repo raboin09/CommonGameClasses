@@ -58,12 +58,12 @@ protected:
 	EMeshType MeshType = EMeshType::AbilityMesh;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Mesh")
 	FName AttachmentSocket = "hand_r";
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (ClampMin = "0"))
+	float ResourceCost = 0.f;
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (EditCondition = "ResourceCost > 0"))
+	EResourceContainerLocation ResourceContainerLocation;
 	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "(ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
 	TSubclassOf<UActorComponent> ResourceContainerClass;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (ClampMin = "0", EditCondition = "ResourceContainerClass != nullptr"))
-	float ResourceCost = 0.f;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (EditCondition = "ResourceCost > 0 && ResourceContainerClass != nullptr"))
-	EResourceContainerLocation ResourceContainerLocation;
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM|Ability")
 	TObjectPtr<UCooldownMechanismImpl> CooldownMechanism;
 	// If the ability only requires simple trigger logic (only needs burst timer and/or num shots), create an instance of an obj instead of requiring a child BP.

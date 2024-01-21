@@ -28,7 +28,6 @@ bool UResourceComponent::TrySpendResource(const float RequestedAmount)
 {
 	if(!CanSpendResourceAmount(RequestedAmount))
 	{
-		UKismetSystemLibrary::PrintString(this, "Cant spend");
 		return false;
 	}
 	const float Delta = CalculateResourceCost(RequestedAmount);
