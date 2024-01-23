@@ -41,6 +41,7 @@ void FResourcePoolContainer::GiveResources(float ResourcesToGive)
 {
 	if(ResourcePools.Num() == 0)
 		return;
+	
 	FResourcePool& CurrResourcePool = GetCurrentResourcePool();
 	if(ResourcesToGive + CurrResourcePool.CurrentResources > CurrResourcePool.MaxResourcesInPool)
 	{

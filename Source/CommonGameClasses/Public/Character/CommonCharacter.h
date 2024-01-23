@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AlsCharacter.h"
 #include "Ability/CommonAbility.h"
+#include "Animation/CommonAnimInstance.h"
 #include "API/Taggable.h"
 #include "Types/CommonTagTypes.h"
 #include "CommonCharacter.generated.h"
@@ -97,5 +98,6 @@ protected:
 	/////////////////////////////////
 public:
 	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Dead); }
-	FORCEINLINE UGameplayTagComponent* GetGameplayTagComponent() const { return GameplayTagComponent; } 
+	FORCEINLINE UGameplayTagComponent* GetGameplayTagComponent() const { return GameplayTagComponent; }
+	FORCEINLINE TWeakObjectPtr<UAnimInstance> GetAnimInstance() const { return AnimationInstance; }
 };

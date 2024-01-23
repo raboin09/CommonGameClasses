@@ -3,7 +3,7 @@
 #include "Utils/CommonWorldUtils.h"
 #include "Ability/CommonAbility.h"
 
-UWorld* UCommonWorldUtils::CurrentWorld = nullptr;
+TWeakObjectPtr<UWorld> UCommonWorldUtils::CurrentWorld = nullptr;
 
 AActor* UCommonWorldUtils::K2_SpawnActorToCurrentWorld_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner, APawn* Instigator, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride)
 {

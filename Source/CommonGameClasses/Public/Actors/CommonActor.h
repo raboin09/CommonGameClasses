@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "API/Taggable.h"
 #include "GameFramework/Actor.h"
+#include "Types/CommonEventDeclarations.h"
 #include "CommonActor.generated.h"
 
+class UActorAssetManagerComponent;
 struct FGameplayTag;
 class UGameplayTagComponent;
 
@@ -17,6 +20,7 @@ class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable
 
 public:
 	ACommonActor();
+	
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	
@@ -31,6 +35,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
 	TArray<FGameplayTag> DefaultGameplayTags;
 
+	UPROPERTY(BlueprintReadOnly)
+	UActorAssetManagerComponent* ActorAssetManagerComponent;
 	UPROPERTY()
 	UGameplayTagComponent* GameplayTagComponent;
 };

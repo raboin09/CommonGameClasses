@@ -2,7 +2,7 @@
 
 
 #include "Utils/CommonEffectUtils.h"
-#include "Actors/Effects/CommonEffect.h"
+#include "Effects/CommonEffect.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/DataTable.h"
 #include "ActorComponent/HealthComponent.h"
@@ -242,7 +242,6 @@ void UCommonEffectUtils::TryApplyShieldHealToActor(const AActor* ReceivingActor,
 	
 	if(UShieldEnergyComponent* ShieldEnergyComponent = ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
 	{
-		UKismetSystemLibrary::PrintString(ReceivingActor, "TRY");
 		ShieldEnergyComponent->ApplyShieldHeal(Heal);
 	}
 }

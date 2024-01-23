@@ -1,8 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Actors/Effects/ConditionTree.h"
-
+#include "Effects/ConditionTree.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/ShieldEnergyComponent.h"
 

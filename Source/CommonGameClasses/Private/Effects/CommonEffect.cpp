@@ -1,4 +1,4 @@
-﻿#include "Actors/Effects/CommonEffect.h"
+﻿#include "Effects/CommonEffect.h"
 
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"

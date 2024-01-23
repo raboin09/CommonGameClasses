@@ -3,10 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "API/Interactable.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Types/CommonCombatTypes.h"
-#include "Types/CommonResourceTypes.h"
 #include "CommonCombatUtils.generated.h"
 
 #define OUTLINE_COLOR_RED 254

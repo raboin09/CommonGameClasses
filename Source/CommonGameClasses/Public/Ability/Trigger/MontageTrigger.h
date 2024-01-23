@@ -14,14 +14,15 @@ class COMMONGAMECLASSES_API UMontageTrigger : public UBaseComplexTrigger
 	GENERATED_BODY()
 
 public:
+	virtual void InitTrigger() override;
 	virtual void PressTrigger() override;
 	virtual void ReleaseTrigger() override;
 	virtual void ResetTrigger() override;
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return false; }
 	
-protected:
+protected:	
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	UAnimMontage* MontageToPlay;
+	TSoftObjectPtr<UAnimMontage> MontageToPlay;
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	int32 MaxComboSections = 3;
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
@@ -30,6 +31,9 @@ protected:
 	bool bShouldPlayerLockOnToNearestTarget = false;
 	
 private:
+	UFUNCTION()
+	void HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload);
+	
 	FAnimMontagePlayData Internal_GetPlayData() const;
 	FName Internal_GetNextMontageSection() const;
 	void Internal_StartMontage();
@@ -37,6 +41,9 @@ private:
 	// COMBO VARIABLES
 	void Internal_IncrementComboCounter();
 	void Internal_ResetComboCounter();
+
+	UPROPERTY(Transient)
+	TWeakObjectPtr<UAnimMontage> CurrentMontagePlaying = nullptr;
 	
 	int32 ComboSectionIncrement;
 	const FString ComboPrefix = "Combo";

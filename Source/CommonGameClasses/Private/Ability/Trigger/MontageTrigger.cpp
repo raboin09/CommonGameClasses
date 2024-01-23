@@ -3,8 +3,23 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTagTypes.h"
+
+void UMontageTrigger::InitTrigger()
+{
+	K2_HandleInitTrigger();
+	if(!GetInstigator())
+	{
+		return;
+	}
+	
+	if(UCharacterAnimationComponent* CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>())
+	{
+		CharacterAnimationComponent->OnCharacterMontageEnded().AddDynamic(this, &UMontageTrigger::HandleMontageEnded);
+	}
+}
 
 void UMontageTrigger::PressTrigger()
 {	
@@ -31,12 +46,27 @@ void UMontageTrigger::ReleaseTrigger()
 void UMontageTrigger::ResetTrigger()
 {
 	Internal_ResetComboCounter();
+	TArray<FGameplayTag> StateTagsToRemove;
+	StateTagsToRemove.Add(CommonGameAbilityEvent::ComboActivated);
+	StateTagsToRemove.Add(CommonGameAbilityEvent::ComboWindowEnabled);
+	StateTagsToRemove.Add(CommonGameAbilityEvent::Active);
+	StateTagsToRemove.Add(CommonGameAbilityEvent::Activated);
+	UGameplayTagComponent::RemoveTagsFromActor(GetOwner(), StateTagsToRemove);
+}
+
+void UMontageTrigger::HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload)
+{
+	if(CharacterMontageEndedPayload.bInterrupted && CharacterMontageEndedPayload.EndedMontage == CurrentMontagePlaying)
+	{
+		ResetTrigger();	
+	}
+	CurrentMontagePlaying = nullptr;
 }
 
 FAnimMontagePlayData UMontageTrigger::Internal_GetPlayData() const
 {
 	FAnimMontagePlayData PlayData;	
-	PlayData.MontageToPlay = MontageToPlay;
+	PlayData.MontageToPlay = MontageToPlay.Get();
 	PlayData.MontageSection = Internal_GetNextMontageSection();
 	return PlayData;
 }
@@ -61,7 +91,8 @@ void UMontageTrigger::Internal_StartMontage()
 	if(UCharacterAnimationComponent* CharacterAnimationComponent = CurrentInstigator->FindComponentByClass<UCharacterAnimationComponent>())
 	{
 		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
-		CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
+		CharacterAnimationComponent->TryPlayAnimMontage(PlayData);
+		CurrentMontagePlaying = PlayData.MontageToPlay;
 	}
 	
 	if(bShouldPlayerLockOnToNearestTarget && CurrentInstigator->IsPlayerControlled())

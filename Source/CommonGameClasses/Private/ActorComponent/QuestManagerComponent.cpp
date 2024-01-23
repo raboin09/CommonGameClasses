@@ -97,7 +97,7 @@ void UQuestManagerComponent::DeactivateAllQuests()
 
 void UQuestManagerComponent::HandleQuestUpdate(const FQuestUpdateEventPayload& QuestObjectiveEventPayload)
 {
-	if(!QuestObjectiveEventPayload.UpdatedQuest)
+	if(!QuestObjectiveEventPayload.UpdatedQuest.IsValid())
 		return;
 
 	if(QuestObjectiveEventPayload.UpdatedQuest->IsQuestComplete())

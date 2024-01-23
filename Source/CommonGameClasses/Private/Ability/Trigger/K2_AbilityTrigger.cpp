@@ -5,9 +5,11 @@
 void UK2_AbilityTrigger::K2_PressTrigger_Implementation(FTriggerEventPayload& TriggerEventPayload)
 {
 	TriggerPressedEvent.Broadcast(TriggerEventPayload);
+	K2_HandlePressedTrigger();
 }
 
 void UK2_AbilityTrigger::K2_ReleaseTrigger_Implementation(FTriggerEventPayload& TriggerEventPayload)
 {
-	TriggerReleasedEvent.Broadcast(TriggerEventPayload); 
+	TriggerReleasedEvent.Broadcast(TriggerEventPayload);
+	K2_HandleReleasedTrigger();
 }

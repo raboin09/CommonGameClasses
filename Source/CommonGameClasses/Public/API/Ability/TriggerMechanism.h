@@ -16,7 +16,8 @@ class UTriggerMechanism : public UInterface
 class COMMONGAMECLASSES_API ITriggerMechanism
 {
 	GENERATED_BODY()
-public:	
+public:
+	virtual void InitTrigger() {}
 	virtual void PressTrigger() PURE_VIRTUAL(ITriggerMechanism::PressTrigger,)
 	virtual void ReleaseTrigger() PURE_VIRTUAL(ITriggerMechanism::ReleaseTrigger,)
 	

@@ -15,7 +15,7 @@ class COMMONGAMECLASSES_API UCommonWorldUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	static UWorld* CurrentWorld;
+	static TWeakObjectPtr<UWorld> CurrentWorld;
 	
 	UFUNCTION()
 	static void HandleNewLevelLoadEvent(const FNewLevelLoadedEventPayload& NewLevelLoadedPayload); 
@@ -48,22 +48,38 @@ private:
 	template<typename T>
 	FORCEINLINE static T* Internal_TemplatedSpawnActorFromClass_Deferred(TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
-		if(!CurrentWorld && (!Owner || !Owner->GetWorld()))
+		if(!CurrentWorld.IsValid() && (!Owner || !Owner->GetWorld()))
 		{
 			return nullptr;
 		}
-		UWorld* WorldToSpawnTo = CurrentWorld ? CurrentWorld : Owner->GetWorld();
+		UWorld* WorldToSpawnTo;
+		if(CurrentWorld.IsValid())
+		{
+			WorldToSpawnTo = CurrentWorld.Get();	
+		} else
+		{
+			WorldToSpawnTo = Owner->GetWorld();
+		}
 		return WorldToSpawnTo->SpawnActorDeferred<T>(ClassToSpawn, FTransform(), Owner, Instigator, CollisionHandlingOverride);
 	}
 
 	template<typename T>
 	static T* Internal_TemplatedSpawnActorFromClass(TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn)
 	{
-		if(!CurrentWorld && (!Owner || !Owner->GetWorld()))
+		if(!CurrentWorld.IsValid() && (!Owner || !Owner->GetWorld()))
 		{
 			return nullptr;
 		}
-		UWorld* WorldToSpawnTo = CurrentWorld ? CurrentWorld : Owner->GetWorld();
+		
+		UWorld* WorldToSpawnTo;
+		if(CurrentWorld.IsValid())
+		{
+			WorldToSpawnTo = CurrentWorld.Get();	
+		} else
+		{
+			WorldToSpawnTo = Owner->GetWorld();
+		}
+		
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.Owner = Owner;
 		SpawnParameters.Instigator = Instigator;

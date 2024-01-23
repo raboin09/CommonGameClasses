@@ -8,6 +8,7 @@
 #include "Types/CommonEventDeclarations.h"
 #include "CharacterAnimationComponent.generated.h"
 
+class UCommonAnimInstance;
 struct FAnimMontagePlayData;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -34,6 +35,8 @@ protected:
 
 private:
 	UFUNCTION()
+	void HandleMontageEnded(UAnimMontage* EndedMontage, bool bInterrupted);
+	UFUNCTION()
 	void HandleCurrentWoundChangedEvent(const FCurrentWoundEventPayload& CurrentWoundEventPayload);
 	UFUNCTION()
 	void HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload);
@@ -49,10 +52,19 @@ private:
 	UPROPERTY()
 	ACommonCharacter* OwnerCharacter;
 	UPROPERTY()
+	TWeakObjectPtr<UAnimInstance> OwnerAnimInstance;
+	UPROPERTY()
 	UGameplayTagComponent* OwningTagComponent;
+	UPROPERTY()
+	FCharacterMontageEnded CharacterMontageEnded;	
+	
 	FRotator ControlRotation;
 
 	// Ragdolling
 	FTimerHandle TimerHandle_Ragdoll;
 	FVector LastRagdollVelocity = FVector::ZeroVector;
+
+public:
+	FORCEINLINE TWeakObjectPtr<UAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
+	FORCEINLINE FCharacterMontageEnded& OnCharacterMontageEnded() { return CharacterMontageEnded; }
 };

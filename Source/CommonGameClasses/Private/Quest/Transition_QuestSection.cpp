@@ -110,7 +110,7 @@ void UTransition_QuestSection::DeactivateQuestObjectiveActor(AActor* InActor) co
 
 void UTransition_QuestSection::HandleQuestEventTrigger(const FQuestObjectiveEventPayload& InEvent)
 {
-	if(InEvent.EventObjective && QuestSectionData.ValidObjectiveActions.Contains(InEvent.EventAction))
+	if(InEvent.EventObjective.IsValid() && QuestSectionData.ValidObjectiveActions.Contains(InEvent.EventAction))
 	{
 		ApplyQuestIncrementsForEvent(InEvent.EventAction, InEvent.EventObjective->GetClass());
 	}
@@ -127,7 +127,8 @@ void UTransition_QuestSection::ApplyQuestIncrementsForEvent(EQuestObjectiveActio
 		
 		if(UQuestStateMachine* CurrQuest = Cast<UQuestStateMachine>(GetStateMachineInstance(true)))
 		{
-			QuestUpdated.Broadcast(CurrQuest);
+			const TWeakObjectPtr<UQuestStateMachine> CurrQuestWeak = CurrQuest;
+			QuestUpdated.Broadcast(CurrQuestWeak);
 		}
 	}
 }

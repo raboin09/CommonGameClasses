@@ -13,6 +13,7 @@ UCharacterAnimationComponent::UCharacterAnimationComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 	OwnerCharacter = nullptr;
+	OwnerAnimInstance = nullptr;
 	OwningTagComponent = nullptr;
 }
 
@@ -34,11 +35,22 @@ void UCharacterAnimationComponent::BeginPlay()
 		return;
 	}
 	OwningTagComponent = OwnerCharacter->GetGameplayTagComponent();
+	OwnerAnimInstance = OwnerCharacter->GetAnimInstance();
+	if(OwnerAnimInstance.IsValid())
+	{
+		OwnerAnimInstance->OnMontageEnded.AddDynamic(this, &UCharacterAnimationComponent::HandleMontageEnded);
+	}
 	if(UHealthComponent* HealthComponent = OwnerCharacter->FindComponentByClass<UHealthComponent>())
 	{
 		HealthComponent->OnCurrentWoundHealthChanged().AddDynamic(this, &UCharacterAnimationComponent::HandleCurrentWoundChangedEvent);
 		HealthComponent->OnActorDeath().AddDynamic(this, &UCharacterAnimationComponent::HandleActorDeathEvent);
 	}
+}
+
+void UCharacterAnimationComponent::HandleMontageEnded(UAnimMontage* EndedMontage, bool bInterrupted)
+{
+	const FCharacterMontageEndedPayload CharacterMontageEndedPayload = FCharacterMontageEndedPayload(EndedMontage, bInterrupted);
+	CharacterMontageEnded.Broadcast(CharacterMontageEndedPayload);
 }
 
 void UCharacterAnimationComponent::HandleCurrentWoundChangedEvent(const FCurrentWoundEventPayload& CurrentWoundEventPayload)

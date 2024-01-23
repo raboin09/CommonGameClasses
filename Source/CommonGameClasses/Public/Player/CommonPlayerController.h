@@ -22,6 +22,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
+	virtual void BeginPlay() override;
 	
 	//////////////////////////////////////////////
 	/// CommonPlayerController

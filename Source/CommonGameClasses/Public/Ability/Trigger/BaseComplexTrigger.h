@@ -17,6 +17,8 @@ class COMMONGAMECLASSES_API UBaseComplexTrigger : public UBaseTrigger
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void K2_HandleInitTrigger();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandlePressedTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleReleasedTrigger();

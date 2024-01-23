@@ -14,4 +14,5 @@ class COMMONGAMECLASSES_API ACommonGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+	virtual void BeginPlay() override;
 };

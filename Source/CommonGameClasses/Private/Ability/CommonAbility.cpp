@@ -253,6 +253,7 @@ void ACommonAbility::SetTriggerMechanism()
 	}
 	TriggerMechanism->SetInstigator(GetInstigator());
 	TriggerMechanism->SetOwner(this);
+	TriggerMechanism->InitTrigger();
 }
 
 void ACommonAbility::SetResourceContainerObject()

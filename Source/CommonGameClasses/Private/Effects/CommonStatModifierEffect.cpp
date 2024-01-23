@@ -1,4 +1,4 @@
-﻿#include "Actors/Effects/CommonStatModifierEffect.h"
+﻿#include "Effects/CommonStatModifierEffect.h"
 
 #include "ActorComponent/GameplayTagComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -35,8 +35,7 @@ void ACommonStatModifierEffect::DestroyEffect()
 void ACommonStatModifierEffect::K2_ApplyStatChange_Implementation(float ModifiedStatValue)
 {
 	switch (StatEffectDataObj->StatToModify) {
-		case EEffectStatType::ShieldHeal:
-			UKismetSystemLibrary::PrintString(this, "SHIELD HEAL");
+		case EEffectStatType::HealShield:
 			Internal_ShieldHeal(ModifiedStatValue);
 			break;
 		case EEffectStatType::MaxHealth:

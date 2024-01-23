@@ -9,6 +9,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "ActorComponent/QuestManagerComponent.h"
 #include "Utils/CommonInteractUtils.h"
+#include "Utils/CommonWorldUtils.h"
 
 ACommonPlayerController::ACommonPlayerController()
 {
@@ -32,6 +33,11 @@ void ACommonPlayerController::OnUnPossess()
 {
 	Super::OnUnPossess();
 	PlayerCharacter = nullptr;
+}
+
+void ACommonPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void ACommonPlayerController::MoveToNewDestination(const FVector& MoveLocation)

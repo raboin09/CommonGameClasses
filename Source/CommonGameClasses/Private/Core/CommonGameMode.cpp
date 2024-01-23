@@ -2,3 +2,11 @@
 
 
 #include "Core/CommonGameMode.h"
+
+#include "Utils/CommonWorldUtils.h"
+
+void ACommonGameMode::BeginPlay()
+{
+	UCommonWorldUtils::CurrentWorld = GetWorld();
+	Super::BeginPlay();	
+}

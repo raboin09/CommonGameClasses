@@ -7,9 +7,56 @@
 #include "GameplayTagContainer.h"
 #include "CommonResourceTypes.h"
 #include "CommonQuestTypes.h"
+#include "Quest/QuestStateMachine.h"
 #include "CommonEventDeclarations.generated.h"
 
 class IAbility;
+
+///////////////////////////
+// Load Asset Events
+///////////////////////////
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedNiagaraSystemObjectEvent, TSoftObjectPtr<UNiagaraSystem>, LoadedNiagaraSystem);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedCascadeSystemObjectEvent, TSoftObjectPtr<UParticleSystem>, LoadedParticleSystem);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedSoundObjectEvent, TSoftObjectPtr<USoundBase>, LoadedSound);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedTextureEvent, TSoftObjectPtr<UTexture>, LoadedTexture);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedMaterialEvent, TSoftObjectPtr<UMaterialInterface>, LoadedMaterial);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedStaticMeshEvent, TSoftObjectPtr<UStaticMesh>, LoadedStaticMesh);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedSkeletalMeshEvent, TSoftObjectPtr<USkeletalMesh>, LoadedSkeletalMesh);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedClassEvent, TSoftClassPtr<UClass>, LoadedClass);
+//
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedNiagaraSystemObjectEvent, UNiagaraSystem*, LoadedNiagaraSystem);
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedCascadeSystemObjectEvent, UParticleSystem*, LoadedParticleSystem);
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedSoundObjectEvent, USoundBase*, LoadedSound);
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedTextureEvent, UTexture*, LoadedTexture);
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedMaterialEvent, UMaterialInterface*, LoadedMaterial);
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedClassEvent, UClass*, LoadedClass);
+
+///////////////////////////
+// Montage Ended
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FCharacterMontageEndedPayload
+{
+	GENERATED_BODY()
+	FCharacterMontageEndedPayload()
+	{
+		EndedMontage = nullptr;
+		bInterrupted = false;
+	}
+	
+	FCharacterMontageEndedPayload(const TObjectPtr<UAnimMontage> InMontage, const bool bInInterrupted)
+	{
+		EndedMontage = InMontage;
+		bInterrupted = bInInterrupted;
+	}
+	
+	UPROPERTY()
+	TWeakObjectPtr<UAnimMontage> EndedMontage;
+	UPROPERTY()
+	bool bInterrupted;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterMontageEnded, const FCharacterMontageEndedPayload&, CharacterMontageEndedPayload);
+
 
 ///////////////////////////
 // Ability equipped
@@ -85,7 +132,7 @@ struct FNewLevelLoadedEventPayload
 	}
 
 	UPROPERTY()
-	UWorld* NewStreamedWorld;
+	TWeakObjectPtr<UWorld> NewStreamedWorld;
 };
 DECLARE_EVENT_OneParam(ILevelLoadingManager, FNewLevelLoadedEvent, const FNewLevelLoadedEventPayload&);
 
@@ -257,9 +304,9 @@ struct FActorDeathEventPayload
 	UPROPERTY()
 	float DyingDamage = 0.f;
 	UPROPERTY()
-	AActor* DyingActor = nullptr;
+	TWeakObjectPtr<AActor> DyingActor = nullptr;
 	UPROPERTY()
-	AActor* KillingActor = nullptr;
+	TWeakObjectPtr<AActor> KillingActor = nullptr;
 	UPROPERTY()
 	FHitResult HitResult = FHitResult();
 	UPROPERTY()
@@ -309,9 +356,9 @@ struct FCurrentWoundEventPayload
 	UPROPERTY()
 	FDamageHitReactEvent DamageHitReactEvent = FDamageHitReactEvent();
 	UPROPERTY()
-	AActor* ReceivingActor = nullptr;
+	TWeakObjectPtr<AActor> ReceivingActor = nullptr;
 	UPROPERTY()
-	AActor* InstigatingActor = nullptr;
+	TWeakObjectPtr<AActor> InstigatingActor = nullptr;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCurrentWoundHealthChanged, const FCurrentWoundEventPayload&, CurrentWoundEventPayload);
 
@@ -325,7 +372,7 @@ struct FQuestObjectiveEventPayload
 	
 	// The overlapped actor, quest objective, or killed AI character
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* EventObjective = nullptr;
+	TWeakObjectPtr<AActor> EventObjective = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EQuestObjectiveAction EventAction = EQuestObjectiveAction::None;
 
@@ -353,9 +400,9 @@ struct FQuestUpdateEventPayload
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UQuestStateMachine* UpdatedQuest = nullptr;
+	TWeakObjectPtr<UQuestStateMachine> UpdatedQuest = nullptr;
 
-	FQuestUpdateEventPayload(UQuestStateMachine* InUpdatedQuest)
+	FQuestUpdateEventPayload(TWeakObjectPtr<UQuestStateMachine> InUpdatedQuest)
 	{
 		UpdatedQuest = InUpdatedQuest;
 	}
@@ -376,12 +423,7 @@ struct FEnergyChangedEventPayload
 {
 	GENERATED_BODY()
 
-	FEnergyChangedEventPayload()
-	{
-		CurrentEnergy = -1.f;
-		MaxEnergy = -1.f;
-	}
-
+	FEnergyChangedEventPayload() { }	
 	FEnergyChangedEventPayload(const float InCurrentEnergy, const float InMaxEnergy)
 	{
 		CurrentEnergy = InCurrentEnergy;
@@ -389,9 +431,9 @@ struct FEnergyChangedEventPayload
 	}
 
 	UPROPERTY(BlueprintReadOnly)
-	float CurrentEnergy;
+	float CurrentEnergy = -1.f;
 	UPROPERTY(BlueprintReadOnly)
-	float MaxEnergy;
+	float MaxEnergy = -1.f;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEnergyAmountChangedEvent, const FEnergyChangedEventPayload&, EnergyChangedEventPayload);
 
@@ -403,21 +445,18 @@ struct FAmmoAmountChangedPayload
 {
 	GENERATED_BODY()
 
+	FAmmoAmountChangedPayload() {}
 	FAmmoAmountChangedPayload(int32 InCurrAmmoInClip, int32 InClipCapacity, int32 InCurrentAmmo, int32 InMaxClips)
 		: CurrentAmmoInClip(InCurrAmmoInClip), ClipCapacity(InClipCapacity),  CurrentAmmo(InCurrentAmmo), MaxAmmo(InMaxClips) {}
-
-	FAmmoAmountChangedPayload(): CurrentAmmoInClip(0), ClipCapacity(0), CurrentAmmo(0), MaxAmmo(0)
-	{
-	}
-
+	
 	UPROPERTY()
-	int32 CurrentAmmoInClip;
+	int32 CurrentAmmoInClip = 0;
 	UPROPERTY()
-	int32 ClipCapacity;
+	int32 ClipCapacity = 0;
 	UPROPERTY()
-	int32 CurrentAmmo;
+	int32 CurrentAmmo = 0;
 	UPROPERTY()
-	int32 MaxAmmo;
+	int32 MaxAmmo = 0;
 	
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAmmoAmountChangedEvent, const FAmmoAmountChangedPayload&, AmmoAmountChangedPayload);
@@ -452,7 +491,7 @@ struct FInteractionStartedEventPayload
 		: InstigatingActor(InInstigator), bIsStarting(bIsStarting) {	}
 	
 	UPROPERTY(BlueprintReadOnly)
-	AActor* InstigatingActor = nullptr;
+	TWeakObjectPtr<AActor> InstigatingActor = nullptr;
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsStarting = true;
 
@@ -476,7 +515,7 @@ struct FInteractionInitiatedEventPayload
 		: InstigatingActor(InInstigator) {	}
 	
 	UPROPERTY(BlueprintReadOnly)
-	AActor* InstigatingActor = nullptr;
+	TWeakObjectPtr<AActor> InstigatingActor = nullptr;
 
 };
 DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionInitiatedEvent, const FInteractionInitiatedEventPayload);

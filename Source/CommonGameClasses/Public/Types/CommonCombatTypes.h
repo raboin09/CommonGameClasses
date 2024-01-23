@@ -45,8 +45,8 @@ enum class EEffectStatType
 	Damage_Health,
 	Damage_Shield,
 	HealHealth,
+	HealShield,
 	MoveSpeed,
-	ShieldHeal,
 };
 
 USTRUCT(BlueprintType)

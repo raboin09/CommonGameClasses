@@ -12,7 +12,7 @@
  * 
  */
 UCLASS()
-class COMMONGAMECLASSES_API UCommonEffectUtils : public UObject
+class COMMONGAMECLASSES_API UCommonEffectUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

@@ -2,15 +2,17 @@
 
 
 #include "Actors/CommonActor.h"
+
+#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Core/ActorTrackingSubsystem.h"
-#include "Core/CommonGameMode.h"
 #include "Utils/CommonCoreUtils.h"
 
 ACommonActor::ACommonActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	GameplayTagComponent = CreateDefaultSubobject<UGameplayTagComponent>(TEXT("GameplayTagComponent"));
+	ActorAssetManagerComponent = CreateDefaultSubobject<UActorAssetManagerComponent>(TEXT("ActorAssetManagerComponent"));
 }
 
 void ACommonActor::BeginPlay()
