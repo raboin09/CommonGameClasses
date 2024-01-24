@@ -18,7 +18,9 @@ class COMMONGAMECLASSES_API UActorAssetManagerComponent : public UActorComponent
 
 public:
 	UActorAssetManagerComponent();
-	
+
+	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
+	void K2_Async_LoadAnimMontageObject(TSoftObjectPtr<UAnimMontage> UnloadedAsset, const bool bIsHighPriority, FLoadedAnimMontageEvent LoadedObjectEvent);
 	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
 	void K2_Async_LoadNiagaraSystemObject(TSoftObjectPtr<UNiagaraSystem> UnloadedAsset, const bool bIsHighPriority, FLoadedNiagaraSystemObjectEvent LoadedObjectEvent);
 	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
@@ -34,8 +36,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
 	void K2_Async_LoadSkeletalMeshObject(TSoftObjectPtr<USkeletalMesh> UnloadedAsset, const bool bIsHighPriority, FLoadedSkeletalMeshEvent LoadedObjectEvent);
 	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
-	void K2_Async_LoadClassObject(TSoftClassPtr<UClass> UnloadedAsset, const bool bIsHighPriority, FLoadedClassEvent LoadedObjectEvent);
-
+	void K2_Async_LoadBehaviorTreeObject(TSoftObjectPtr<UBehaviorTree> UnloadedAsset, const bool bIsHighPriority, FLoadedBehaviorTreeEvent LoadedObjectEvent);
+	
+	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
+	void K2_Async_LoadAbilityClass(TSoftClassPtr<ACommonAbility> UnloadedAsset, const bool bIsHighPriority, FLoadedAbilityEvent LoadedObjectEvent);
+	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
+	void K2_Async_LoadActorClassObject(TSoftClassPtr<ACommonActor> UnloadedAsset, const bool bIsHighPriority, FLoadedActorEvent LoadedObjectEvent);
+	UFUNCTION(BlueprintCallable, Category="COMMON|AssetManagement")
+	void K2_Async_LoadCharacterClassObject(TSoftClassPtr<ACommonCharacter> UnloadedAsset, const bool bIsHighPriority, FLoadedCharacterEvent LoadedObjectEvent);
+	
 private:
 	template<typename AssetType, typename DelegateType>
 	void Async_LoadSoftObjects(TArray<TAsyncObjectLoadRequest<AssetType, DelegateType>> AssetLoadRequests);

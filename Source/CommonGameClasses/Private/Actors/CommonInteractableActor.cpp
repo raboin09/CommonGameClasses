@@ -47,23 +47,23 @@ void ACommonInteractableActor::HandleMeshOutlining(const FInteractionOutlinedEve
 	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
 }
 
-void ACommonInteractableActor::K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
+void ACommonInteractableActor::K2N_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
 {
 	if(ACharacter* CastedChar = Cast<ACharacter>(OtherActor))
 	{
-		if(K2_CanPickup(CastedChar))
+		if(K2N_CanPickup(CastedChar))
 		{
 			ConsumePickup(CastedChar);
 			if(bDiesAfterOverlap)
 			{
 				PickupBase->SetVisibility(false);
 			}
-			Super::K2_HandleOverlapEvent_Implementation(OtherActor, HitResult);
+			Super::K2N_HandleOverlapEvent_Implementation(OtherActor, HitResult);
 		}
 	}
 }
 
-bool ACommonInteractableActor::K2_CanPickup_Implementation(ACharacter* PotentialChar)
+bool ACommonInteractableActor::K2N_CanPickup_Implementation(ACharacter* PotentialChar)
 {
 	return true;
 }
@@ -78,6 +78,6 @@ void ACommonInteractableActor::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	if(RotatingMovementComponent)
 	{
-		RotatingMovementComponent->SetUpdatedComponent(GetMesh());	
+		RotatingMovementComponent->SetUpdatedComponent(K2N_GetMesh());	
 	}
 }

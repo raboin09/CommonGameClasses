@@ -21,7 +21,7 @@ protected:
 	int32 NumberOfActivations = 3;
 	// The delay (if any) before activating again (e.g. a shotgun would be 0 as all the pellets fire instantaneously, a 3-round burst rifle would be
 	// something like .1)
-	UPROPERTY(EditAnywhere, Category="Trigger", meta=(EditCondition = "NumberOfActivations > 1.f", ClampMin = 0.f))
+	UPROPERTY(EditAnywhere, Category="Trigger", meta=(EditCondition = "NumberOfActivations > 1", ClampMin = 0.f))
 	float TimeBetweenBurstShots = .1f;
 	
 private:	

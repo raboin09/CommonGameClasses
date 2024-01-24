@@ -46,11 +46,11 @@ void UInteractionComponent::Internal_SetupInteractionTimeline()
 	Timeline.SetLooping(false);
 	
 	FOnTimelineEvent InteractProgressFunction;
-	InteractProgressFunction.BindDynamic(this, &UInteractionComponent::Internal_InteractionTick);
+	InteractProgressFunction.BindDynamic(this, &ThisClass::Internal_InteractionTick);
 	Timeline.SetTimelinePostUpdateFunc(InteractProgressFunction);
 	
 	FOnTimelineEvent InteractFinishedEvent;
-	InteractFinishedEvent.BindDynamic(this, &UInteractionComponent::Internal_InteractionFinished);
+	InteractFinishedEvent.BindDynamic(this, &ThisClass::Internal_InteractionFinished);
 	Timeline.SetTimelineFinishedFunc(InteractFinishedEvent);
 
 	SetComponentTickEnabled(false);

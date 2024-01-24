@@ -1,9 +1,11 @@
 ﻿
 #include "ActorComponent/CharacterAnimationComponent.h"
 
+#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/MountManagerComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
 
@@ -36,20 +38,22 @@ void UCharacterAnimationComponent::BeginPlay()
 	}
 	OwningTagComponent = OwnerCharacter->GetGameplayTagComponent();
 	OwnerAnimInstance = OwnerCharacter->GetAnimInstance();
+	
 	if(OwnerAnimInstance.IsValid())
 	{
-		OwnerAnimInstance->OnMontageEnded.AddDynamic(this, &UCharacterAnimationComponent::HandleMontageEnded);
+		OwnerAnimInstance->OnMontageEnded.AddDynamic(this, &ThisClass::HandleMontageEnded);
 	}
+	
 	if(UHealthComponent* HealthComponent = OwnerCharacter->FindComponentByClass<UHealthComponent>())
 	{
-		HealthComponent->OnCurrentWoundHealthChanged().AddDynamic(this, &UCharacterAnimationComponent::HandleCurrentWoundChangedEvent);
-		HealthComponent->OnActorDeath().AddDynamic(this, &UCharacterAnimationComponent::HandleActorDeathEvent);
+		HealthComponent->OnCurrentWoundHealthChanged().AddDynamic(this, &ThisClass::HandleCurrentWoundChangedEvent);
+		HealthComponent->OnActorDeath().AddDynamic(this, &ThisClass::HandleActorDeathEvent);
 	}
 }
 
 void UCharacterAnimationComponent::HandleMontageEnded(UAnimMontage* EndedMontage, bool bInterrupted)
 {
-	const FCharacterMontageEndedPayload CharacterMontageEndedPayload = FCharacterMontageEndedPayload(EndedMontage, bInterrupted);
+	const FCharacterMontageEndedPayload CharacterMontageEndedPayload = FCharacterMontageEndedPayload(EndedMontage, GetCurrentPlayingMontage().Get(), bInterrupted);
 	CharacterMontageEnded.Broadcast(CharacterMontageEndedPayload);
 }
 
@@ -67,13 +71,28 @@ void UCharacterAnimationComponent::HandleActorDeathEvent(const FActorDeathEventP
 	Internal_TryStartCharacterKnockback(DeathEventPayload.HitReactEvent, false);
 }
 
+float UCharacterAnimationComponent::HandleMontageLoadedEvent(TSoftObjectPtr<UAnimMontage> LoadedAnimMontage)
+{
+	if(!CachedMontageData.Contains(LoadedAnimMontage))
+	{
+		return -1.f;
+	}
+	const FAnimMontagePlayData& AnimMontagePlayData = CachedMontageData[LoadedAnimMontage];
+	CachedMontageData.Remove(LoadedAnimMontage);
+	if(AnimMontagePlayData.bForcePlay)
+	{
+		return ForcePlayAnimMontage(AnimMontagePlayData);
+	}
+	return TryPlayAnimMontage(AnimMontagePlayData);
+}
+
 float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
 {
 	if(!OwnerCharacter || OwnerCharacter->GetCurrentMontage())
 	{
 		return -1.f;
 	}
-	return OwnerCharacter->PlayAnimMontage(AnimMontageData.MontageToPlay);
+	return Internal_PlayMontage(AnimMontageData);
 }
 
 void UCharacterAnimationComponent::StopAnimMontage(UAnimMontage* Montage)
@@ -131,9 +150,21 @@ float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayD
 	if (!AnimMontagePlayData.MontageToPlay)
 	{
 		return 0.f;
-	}	
-	AnimMontagePlayData.MontageToPlay->bEnableAutoBlendOut = AnimMontagePlayData.bShouldBlendOut;
-	return OwnerCharacter->PlayAnimMontage(AnimMontagePlayData.MontageToPlay, AnimMontagePlayData.PlayRate, AnimMontagePlayData.MontageSection);
+	}
+	if(AnimMontagePlayData.MontageToPlay.IsValid())
+	{
+		return OwnerCharacter->PlayAnimMontage(AnimMontagePlayData.MontageToPlay.Get(), AnimMontagePlayData.PlayRate, AnimMontagePlayData.MontageSection);	
+	}
+	
+	if(UActorAssetManagerComponent* ActorAssetManagerComponent = GetOwner()->FindComponentByClass<UActorAssetManagerComponent>())
+	{
+		CachedMontageData[AnimMontagePlayData.MontageToPlay] = AnimMontagePlayData;
+		FLoadedAnimMontageEvent LoadedAnimMontageEvent = FLoadedAnimMontageEvent();
+		LoadedAnimMontageEvent.BindDynamic(this, &ThisClass::HandleMontageLoadedEvent);
+		ActorAssetManagerComponent->K2_Async_LoadAnimMontageObject(AnimMontagePlayData.MontageToPlay, true, LoadedAnimMontageEvent);
+		// Anim montage loading issue, could blend out too early
+	}
+	return 0.f;
 }
 
 void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange)
@@ -160,7 +191,7 @@ void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
 	
 	if (LastRagdollVelocity.Size() > 100)
 	{
-		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery, .1f, false);
+		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, .1f, false);
 	}
 	else
 	{
@@ -186,7 +217,7 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 	Internal_ApplyCharacterKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);
 	if(bShouldRecoverFromKnockback)
 	{
-		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
+		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
 	}
 }
 
@@ -204,12 +235,10 @@ void UCharacterAnimationComponent::Internal_TryPlayHitReact(const FDamageHitReac
 	
 	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Chainsaw || HitReactEvent.DeathReactType == EHitReactType::HitReact_Chainsaw)
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactChainsaw);
-		PlayData.bShouldBlendOut = false;
+		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactChainsaw).Get();
 	} else
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection));
-		PlayData.bShouldBlendOut = true;
+		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();
 	}
 	
 	ForcePlayAnimMontage(PlayData);

@@ -9,6 +9,7 @@
 class UBotBehaviorComponent;
 class UAISenseConfig_Sight;
 class UBehaviorTreeComponent;
+class UActorAssetManagerComponent;
 
 UCLASS()
 class COMMONGAMECLASSES_API ACommonAIController : public AAIController
@@ -34,18 +35,24 @@ public:
 	
 private:
 	// Link the bot behavior component to the perception updates
-	void InitPerceptionComponents(const UBotBehaviorComponent* BotBehaviorComponent);
+	void InitPerceptionComponents();
+	UFUNCTION()
+	void HandleBehaviorTreeLoaded(TSoftObjectPtr<UBehaviorTree> LoadedTree);
 
 	////////////////////////////////
 	/// Common Variables
 	////////////////////////////////
-private:
-	UPROPERTY(Transient, VisibleDefaultsOnly)
-	UAISenseConfig_Sight* Sight;
-	UPROPERTY(Transient, VisibleDefaultsOnly)
-	UAIPerceptionComponent* AIPerceptionComponent;
+protected:
+	UPROPERTY()
+	TWeakObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UActorAssetManagerComponent> ActorAssetManagerComponent;
+	UPROPERTY(VisibleDefaultsOnly)
+	TObjectPtr<UAISenseConfig_Sight> Sight;
+	UPROPERTY(VisibleDefaultsOnly)
+	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
 	UPROPERTY(Transient)
-	UBlackboardComponent* BlackboardComponent;
+	TObjectPtr<UBlackboardComponent> BlackboardComponent;
 	UPROPERTY(Transient)
-	UBehaviorTreeComponent* BehaviorTreeComponent;
+	TObjectPtr<UBehaviorTreeComponent> BehaviorTreeComponent;
 };

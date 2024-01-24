@@ -79,7 +79,7 @@ void UQuestManagerComponent::ActivateQuestInstance(TSubclassOf<UQuestStateMachin
 	{
 		if(CurrTrans)
 		{
-			CurrTrans->OnQuestUpdated().AddUObject(this, &UQuestManagerComponent::HandleQuestUpdate);
+			CurrTrans->OnQuestUpdated().AddUObject(this, &ThisClass::HandleQuestUpdate);
 		}		
 	}
 	QuestUpdate.Broadcast(FQuestUpdateEventPayload(TempQuest));

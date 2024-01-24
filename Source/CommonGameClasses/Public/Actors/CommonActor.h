@@ -36,7 +36,7 @@ protected:
 	TArray<FGameplayTag> DefaultGameplayTags;
 
 	UPROPERTY(BlueprintReadOnly)
-	UActorAssetManagerComponent* ActorAssetManagerComponent;
+	TObjectPtr<UActorAssetManagerComponent> ActorAssetManagerComponent;
 	UPROPERTY()
-	UGameplayTagComponent* GameplayTagComponent;
+	TObjectPtr<UGameplayTagComponent> GameplayTagComponent;
 };

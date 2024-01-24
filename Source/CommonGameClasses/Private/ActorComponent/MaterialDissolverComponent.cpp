@@ -76,12 +76,12 @@ void UMaterialDissolverComponent::InitDissolveTimeline()
 	if(DissolveCurveFloat)
 	{
 		FOnTimelineFloat DissolveProgressFunction;
-		DissolveProgressFunction.BindDynamic(this, &UMaterialDissolverComponent::Internal_TimelineDissolveUpdate);
+		DissolveProgressFunction.BindDynamic(this, &ThisClass::Internal_TimelineDissolveUpdate);
 		DissolveTimeline.AddInterpFloat(DissolveCurveFloat, DissolveProgressFunction);
 		DissolveTimeline.SetLooping(false);
 	}
 	
 	FOnTimelineEvent CoverLerpFinishedEvent;
-	CoverLerpFinishedEvent.BindDynamic(this, &UMaterialDissolverComponent::Internal_TimelineDissolveEnd);
+	CoverLerpFinishedEvent.BindDynamic(this, &ThisClass::Internal_TimelineDissolveEnd);
 	DissolveTimeline.SetTimelineFinishedFunc(CoverLerpFinishedEvent);
 }

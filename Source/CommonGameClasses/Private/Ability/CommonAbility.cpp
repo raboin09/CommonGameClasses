@@ -10,6 +10,7 @@
 #include "API/Ability/ResourceContainer.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTypes.h"
@@ -26,10 +27,15 @@ ACommonAbility::ACommonAbility()
 	InitWeaponMesh(AbilityStaticMesh);
 }
 
+void ACommonAbility::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	Internal_SetMeshToUse();
+}
+
 void ACommonAbility::BeginPlay()
 {
 	Super::BeginPlay();
-	Internal_SetMeshToUse();
 	SetActivationMechanism();
 	SetResourceContainerObject();
 	SetTriggerMechanism();
@@ -62,23 +68,10 @@ void ACommonAbility::EquipAbility()
 {
 	Internal_HideMesh(false);
 	UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Equipping);
-
-	UAnimMontage* EquipAnimation = K2_GetEquipAnim();
-	UCharacterAnimationComponent* CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>();
-	if (!CharacterAnimationComponent || !EquipAnimation)
-	{
-		K2_HandleEquip();
-		HandleEquipFinished();
-		return;
-	}
-
-	K2_HandleEquip();
-	FAnimMontagePlayData PlayData = FAnimMontagePlayData();
-	PlayData.MontageToPlay = EquipAnimation;
-	const float Duration = CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
+	const float Duration = K2_HandleEquip();
 	if (Duration > 0.0f)
 	{
-		GetWorldTimerManager().SetTimer(Timer_OnEquipFinished, this, &ACommonAbility::HandleEquipFinished, Duration, false);
+		GetWorldTimerManager().SetTimer(Timer_OnEquipFinished, this, &ThisClass::HandleEquipFinished, Duration, false);
 	}
 	else
 	{
@@ -95,6 +88,20 @@ void ACommonAbility::HandleEquipFinished()
 		TryStartAbility();
 	}
 	K2_HandleEquipFinished();
+}
+
+float ACommonAbility::PlayAnimMontage(UAnimMontage* MontageToPlay)
+{
+	UCharacterAnimationComponent* CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>();
+	if (!CharacterAnimationComponent || !MontageToPlay)
+	{
+		return 0.f;
+	}
+
+	K2_HandleEquip();
+	FAnimMontagePlayData PlayData = FAnimMontagePlayData();
+	PlayData.MontageToPlay = MontageToPlay;
+	return CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
 }
 
 void ACommonAbility::UnEquipAbility()
@@ -174,6 +181,7 @@ void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
 
 	if (!OwnerMeshComponent || !MeshToUse)
 	{
+		UKismetSystemLibrary::PrintString(this, "Mesh NOT Ok");
 		return;
 	}
 	MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);
@@ -230,9 +238,9 @@ void ACommonAbility::Internal_SetMeshToUse()
 
 void ACommonAbility::Internal_HideMesh(bool bShouldHide) const
 {
-	if (GetAbilityMesh() && MeshType == EMeshType::AbilityMesh)
+	if (MeshToUse && MeshType == EMeshType::AbilityMesh)
 	{
-		GetAbilityMesh()->SetHiddenInGame(bShouldHide);
+		MeshToUse->SetHiddenInGame(bShouldHide);
 	}
 }
 
@@ -344,7 +352,7 @@ void ACommonAbility::SetActivationMechanism()
 	ActivationMechanism = Cast<UBaseActivation>(TempObj);
 	ActivationMechanism->SetInstigator(GetInstigator());
 	ActivationMechanism->SetOwner(this);
-	ActivationMechanism->InitActivationMechanism(GetAbilityMesh());
+	ActivationMechanism->InitActivationMechanism(MeshToUse);
 }
 
 bool ACommonAbility::Internal_StartNormalAbility()
@@ -379,20 +387,20 @@ void ACommonAbility::Internal_BindMechanismEventsToAbility()
 {
 	if (CooldownMechanism)
 	{
-		CooldownMechanism->OnCooldownTimerStarted().AddUObject(this, &ACommonAbility::HandleCooldownStarted);
-		CooldownMechanism->OnCooldownTimerEnded().AddUObject(this, &ACommonAbility::HandleCooldownEnded);
+		CooldownMechanism->OnCooldownTimerStarted().AddUObject(this, &ThisClass::HandleCooldownStarted);
+		CooldownMechanism->OnCooldownTimerEnded().AddUObject(this, &ThisClass::HandleCooldownEnded);
 	}
 
 	if (TriggerMechanism)
 	{
-		TriggerMechanism->OnTriggerPressed().AddUObject(this, &ACommonAbility::HandleTriggerPressedEvent);
-		TriggerMechanism->OnTriggerReleased().AddUObject(this, &ACommonAbility::HandleTriggerReleasedEvent);
+		TriggerMechanism->OnTriggerPressed().AddUObject(this, &ThisClass::HandleTriggerPressedEvent);
+		TriggerMechanism->OnTriggerReleased().AddUObject(this, &ThisClass::HandleTriggerReleasedEvent);
 	}
 
 	if (ActivationMechanism)
 	{
-		ActivationMechanism->OnActivation().AddUObject(this, &ACommonAbility::HandleAbilityActivationEvent);
-		ActivationMechanism->OnDeactivation().AddUObject(this, &ACommonAbility::HandleAbilityDeactivationEvent);
+		ActivationMechanism->OnActivation().AddUObject(this, &ThisClass::HandleAbilityActivationEvent);
+		ActivationMechanism->OnDeactivation().AddUObject(this, &ThisClass::HandleAbilityDeactivationEvent);
 	}
 }
 
@@ -439,7 +447,6 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 		// Some activations don't start until an external event happens (e.g. montage notifies), so we store it
 		// in the parent AbilityComponent
 		FAwaitingActivationDetails AwaitingActivationDetails;
-		AwaitingActivationDetails.AbilityTagComponent = GameplayTagComponent;
 		AwaitingActivationDetails.MechanismAwaitingActivation = ActivationMechanism;
 		AwaitingActivationDetails.ActivationLevel = TriggeredEventPayload.ActivationLevel;
 		OwningAbilityComponent->SetMechanismAwaitingActivation(AwaitingActivationDetails);

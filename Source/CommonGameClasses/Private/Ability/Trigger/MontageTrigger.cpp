@@ -1,4 +1,6 @@
 ﻿#include "Ability/Trigger/MontageTrigger.h"
+
+#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
@@ -10,15 +12,21 @@
 void UMontageTrigger::InitTrigger()
 {
 	K2_HandleInitTrigger();
-	if(!GetInstigator())
+	if(!MontageToPlay.IsValid())
 	{
-		return;
+		if(!GetOwner())
+		{
+			return;
+		}
+		
+		if(UActorAssetManagerComponent* ActorAssetManagerComponent = GetOwner()->FindComponentByClass<UActorAssetManagerComponent>())
+		{
+			FLoadedAnimMontageEvent LoadedAnimMontageEvent = FLoadedAnimMontageEvent();
+			ActorAssetManagerComponent->K2_Async_LoadAnimMontageObject(MontageToPlay, true, LoadedAnimMontageEvent);
+		}
 	}
 	
-	if(UCharacterAnimationComponent* CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>())
-	{
-		CharacterAnimationComponent->OnCharacterMontageEnded().AddDynamic(this, &UMontageTrigger::HandleMontageEnded);
-	}
+	CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>();
 }
 
 void UMontageTrigger::PressTrigger()
@@ -28,6 +36,7 @@ void UMontageTrigger::PressTrigger()
 		Internal_IncrementComboCounter();
 	} else
 	{
+		UKismetSystemLibrary::PrintString(this, "Soft Reset");
 		Internal_ResetComboCounter();
 	}
 	Internal_StartMontage();
@@ -48,7 +57,6 @@ void UMontageTrigger::ResetTrigger()
 	Internal_ResetComboCounter();
 	TArray<FGameplayTag> StateTagsToRemove;
 	StateTagsToRemove.Add(CommonGameAbilityEvent::ComboActivated);
-	StateTagsToRemove.Add(CommonGameAbilityEvent::ComboWindowEnabled);
 	StateTagsToRemove.Add(CommonGameAbilityEvent::Active);
 	StateTagsToRemove.Add(CommonGameAbilityEvent::Activated);
 	UGameplayTagComponent::RemoveTagsFromActor(GetOwner(), StateTagsToRemove);
@@ -56,11 +64,11 @@ void UMontageTrigger::ResetTrigger()
 
 void UMontageTrigger::HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload)
 {
-	if(CharacterMontageEndedPayload.bInterrupted && CharacterMontageEndedPayload.EndedMontage == CurrentMontagePlaying)
+	if(CharacterMontageEndedPayload.EndedMontage == MontageToPlay.Get() && CharacterMontageEndedPayload.UpcomingMontage != MontageToPlay.Get())
 	{
-		ResetTrigger();	
+		ResetTrigger();
+		CharacterAnimationComponent->OnCharacterMontageEnded().RemoveDynamic(this, &ThisClass::HandleMontageEnded);
 	}
-	CurrentMontagePlaying = nullptr;
 }
 
 FAnimMontagePlayData UMontageTrigger::Internal_GetPlayData() const
@@ -88,11 +96,11 @@ void UMontageTrigger::Internal_StartMontage()
 		return;
 	}
 	
-	if(UCharacterAnimationComponent* CharacterAnimationComponent = CurrentInstigator->FindComponentByClass<UCharacterAnimationComponent>())
+	if(CharacterAnimationComponent.IsValid())
 	{
 		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
-		CharacterAnimationComponent->TryPlayAnimMontage(PlayData);
-		CurrentMontagePlaying = PlayData.MontageToPlay;
+		CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
+		CharacterAnimationComponent->OnCharacterMontageEnded().AddUniqueDynamic(this, &ThisClass::HandleMontageEnded);
 	}
 	
 	if(bShouldPlayerLockOnToNearestTarget && CurrentInstigator->IsPlayerControlled())
@@ -114,6 +122,7 @@ void UMontageTrigger::Internal_StartMontage()
 
 void UMontageTrigger::Internal_IncrementComboCounter()
 {
+	UKismetSystemLibrary::PrintString(this, FString::FromInt(ComboSectionIncrement + 1));
 	if(++ComboSectionIncrement > MaxComboSections)
 	{
 		Internal_ResetComboCounter();

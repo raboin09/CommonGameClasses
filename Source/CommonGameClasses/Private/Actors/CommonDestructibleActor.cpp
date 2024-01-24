@@ -31,7 +31,7 @@ void ACommonDestructibleActor::BeginPlay()
 	Super::BeginPlay();
 	if(HealthComponent)
 	{
-		HealthComponent->OnActorDeath().AddDynamic(this, &ACommonDestructibleActor::HandleDeathEvent);
+		HealthComponent->OnActorDeath().AddDynamic(this, &ThisClass::HandleDeathEvent);
 	}
 }
 

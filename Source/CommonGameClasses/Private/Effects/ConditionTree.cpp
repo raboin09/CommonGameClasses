@@ -2,6 +2,8 @@
 
 
 #include "Effects/ConditionTree.h"
+
+#include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/ShieldEnergyComponent.h"
 
@@ -30,20 +32,21 @@ bool UConditionTreeNode::AreConditionsTrue(const FEffectContext& InEffectContext
 	return true;
 }
 
-bool UFloatLeafNode::AreConditionsTrue(const FEffectContext& InEffectContext) const
+bool UFloatLeafConditionNode::AreConditionsTrue(const FEffectContext& InEffectContext) const
 {
+	const float PropertyValue = GetProperty(InEffectContext);
 	switch (Operator) {
-		case EMathLeafOperator::Equal: return GetProperty(InEffectContext) == Value;
-		case EMathLeafOperator::NotEqual: return GetProperty(InEffectContext) != Value;
-		case EMathLeafOperator::GreaterThan: return GetProperty(InEffectContext) > Value;
-		case EMathLeafOperator::GreaterThanOrEqual: return GetProperty(InEffectContext) >= Value;
-		case EMathLeafOperator::LessThan: return GetProperty(InEffectContext) < Value;
-		case EMathLeafOperator::LessThanOrEqual: return GetProperty(InEffectContext) <= Value;
+		case EMathLeafOperator::Equal: return PropertyValue == Value;
+		case EMathLeafOperator::NotEqual: return PropertyValue != Value;
+		case EMathLeafOperator::GreaterThan: return PropertyValue > Value;
+		case EMathLeafOperator::GreaterThanOrEqual: return PropertyValue >= Value;
+		case EMathLeafOperator::LessThan: return PropertyValue < Value;
+		case EMathLeafOperator::LessThanOrEqual: return PropertyValue <= Value;
 		default: return false;
 	}
 }
 
-float UFloatLeafNode::GetProperty(const FEffectContext& InEffectContext) const
+float UFloatLeafConditionNode::GetProperty(const FEffectContext& InEffectContext) const
 {
 	const AActor* PropertyOwnerActor = GetPropertyOwner(PropertyOwner, InEffectContext);
 	if(!PropertyOwnerActor)
@@ -71,5 +74,20 @@ float UFloatLeafNode::GetProperty(const FEffectContext& InEffectContext) const
 		}
 	default:
 		return 0.f;
+	}
+}
+
+bool UGameplayTagConditionNode::AreConditionsTrue(const FEffectContext& InEffectContext) const
+{
+	AActor* TagActor = GetPropertyOwner(PropertyOwner, InEffectContext);
+	if(!TagActor)
+	{
+		return false;
+	}
+	
+	switch (Operator) {
+		case ETagOperator::HasTagsAny: return UGameplayTagComponent::ActorHasAnyGameplayTags(TagActor, ConditionTags, bExactMatch);
+		case ETagOperator::HasTagsAll: return UGameplayTagComponent::ActorHasAnyGameplayTags(TagActor, ConditionTags, bExactMatch);
+		default: return false;
 	}
 }

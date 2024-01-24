@@ -8,8 +8,18 @@
 #include "ConditionTree.generated.h"
 
 UENUM(BlueprintType)
+enum class ETagOperator : uint8
+{
+	None UMETA(DisplayName = "None"),
+	HasTag UMETA(DisplayName = "Has Gameplay Tag"),
+	HasTagsAny UMETA(DisplayName = "Has Gameplay Tags (ANY)"),
+	HasTagsAll UMETA(DisplayName = "Has Gameplay Tags (ALL)"),
+};
+
+UENUM(BlueprintType)
 enum class EMathLeafOperator : uint8
 {
+	None UMETA(DisplayName = "None"),
 	Equal UMETA(DisplayName = "=="),
 	NotEqual UMETA(DisplayName = "!="),
 	GreaterThan UMETA(DisplayName = ">"),
@@ -21,6 +31,7 @@ enum class EMathLeafOperator : uint8
 UENUM(BlueprintType)
 enum class ETreeOperator : uint8
 {
+	None,
 	And UMETA(DisplayName = "AND"),
 	Or UMETA(DisplayName = "OR"),
 	Not UMETA(DisplayName = "NOT"),
@@ -29,6 +40,7 @@ enum class ETreeOperator : uint8
 UENUM(BlueprintType)
 enum class EPropertyOwner : uint8
 {
+	None,
 	Instigator,
 	ReceivingActor
 };
@@ -36,6 +48,7 @@ enum class EPropertyOwner : uint8
 UENUM(BlueprintType)
 enum class EFloatOperand : uint8
 {
+	None,
 	CurrentHealth,
 	CurrentShield
 };
@@ -61,7 +74,7 @@ public:
 	virtual bool AreConditionsTrue(const FEffectContext& InEffectContext) const override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Condition Tree")
+	UPROPERTY(EditDefaultsOnly, Category="Condition Tree", meta=(EditCondition = "ChildConditions.Num() > 0", EditConditionHides))
 	ETreeOperator Operator;
 	UPROPERTY(EditDefaultsOnly, Category="Condition Tree", Instanced)
 	TArray<UConditionExpression*> ChildConditions;
@@ -78,7 +91,7 @@ protected:
 };
 
 UCLASS()
-class COMMONGAMECLASSES_API UFloatLeafNode : public UConditionLeafNode
+class COMMONGAMECLASSES_API UFloatLeafConditionNode : public UConditionLeafNode
 {
 	GENERATED_BODY()
 
@@ -92,4 +105,20 @@ protected:
 	EFloatOperand FloatProperty;
 	UPROPERTY(EditDefaultsOnly, Category="Condition")
 	float Value;
+};
+
+UCLASS()
+class COMMONGAMECLASSES_API UGameplayTagConditionNode : public UConditionLeafNode
+{
+	GENERATED_BODY()
+
+protected:
+	virtual bool AreConditionsTrue(const FEffectContext& InEffectContext) const override;
+
+	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	ETagOperator Operator;
+	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	TArray<FGameplayTag> ConditionTags;
+	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	bool bExactMatch = false;
 };

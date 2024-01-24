@@ -14,11 +14,11 @@ class COMMONGAMECLASSES_API UK2_AbilityActivation : public UBaseActivation
 
 protected:	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2_Activate(const FTriggerEventPayload& TriggerEventPayload);
+	void K2N_Activate(const FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2_Deactivate();
+	void K2N_Deactivate();
 
 public:
-	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { K2_Activate(TriggerEventPayload); }	
-	FORCEINLINE virtual void Deactivate() override { K2_Deactivate(); }
+	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { K2N_Activate(TriggerEventPayload); }	
+	FORCEINLINE virtual void Deactivate() override { K2N_Deactivate(); }
 };

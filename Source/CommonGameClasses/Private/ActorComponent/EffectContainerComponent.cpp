@@ -213,7 +213,7 @@ void UEffectContainerComponent::Internal_TryStartTicking()
 		return;
 	}
 	Internal_TickEffects();
-	CachedWorld->GetTimerManager().SetTimer(Timer_EffectTicker, this, &UEffectContainerComponent::Internal_TickEffects, EFFECT_TICK_RATE, true);
+	CachedWorld->GetTimerManager().SetTimer(Timer_EffectTicker, this, &ThisClass::Internal_TickEffects, EFFECT_TICK_RATE, true);
 	bIsTicking = true;
 }
 

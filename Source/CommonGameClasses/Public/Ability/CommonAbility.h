@@ -29,13 +29,14 @@ class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbilit
 	
 public:
 	ACommonAbility();
+	virtual void PostInitializeComponents() override;
+	
 	virtual void EquipAbility() override;
 	virtual void UnEquipAbility() override;
 	virtual bool TryStartAbility() override;
 	virtual bool TryEndAbility() override;
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) override;
 	virtual void DestroyAbility() override;
-	FORCEINLINE virtual UMeshComponent* GetAbilityMesh() const override { return MeshToUse; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -43,14 +44,16 @@ protected:
 	UFUNCTION()
 	void HandleEquipFinished();
 
+	// Return how long to delay the execution of HandleEquipFinished (e.g. if playing an equip anim montage, return the duration of the montage)
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	UAnimMontage* K2_GetEquipAnim();
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandleEquip();
+	float K2_HandleEquip();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleEquipFinished();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleUnEquip();
+	
+	UFUNCTION(BlueprintCallable)
+	float PlayAnimMontage(UAnimMontage* MontageToPlay);d
 
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Animation")
 	FGameplayTag AbilityOverlay = FGameplayTag(CommonGameAnimation::Unarmed);
@@ -58,12 +61,14 @@ protected:
 	EMeshType MeshType = EMeshType::AbilityMesh;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|Mesh")
 	FName AttachmentSocket = "hand_r";
+	
 	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (ClampMin = "0"))
-	float ResourceCost = 0.f;
+	float ResourceCost = 0.f;dwwwwww
 	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (EditCondition = "ResourceCost > 0"))
 	EResourceContainerLocation ResourceContainerLocation;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "(ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
+	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Ability|Resource", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceCost > 0 && DDDDDDDDD(ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
 	TSubclassOf<UActorComponent> ResourceContainerClass;
+	
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM|Ability")
 	TObjectPtr<UCooldownMechanismImpl> CooldownMechanism;
 	// If the ability only requires simple trigger logic (only needs burst timer and/or num shots), create an instance of an obj instead of requiring a child BP.
@@ -76,14 +81,14 @@ protected:
 	TSubclassOf<UBaseActivation> ActivationMechanismClass;
 
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Ability|AI")
-	UBehaviorTree* BotWeaponBehavior;
+	TSoftObjectPtr<UBehaviorTree> BotWeaponBehavior;
 	
 	UPROPERTY(VisibleDefaultsOnly, Category="CUSTOM|Ability")
-	USphereComponent* AbilityRoot;
+	TObjectPtr<USphereComponent> AbilityRoot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Ability")
-	UStaticMeshComponent* AbilityStaticMesh;
+	TObjectPtr<UStaticMeshComponent> AbilityStaticMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Ability")
-	USkeletalMeshComponent* AbilitySkeletalMesh;
+	TObjectPtr<USkeletalMeshComponent> AbilitySkeletalMesh;
 
 private:
 	void Internal_SetMeshToUse();
@@ -115,7 +120,7 @@ private:
 	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent);
 
 	UPROPERTY()
-	UMeshComponent* MeshToUse;
+	TObjectPtr<UMeshComponent> MeshToUse;
 	UPROPERTY()
 	TScriptInterface<IResourceContainer> ResourceContainer;
 	UPROPERTY()
@@ -123,7 +128,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UBaseActivation> ActivationMechanism;
 	UPROPERTY()
-	UAbilityComponent* OwningAbilityComponent;
+	TObjectPtr<UAbilityComponent> OwningAbilityComponent;
 	UPROPERTY()
 	FTimerHandle Timer_OnEquipFinished;
 }; 

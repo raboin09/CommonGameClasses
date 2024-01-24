@@ -61,7 +61,7 @@ void UResourceComponent::Internal_StartRegenTimer()
 		return;
 	}
 	bIsRegenTicking = true;
-	GetWorld()->GetTimerManager().SetTimer(Timer_RegenRate, this, &UResourceComponent::Internal_TickRegen, RegenRate, true);
+	GetWorld()->GetTimerManager().SetTimer(Timer_RegenRate, this, &ThisClass::Internal_TickRegen, RegenRate, true);
 }
 
 void UResourceComponent::Internal_StopRegenTimer()

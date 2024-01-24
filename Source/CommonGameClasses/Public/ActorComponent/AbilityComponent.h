@@ -15,8 +15,6 @@ struct FAwaitingActivationDetails
 	GENERATED_BODY()
 
 	UPROPERTY()
-	UGameplayTagComponent* AbilityTagComponent = nullptr;
-	UPROPERTY()
 	TScriptInterface<IActivationMechanism> MechanismAwaitingActivation = nullptr;
 	UPROPERTY()
 	int32 ActivationLevel = -1;

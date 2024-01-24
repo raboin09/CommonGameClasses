@@ -40,13 +40,14 @@ struct FDamageHitReactEvent
 UENUM(BlueprintType)
 enum class EEffectStatType
 {
-	MaxHealth,
-	Damage_All,
-	Damage_Health,
-	Damage_Shield,
-	HealHealth,
-	HealShield,
-	MoveSpeed,
+	None,
+	MaxWounds UMETA(DisplayName = "Max Wounds (Resource Pools)"),
+	Damage_All UMETA(DisplayName = "Damage All (Affects Health and Shields)"),
+	Damage_Health UMETA(DisplayName = "Damage Health (ONLY Affects Health)"),
+	Damage_Shield UMETA(DisplayName = "Damage Shields (ONLY Affects Shields)"),
+	HealHealth UMETA(DisplayName = "Heal Health (ONLY Affects Health)"),
+	HealShield UMETA(DisplayName = "Heal Shields (ONLY Affects Shields)"),
+	MoveSpeed UMETA(DisplayName = "Move Speed (Affects Health and Shields)"),
 };
 
 USTRUCT(BlueprintType)

@@ -24,12 +24,12 @@ void ULockOnComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	FOnTimelineFloat InterpUpdateFunction;
-	InterpUpdateFunction.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionUpdate);
+	InterpUpdateFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionUpdate);
 	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, InterpUpdateFunction);
 	LockOnInterpTimeline.SetLooping(false);
 
 	FOnTimelineEvent InterpFinishedFunction;
-	InterpFinishedFunction.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionFinished);
+	InterpFinishedFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionFinished);
 	LockOnInterpTimeline.SetTimelineFinishedFunc(InterpFinishedFunction);
 }
 

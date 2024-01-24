@@ -11,7 +11,7 @@ void UBurstTrigger::PressTrigger()
 		}
 	} else
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BurstFire, this, &UBurstTrigger::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);	
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BurstFire, this, &ThisClass::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);	
 	}
 }
 

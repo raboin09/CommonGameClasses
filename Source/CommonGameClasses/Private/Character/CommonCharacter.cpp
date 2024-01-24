@@ -2,6 +2,10 @@
 
 
 #include "Character/CommonCharacter.h"
+
+#include "Ability/CommonAbility.h"
+#include "ActorComponent/AbilityComponent.h"
+#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
@@ -18,6 +22,7 @@ ACommonCharacter ::ACommonCharacter(const FObjectInitializer& ObjectInitializer)
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainerComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
+	ActorAssetManagerComponent = CreateDefaultSubobject<UActorAssetManagerComponent>(TEXT("ActorAssetManagerComponent"));
 	CommonCharacterMovementComponent = Cast<UCommonCharacterMovementComponent>(GetCharacterMovement());
 }
 
@@ -30,11 +35,6 @@ void ACommonCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	UGameplayTagComponent::AddTagsToActor(this, DefaultGameplayTags);
-}
-
-void ACommonCharacter::BeginPlay()
-{
-	Super::BeginPlay();
 	if(!AbilityComponent)
 	{
 		return;
@@ -42,9 +42,25 @@ void ACommonCharacter::BeginPlay()
 	
 	for(auto Ability : DefaultAbilities)
 	{
-		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);		
+		if(!Ability.Value.IsValid())
+		{
+			FLoadedAbilityEvent LoadedClassEvent = FLoadedAbilityEvent();
+			LoadedClassEvent.BindDynamic(this, &ThisClass::HandleDefaultAbilityLoaded);
+			ActorAssetManagerComponent->K2_Async_LoadAbilityClass(Ability.Value, true, LoadedClassEvent);
+		} else
+		{
+			AbilityComponent->AddAbilityFromClassInSlot(Ability.Value.Get(), Ability.Key);
+			if(Ability.Key == CommonGameSlot::SlotMain)
+			{
+				AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);;
+			}
+		}
 	}
-	AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);
+}
+
+void ACommonCharacter::BeginPlay()
+{
+	Super::BeginPlay();
 	
 	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UCommonCoreUtils::GetActorTrackingSubsystem(this))
 	{
@@ -81,4 +97,20 @@ void ACommonCharacter::SetMoveSpeedRatioIncrease(float Ratio)
 		return;
 	}
 	CommonCharacterMovementComponent->SetWalkSpeedRatio(Ratio);
+}
+
+void ACommonCharacter::HandleDefaultAbilityLoaded(TSoftClassPtr<ACommonAbility> LoadedAbilityClass)
+{
+	for(auto Ability : DefaultAbilities)
+	{
+		if(Ability.Value == LoadedAbilityClass)
+		{
+			AbilityComponent->AddAbilityFromClassInSlot(LoadedAbilityClass.Get(), Ability.Key);
+			if(Ability.Key == CommonGameSlot::SlotMain)
+			{
+				AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);;
+			}
+			return;
+		}
+	}
 }

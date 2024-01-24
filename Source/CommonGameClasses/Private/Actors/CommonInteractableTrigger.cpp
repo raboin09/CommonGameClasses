@@ -16,21 +16,21 @@ ACommonInteractableTrigger::ACommonInteractableTrigger()
 	TriggerMachine = nullptr;
 }
 
-void ACommonInteractableTrigger::K2_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
+void ACommonInteractableTrigger::K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
 {
 	if(!TriggerMachine)
 	{
 		return;
 	}
 	
-	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && K2_CanPickup(CastedChar))
+	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && K2N_CanPickup(CastedChar))
 	{
 		TriggerMachine->Stop();
 	}
 
 }
 
-bool ACommonInteractableTrigger::K2_CanPickup_Implementation(ACharacter* PotentialChar)
+bool ACommonInteractableTrigger::K2N_CanPickup_Implementation(ACharacter* PotentialChar)
 {
 	if(PotentialChar && PotentialChar->IsPlayerControlled())
 	{

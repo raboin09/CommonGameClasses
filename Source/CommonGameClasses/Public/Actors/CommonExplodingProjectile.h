@@ -18,7 +18,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void HandleActorDeath() override;
-	virtual void K2_HandleImpact_Implementation(const FHitResult& HitResult) override;
+	virtual void K2N_HandleImpact_Implementation(const FHitResult& HitResult) override;
 	virtual void OnImpact(const FHitResult& HitResult) override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")

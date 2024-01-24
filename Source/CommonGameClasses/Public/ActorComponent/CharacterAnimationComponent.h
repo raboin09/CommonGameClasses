@@ -5,11 +5,11 @@
 #include "CoreMinimal.h"
 #include "Character/CommonCharacter.h"
 #include "Components/ActorComponent.h"
+#include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CharacterAnimationComponent.generated.h"
 
 class UCommonAnimInstance;
-struct FAnimMontagePlayData;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API UCharacterAnimationComponent : public UActorComponent
@@ -40,6 +40,8 @@ private:
 	void HandleCurrentWoundChangedEvent(const FCurrentWoundEventPayload& CurrentWoundEventPayload);
 	UFUNCTION()
 	void HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload);
+	UFUNCTION()
+	float HandleMontageLoadedEvent(TSoftObjectPtr<UAnimMontage> LoadedAnimMontage);
 	
 	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
 	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
@@ -59,6 +61,7 @@ private:
 	FCharacterMontageEnded CharacterMontageEnded;	
 	
 	FRotator ControlRotation;
+	TMap<TSoftObjectPtr<UAnimMontage>, FAnimMontagePlayData> CachedMontageData;
 
 	// Ragdolling
 	FTimerHandle TimerHandle_Ragdoll;
@@ -67,4 +70,5 @@ private:
 public:
 	FORCEINLINE TWeakObjectPtr<UAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
 	FORCEINLINE FCharacterMontageEnded& OnCharacterMontageEnded() { return CharacterMontageEnded; }
+	FORCEINLINE TWeakObjectPtr<UAnimMontage> GetCurrentPlayingMontage() const { return OwnerCharacter ? OwnerCharacter->GetCurrentMontage() : nullptr; }
 };

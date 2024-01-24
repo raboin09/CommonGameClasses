@@ -14,12 +14,12 @@ ACommonOverlapActor::ACommonOverlapActor()
 void ACommonOverlapActor::BeginPlay()
 {
 	Super::BeginPlay();
-	if(UShapeComponent* ShapeComponent = GetCollisionComponent())
+	if(UShapeComponent* ShapeComponent = K2N_GetCollisionComponent())
 	{
-		ShapeComponent->OnComponentBeginOverlap.AddDynamic(this, &ACommonOverlapActor::ActorBeginOverlap);
-		ShapeComponent->OnComponentEndOverlap.AddDynamic(this, &ACommonOverlapActor::ActorEndOverlap);
+		ShapeComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::ActorBeginOverlap);
+		ShapeComponent->OnComponentEndOverlap.AddDynamic(this, &ThisClass::ActorEndOverlap);
 		ShapeComponent->IgnoreActorWhenMoving(this, true);
-		ShapeComponent->IgnoreComponentWhenMoving(GetMesh(), true);
+		ShapeComponent->IgnoreComponentWhenMoving(K2N_GetMesh(), true);
 	}
 
 	if(bActivateOnStart)
@@ -37,14 +37,14 @@ void ACommonOverlapActor::BeginPlay()
 	}
 }
 
-void ACommonOverlapActor::K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
+void ACommonOverlapActor::K2N_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
 {
 	if(bDiesAfterOverlap) {
 		HandleActorDeath();
 	}
 }
 
-void ACommonOverlapActor::K2_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
+void ACommonOverlapActor::K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
 {
 	
 }
@@ -59,7 +59,7 @@ void ACommonOverlapActor::Activate()
 {
 	HitActors.Empty();
 	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Active);
-	if(UShapeComponent* ShapeComponent = GetCollisionComponent())
+	if(UShapeComponent* ShapeComponent = K2N_GetCollisionComponent())
 	{
 		ShapeComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		ShapeComponent->SetGenerateOverlapEvents(true);
@@ -70,7 +70,7 @@ void ACommonOverlapActor::Activate()
 void ACommonOverlapActor::Deactivate()
 {
 	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameState::Active);
-	if(UShapeComponent* ShapeComponent = GetCollisionComponent())
+	if(UShapeComponent* ShapeComponent = K2N_GetCollisionComponent())
 	{
 		ShapeComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		ShapeComponent->SetGenerateOverlapEvents(false);
@@ -95,7 +95,7 @@ void ACommonOverlapActor::ActorBeginOverlap(UPrimitiveComponent* OverlappedComp,
 	const bool bValidRequiredTags = RequiredOverlapTags.Num() > 0 ? UGameplayTagComponent::ActorHasAnyGameplayTags(OtherActor, RequiredOverlapTags) : true;
 	if (IsActive() && !HitActors.Contains(OtherActor) && bValidRequiredTags) {
 		HitActors.Add(OtherActor);
-		K2_HandleOverlapEvent(OtherActor, SweepResult);
+		K2N_HandleOverlapEvent(OtherActor, SweepResult);
 	}
 }
 
@@ -104,6 +104,6 @@ void ACommonOverlapActor::ActorEndOverlap(UPrimitiveComponent* OverlappedComp, A
 	if(OtherActor && !OtherActor->IsA(StaticClass()) && HitActors.Contains(OtherActor))
 	{
 		HitActors.Remove(OtherActor);
-		K2_HandleEndOverlapEvent(OtherActor);
+		K2N_HandleEndOverlapEvent(OtherActor);
 	}
 }

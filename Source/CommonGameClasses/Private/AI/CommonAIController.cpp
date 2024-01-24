@@ -1,6 +1,7 @@
 ﻿
 #include "AI/CommonAIController.h"
 
+#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/BotBehaviorComponent.h"
 #include "Character/CommonAICharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -13,6 +14,7 @@ ACommonAIController::ACommonAIController()
 	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackBoardComp"));
 	BrainComponent = BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorComp"));
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(FName("AIPerceptionComp"));
+	ActorAssetManagerComponent = CreateDefaultSubobject<UActorAssetManagerComponent>(TEXT("ActorAssetManagerComponent"));
 	Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(FName("Sight Config"));
 	Sight->SightRadius = 2000.f;
 	Sight->LoseSightRadius = 2500.f;
@@ -32,14 +34,21 @@ void ACommonAIController::OnPossess(APawn* InPawn)
 		return;
 	}
 	
-	const UBotBehaviorComponent* BotBehaviorComponent = InPawn->FindComponentByClass<UBotBehaviorComponent>();
-	if(!BotBehaviorComponent)
+	BotBehaviorComponent = InPawn->FindComponentByClass<UBotBehaviorComponent>();
+	if(!BotBehaviorComponent.IsValid())
 	{
 		return;
 	}
 	
-	InitPerceptionComponents(BotBehaviorComponent);
-	InitAIBehavior(BotBehaviorComponent->GetDefaultBehavior());
+	if(!BotBehaviorComponent->GetDefaultBehavior().IsValid())
+	{
+		FLoadedBehaviorTreeEvent LoadedBehaviorTreeEvent = FLoadedBehaviorTreeEvent();
+		LoadedBehaviorTreeEvent.BindDynamic(this, &ThisClass::HandleBehaviorTreeLoaded);
+		ActorAssetManagerComponent->K2_Async_LoadBehaviorTreeObject(BotBehaviorComponent->GetDefaultBehavior(), false, LoadedBehaviorTreeEvent);
+	} else
+	{
+		HandleBehaviorTreeLoaded(BotBehaviorComponent->GetDefaultBehavior());
+	}
 }
 
 void ACommonAIController::OnUnPossess()
@@ -74,11 +83,17 @@ void ACommonAIController::InitAIBehavior(UBehaviorTree* BehaviorTree) const
 	BehaviorTreeComponent->StartTree(*BehaviorTree);
 }
 
-void ACommonAIController::InitPerceptionComponents(const UBotBehaviorComponent* BotBehaviorComponent)
+void ACommonAIController::InitPerceptionComponents()
 {
-	if(AIPerceptionComponent)
+	if(AIPerceptionComponent && BotBehaviorComponent.IsValid())
 	{
 		AIPerceptionComponent->OnPerceptionUpdated.RemoveAll(this);
-		AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(BotBehaviorComponent, &UBotBehaviorComponent::HandlePerceptionUpdated);
+		AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(BotBehaviorComponent.Get(), &UBotBehaviorComponent::HandlePerceptionUpdated);
 	}
+}
+
+void ACommonAIController::HandleBehaviorTreeLoaded(TSoftObjectPtr<UBehaviorTree> LoadedTree)
+{
+	InitPerceptionComponents();
+	InitAIBehavior(LoadedTree.Get());
 }

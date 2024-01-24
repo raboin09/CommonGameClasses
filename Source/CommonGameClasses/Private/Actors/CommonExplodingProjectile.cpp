@@ -28,14 +28,14 @@ void ACommonExplodingProjectile::HandleActorDeath()
 	Super::HandleActorDeath();
 }
 
-void ACommonExplodingProjectile::K2_HandleImpact_Implementation(const FHitResult& HitResult)
+void ACommonExplodingProjectile::K2N_HandleImpact_Implementation(const FHitResult& HitResult)
 {
 	Internal_Explode();
 }
 
 void ACommonExplodingProjectile::OnImpact(const FHitResult& HitResult)
 {
-	K2_HandleImpact_Implementation(HitResult);
+	K2N_HandleImpact_Implementation(HitResult);
 	HandleActorDeath();
 }
 

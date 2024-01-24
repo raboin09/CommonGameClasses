@@ -10,6 +10,8 @@
 #include "GameFramework/Actor.h"
 #include "CommonEffect.generated.h"
 
+class UActorAssetManagerComponent;
+
 UCLASS(Blueprintable, BlueprintType, EditInlineNew)
 class COMMONGAMECLASSES_API UEffectData : public UObject
 {
@@ -18,35 +20,29 @@ class COMMONGAMECLASSES_API UEffectData : public UObject
 public:
 	UEffectData()
 	{
-		// ImpactVFXRowHandle.DataTable = LoadObject<UDataTable>(nullptr, UTF8_TO_TCHAR("DataTable'/Game/_CUSTOM/Data/CUSTOM_ImpactVFX.CUSTOM_ImpactVFX'"));
-		// ImpactSFXRowHandle.DataTable = LoadObject<UDataTable>(nullptr, UTF8_TO_TCHAR("DataTable'/Game/_CUSTOM/Data/CUSTOM_ImpactSFX.CUSTOM_ImpactSFX'"));
+		Conditions = CreateDefaultSubobject<UConditionTreeNode>(TEXT("ConditionTree"));
 	}
-	
+
 	UPROPERTY(EditDefaultsOnly, Category="Initialization Data")
 	FEffectInitializationData InitializationData;
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="Conditions")
 	UConditionTreeNode* Conditions;
 	UPROPERTY(EditDefaultsOnly, Category="FX")
 	bool bAttachVFXToActor = false;
-	UPROPERTY(EditDefaultsOnly, Category="FX")
-	FDataTableRowHandle ImpactVFXRowHandle;
-	UPROPERTY(EditDefaultsOnly, Category="FX")
-	FDataTableRowHandle ImpactSFXRowHandle;
 	UPROPERTY(EditDefaultsOnly, Category="Modifiers")
 	TMap<FGameplayTag, FModifierExpression> EffectModifiers;
 };
 
 class USoundCue;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(Abstract, Blueprintable, HideCategories=("ActorTick", "Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "Events",
+		"LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition", "Actor Tick"))
 class COMMONGAMECLASSES_API ACommonEffect : public AActor, public IEffect
 {
 	GENERATED_BODY()
 	
 public:	
 	ACommonEffect();
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	//////////////////////////
 	/// IEffect overrides
@@ -60,28 +56,25 @@ public:
 	virtual void DestroyEffect() override;
 
 protected:
-
 	virtual bool CanActivateEffect();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	bool K2_CanActivateEffect();
 	
 	//////////////////////////
 	/// BaseEffect code
 	//////////////////////////
 	
-	// Must override in child classes
+	// BP event that fires after effect has successfully been activated
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_OnActivateEffect();
+	void K2_ActivateEffect();
 	// Optionally override one of these in child classes
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_OnDestroyEffect();
-	
-	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
-	UFXSystemAsset* K2_GetEffectParticleSystem();
-	virtual UFXSystemAsset* K2_GetEffectParticleSystem_Implementation();
-	
-	// Optionally override one of these in child classes
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON")
-	USoundCue* K2_GetEffectSound();
-	virtual USoundCue* K2_GetEffectSound_Implementation();
+	void K2_DestroyEffect();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	void K2_PlayEffectSound();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	void K2_PlayEffectVFX(const bool bAttachVFXToActor);
 	
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = "CUSTOM")
 	UEffectData* EffectData;
@@ -89,10 +82,10 @@ protected:
 	FEffectContext EffectContext;	
 	UPROPERTY(Transient)
 	UFXSystemComponent* EffectVFX;
+	UPROPERTY(BlueprintReadOnly)
+	UActorAssetManagerComponent* ActorAssetManagerComponent;
 
 private:
-	void Internal_PlayEffectSound();
-	void Internal_PlayEffectParticleSystem();
 	bool Internal_IsValidHeadshot() const;
 
 	// Add and remove tags

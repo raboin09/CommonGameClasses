@@ -10,6 +10,10 @@
 #include "Quest/QuestStateMachine.h"
 #include "CommonEventDeclarations.generated.h"
 
+class ACommonCharacter;
+class ACommonActor;
+class ACommonAbility;
+class UBehaviorTree;
 class IAbility;
 
 ///////////////////////////
@@ -22,7 +26,12 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedTextureEvent, TSoftObjectPtr<UTexture>,
 DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedMaterialEvent, TSoftObjectPtr<UMaterialInterface>, LoadedMaterial);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedStaticMeshEvent, TSoftObjectPtr<UStaticMesh>, LoadedStaticMesh);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedSkeletalMeshEvent, TSoftObjectPtr<USkeletalMesh>, LoadedSkeletalMesh);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedClassEvent, TSoftClassPtr<UClass>, LoadedClass);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedBehaviorTreeEvent, TSoftObjectPtr<UBehaviorTree>, LoadedTree);
+DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(float, FLoadedAnimMontageEvent, TSoftObjectPtr<UAnimMontage>, LoadedMontage);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedAbilityEvent, TSoftClassPtr<ACommonAbility>, LoadedAbilityClass);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedActorEvent, TSoftClassPtr<ACommonActor>, LoadedActorClass);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedCharacterEvent, TSoftClassPtr<ACommonCharacter>, LoadedCharacterClass);
 //
 // DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedNiagaraSystemObjectEvent, UNiagaraSystem*, LoadedNiagaraSystem);
 // DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedCascadeSystemObjectEvent, UParticleSystem*, LoadedParticleSystem);
@@ -41,15 +50,19 @@ struct FCharacterMontageEndedPayload
 	FCharacterMontageEndedPayload()
 	{
 		EndedMontage = nullptr;
+		UpcomingMontage = nullptr;
 		bInterrupted = false;
 	}
 	
-	FCharacterMontageEndedPayload(const TObjectPtr<UAnimMontage> InMontage, const bool bInInterrupted)
+	FCharacterMontageEndedPayload(const TObjectPtr<UAnimMontage> InMontage, const TObjectPtr<UAnimMontage> InUpcomingMontage, const bool bInInterrupted)
 	{
 		EndedMontage = InMontage;
+		UpcomingMontage = InUpcomingMontage;
 		bInterrupted = bInInterrupted;
 	}
-	
+
+	UPROPERTY()
+	TWeakObjectPtr<UAnimMontage> UpcomingMontage;
 	UPROPERTY()
 	TWeakObjectPtr<UAnimMontage> EndedMontage;
 	UPROPERTY()

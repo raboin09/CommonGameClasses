@@ -28,8 +28,8 @@ public:
 	/// CommonPlayerController
 	//////////////////////////////////////////////
 	
-	FORCEINLINE UInteractionComponent* GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent; };
-	FORCEINLINE ACommonPlayerCharacter* GetCommonPlayerCharacter() const { return PlayerCharacter; };
+	FORCEINLINE UInteractionComponent* GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent.Get(); };
+	FORCEINLINE ACommonPlayerCharacter* GetCommonPlayerCharacter() const { return PlayerCharacter.Get(); };
 	FORCEINLINE UQuestManagerComponent* GetQuestManager() const { return QuestManager; }
 	
 protected:
@@ -67,14 +67,14 @@ protected:
 	
 private:
 	UPROPERTY()
-	ACommonPlayerCharacter* PlayerCharacter;
+	TWeakObjectPtr<ACommonPlayerCharacter> PlayerCharacter;
 	
 	UPROPERTY()
-	UInteractionComponent* CurrentHoveredInteractionComponent;
+	TWeakObjectPtr<UInteractionComponent> CurrentHoveredInteractionComponent;
 
 	// Interact move-to variables
 	UPROPERTY()
-	UInteractionComponent* TargetedInteractionComponent;
+	TWeakObjectPtr<UInteractionComponent> TargetedInteractionComponent;
 	const float DISTANCE_CHECK_RATE = 0.1f;
 	const float MAX_DISTANCE_CHECK_TIME = 7.f;	
 	float CachedDistanceCheckTime = 0.f;

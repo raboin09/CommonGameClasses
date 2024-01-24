@@ -30,7 +30,6 @@ public:
 	virtual bool TryStartAbility() PURE_VIRTUAL(IAbility::TryStartAbility, return false;)
 	virtual bool TryEndAbility() PURE_VIRTUAL(IAbility::TryEndAbility, return false;)
 	
-	virtual UMeshComponent* GetAbilityMesh() const PURE_VIRTUAL(IAbility::GetAbilityMesh, return nullptr; )
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IAbility::InitAbility, )
 	virtual void DestroyAbility() PURE_VIRTUAL(IAbility::DestroyAbility, )
 

@@ -3,12 +3,12 @@
 
 #include "Ability/Activation/K2_AbilityActivation.h"
 
-void UK2_AbilityActivation::K2_Activate_Implementation(const FTriggerEventPayload& TriggerEventPayload)
+void UK2_AbilityActivation::K2N_Activate_Implementation(const FTriggerEventPayload& TriggerEventPayload)
 {
 	AbilityActivationEvent.Broadcast(FAbilityActivationEventPayload());
 }
 
-void UK2_AbilityActivation::K2_Deactivate_Implementation()
+void UK2_AbilityActivation::K2N_Deactivate_Implementation()
 {
 	AbilityDeactivationEvent.Broadcast(FAbilityDeactivationEventPayload());
 }

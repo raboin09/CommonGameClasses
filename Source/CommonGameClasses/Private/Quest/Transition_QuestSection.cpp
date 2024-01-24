@@ -77,7 +77,7 @@ void UTransition_QuestSection::ActivateQuestObjectiveActor(AActor* InActor)
 
 	if(IQuestable* CastedActor = Cast<IQuestable>(InActor))
 	{
-		CastedActor->OnQuestObjectiveEvent().AddUObject(this, &UTransition_QuestSection::HandleQuestEventTrigger);
+		CastedActor->OnQuestObjectiveEvent().AddUObject(this, &ThisClass::HandleQuestEventTrigger);
 	}
 }
 

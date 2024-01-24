@@ -39,7 +39,7 @@ void UMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()
 		return;
 	}
 	K2_HandleWeaponTraceStart();
-	GetWorld()->GetTimerManager().SetTimer(Timer_Raycasting, this, &UMeleeOverlapActivation::Internal_CheckForCollisionHit, TraceTickRate, true);
+	GetWorld()->GetTimerManager().SetTimer(Timer_Raycasting, this, &ThisClass::Internal_CheckForCollisionHit, TraceTickRate, true);
 }
 
 void UMeleeOverlapActivation::Internal_StopCollisionRaycastingTick()

@@ -32,7 +32,6 @@ void ACommonPlayerController::OnPossess(APawn* InPawn)
 void ACommonPlayerController::OnUnPossess()
 {
 	Super::OnUnPossess();
-	PlayerCharacter = nullptr;
 }
 
 void ACommonPlayerController::BeginPlay()
@@ -49,7 +48,7 @@ void ACommonPlayerController::OnNewActorTargeted(const AActor* NewHoveredActor)
 {
 	if(!NewHoveredActor)
 	{
-		K2_HandleNewActorHovered(CurrentHoveredInteractionComponent, false);
+		K2_HandleNewActorHovered(CurrentHoveredInteractionComponent.Get(), false);
 		CurrentHoveredInteractionComponent = nullptr;
 		return;
 	}
@@ -60,17 +59,20 @@ void ACommonPlayerController::OnNewActorTargeted(const AActor* NewHoveredActor)
 		return;
 	}
 
-	K2_HandleNewActorHovered(CurrentHoveredInteractionComponent, false);
+	K2_HandleNewActorHovered(CurrentHoveredInteractionComponent.Get(), false);
 	CurrentHoveredInteractionComponent = FoundInteractionComponent;
 	K2_HandleNewActorHovered(FoundInteractionComponent, true);
 }
 
 void ACommonPlayerController::Internal_CheckDistanceToInteractActor()
 {
-	if(IsInRangeOfInteractable(TargetedInteractionComponent))
+	if(IsInRangeOfInteractable(TargetedInteractionComponent.Get()))
 	{
-		PlayerCharacter->GetMovementComponent()->StopActiveMovement();
-		TargetedInteractionComponent->InitiateInteraction(PlayerCharacter, true);
+		if(PlayerCharacter.IsValid())
+		{
+			PlayerCharacter->GetMovementComponent()->StopActiveMovement();	
+		}
+		TargetedInteractionComponent->InitiateInteraction(PlayerCharacter.Get(), true);
 		Internal_ClearCheckDistTimer();
 	} else
 	{
@@ -92,7 +94,7 @@ void ACommonPlayerController::Internal_ClearCheckDistTimer()
 
 void ACommonPlayerController::K2_HandleNewActorHovered_Implementation(const UInteractionComponent* NewlyHoveredInteractable, bool bShouldOutline)
 {
-	if(NewlyHoveredInteractable)
+	if(NewlyHoveredInteractable && CurrentHoveredInteractionComponent.IsValid())
 	{
 		CurrentHoveredInteractionComponent->SwitchOutlineOnAllMeshes(bShouldOutline);	
 	}
@@ -100,25 +102,25 @@ void ACommonPlayerController::K2_HandleNewActorHovered_Implementation(const UInt
 
 void ACommonPlayerController::K2_TryStartInteraction_Implementation()
 {
-	if(CurrentHoveredInteractionComponent)
+	if(CurrentHoveredInteractionComponent.IsValid())
 	{
-		if(IsInRangeOfInteractable(CurrentHoveredInteractionComponent))
+		if(IsInRangeOfInteractable(CurrentHoveredInteractionComponent.Get()))
 		{
-			CurrentHoveredInteractionComponent->InitiateInteraction(PlayerCharacter, true);	
+			CurrentHoveredInteractionComponent->InitiateInteraction(PlayerCharacter.Get(), true);	
 		} else
 		{
 			TargetedInteractionComponent = CurrentHoveredInteractionComponent;
 			MoveToNewDestination(TargetedInteractionComponent->GetOwnerLocation());
-			GetWorldTimerManager().SetTimer(Timer_InteractDistanceCheck, this, &ACommonPlayerController::Internal_CheckDistanceToInteractActor, DISTANCE_CHECK_RATE, true);
+			GetWorldTimerManager().SetTimer(Timer_InteractDistanceCheck, this, &ThisClass::Internal_CheckDistanceToInteractActor, DISTANCE_CHECK_RATE, true);
 		}
 	}
 }
 
 void ACommonPlayerController::K2_StopInteraction_Implementation()
 {
-	if(CurrentHoveredInteractionComponent)
+	if(CurrentHoveredInteractionComponent.IsValid())
 	{
-		CurrentHoveredInteractionComponent->InitiateInteraction(PlayerCharacter, false);
+		CurrentHoveredInteractionComponent->InitiateInteraction(PlayerCharacter.Get(), false);
 		Internal_ClearCheckDistTimer();
 	}
 }
@@ -129,7 +131,7 @@ void ACommonPlayerController::Internal_TryAssignInteractable()
 	if(IsValidInteractableActorUnderCursor(HitResult))
 	{
 		OnNewActorTargeted(HitResult.GetActor());
-	} else if(CurrentHoveredInteractionComponent)
+	} else if(CurrentHoveredInteractionComponent.IsValid())
 	{
 		OnNewActorTargeted(nullptr);
 	}
@@ -159,7 +161,7 @@ FHitResult ACommonPlayerController::Internal_ScanForActorUnderCursor() const
 
 bool ACommonPlayerController::IsInRangeOfInteractable(const UInteractionComponent* InteractionComponent) const
 {
-	if (!PlayerCharacter || !InteractionComponent) {
+	if (!PlayerCharacter.IsValid() || !InteractionComponent) {
 		return false;
 	}
 

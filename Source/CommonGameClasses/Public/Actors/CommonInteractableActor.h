@@ -30,7 +30,7 @@ public:
 	//////////////////////////////////////
 	// ACommonOverlapActor Overrides
 	//////////////////////////////////////
-	FORCEINLINE virtual UShapeComponent* GetCollisionComponent_Implementation() const override { return CollisionComp; }
+	FORCEINLINE virtual UShapeComponent* K2N_GetCollisionComponent_Implementation() const override { return CollisionComp; }
 	
 protected:	
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
@@ -43,12 +43,12 @@ protected:
 	void K2_HandleConsumePickup(ACharacter* ConsumingChar);
 	
 	virtual void PostInitializeComponents() override;	
-	virtual void K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult) override;
-	FORCEINLINE virtual UMeshComponent* GetMesh_Implementation() const override { return PickupBase; }
+	virtual void K2N_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult) override;
+	FORCEINLINE virtual UMeshComponent* K2N_GetMesh_Implementation() const override { return PickupBase; }
 	
 	UFUNCTION(BlueprintNativeEvent)
-	bool K2_CanPickup(ACharacter* PotentialChar);
-	virtual bool K2_CanPickup_Implementation(ACharacter* PotentialChar);
+	bool K2N_CanPickup(ACharacter* PotentialChar);
+	virtual bool K2N_CanPickup_Implementation(ACharacter* PotentialChar);
 	
 	virtual void ConsumePickup(ACharacter* ConsumingChar);
 

@@ -53,7 +53,7 @@ void ACommonProjectile::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	if(MovementComp)
 	{
-		MovementComp->OnProjectileStop.AddDynamic(this, &ACommonProjectile::OnImpact);
+		MovementComp->OnProjectileStop.AddDynamic(this, &ThisClass::OnImpact);
 	}
 }
 
@@ -78,7 +78,7 @@ void ACommonProjectile::InitVelocity(const FVector& ShootDirection) const
 	}
 }
 
-void ACommonProjectile::K2_HandleImpact_Implementation(const FHitResult& HitResult)
+void ACommonProjectile::K2N_HandleImpact_Implementation(const FHitResult& HitResult)
 {
 	UCommonEffectUtils::ApplyEffectsToHitResult(ProjectileEffectsToApply, HitResult, GetInstigator());
 }
@@ -99,7 +99,7 @@ void ACommonProjectile::OnImpact(const FHitResult& HitResult)
 
 	if(HitActor->FindComponentByClass<UEffectContainerComponent>() && !UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
-		K2_HandleImpact(HitResult);
+		K2N_HandleImpact(HitResult);
 	} else
 	{
 		ApplyMissEffects(HitResult);

@@ -6,6 +6,7 @@
 #include "BaseComplexTrigger.h"
 #include "MontageTrigger.generated.h"
 
+class UCharacterAnimationComponent;
 struct FAnimMontagePlayData;
 
 UCLASS(Abstract, Blueprintable)
@@ -42,8 +43,7 @@ private:
 	void Internal_IncrementComboCounter();
 	void Internal_ResetComboCounter();
 
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UAnimMontage> CurrentMontagePlaying = nullptr;
+	TWeakObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
 	
 	int32 ComboSectionIncrement;
 	const FString ComboPrefix = "Combo";

@@ -33,6 +33,10 @@ UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonStatModifierEffect : public ACommonEffect
 {
 	GENERATED_BODY()
+
+		
+public:	
+	ACommonStatModifierEffect();
 	
 protected:
 	virtual bool TryActivateEffect() override;
@@ -40,11 +44,11 @@ protected:
 
 	// Optionally override one of these in child classes
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void K2_ApplyStatChange(float ModifiedStatValue);
-	virtual void K2_ApplyStatChange_Implementation(float ModifiedStatValue);
+	void K2N_ApplyStatChange(float ModifiedStatValue);
+	virtual void K2N_ApplyStatChange_Implementation(float ModifiedStatValue);
 
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM")
-	UBaseStatsModifierData* StatEffectDataObj;
+	UBaseStatsModifierData* StatEffectData;
 
 	TFunction<void()> ReversalFunc;
 	
@@ -53,7 +57,7 @@ private:
 	float CalculateModifierValues() const;
 	void CalculateModifier(const FModifierExpression& ModifierExpression, const FGameplayTag& ModifierTag, float& ModifiedBaseValue) const;
 
-	void Internal_MovespeedStatChange(float ModifiedStatValue);
+	void Internal_MoveSpeedStatChange(float ModifiedStatValue);
 	void Internal_AllDamage(float ModifiedStatValue) const;
 	void Internal_HealthDamage(float ModifiedStatValue) const;
 	void Internal_ShieldDamage(float ModifiedStatValue) const;

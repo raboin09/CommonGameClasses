@@ -12,6 +12,11 @@ UActorAssetManagerComponent::UActorAssetManagerComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+void UActorAssetManagerComponent::K2_Async_LoadAnimMontageObject(TSoftObjectPtr<UAnimMontage> UnloadedAsset, const bool bIsHighPriority, FLoadedAnimMontageEvent LoadedObjectEvent)
+{
+	Async_LoadSoftObject<UAnimMontage, FLoadedAnimMontageEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
+}
+
 void UActorAssetManagerComponent::K2_Async_LoadNiagaraSystemObject(TSoftObjectPtr<UNiagaraSystem> UnloadedAsset, const bool bIsHighPriority, FLoadedNiagaraSystemObjectEvent LoadedObjectEvent)
 {
 	Async_LoadSoftObject<UNiagaraSystem, FLoadedNiagaraSystemObjectEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
@@ -47,7 +52,23 @@ void UActorAssetManagerComponent::K2_Async_LoadSkeletalMeshObject(TSoftObjectPtr
 	Async_LoadSoftObject<USkeletalMesh, FLoadedSkeletalMeshEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
 }
 
-void UActorAssetManagerComponent::K2_Async_LoadClassObject(TSoftClassPtr<UClass> UnloadedAsset, const bool bIsHighPriority, FLoadedClassEvent LoadedObjectEvent)
+void UActorAssetManagerComponent::K2_Async_LoadBehaviorTreeObject(TSoftObjectPtr<UBehaviorTree> UnloadedAsset, const bool bIsHighPriority, FLoadedBehaviorTreeEvent LoadedObjectEvent)
 {
-	Async_LoadSoftClass<UClass, FLoadedClassEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
+	Async_LoadSoftObject<UBehaviorTree, FLoadedBehaviorTreeEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
 }
+
+void UActorAssetManagerComponent::K2_Async_LoadAbilityClass(TSoftClassPtr<ACommonAbility> UnloadedAsset, const bool bIsHighPriority, FLoadedAbilityEvent LoadedObjectEvent)
+{
+	Async_LoadSoftClass<ACommonAbility, FLoadedAbilityEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
+}
+
+void UActorAssetManagerComponent::K2_Async_LoadActorClassObject(TSoftClassPtr<ACommonActor> UnloadedAsset, const bool bIsHighPriority, FLoadedActorEvent LoadedObjectEvent)
+{
+	Async_LoadSoftClass<ACommonActor, FLoadedActorEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
+}
+
+void UActorAssetManagerComponent::K2_Async_LoadCharacterClassObject(TSoftClassPtr<ACommonCharacter> UnloadedAsset, const bool bIsHighPriority, FLoadedCharacterEvent LoadedObjectEvent)
+{
+	Async_LoadSoftClass<ACommonCharacter, FLoadedCharacterEvent>(UnloadedAsset, bIsHighPriority, LoadedObjectEvent);
+}
+

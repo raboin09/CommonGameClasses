@@ -11,10 +11,10 @@ void UHitscanActivation::Fire(int32 ActivationLevel)
 void UHitscanActivation::Internal_FireShot()
 {
 	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), TraceRadius);
-	K2_ProcessInstantHit(Impact);
+	K2N_ProcessInstantHit(Impact);
 }
 
-void UHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& Impact)
+void UHitscanActivation::K2N_ProcessInstantHit_Implementation(const FHitResult& Impact)
 {
 	const AActor* HitActor = Impact.GetActor();
 	K2_PlayTrailFX(Impact.TraceStart, HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
