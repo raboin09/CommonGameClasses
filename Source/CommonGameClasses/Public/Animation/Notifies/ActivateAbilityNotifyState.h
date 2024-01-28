@@ -16,5 +16,5 @@ class COMMONGAMECLASSES_API UActivateAbilityNotifyState : public UActivationNoti
 
 protected:
 	UPROPERTY(EditAnywhere, Category="CUSTOM", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
-	TArray<TSubclassOf<AActor>> ActivationEffects;
+	TArray<TSoftClassPtr<AActor>> ActivationEffects;
 };

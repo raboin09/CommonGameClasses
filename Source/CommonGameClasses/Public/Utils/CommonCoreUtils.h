@@ -10,6 +10,7 @@
 #include "Core/CommonGameMode.h"
 #include "CommonCoreUtils.generated.h"
 
+class UHealthComponent;
 class ACommonPlayerCharacter;
 class ACommonPlayerController;
 

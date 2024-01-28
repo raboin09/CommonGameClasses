@@ -3,13 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "API/Taggable.h"
 #include "GameFramework/Actor.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonActor.generated.h"
 
-class UActorAssetManagerComponent;
 struct FGameplayTag;
 class UGameplayTagComponent;
 
@@ -35,8 +33,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
 	TArray<FGameplayTag> DefaultGameplayTags;
 
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UActorAssetManagerComponent> ActorAssetManagerComponent;
 	UPROPERTY()
 	TObjectPtr<UGameplayTagComponent> GameplayTagComponent;
 };

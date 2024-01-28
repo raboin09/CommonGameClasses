@@ -116,7 +116,7 @@ UQuestStateMachine* UQuestManagerComponent::GetActiveQuest(int32 QuestID)
 void UQuestManagerComponent::DeactivateQuest(int32 QuestID)
 {
 	if(const UQuestStateMachine* QuestInst = GetActiveQuest(QuestID))	{
-		if(QuestInst->QuestData.QuestStateMachineInstance)
+		if(QuestInst->QuestData.QuestStateMachineInstance.IsValid())
 		{
 			QuestInst->QuestData.QuestStateMachineInstance->Stop();
 		}
@@ -128,7 +128,7 @@ bool UQuestManagerComponent::IsQuestComplete(int32 QuestID)
 {
 	if(const UQuestStateMachine* QuestInst = GetActiveQuest(QuestID))
 	{
-		if(QuestInst->QuestData.QuestStateMachineInstance)
+		if(QuestInst->QuestData.QuestStateMachineInstance.IsValid())
 		{
 			return  QuestInst->QuestData.QuestStateMachineInstance->IsInEndState();
 		}

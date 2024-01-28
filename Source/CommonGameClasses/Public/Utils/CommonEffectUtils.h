@@ -48,8 +48,4 @@ public:
 	static void TryApplyShieldDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent = FDamageHitReactEvent());
 	UFUNCTION(BlueprintCallable, Category="COMMON|Utils")
 	static void TryApplyShieldHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal);
-	
-	static class UFXSystemAsset* GetVFXAssetFromKey(const struct FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot);
-	static class USoundCue* GetSFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot);
-
 };

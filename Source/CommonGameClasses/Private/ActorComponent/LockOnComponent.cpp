@@ -22,7 +22,7 @@ ULockOnComponent::ULockOnComponent()
 void ULockOnComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	check(LockOnTransitionCurve)
 	FOnTimelineFloat InterpUpdateFunction;
 	InterpUpdateFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionUpdate);
 	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, InterpUpdateFunction);
@@ -38,11 +38,11 @@ void ULockOnComponent::InterpToBestTargetForMeleeAttack(const TFunction<void()>&
 	InterpToActor(Internal_TraceForTarget(), InFinishedFunction);
 }
 
-void ULockOnComponent::InterpToActor(AActor* ActorToInterpTo, const TFunction<void()>& InFinishedFunction)
+void ULockOnComponent::InterpToActor(TWeakObjectPtr<AActor> ActorToInterpTo, const TFunction<void()>& InFinishedFunction)
 {
 	SetComponentTickEnabled(true);
 	SelectedActor = ActorToInterpTo;
-	if(!SelectedActor)
+	if(!SelectedActor.IsValid())
 	{
 		return;
 	}
@@ -72,7 +72,7 @@ void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void ULockOnComponent::Internal_StartInterpTransition()
 {
-	if(!SelectedActor)
+	if(!SelectedActor.IsValid())
 	{
 		return;
 	}
@@ -81,7 +81,7 @@ void ULockOnComponent::Internal_StartInterpTransition()
 
 void ULockOnComponent::Internal_InterpTransitionUpdate(float Alpha)
 {
-	if(!SelectedActor)
+	if(!SelectedActor.IsValid())
 	{
 		return;
 	}
@@ -104,10 +104,10 @@ void ULockOnComponent::Internal_InterpTransitionFinished()
 	SetComponentTickEnabled(false);
 }
 
-AActor* ULockOnComponent::Internal_TraceForTarget() const
+TWeakObjectPtr<AActor> ULockOnComponent::Internal_TraceForTarget() const
 {
-	AActor* SourceActor = GetOwner();
-	if(!SourceActor)
+	TWeakObjectPtr<AActor> SourceActor = GetOwner();
+	if(!SourceActor.IsValid())
 	{
 		return nullptr;
 	}
@@ -138,9 +138,9 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 
 		TArray<TEnumAsByte <EObjectTypeQuery>> ObjectTypes;
 		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-		UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, SweepRadius, ObjectTypes, false, { SourceActor }, bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, TempHitResults, true);
+		UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, SweepRadius, ObjectTypes, false, { SourceActor.Get() }, bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, TempHitResults, true);
 		for (FHitResult HitResult : TempHitResults) {
-			if(UCommonInteractUtils::AreActorsEnemies(SourceActor, HitResult.GetActor()))
+			if(UCommonInteractUtils::AreActorsEnemies(SourceActor.Get(), HitResult.GetActor()))
 			{
 				OutHitResults.Add(HitResult);
 			}
@@ -149,7 +149,7 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 	return Internal_FindBestTargetFromActors(OutHitResults);
 }
 
-AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults)
+TWeakObjectPtr<AActor> ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults)
 {
 	if(PotentialHitResults.Num() <= 0)
 	{
@@ -167,7 +167,7 @@ AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> P
 	return HitActors[0];
 }
 
-FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor)
+FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(TWeakObjectPtr<AActor> SourceActor)
 {
 	const APlayerController* PlayerController = nullptr;
 	if(const APawn* PawnObj = Cast<APawn>(SourceActor))

@@ -28,9 +28,13 @@ USTRUCT(BlueprintType)
 struct FModifierExpression
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere)
+
+	// Which actor to check the expression on. For example, if we want to check if the receiving actor has the "Weakened" tag
+	// we would set it to Receiver. 
+	UPROPERTY(EditAnywhere, DisplayName="Actor To Check Condition On")
 	EModifierActor ModifierActor = EModifierActor::None;
+	// How to modify the effect scalar if the ModifierActor condition is true. If an effect has Damage, this will choose how to adjust the
+	// Damage value based on the conditions (e.g. if the Receiving actor is "Weakened", set this to Multiply and set the Operand to 1.25).
 	UPROPERTY(EditAnywhere)
 	EModifierOperator Operation = EModifierOperator::None;
 	UPROPERTY(EditAnywhere)
@@ -56,10 +60,10 @@ struct FEffectContext
 
 	// Actor that the effect is being applied to
 	UPROPERTY(BlueprintReadOnly, Category="COMMON")
-	AActor* ReceivingActor;
+	TWeakObjectPtr<AActor> ReceivingActor;
 	// Actor that applied the effect
 	UPROPERTY(BlueprintReadOnly, Category="COMMON")
-	AActor* InstigatingActor;
+	TWeakObjectPtr<AActor> InstigatingActor;
 	FHitResult SurfaceHit;
 	FVector HitDirection;
 };
@@ -91,10 +95,10 @@ struct FEffectValidTargets
 	GENERATED_BODY()
 
 	// Tags that the receiving actor needs for the effect to be activated 
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", DisplayName="Required Target Tags (All)")
 	TArray<FGameplayTag> RequiredTags;
-	// Tags that the actos CANNOT have in order for the effect to be activated
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	// Tags that the actors CANNOT have in order for the effect to be activated
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", DisplayName="Blocked Target Tags (Any)")
 	TArray<FGameplayTag> BlockedTags;
 };
 
@@ -105,7 +109,7 @@ struct FEffectInitializationData
 
 	// Whether to remove the TagsToApply and reverse any other changes made when the effect is destroyed.
 	// So if there is a temporary MoveSpeed boost, this is true. If it's a permanent HP boost, it's false.
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "DurationType != EEffectDurationType::Instant"))
 	bool bShouldReverseChangesAfterDestroy = true;
 	UPROPERTY(EditDefaultsOnly)
 	EEffectDurationType DurationType = EEffectDurationType::Instant;
@@ -113,7 +117,7 @@ struct FEffectInitializationData
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "DurationType != EEffectDurationType::Instant"))
 	bool bEffectCanStack = false;
 	// Required/Blocked tags that the receiving Actor must (not) have in order to activate this effect
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, meta=(ShowOnlyInnerProperties))
 	FEffectValidTargets ValidTargets;
 
 	// How long the effect ticks (and tries to activate)
@@ -127,13 +131,13 @@ struct FEffectInitializationData
 	// Useful for abilities like "Cure" that remove all effects with the "Poison" tag.
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FGameplayTag> EffectTags;
-	// Tags that are applied to the target actor
+	// Tags that are applied to the target actor (e.g. apply the "Stunned" tag so the character can handle the stunned state).
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FGameplayTag> TagsToApply;
-	// Tags that are removed from the target actor
+	// Tags that are removed from the target actor (e.g. remove the "Stunned" tag so it frees the character to move again).
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FGameplayTag> TagsToRemove;
-	// Remove all effects whose EffectTags match any one of these
+	// Remove all effects whose EffectTags match any one of these (e.g. in a Cure effect, remove any/all effects with the EffectTag of "Poison").
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FGameplayTag> RemoveEffectsWithTags;
 	

@@ -56,10 +56,10 @@ void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 
 ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity)
 {
-
+	check(ProjectileClass)
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
-	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(ProjectileClass, GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(ProjectileClass.Get(), GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
 	{		
 		Projectile->InitVelocity(ProjectileVelocity);
 		Projectile->SetLifeSpan(ProjectileLife);

@@ -18,7 +18,7 @@ void URangedActivation::Deactivate()
 	AbilityDeactivationEvent.Broadcast({});
 }
 
-void URangedActivation::InitActivationMechanism(UMeshComponent* OwnerMeshComponent)
+void URangedActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent)
 {
 	Super::InitActivationMechanism(OwnerMeshComponent);
 	Internal_AssignOwningController();
@@ -26,16 +26,16 @@ void URangedActivation::InitActivationMechanism(UMeshComponent* OwnerMeshCompone
 
 void URangedActivation::Internal_AssignOwningController()
 {
-	const APawn* CurrentInsigator = GetInstigator();
-	if(!CurrentInsigator)
+	const TWeakObjectPtr<APawn> CurrentInstigator = GetInstigator();
+	if(!CurrentInstigator.IsValid())
 	{
 		return;
 	}
 
-	if(const APlayerController* TempPlayerController = Cast<APlayerController>(CurrentInsigator->GetController()))
+	if(APlayerController* TempPlayerController = Cast<APlayerController>(CurrentInstigator->GetController()))
 	{
 		OwningPlayerController = TempPlayerController;
-	} else if(const AAIController* TempAIController = Cast<AAIController>(CurrentInsigator->GetController()))
+	} else if(AAIController* TempAIController = Cast<AAIController>(CurrentInstigator->GetController()))
 	{
 		OwningAIController = TempAIController;
 	}
@@ -69,7 +69,7 @@ FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirec
 
 FVector URangedActivation::Internal_GetCameraStartLocation(const FVector AimDirection) const
 {
-	if (!OwningPlayerController)
+	if (!OwningPlayerController.IsValid())
 	{
 		return GetRaycastOriginLocation();
 	}
@@ -108,7 +108,7 @@ FVector URangedActivation::Internal_GetFiringSpreadDirection(const FVector AimDi
 
 FVector URangedActivation::Internal_GetMouseAim() const
 {
-	if(!OwningPlayerController)
+	if(!OwningPlayerController.IsValid())
 	{
 		return FVector::ZeroVector;
 	}
@@ -138,7 +138,7 @@ FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 
 FVector URangedActivation::GetRaycastOriginRotation() const
 {
-	if(!MeshComponentRef)
+	if(!MeshComponentRef.IsValid())
 	{
 		return FVector::ZeroVector;	
 	}
@@ -147,7 +147,7 @@ FVector URangedActivation::GetRaycastOriginRotation() const
 
 FVector URangedActivation::GetRaycastOriginLocation() const
 {
-	if(!MeshComponentRef)
+	if(!MeshComponentRef.IsValid())
 	{
 		return FVector::ZeroVector;	
 	}

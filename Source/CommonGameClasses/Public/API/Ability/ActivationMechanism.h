@@ -23,23 +23,24 @@ class COMMONGAMECLASSES_API IActivationMechanism
 
 public:
 	// Activation level is for things like charge-up weapons, combos, etc
-	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IActivationMechanism::InitActivationMechanism,)
+	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) PURE_VIRTUAL(IActivationMechanism::InitActivationMechanism,)
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(IActivationMechanism::Activate,)
 	virtual void Deactivate() PURE_VIRTUAL(IActivationMechanism::Deactivate,)
 	
 	FORCEINLINE FAbilityActivationEvent& OnActivation() { return AbilityActivationEvent; }
 	FORCEINLINE FAbilityDeactivationEvent& OnDeactivation() { return AbilityDeactivationEvent; }
 	
-	FORCEINLINE virtual void SetInstigator(APawn* InPawn) { PawnInstigator = InPawn; }
-	UFUNCTION(BlueprintCallable)
-	virtual APawn* GetInstigator() const { return PawnInstigator; }
-	FORCEINLINE virtual void SetOwner(AActor* InActor) { AbilityOwner = InActor; }
-	UFUNCTION(BlueprintCallable)
-	virtual AActor* GetOwner() const { return AbilityOwner; }
+	FORCEINLINE virtual void SetInstigator(TWeakObjectPtr<APawn> InPawn) { PawnInstigator = InPawn; }
+	FORCEINLINE virtual void SetOwner(TWeakObjectPtr<AActor> InActor) { AbilityOwner = InActor; }
+
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual APawn* GetInstigator() const { return PawnInstigator.Get(); }
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual AActor* GetOwner() const { return AbilityOwner.Get(); }
 	
 protected:
-	AActor* AbilityOwner = nullptr;
-	APawn* PawnInstigator = nullptr;
+	TWeakObjectPtr<AActor> AbilityOwner = nullptr;
+	TWeakObjectPtr<APawn> PawnInstigator = nullptr;
 
 	FAbilityActivationEvent AbilityActivationEvent;
 	FAbilityDeactivationEvent AbilityDeactivationEvent;

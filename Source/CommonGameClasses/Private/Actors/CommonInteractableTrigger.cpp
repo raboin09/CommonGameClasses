@@ -49,7 +49,8 @@ void ACommonInteractableTrigger::ConsumePickup(ACharacter* ConsumingChar)
 	
 	if(!TriggerMachine)
 	{
-		TriggerMachine = USMBlueprintUtils::CreateStateMachineInstance(TriggerLogicClass, this);
+		check(TriggerLogicClass.IsValid())
+		TriggerMachine = USMBlueprintUtils::CreateStateMachineInstance(TriggerLogicClass.Get(), this);
 	}	
 
 	if(TriggerMachine)

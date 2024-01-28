@@ -17,13 +17,13 @@ public:
 	virtual void BeginPlay() override;
 	
 	void InterpToBestTargetForMeleeAttack(const TFunction<void()>& InFinishedFunction = TFunction<void()>());
-	void InterpToActor(AActor* ActorToInterpTo, const TFunction<void()>& InFinishedFunction = TFunction<void()>());
+	void InterpToActor(TWeakObjectPtr<AActor> ActorToInterpTo, const TFunction<void()>& InFinishedFunction = TFunction<void()>());
 	
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UCurveFloat* LockOnTransitionCurve;
+	TObjectPtr<UCurveFloat> LockOnTransitionCurve;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FVector TraceOffset = FVector(0.f, 0.f, 50.f);
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
@@ -40,9 +40,9 @@ protected:
 	bool bDrawDebug;
 	
 private:
-	AActor* Internal_TraceForTarget() const;
-	static AActor* Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults);
-	static FRotator Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor);
+	TWeakObjectPtr<AActor> Internal_TraceForTarget() const;
+	static TWeakObjectPtr<AActor> Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults);
+	static FRotator Internal_GetControllerAndActorBlendedRotation(TWeakObjectPtr<AActor> SourceActor);
 	
 	void Internal_StartInterpTransition();
 	UFUNCTION()
@@ -56,7 +56,7 @@ private:
 	FRotator TargetActorRotation;
 
 	UPROPERTY(Transient)
-	AActor* SelectedActor;
+	TWeakObjectPtr<AActor> SelectedActor;
 	UPROPERTY()
 	FTimeline LockOnInterpTimeline;
 };

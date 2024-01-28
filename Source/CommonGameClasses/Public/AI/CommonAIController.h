@@ -45,8 +45,6 @@ private:
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UActorAssetManagerComponent> ActorAssetManagerComponent;
 	UPROPERTY(VisibleDefaultsOnly)
 	TObjectPtr<UAISenseConfig_Sight> Sight;
 	UPROPERTY(VisibleDefaultsOnly)

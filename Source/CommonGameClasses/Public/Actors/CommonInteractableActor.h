@@ -53,11 +53,11 @@ protected:
 	virtual void ConsumePickup(ACharacter* ConsumingChar);
 
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
-	USphereComponent* CollisionComp;
+	TObjectPtr<USphereComponent> CollisionComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
-	UStaticMeshComponent* PickupBase;
+	TObjectPtr<UStaticMeshComponent> PickupBase;
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
-	URotatingMovementComponent* RotatingMovementComponent;
+	TObjectPtr<URotatingMovementComponent> RotatingMovementComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CUSTOM")
-	UInteractionComponent* InteractionComponent;
+	TObjectPtr<UInteractionComponent> InteractionComponent;
 };

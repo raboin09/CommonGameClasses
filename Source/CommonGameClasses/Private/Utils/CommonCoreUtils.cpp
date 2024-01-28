@@ -19,7 +19,7 @@ ACommonPlayerCharacter* UCommonCoreUtils::GetCommonPlayerCharacter(const UObject
 {
 	if (const ACommonPlayerController* CurrCon = GetCommonPlayerController(ContextObject))
 	{
-		return CurrCon->GetCommonPlayerCharacter();
+		return CurrCon->GetCommonPlayerCharacter().Get();
 	}
 	return nullptr;
 }
@@ -61,7 +61,7 @@ UInteractionComponent* UCommonCoreUtils::GetHoveredInteractionComponentByPlayerC
 {
 	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
 	{
-		return PlayerController->GetCurrentHoveredInteractionComponent();
+		return PlayerController->GetCurrentHoveredInteractionComponent().Get();
 	}
 	return nullptr;
 }
@@ -92,7 +92,7 @@ UQuestManagerComponent* UCommonCoreUtils::GetQuestManager(const UObject* Context
 {
 	if (const ACommonPlayerController* BaseCon = GetCommonPlayerController(ContextObject))
 	{
-		return BaseCon->GetQuestManager();
+		return BaseCon->GetQuestManager().Get();
 	}
 	return nullptr;
 }

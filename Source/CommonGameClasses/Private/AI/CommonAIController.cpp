@@ -1,9 +1,6 @@
 ﻿
 #include "AI/CommonAIController.h"
-
-#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/BotBehaviorComponent.h"
-#include "Character/CommonAICharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -14,7 +11,6 @@ ACommonAIController::ACommonAIController()
 	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackBoardComp"));
 	BrainComponent = BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorComp"));
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(FName("AIPerceptionComp"));
-	ActorAssetManagerComponent = CreateDefaultSubobject<UActorAssetManagerComponent>(TEXT("ActorAssetManagerComponent"));
 	Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(FName("Sight Config"));
 	Sight->SightRadius = 2000.f;
 	Sight->LoseSightRadius = 2500.f;
@@ -42,9 +38,9 @@ void ACommonAIController::OnPossess(APawn* InPawn)
 	
 	if(!BotBehaviorComponent->GetDefaultBehavior().IsValid())
 	{
-		FLoadedBehaviorTreeEvent LoadedBehaviorTreeEvent = FLoadedBehaviorTreeEvent();
-		LoadedBehaviorTreeEvent.BindDynamic(this, &ThisClass::HandleBehaviorTreeLoaded);
-		ActorAssetManagerComponent->K2_Async_LoadBehaviorTreeObject(BotBehaviorComponent->GetDefaultBehavior(), false, LoadedBehaviorTreeEvent);
+		// FLoadedBehaviorTreeEvent LoadedBehaviorTreeEvent = FLoadedBehaviorTreeEvent();
+		// LoadedBehaviorTreeEvent.BindDynamic(this, &ThisClass::HandleBehaviorTreeLoaded);
+		// ActorAssetManagerComponent->K2_Async_LoadBehaviorTreeObject(BotBehaviorComponent->GetDefaultBehavior(), false, LoadedBehaviorTreeEvent);
 	} else
 	{
 		HandleBehaviorTreeLoaded(BotBehaviorComponent->GetDefaultBehavior());

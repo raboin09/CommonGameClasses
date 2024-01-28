@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "API/Ability/Ability.h"
 #include "ActorComponent/GameplayTagComponent.h"
-#include "API/Ability/ActivationMechanism.h"
 #include "Types/CommonTagTypes.h"
 #include "AbilityComponent.generated.h"
 
@@ -14,9 +12,7 @@ struct FAwaitingActivationDetails
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	TScriptInterface<IActivationMechanism> MechanismAwaitingActivation = nullptr;
-	UPROPERTY()
+	TWeakInterfacePtr<IActivationMechanism> MechanismAwaitingActivation = nullptr;
 	int32 ActivationLevel = -1;
 		
 };
@@ -35,7 +31,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSlot);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
-	void AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityClass, const FGameplayTag& SlotTag);
+	void AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag& SlotTag);
 
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	FORCEINLINE void TryStartEquippedAbility() { TryStartAbilityInSlot(EquippedSlot); }
@@ -49,15 +45,13 @@ public:
 	void TryActivateAwaitingMechanism(bool bShouldActivate) const;
 	
 private:
-	TScriptInterface<IAbility> Internal_SpawnAbilityFromClass(TSubclassOf<AActor> AbilityClass) const;
-	void Internal_InitAndAttachAbilityToOwnerMesh(TScriptInterface<IAbility> AbilityToAttach) const;
-	static void Internal_DestroyAbility(TScriptInterface<IAbility> AbilityToRemove);
-	void Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, TScriptInterface<IAbility> AbilityToAdd);
+	TWeakInterfacePtr<IAbility> Internal_SpawnAbilityFromClass(TSubclassOf<AActor> AbilityClass) const;
+	void Internal_InitAndAttachAbilityToOwnerMesh(TWeakInterfacePtr<IAbility> AbilityToAttach) const;
+	static void Internal_DestroyAbility(TWeakInterfacePtr<IAbility> AbilityToRemove);
+	void Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, TWeakInterfacePtr<IAbility> AbilityToAdd);
 	void Internal_RemoveAbilityInSlot(const FGameplayTag& SlotTag);
-	TScriptInterface<IAbility> Internal_FindAbility(const FGameplayTag& SlotTag) const;
+	TWeakInterfacePtr<IAbility> Internal_FindAbility(const FGameplayTag& SlotTag) const;
 	
-	UPROPERTY()
-	TMap<FGameplayTag, TScriptInterface<IAbility>> SlottedAbilities;
 	UPROPERTY()
 	FAwaitingActivationDetails AwaitingActivationDetails;
 	UPROPERTY()
@@ -67,9 +61,12 @@ private:
 	UPROPERTY(BlueprintAssignable)
 	FAbilityRemoved AbilityRemoved;
 
+	TMap<FGameplayTag, TWeakInterfacePtr<IAbility>> SlottedAbilities;
 public:
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
-	FORCEINLINE TScriptInterface<IAbility> GetAbilityInSlot(const FGameplayTag& SlotTag) const { return Internal_FindAbility(SlotTag); }
+	FORCEINLINE TScriptInterface<IAbility> GetAbilityInSlot(const FGameplayTag& SlotTag) const { return Internal_FindAbility(SlotTag).ToScriptInterface(); }
+	FORCEINLINE TWeakInterfacePtr<IAbility> GetAbilityInSlot_Weak(const FGameplayTag& SlotTag) const { return Internal_FindAbility(SlotTag); }
+	
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	FORCEINLINE bool HasAbilityInSlot(const FGameplayTag& SlotTag) const { return SlottedAbilities.Contains(SlotTag); }
 	

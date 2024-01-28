@@ -12,11 +12,11 @@ class COMMONGAMECLASSES_API UBaseActivation : public UObject, public IActivation
 	GENERATED_BODY()
 
 public:
-	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) override;
+	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override  PURE_VIRTUAL(AActivationBase::Activate, )
 	virtual void Deactivate() override PURE_VIRTUAL(AActivationBase::Deactivate, )
 
 protected:	
 	UPROPERTY(BlueprintReadOnly)
-	UMeshComponent* MeshComponentRef = nullptr;
+	TWeakObjectPtr<UMeshComponent> MeshComponentRef = nullptr;
 };

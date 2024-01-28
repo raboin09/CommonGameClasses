@@ -19,13 +19,13 @@ public:
 	EEffectStatType StatToModify = EEffectStatType::Damage_All;
 	UPROPERTY(EditDefaultsOnly)
 	float BaseModifierValue;
-	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield", EditConditionHides))
 	bool bAddDamageForHeadshots = false;
-	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage && bAddDamageForHeadshots", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "(StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield) && bAddDamageForHeadshots", EditConditionHides))
 	float HeadshotModifier = 1.f;
-	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield", EditConditionHides))
 	EHitReactType HitImpulse;
-	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield", EditConditionHides))
 	EHitReactType DeathImpulse;
 };
 

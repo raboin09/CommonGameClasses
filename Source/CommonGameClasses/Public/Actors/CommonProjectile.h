@@ -34,18 +34,18 @@ protected:
 	void ApplyMissEffects(const FHitResult Impact);
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	UProjectileMovementComponent* MovementComp;
+	TObjectPtr<UProjectileMovementComponent> MovementComp;
 	UPROPERTY(VisibleDefaultsOnly)
-	UParticleSystemComponent* ParticleComp;
+	TObjectPtr<UParticleSystemComponent> ParticleComp;
 	UPROPERTY(VisibleDefaultsOnly)
-	USphereComponent* CollisionComp;
+	TObjectPtr<USphereComponent> CollisionComp;
 	UPROPERTY(VisibleDefaultsOnly)
-	UStaticMeshComponent* SummonedMesh;
+	TObjectPtr<UStaticMeshComponent> SummonedMesh;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Projectile", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> ProjectileEffectsToApply;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Projectile")
 	float DeathBuffer = 0.f;
 
 public:
-	FORCEINLINE void AddAdditionalEffectsToApply(TArray<TSubclassOf<AActor>> AdditionalEffectsToApply) { ProjectileEffectsToApply.Append(AdditionalEffectsToApply);}
+	FORCEINLINE void AddAdditionalEffectsToApply(const TArray<TSubclassOf<AActor>>& AdditionalEffectsToApply) { ProjectileEffectsToApply.Append(AdditionalEffectsToApply);}
 };

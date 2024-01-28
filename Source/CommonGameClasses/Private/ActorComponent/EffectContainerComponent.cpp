@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ActorComponent/EffectContainerComponent.h"
@@ -17,7 +17,7 @@ UEffectContainerComponent::UEffectContainerComponent()
 	CachedWorld = nullptr;
 }
 
-void UEffectContainerComponent::TryApplyEffectToContainerFromHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
+void UEffectContainerComponent::TryApplyEffectToContainerFromHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, TWeakObjectPtr<AActor> InstigatingActor, bool bShouldRotateHitResult)
 {
 	if(!BaseEffectClass || !BaseEffectClass->ImplementsInterface(UEffect::StaticClass()))
 	{
@@ -27,7 +27,7 @@ void UEffectContainerComponent::TryApplyEffectToContainerFromHitResult(TSubclass
 	Internal_ApplyEffect(BaseEffect);
 }
 
-void UEffectContainerComponent::TryApplyEffectToContainer(TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor)
+void UEffectContainerComponent::TryApplyEffectToContainer(TSubclassOf<AActor> BaseEffectClass, TWeakObjectPtr<AActor> InstigatingActor)
 {
 	if(!BaseEffectClass || !BaseEffectClass->ImplementsInterface(UEffect::StaticClass()))
 	{
@@ -37,9 +37,14 @@ void UEffectContainerComponent::TryApplyEffectToContainer(TSubclassOf<AActor> Ba
 	Internal_ApplyEffect(BaseEffect);
 }
 
-TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHitResult(UObject* ContextObject, TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
+TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHitResult(TWeakObjectPtr<UObject> ContextObject, TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, TWeakObjectPtr<AActor> InstigatingActor, bool bShouldRotateHitResult)
 {
-	if(!ContextObject)
+	if(!ContextObject.IsValid())
+	{
+		return nullptr;
+	}
+
+	if(!BaseEffectClass)
 	{
 		return nullptr;
 	}
@@ -49,21 +54,22 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	{
 		SpawnTransform = FTransform(UCommonCombatUtils::GetRotationFromComponentHit(Impact), Impact.ImpactPoint);
 	}
-
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor, Cast<APawn>(InstigatingActor));
-	if (!EffectActor)
-	{
-		return nullptr;
-	}
-
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor.Get(), Cast<APawn>(InstigatingActor));
+	TScriptInterface<IEffect> SpawnedEffect;
+	SpawnedEffect.SetObject(EffectActor);
+	SpawnedEffect.SetInterface(Cast<IEffect>(EffectActor));
 	FEffectContext EffectContext;
 	EffectContext.InstigatingActor = InstigatingActor;
 	EffectContext.ReceivingActor = Impact.GetActor();
 	EffectContext.SurfaceHit = Impact;
 	EffectContext.HitDirection = Impact.ImpactNormal;
 	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	if (!SpawnedEffect)
+	{
+		return nullptr;
+	}
 	EffectActor->SetEffectContext(EffectContext);
-	return EffectActor;
+	return SpawnedEffect;
 }
 
 void UEffectContainerComponent::BeginPlay()
@@ -72,16 +78,21 @@ void UEffectContainerComponent::BeginPlay()
 	CachedWorld = GetWorld();
 }
 
-TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor) const
+TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubclassOf<AActor> BaseEffectClass, TWeakObjectPtr<AActor> InstigatingActor) const
 {
 	if (!GetOwner())
 	{
 		return nullptr;
 	}
 
+	if(!IsValid(BaseEffectClass))
+	{
+		return nullptr;
+	}
+
 	const FTransform& SpawnTransform = GetOwner()->GetActorTransform();
 
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass);
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass.Get());
 	if (!EffectActor)
 	{
 		return nullptr;
@@ -164,7 +175,7 @@ void UEffectContainerComponent::Internal_TickEffects()
 
 void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKey)
 {
-	if(!CachedWorld || !EffectsToTick.Contains(CurrentTickingEffectKey))
+	if(CachedWorld.IsStale() || !EffectsToTick.Contains(CurrentTickingEffectKey))
 		return;
 
 	FTickingEffect& TickingEffect = EffectsToTick[CurrentTickingEffectKey];
@@ -208,7 +219,7 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 
 void UEffectContainerComponent::Internal_TryStartTicking()
 {
-	if(bIsTicking || !CachedWorld)
+	if(bIsTicking || CachedWorld.IsStale())
 	{
 		return;
 	}
@@ -219,7 +230,7 @@ void UEffectContainerComponent::Internal_TryStartTicking()
 
 void UEffectContainerComponent::Internal_StopTicking()
 {
-	if (!CachedWorld)
+	if (CachedWorld.IsStale())
 	{
 		return;
 	}
@@ -273,7 +284,7 @@ FTickingEffect UEffectContainerComponent::Internal_GenerateTickingEffectStruct(T
 
 void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect)
 {
-	if (!IncomingEffect || !CachedWorld)
+	if (!IncomingEffect || !CachedWorld.IsValid())
 	{
 		return;
 	}

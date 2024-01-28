@@ -33,7 +33,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FName ColorParameterName;
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
-	UCurveFloat* DissolveCurveFloat;
+	TSoftObjectPtr<UCurveFloat> DissolveCurveFloat;
 
 private:
 	UFUNCTION()
@@ -46,8 +46,8 @@ private:
 	UPROPERTY()
 	FTimeline DissolveTimeline;
 	UPROPERTY()
-	UMeshComponent* MeshComponent;
+	TWeakObjectPtr<UMeshComponent> MeshComponent;
 	UPROPERTY()
-	TArray<UMaterialInstanceDynamic*> DissolveDynamicMaterialInstances;
+	TArray<TSoftObjectPtr<UMaterialInstanceDynamic>> DissolveDynamicMaterialInstances;
 };
  

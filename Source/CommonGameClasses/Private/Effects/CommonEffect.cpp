@@ -1,8 +1,6 @@
 ﻿#include "Effects/CommonEffect.h"
 
 #include "ActorComponent/GameplayTagComponent.h"
-#include "ActorComponent/ActorAssetManagerComponent.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "Utils/CommonCombatUtils.h"
 
 
@@ -10,7 +8,6 @@ ACommonEffect::ACommonEffect()
 {
  	PrimaryActorTick.bCanEverTick = false;
 	SetAutoDestroyWhenFinished(false);
-	ActorAssetManagerComponent = CreateDefaultSubobject<UActorAssetManagerComponent>(TEXT("ActorAssetManagerComponent"));
 	EffectData = CreateDefaultSubobject<UEffectData>(TEXT("EffectData"));
 }
 
@@ -21,8 +18,8 @@ void ACommonEffect::SetEffectContext(const FEffectContext& InContext)
 
 void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Activation()
 {
-	UGameplayTagComponent::AddTagsToActor(EffectContext.ReceivingActor, GetEffectInitializationData().TagsToApply);
-	UGameplayTagComponent::RemoveTagsFromActor(EffectContext.ReceivingActor, GetEffectInitializationData().TagsToRemove);
+	UGameplayTagComponent::AddTagsToActor(EffectContext.ReceivingActor.Get(), GetEffectInitializationData().TagsToApply);
+	UGameplayTagComponent::RemoveTagsFromActor(EffectContext.ReceivingActor.Get(), GetEffectInitializationData().TagsToRemove);
 }
 
 void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
@@ -31,7 +28,7 @@ void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
 	{
 		return;
 	}
-	UGameplayTagComponent::RemoveTagsFromActor(EffectContext.ReceivingActor, GetEffectInitializationData().TagsToApply);
+	UGameplayTagComponent::RemoveTagsFromActor(EffectContext.ReceivingActor.Get(), GetEffectInitializationData().TagsToApply);
 }
 
 bool ACommonEffect::Internal_IsValidHeadshot() const
@@ -52,12 +49,12 @@ void ACommonEffect::PlayEffectFX()
 
 bool ACommonEffect::CanActivateEffect()
 {
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(EffectContext.ReceivingActor, GetBlockedTags()))
+	if (UGameplayTagComponent::ActorHasAnyGameplayTags(EffectContext.ReceivingActor.Get(), GetBlockedTags()))
 	{
 		return false;
 	}
 
-	if (!UGameplayTagComponent::ActorHasAllGameplayTags(EffectContext.ReceivingActor, GetRequiredTags()))
+	if (!UGameplayTagComponent::ActorHasAllGameplayTags(EffectContext.ReceivingActor.Get(), GetRequiredTags()))
 	{
 		return false;
 	}
@@ -90,10 +87,6 @@ bool ACommonEffect::TryActivateEffect()
 void ACommonEffect::DestroyEffect()
 {
 	Internal_AddAndRemoveTagsFromReceiver_Deactivation();
-	if(EffectVFX)
-	{
-		EffectVFX->Deactivate();
-	}
 	K2_DestroyEffect();
 	SetLifeSpan(1.f);
 }

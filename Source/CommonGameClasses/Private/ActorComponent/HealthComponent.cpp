@@ -2,10 +2,7 @@
 
 
 #include "ActorComponent/HealthComponent.h"
-
 #include "ActorComponent/CharacterAnimationComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonCoreTypes.h"
 
 UHealthComponent::UHealthComponent()
 {

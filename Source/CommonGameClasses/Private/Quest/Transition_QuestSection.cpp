@@ -27,18 +27,18 @@ void UTransition_QuestSection::OnTransitionInitialized_Implementation()
 
 void UTransition_QuestSection::ActivateQuest()
 {
-	for(TSubclassOf<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
+	for(TSoftClassPtr<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
 	{
-		ActivateAllObjectivesOfClass(CurrClass);
+		ActivateAllObjectivesOfClass(CurrClass.Get());
 	}
 }
 
 void UTransition_QuestSection::DeactivateQuest()
 {
 	QuestUpdated.RemoveAll(this);
-	for(TSubclassOf<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
+	for(TSoftClassPtr<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
 	{
-		DeactivateAllObjectivesOfClass(CurrClass);
+		DeactivateAllObjectivesOfClass(CurrClass.Get());
 	}
 }
 
@@ -51,16 +51,16 @@ void UTransition_QuestSection::ActivateAllObjectivesOfClass(UClass* ObjectiveCla
 
 	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UCommonCoreUtils::GetActorTrackingSubsystem(this))
 	{
-		for(AActor* CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
+		for(TWeakObjectPtr<AActor> CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
 		{
-			if(!CurrActor)
+			if(CurrActor.IsStale())
 			{
 				continue;
 			}
 		
 			if(QuestSectionData.ObjectiveTag.IsNone() || CurrActor->ActorHasTag(QuestSectionData.ObjectiveTag))
 			{
-				ActivateQuestObjectiveActor(CurrActor);	
+				ActivateQuestObjectiveActor(CurrActor.Get());	
 			}
 		}
 	}
@@ -93,9 +93,9 @@ void UTransition_QuestSection::DeactivateAllObjectivesOfClass(UClass* ObjectiveC
 
 		UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(GameMode->GetWorld());
 		
-		for(AActor* CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
+		for(TWeakObjectPtr<AActor> CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
 		{
-			DeactivateQuestObjectiveActor(CurrActor);
+			DeactivateQuestObjectiveActor(CurrActor.Get());
 		}
 	}
 }

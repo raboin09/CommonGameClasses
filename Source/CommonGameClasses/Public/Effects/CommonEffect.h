@@ -5,12 +5,10 @@
 #include "CoreMinimal.h"
 #include "ConditionTree.h"
 #include "API/Effect.h"
-#include "NiagaraSystem.h"
 #include "Engine/DataTable.h"
 #include "GameFramework/Actor.h"
 #include "CommonEffect.generated.h"
 
-class UActorAssetManagerComponent;
 
 UCLASS(Blueprintable, BlueprintType, EditInlineNew)
 class COMMONGAMECLASSES_API UEffectData : public UObject
@@ -23,10 +21,10 @@ public:
 		Conditions = CreateDefaultSubobject<UConditionTreeNode>(TEXT("ConditionTree"));
 	}
 
-	UPROPERTY(EditDefaultsOnly, Category="Initialization Data")
+	UPROPERTY(EditDefaultsOnly, Category="Initialization Data", meta=(ShowOnlyInnerProperties))
 	FEffectInitializationData InitializationData;
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="Conditions")
-	UConditionTreeNode* Conditions;
+	TObjectPtr<UConditionTreeNode> Conditions;
 	UPROPERTY(EditDefaultsOnly, Category="FX")
 	bool bAttachVFXToActor = false;
 	UPROPERTY(EditDefaultsOnly, Category="Modifiers")
@@ -77,13 +75,9 @@ protected:
 	void K2_PlayEffectVFX(const bool bAttachVFXToActor);
 	
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = "CUSTOM")
-	UEffectData* EffectData;
+	TObjectPtr<UEffectData> EffectData;
 	UPROPERTY(BlueprintReadOnly, Category = "CUSTOM")
-	FEffectContext EffectContext;	
-	UPROPERTY(Transient)
-	UFXSystemComponent* EffectVFX;
-	UPROPERTY(BlueprintReadOnly)
-	UActorAssetManagerComponent* ActorAssetManagerComponent;
+	FEffectContext EffectContext;
 
 private:
 	bool Internal_IsValidHeadshot() const;

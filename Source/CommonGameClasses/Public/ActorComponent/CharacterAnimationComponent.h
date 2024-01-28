@@ -52,15 +52,17 @@ private:
 	void Internal_RagdollUpdate();
 	
 	UPROPERTY()
-	ACommonCharacter* OwnerCharacter;
+	TWeakObjectPtr<ACommonCharacter> OwnerCharacter;
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> OwnerAnimInstance;
 	UPROPERTY()
-	UGameplayTagComponent* OwningTagComponent;
+	TWeakObjectPtr<UGameplayTagComponent> OwningTagComponent;
 	UPROPERTY()
 	FCharacterMontageEnded CharacterMontageEnded;	
 	
 	FRotator ControlRotation;
+
+	// Used for async loading, will play anim after loaded
 	TMap<TSoftObjectPtr<UAnimMontage>, FAnimMontagePlayData> CachedMontageData;
 
 	// Ragdolling
@@ -70,5 +72,5 @@ private:
 public:
 	FORCEINLINE TWeakObjectPtr<UAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
 	FORCEINLINE FCharacterMontageEnded& OnCharacterMontageEnded() { return CharacterMontageEnded; }
-	FORCEINLINE TWeakObjectPtr<UAnimMontage> GetCurrentPlayingMontage() const { return OwnerCharacter ? OwnerCharacter->GetCurrentMontage() : nullptr; }
+	FORCEINLINE TWeakObjectPtr<UAnimMontage> GetCurrentPlayingMontage() const { return OwnerCharacter.IsValid() ? OwnerCharacter->GetCurrentMontage() : nullptr; }
 };

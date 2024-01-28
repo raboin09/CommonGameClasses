@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "ActorComponent/InteractionComponent.h"
+#include "ActorComponent/QuestManagerComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "CommonPlayerController.generated.h"
 
 class IInteractable;
 class ACommonPlayerCharacter;
-class UQuestManagerComponent;
 
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonPlayerController : public APlayerController
@@ -28,9 +28,9 @@ public:
 	/// CommonPlayerController
 	//////////////////////////////////////////////
 	
-	FORCEINLINE UInteractionComponent* GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent.Get(); };
-	FORCEINLINE ACommonPlayerCharacter* GetCommonPlayerCharacter() const { return PlayerCharacter.Get(); };
-	FORCEINLINE UQuestManagerComponent* GetQuestManager() const { return QuestManager; }
+	FORCEINLINE TWeakObjectPtr<UInteractionComponent> GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent.Get(); };
+	FORCEINLINE TWeakObjectPtr<ACommonPlayerCharacter> GetCommonPlayerCharacter() const { return PlayerCharacter.Get(); };
+	FORCEINLINE TWeakObjectPtr<UQuestManagerComponent> GetQuestManager() const { return QuestManager; }
 	
 protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
@@ -63,12 +63,11 @@ protected:
 	float InteractWithEnemiesDistance = 150.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UQuestManagerComponent* QuestManager;
+	TObjectPtr<UQuestManagerComponent> QuestManager;
 	
 private:
 	UPROPERTY()
-	TWeakObjectPtr<ACommonPlayerCharacter> PlayerCharacter;
-	
+	TWeakObjectPtr<ACommonPlayerCharacter> PlayerCharacter;	
 	UPROPERTY()
 	TWeakObjectPtr<UInteractionComponent> CurrentHoveredInteractionComponent;
 

@@ -56,31 +56,31 @@ struct FEffectImpactVFX : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* DefaultFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> DefaultFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* ConcreteFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> ConcreteFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* DirtFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> DirtFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* WaterFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> WaterFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* MetalFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> MetalFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* WoodFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> WoodFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* GlassFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> GlassFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* GrassFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> GrassFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* FleshFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> FleshFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* SandFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> SandFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* PlasticFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> PlasticFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* IceFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> IceFX = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UNiagaraSystem* FleshHeadshotFX = nullptr;
+	TSoftObjectPtr<UNiagaraSystem> FleshHeadshotFX = nullptr;
 };
 
 USTRUCT(BlueprintType)
@@ -89,29 +89,29 @@ struct FEffectImpactSFX : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* DefaultSound = nullptr;
+	TSoftObjectPtr<USoundCue> DefaultSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* ConcreteSound = nullptr;
+	TSoftObjectPtr<USoundCue> ConcreteSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* DirtSound = nullptr;
+	TSoftObjectPtr<USoundCue> DirtSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* WaterSound = nullptr;
+	TSoftObjectPtr<USoundCue> WaterSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* MetalSound = nullptr;
+	TSoftObjectPtr<USoundCue> MetalSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* WoodSound = nullptr;
+	TSoftObjectPtr<USoundCue> WoodSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* GlassSound = nullptr;
+	TSoftObjectPtr<USoundCue> GlassSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* GrassSound = nullptr;
+	TSoftObjectPtr<USoundCue> GrassSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* FleshSound = nullptr;
+	TSoftObjectPtr<USoundCue> FleshSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* SandSound = nullptr;
+	TSoftObjectPtr<USoundCue> SandSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* PlasticSound = nullptr;
+	TSoftObjectPtr<USoundCue> PlasticSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* IceSound = nullptr;
+	TSoftObjectPtr<USoundCue> IceSound = nullptr;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	USoundCue* FleshHeadshotSound = nullptr;
+	TSoftObjectPtr<USoundCue> FleshHeadshotSound = nullptr;
 };

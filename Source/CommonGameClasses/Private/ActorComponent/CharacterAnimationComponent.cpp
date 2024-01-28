@@ -1,11 +1,8 @@
 ﻿
 #include "ActorComponent/CharacterAnimationComponent.h"
-
-#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/MountManagerComponent.h"
 #include "GameFramework/Character.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
 
@@ -22,7 +19,7 @@ UCharacterAnimationComponent::UCharacterAnimationComponent()
 void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter, CommonGameState::Ragdoll))
+	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter.Get(), CommonGameState::Ragdoll))
 	{
 		Internal_RagdollUpdate();
 	}
@@ -32,7 +29,7 @@ void UCharacterAnimationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	OwnerCharacter = Cast<ACommonCharacter>(GetOwner());
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
@@ -88,7 +85,7 @@ float UCharacterAnimationComponent::HandleMontageLoadedEvent(TSoftObjectPtr<UAni
 
 float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
 {
-	if(!OwnerCharacter || OwnerCharacter->GetCurrentMontage())
+	if(!OwnerCharacter.IsValid() || OwnerCharacter->GetCurrentMontage())
 	{
 		return -1.f;
 	}
@@ -97,7 +94,7 @@ float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayDat
 
 void UCharacterAnimationComponent::StopAnimMontage(UAnimMontage* Montage)
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
@@ -106,7 +103,7 @@ void UCharacterAnimationComponent::StopAnimMontage(UAnimMontage* Montage)
 
 float UCharacterAnimationComponent::ForcePlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
 {
-	if(!AnimMontageData.MontageToPlay)
+	if(!AnimMontageData.MontageToPlay.IsValid())
 	{
 		return -1.f;
 	}
@@ -116,7 +113,7 @@ float UCharacterAnimationComponent::ForcePlayAnimMontage(const FAnimMontagePlayD
 
 void UCharacterAnimationComponent::SetAnimationOverlay(const FGameplayTag& NewOverlay)
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
@@ -125,7 +122,7 @@ void UCharacterAnimationComponent::SetAnimationOverlay(const FGameplayTag& NewOv
 
 void UCharacterAnimationComponent::StartRagdolling()
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
@@ -136,7 +133,7 @@ void UCharacterAnimationComponent::StartRagdolling()
 
 void UCharacterAnimationComponent::StopRagdolling()
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
@@ -147,22 +144,14 @@ void UCharacterAnimationComponent::StopRagdolling()
 
 float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData)
 {
-	if (!AnimMontagePlayData.MontageToPlay)
+	if (AnimMontagePlayData.MontageToPlay.IsStale())
 	{
 		return 0.f;
 	}
+	
 	if(AnimMontagePlayData.MontageToPlay.IsValid())
 	{
 		return OwnerCharacter->PlayAnimMontage(AnimMontagePlayData.MontageToPlay.Get(), AnimMontagePlayData.PlayRate, AnimMontagePlayData.MontageSection);	
-	}
-	
-	if(UActorAssetManagerComponent* ActorAssetManagerComponent = GetOwner()->FindComponentByClass<UActorAssetManagerComponent>())
-	{
-		CachedMontageData[AnimMontagePlayData.MontageToPlay] = AnimMontagePlayData;
-		FLoadedAnimMontageEvent LoadedAnimMontageEvent = FLoadedAnimMontageEvent();
-		LoadedAnimMontageEvent.BindDynamic(this, &ThisClass::HandleMontageLoadedEvent);
-		ActorAssetManagerComponent->K2_Async_LoadAnimMontageObject(AnimMontagePlayData.MontageToPlay, true, LoadedAnimMontageEvent);
-		// Anim montage loading issue, could blend out too early
 	}
 	return 0.f;
 }

@@ -4,13 +4,19 @@ void UCooldownMechanismImpl::StartCooldownTimer()
 {
 	TotalCooldownTime = CooldownDuration;
 	CurrentRunningCooldownTime = CooldownDuration;
-	GetWorld()->GetTimerManager().SetTimer(Timer_CooldownTick, this, &ThisClass::Internal_CooldownTick, COOLDOWN_TICK_RATE, false);
+	if(GetOwnerWorld())
+	{
+		GetOwnerWorld()->GetTimerManager().SetTimer(Timer_CooldownTick, this, &ThisClass::Internal_CooldownTick, COOLDOWN_TICK_RATE, false);	
+	}
 	CooldownStartedEvent.Broadcast(FCooldownStartedEventPayload());
 }
 
 void UCooldownMechanismImpl::StopCooldownTimer()
 {
-	GetWorld()->GetTimerManager().ClearTimer(Timer_CooldownTick);
+	if(GetOwnerWorld())
+	{
+		GetOwnerWorld()->GetTimerManager().ClearTimer(Timer_CooldownTick);
+	}
 	TotalCooldownTime = 0.f;
 	CurrentRunningCooldownTime = 0.f;
 	CooldownEndedEvent.Broadcast(FCooldownEndedEventPayload());
@@ -18,7 +24,10 @@ void UCooldownMechanismImpl::StopCooldownTimer()
 
 void UCooldownMechanismImpl::PauseCooldownTimer()
 {
-	GetWorld()->GetTimerManager().PauseTimer(Timer_CooldownTick);
+	if(GetOwnerWorld())
+	{
+		GetOwnerWorld()->GetTimerManager().PauseTimer(Timer_CooldownTick);
+	}
 }
 
 void UCooldownMechanismImpl::Internal_CooldownTick()
@@ -35,5 +44,8 @@ void UCooldownMechanismImpl::Internal_CooldownTick()
 	TickPayload.CooldownLeft = CurrentRunningCooldownTime;
 	TickPayload.TotalCooldown = TotalCooldownTime;
 	CooldownTickedEvent.Broadcast(TickPayload);
-	GetWorld()->GetTimerManager().SetTimer(Timer_CooldownTick, this, &ThisClass::Internal_CooldownTick, COOLDOWN_TICK_RATE, false);
+	if(GetOwnerWorld())
+	{
+		GetOwnerWorld()->GetTimerManager().SetTimer(Timer_CooldownTick, this, &ThisClass::Internal_CooldownTick, COOLDOWN_TICK_RATE, false);
+	}
 }

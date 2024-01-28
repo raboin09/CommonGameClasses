@@ -23,7 +23,7 @@ struct FQuestSectionData
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<AActor>> TargetObjectiveClasses;
+	TArray<TSoftClassPtr<AActor>> TargetObjectiveClasses;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<EQuestObjectiveAction> ValidObjectiveActions;
@@ -54,10 +54,10 @@ struct FQuestData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class USMInstance> QuestStateMachineClass;
+	TSoftClassPtr<USMInstance> QuestStateMachineClass;
 
 	UPROPERTY()
-	class UQuestStateMachine* QuestStateMachineInstance = nullptr;
+	TWeakObjectPtr<class UQuestStateMachine> QuestStateMachineInstance = nullptr;
 	
 	int32 QuestID = -1;
 };

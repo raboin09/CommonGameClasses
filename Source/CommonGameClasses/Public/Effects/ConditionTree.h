@@ -62,7 +62,7 @@ public:
 	virtual bool AreConditionsTrue(const FEffectContext& InEffectContext) const PURE_VIRTUAL(UConditionExpression::AreConditionsTrue, return false; )
 
 protected:
-	AActor* GetPropertyOwner(EPropertyOwner PropertyOwner, const FEffectContext& InEffectContext) const;
+	TWeakObjectPtr<AActor> GetPropertyOwner(EPropertyOwner PropertyOwner, const FEffectContext& InEffectContext) const;
 };
 
 UCLASS()
@@ -77,7 +77,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Condition Tree", meta=(EditCondition = "ChildConditions.Num() > 0", EditConditionHides))
 	ETreeOperator Operator;
 	UPROPERTY(EditDefaultsOnly, Category="Condition Tree", Instanced)
-	TArray<UConditionExpression*> ChildConditions;
+	TArray<TObjectPtr<UConditionExpression>> ChildConditions;
 };
 
 UCLASS(Abstract)

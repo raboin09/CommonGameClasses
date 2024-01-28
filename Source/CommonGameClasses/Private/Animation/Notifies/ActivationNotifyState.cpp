@@ -3,7 +3,7 @@
 #include "Animation/Notifies/ActivationNotifyState.h"
 #include "ActorComponent/AbilityComponent.h"
 
-UAbilityComponent* UActivationNotifyState::GetAbilityComponentFromOwner(const USkeletalMeshComponent* MeshComp) const
+TObjectPtr<UAbilityComponent> UActivationNotifyState::GetAbilityComponentFromOwner(const TObjectPtr<USkeletalMeshComponent> MeshComp) const
 {
 	if (!IsValid(MeshComp) || !IsValid(MeshComp->GetOwner())) {
 		return nullptr;

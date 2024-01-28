@@ -13,17 +13,19 @@ UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API UMontageTrigger : public UBaseComplexTrigger
 {
 	GENERATED_BODY()
-
-public:
-	virtual void InitTrigger() override;
-	virtual void PressTrigger() override;
-	virtual void ReleaseTrigger() override;
+	
+protected:
+	// ITriggerMechanism overrides
+	virtual void InitTriggerMechanism() override;
 	virtual void ResetTrigger() override;
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return false; }
 	
-protected:	
+	// UBaseTrigger overrides
+	virtual void HandleSuccessfulTriggerPressed() override;
+	virtual void HandleTriggerReleased() override;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	TSoftObjectPtr<UAnimMontage> MontageToPlay;
+	TObjectPtr<UAnimMontage> MontageToPlay;
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	int32 MaxComboSections = 3;
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
@@ -39,13 +41,12 @@ private:
 	FName Internal_GetNextMontageSection() const;
 	void Internal_StartMontage();
 
+	TWeakObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
+	
 	// COMBO VARIABLES
 	void Internal_IncrementComboCounter();
 	void Internal_ResetComboCounter();
-
-	TWeakObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
 	
 	int32 ComboSectionIncrement;
 	const FString ComboPrefix = "Combo";
-	FTimerHandle Timer_MaxComboWindow;
 };

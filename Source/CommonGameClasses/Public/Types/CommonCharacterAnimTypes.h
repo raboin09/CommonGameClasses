@@ -11,7 +11,7 @@ struct FAnimMontagePlayData
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TSoftObjectPtr<UAnimMontage> MontageToPlay = nullptr;
+	TWeakObjectPtr<UAnimMontage> MontageToPlay = nullptr;
 	
 	FName MontageSection = NAME_None;
 	bool bForcePlay = false;

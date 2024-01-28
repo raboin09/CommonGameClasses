@@ -43,7 +43,7 @@ protected:
 	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UBotBehaviorComponent* BotBehaviorComponent;
+	TObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInteractionComponent* InteractionComponent;
+	TObjectPtr<UInteractionComponent> InteractionComponent;
 };

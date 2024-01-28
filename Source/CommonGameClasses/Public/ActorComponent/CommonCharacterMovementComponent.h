@@ -22,5 +22,5 @@ public:
 	
 private:
 	UPROPERTY()
-	ACommonCharacter* OwnerCharacter;
+	TWeakObjectPtr<ACommonCharacter> OwnerCharacter;
 };

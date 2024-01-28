@@ -7,6 +7,9 @@
 #include "API/Interactable.h"
 #include "CommonDestructibleActor.generated.h"
 
+class UHealthComponent;
+class UEffectContainerComponent;
+
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonDestructibleActor : public ACommonActor, public IInteractable
 {
@@ -40,16 +43,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM")
 	float DeathBuffer = 5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UHealthComponent* HealthComponent;
+	TObjectPtr<UHealthComponent> HealthComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UInteractionComponent* InteractionComponent;
+	TObjectPtr<UInteractionComponent> InteractionComponent;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
-	class UStaticMeshComponent* DestructibleMesh;
+	TObjectPtr<UStaticMeshComponent> DestructibleMesh;
 	
 private:
 	UFUNCTION()
 	void HandleDeathEvent(const FActorDeathEventPayload& EventPayload);
 	
 	UPROPERTY()
-	class UEffectContainerComponent* EffectContainerComponent;
+	TObjectPtr<UEffectContainerComponent> EffectContainerComponent;
 };

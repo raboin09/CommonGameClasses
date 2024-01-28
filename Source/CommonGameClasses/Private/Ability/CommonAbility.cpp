@@ -1,13 +1,16 @@
 ﻿#include "Ability/CommonAbility.h"
+
 #include "Ability/CooldownMechanismImpl.h"
+#include "Ability/Activation/BaseActivation.h"
+#include "ActorComponent/AbilityComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "API/Ability/ActivationMechanism.h"
-#include "API/Ability/CooldownMechanism.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "Components/SphereComponent.h"
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
+#include "Ability/Trigger/BaseComplexTrigger.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -27,15 +30,16 @@ ACommonAbility::ACommonAbility()
 	InitWeaponMesh(AbilityStaticMesh);
 }
 
-void ACommonAbility::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	Internal_SetMeshToUse();
-}
-
 void ACommonAbility::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(CooldownMechanism)
+	{
+		CooldownMechanism->SetInstigator(GetInstigator());
+		CooldownMechanism->SetOwner(this);
+	}
+	
 	SetActivationMechanism();
 	SetResourceContainerObject();
 	SetTriggerMechanism();
@@ -45,6 +49,12 @@ void ACommonAbility::BeginPlay()
 		return;
 	}
 	OwningAbilityComponent = GetInstigator()->FindComponentByClass<UAbilityComponent>();
+}
+
+void ACommonAbility::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	Internal_SetMeshToUse();
 }
 
 void ACommonAbility::InitWeaponMesh(UMeshComponent* InMeshComp) const
@@ -174,14 +184,8 @@ bool ACommonAbility::TryEndAbility()
 
 void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
 {
-	if (UCharacterAnimationComponent* CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>())
+	if (!OwnerMeshComponent || !MeshToUse.IsValid())
 	{
-		CharacterAnimationComponent->SetAnimationOverlay(AbilityOverlay);
-	}
-
-	if (!OwnerMeshComponent || !MeshToUse)
-	{
-		UKismetSystemLibrary::PrintString(this, "Mesh NOT Ok");
 		return;
 	}
 	MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);
@@ -195,14 +199,14 @@ void ACommonAbility::DestroyAbility()
 
 void ACommonAbility::Internal_SetMeshToUse()
 {
-	if (MeshType == EMeshType::AbilityMesh)
+	if(MeshType == EMeshType::AbilityMesh)
 	{
-		if (AbilitySkeletalMesh && AbilitySkeletalMesh->GetSkeletalMeshAsset())
+		if(AbilitySkeletalMesh && AbilitySkeletalMesh->GetSkeletalMeshAsset())
 		{
 			MeshToUse = AbilitySkeletalMesh;
 		}
-
-		if (AbilityStaticMesh && AbilityStaticMesh->GetStaticMesh())
+	
+		if(AbilityStaticMesh && AbilityStaticMesh->GetStaticMesh())
 		{
 			MeshToUse = AbilityStaticMesh;
 		}
@@ -210,24 +214,24 @@ void ACommonAbility::Internal_SetMeshToUse()
 	else if (MeshType == EMeshType::InstigatorMesh)
 	{
 		APawn* CurrInstigator = GetInstigator();
-		if (!CurrInstigator)
+		if(!CurrInstigator)
 		{
 			return;
 		}
 
-		if (const ACharacter* CharOwner = Cast<ACharacter>(CurrInstigator))
+		if(const ACharacter* CharOwner = Cast<ACharacter>(CurrInstigator))
 		{
-			MeshToUse = CharOwner->GetMesh();
+			MeshToUse =  CharOwner->GetMesh();
 		}
 
-		if (UMeshComponent* MeshComp = CurrInstigator->FindComponentByClass<UMeshComponent>())
+		if(UMeshComponent* MeshComp = CurrInstigator->FindComponentByClass<UMeshComponent>())
 		{
-			MeshToUse = MeshComp;
+			MeshToUse =  MeshComp;
 		}
 	}
 
 	// Fallback in case nothing else is found
-	if (!MeshToUse)
+	if (!MeshToUse.IsValid())
 	{
 		if (UMeshComponent* MeshComp = GetInstigator()->FindComponentByClass<UMeshComponent>())
 		{
@@ -238,7 +242,7 @@ void ACommonAbility::Internal_SetMeshToUse()
 
 void ACommonAbility::Internal_HideMesh(bool bShouldHide) const
 {
-	if (MeshToUse && MeshType == EMeshType::AbilityMesh)
+	if (MeshToUse.IsValid() && MeshType == EMeshType::AbilityMesh)
 	{
 		MeshToUse->SetHiddenInGame(bShouldHide);
 	}
@@ -252,16 +256,17 @@ void ACommonAbility::SetTriggerMechanism()
 	}
 	else
 	{
-		UObject* TempObj = Internal_CreateNewMechanism(ComplexTriggerClass, UTriggerMechanism::StaticClass());
-		if (!TempObj || !TempObj->IsA(UBaseTrigger::StaticClass()))
+		if(!ComplexTriggerClass)
 		{
 			return;
 		}
-		TriggerMechanism = Cast<UBaseTrigger>(TempObj);
+		const TObjectPtr<UObject> TempObj = Internal_CreateNewMechanism(ComplexTriggerClass, UTriggerMechanism::StaticClass());
+		TriggerMechanism.SetObject(TempObj);
+		TriggerMechanism.SetInterface(Cast<ITriggerMechanism>(TempObj));
 	}
 	TriggerMechanism->SetInstigator(GetInstigator());
 	TriggerMechanism->SetOwner(this);
-	TriggerMechanism->InitTrigger();
+	TriggerMechanism->InitTriggerMechanism();
 }
 
 void ACommonAbility::SetResourceContainerObject()
@@ -329,22 +334,22 @@ void ACommonAbility::SetResourceContainerObject()
 	}
 }
 
-void ACommonAbility::Internal_SetResourceContainerToComponent(const AActor* PotentialActor)
+void ACommonAbility::Internal_SetResourceContainerToComponent(TWeakObjectPtr<const AActor> PotentialActor)
 {
-	if (!PotentialActor)
+	if (!PotentialActor.IsValid())
 		return;
-	Internal_SetResourceContainerToObject(PotentialActor->GetComponentByClass(ResourceContainerClass));
+	Internal_SetResourceContainerToObject(PotentialActor->GetComponentByClass(ResourceContainerClass.Get()));
 }
 
-void ACommonAbility::Internal_SetResourceContainerToObject(UObject* ContainerObject)
+void ACommonAbility::Internal_SetResourceContainerToObject(TWeakObjectPtr<UObject> ContainerObject)
 {
 	ResourceContainer.SetInterface(Cast<IResourceContainer>(ContainerObject));
-	ResourceContainer.SetObject(ContainerObject);
+	ResourceContainer.SetObject(ContainerObject.Get());
 }
 
 void ACommonAbility::SetActivationMechanism()
 {
-	UObject* TempObj = Internal_CreateNewMechanism(ActivationMechanismClass, UActivationMechanism::StaticClass());
+	UObject* TempObj = Internal_CreateNewMechanism(ActivationMechanismClass.Get(), UActivationMechanism::StaticClass());
 	if (!TempObj || !TempObj->IsA(UBaseActivation::StaticClass()))
 	{
 		return;
@@ -352,7 +357,7 @@ void ACommonAbility::SetActivationMechanism()
 	ActivationMechanism = Cast<UBaseActivation>(TempObj);
 	ActivationMechanism->SetInstigator(GetInstigator());
 	ActivationMechanism->SetOwner(this);
-	ActivationMechanism->InitActivationMechanism(MeshToUse);
+	ActivationMechanism->InitActivationMechanism(MeshToUse.Get());
 }
 
 bool ACommonAbility::Internal_StartNormalAbility()
@@ -368,13 +373,13 @@ bool ACommonAbility::Internal_StartNormalAbility()
 	return false;
 }
 
-UObject* ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<UObject> InMechanismClass, const UClass* InterfaceClass)
+TObjectPtr<UObject> ACommonAbility::Internal_CreateNewMechanism(const TSubclassOf<UObject> InMechanismClass, const UClass* InterfaceClass)
 {
 	if (!InMechanismClass || !InterfaceClass)
 	{
 		return nullptr;
 	}
-
+	
 	if (!InMechanismClass->ImplementsInterface(InterfaceClass))
 	{
 		return nullptr;
@@ -439,7 +444,7 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 	}
 	else
 	{
-		if (!OwningAbilityComponent || !TriggeredEventPayload.bMontageDrivesActivation)
+		if (!OwningAbilityComponent.IsValid() || !TriggeredEventPayload.bMontageDrivesActivation)
 		{
 			return;
 		}

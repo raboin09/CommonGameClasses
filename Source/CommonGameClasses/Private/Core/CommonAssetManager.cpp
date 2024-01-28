@@ -6,7 +6,6 @@
 UCommonAssetManager& UCommonAssetManager::Get()
 {
 	check(GEngine);
-
 	if (UCommonAssetManager* Singleton = Cast<UCommonAssetManager>(GEngine->AssetManager))
 	{
 		return *Singleton;
@@ -19,17 +18,13 @@ UObject* UCommonAssetManager::SynchronousLoadAsset(const FSoftObjectPath& AssetP
 {
 	if (AssetPath.IsValid())
 	{
-		TUniquePtr<FScopeLogTime> LogTimePtr;
-
 		if (IsInitialized())
 		{
 			return GetStreamableManager().LoadSynchronous(AssetPath, false);
 		}
-
 		// Use LoadObject if asset manager isn't ready yet.
 		return AssetPath.TryLoad();
 	}
-
 	return nullptr;
 }
 

@@ -9,18 +9,18 @@
 #include "Kismet/KismetMathLibrary.h"
 
 
-UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromWorld(const UWorld* World)
+UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromWorld(const TWeakObjectPtr<UWorld> World)
 {
-	if (IsValid(World))
+	if (World.IsValid())
 	{
 		return World->GetSubsystem<UActorTrackingSubsystem>();
 	}
 	return nullptr;
 }
 
-UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromActor(const AActor* Actor)
+UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromActor(const TWeakObjectPtr<AActor> Actor)
 {
-	if (IsValid(Actor))
+	if (Actor.IsValid())
 	{
 		return GetSubsystemFromWorld(Actor->GetWorld());
 	}
@@ -93,7 +93,14 @@ TArray<AActor*> UActorTrackingSubsystem::GetAllActorsOfClass_TrackedOnly(TSubcla
 			continue;
 		}
 
-		OutActors.Append(ClassEntry.Value.Actors);
+		for(TWeakObjectPtr<AActor> WeakActor : ClassEntry.Value.Actors)
+		{
+			if(WeakActor.IsStale())
+			{
+				continue; 
+			}
+			OutActors.Add(WeakActor.Get());
+		}
 	}
 	return OutActors;
 }

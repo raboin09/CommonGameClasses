@@ -8,11 +8,11 @@
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
-void UMeleeOverlapActivation::InitActivationMechanism(UMeshComponent* OwnerMeshComponent)
+void UMeleeOverlapActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent)
 {
 	Super::InitActivationMechanism(OwnerMeshComponent);
 	HitActors.Empty();
-	check(MeshComponentRef)
+	check(MeshComponentRef.IsValid())
 	check(MeshComponentRef->DoesSocketExist(Socket_TraceStart));
 	check(MeshComponentRef->DoesSocketExist(Socket_TraceEnd));
 }
@@ -34,7 +34,7 @@ void UMeleeOverlapActivation::Deactivate()
 
 void UMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()
 {
-	if(!MeshComponentRef)
+	if(!MeshComponentRef.IsValid())
 	{
 		return;
 	}
@@ -50,7 +50,7 @@ void UMeleeOverlapActivation::Internal_StopCollisionRaycastingTick()
 
 void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 {
-	if(!MeshComponentRef || !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Activated))
+	if(!MeshComponentRef.IsValid() || !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Activated))
 	{
 		Internal_StopCollisionRaycastingTick();
 		return;
@@ -78,7 +78,7 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 	AActor* HitActor = Hit.GetActor();		
 	if(HitActor && !HitActors.Contains(HitActor) && HitActor->FindComponentByClass<UEffectContainerComponent>())
 	{		
-		if(bCanHitMultipleEnemies && UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Dead))
+		if(UGameplayTagComponent::ActorHasGameplayTag(HitActor, CommonGameState::Dead))
 		{
 			return;
 		}

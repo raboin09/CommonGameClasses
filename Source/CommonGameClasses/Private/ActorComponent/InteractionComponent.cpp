@@ -58,9 +58,9 @@ void UInteractionComponent::Internal_SetupInteractionTimeline()
 
 void UInteractionComponent::SwitchOutlineOnAllMeshes(bool bShouldOutline)
 {
-	for(UMeshComponent* CurrMesh : OwnerMeshes)
+	for(TWeakObjectPtr<UMeshComponent> CurrMesh : OwnerMeshes)
 	{
-		if(CurrMesh)
+		if(!CurrMesh.IsStale())
 		{
 			const int32 OutlineColorInt = UCommonInteractUtils::GetOutlineInt(GetOwner());
 			CurrMesh->SetRenderCustomDepth(bShouldOutline);
@@ -123,12 +123,12 @@ void UInteractionComponent::Internal_InteractionFinished()
 {
 	// If the instigator has been set, we want to finish the this interaction because the timeline is in the forward direction.
 	// If not, the timeline was moving backward (and resetting) so ignore this
-	if(CachedInstigatingActor)
+	if(CachedInstigatingActor.IsValid())
 	{
-		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor, true));	
+		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor.Get(), true));	
 	} else
 	{
-		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor, false));	
+		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(nullptr, false));	
 	}
 	SetComponentTickEnabled(false);
 }

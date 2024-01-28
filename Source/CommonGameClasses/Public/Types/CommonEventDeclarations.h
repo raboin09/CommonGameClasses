@@ -17,30 +17,6 @@ class UBehaviorTree;
 class IAbility;
 
 ///////////////////////////
-// Load Asset Events
-///////////////////////////
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedNiagaraSystemObjectEvent, TSoftObjectPtr<UNiagaraSystem>, LoadedNiagaraSystem);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedCascadeSystemObjectEvent, TSoftObjectPtr<UParticleSystem>, LoadedParticleSystem);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedSoundObjectEvent, TSoftObjectPtr<USoundBase>, LoadedSound);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedTextureEvent, TSoftObjectPtr<UTexture>, LoadedTexture);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedMaterialEvent, TSoftObjectPtr<UMaterialInterface>, LoadedMaterial);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedStaticMeshEvent, TSoftObjectPtr<UStaticMesh>, LoadedStaticMesh);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedSkeletalMeshEvent, TSoftObjectPtr<USkeletalMesh>, LoadedSkeletalMesh);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedBehaviorTreeEvent, TSoftObjectPtr<UBehaviorTree>, LoadedTree);
-DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(float, FLoadedAnimMontageEvent, TSoftObjectPtr<UAnimMontage>, LoadedMontage);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedAbilityEvent, TSoftClassPtr<ACommonAbility>, LoadedAbilityClass);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedActorEvent, TSoftClassPtr<ACommonActor>, LoadedActorClass);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedCharacterEvent, TSoftClassPtr<ACommonCharacter>, LoadedCharacterClass);
-//
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedNiagaraSystemObjectEvent, UNiagaraSystem*, LoadedNiagaraSystem);
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedCascadeSystemObjectEvent, UParticleSystem*, LoadedParticleSystem);
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedSoundObjectEvent, USoundBase*, LoadedSound);
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedTextureEvent, UTexture*, LoadedTexture);
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedMaterialEvent, UMaterialInterface*, LoadedMaterial);
-// DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadedClassEvent, UClass*, LoadedClass);
-
-///////////////////////////
 // Montage Ended
 ///////////////////////////
 USTRUCT(BlueprintType)
@@ -79,10 +55,9 @@ struct FAbilityFinishedEquipPayload
 {
 	GENERATED_BODY()
 	FAbilityFinishedEquipPayload(){}
-	FAbilityFinishedEquipPayload(const TScriptInterface<IAbility> InEquippedAbility) : EquippedAbility(InEquippedAbility)	{ }
+	FAbilityFinishedEquipPayload(const TWeakInterfacePtr<IAbility> InEquippedAbility) : EquippedAbility(InEquippedAbility)	{ }
 	
-	UPROPERTY()
-	TScriptInterface<IAbility> EquippedAbility;
+	TWeakInterfacePtr<IAbility> EquippedAbility;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityFinishedEquip, const FAbilityFinishedEquipPayload&, AbilityFinishedEquipPayload);
 
@@ -91,10 +66,9 @@ struct FNewAbilityEquippedPayload
 {
 	GENERATED_BODY()
 	FNewAbilityEquippedPayload(){}
-	FNewAbilityEquippedPayload(const TScriptInterface<IAbility> InEquippedAbility) : NewEquippedAbility(InEquippedAbility)	{ }
+	FNewAbilityEquippedPayload(const TWeakInterfacePtr<IAbility> InEquippedAbility) : NewEquippedAbility(InEquippedAbility)	{ }
 	
-	UPROPERTY()
-	TScriptInterface<IAbility> NewEquippedAbility;
+	TWeakInterfacePtr<IAbility> NewEquippedAbility;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewAbilityEquipped, const FNewAbilityEquippedPayload&, NewAbilityEquippedPayload);
 
@@ -106,10 +80,9 @@ struct FNewAbilityAddedPayload
 {
 	GENERATED_BODY()
 	FNewAbilityAddedPayload(){}
-	FNewAbilityAddedPayload(const TScriptInterface<IAbility> InAddedAbility) : AddedAbility(InAddedAbility)	{ }
+	FNewAbilityAddedPayload(const TWeakInterfacePtr<IAbility> InAddedAbility) : AddedAbility(InAddedAbility)	{ }
 
-	UPROPERTY()
-	TScriptInterface<IAbility> AddedAbility;
+	TWeakInterfacePtr<IAbility> AddedAbility;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewAbilityAdded, const FNewAbilityAddedPayload&, NewAbilityAddedPayload);
 
@@ -121,10 +94,9 @@ struct FAbilityRemovedPayload
 {
 	GENERATED_BODY()
 	FAbilityRemovedPayload(){}
-	FAbilityRemovedPayload(const TScriptInterface<IAbility> InAbility) : RemovedAbility(InAbility) { }
+	FAbilityRemovedPayload(const TWeakInterfacePtr<IAbility> InAbility) : RemovedAbility(InAbility) { }
 
-	UPROPERTY()
-	TScriptInterface<IAbility> RemovedAbility;
+	TWeakInterfacePtr<IAbility> RemovedAbility;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityRemoved, const FAbilityRemovedPayload&, AbilityRemovedPayload);
 

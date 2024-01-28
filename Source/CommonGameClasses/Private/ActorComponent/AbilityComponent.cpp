@@ -3,7 +3,9 @@
 
 #include "ActorComponent/AbilityComponent.h"
 
+#include "API/Ability/Ability.h"
 #include "API/Ability/ActivationMechanism.h"
+#include "Core/CommonAssetManager.h"
 #include "GameFramework/Character.h"
 #include "Utils/CommonWorldUtils.h"
 
@@ -22,8 +24,8 @@ void UAbilityComponent::DestroyAbilities()
 
 void UAbilityComponent::SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSlot)
 {
-	const TScriptInterface<IAbility> NewEquippedAbility = Internal_FindAbility(NewEquippedSlot);
-	if(!NewEquippedAbility)
+	const TWeakInterfacePtr<IAbility> NewEquippedAbility = Internal_FindAbility(NewEquippedSlot);
+	if(NewEquippedAbility.IsStale())
 	{
 		return;
 	}
@@ -32,8 +34,9 @@ void UAbilityComponent::SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSl
 	{
 		return;
 	}
-	
-	if(const TScriptInterface<IAbility> LastEquippedAbility = Internal_FindAbility(EquippedSlot))
+
+	const TWeakInterfacePtr<IAbility> LastEquippedAbility = Internal_FindAbility(EquippedSlot);
+	if(!LastEquippedAbility.IsStale())
 	{
 		LastEquippedAbility->UnEquipAbility();
 	}
@@ -46,11 +49,19 @@ void UAbilityComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UAbilityComponent::AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityClass, const FGameplayTag& SlotTag)
+void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag& SlotTag)
 {
-	const TScriptInterface<IAbility> SpawnedAbility = Internal_SpawnAbilityFromClass(AbilityClass);
+	const TSubclassOf<AActor> ClassToSpawn = UCommonAssetManager::Sync_GetSubclass(AbilityClass);
+	const TWeakInterfacePtr<IAbility> SpawnedAbility = Internal_SpawnAbilityFromClass(ClassToSpawn);
+	if(!SpawnedAbility.IsValid())
+	{
+		return;
+	}
 	Internal_InitAndAttachAbilityToOwnerMesh(SpawnedAbility);
-	Internal_RemoveAbilityInSlot(SlotTag);
+	if(HasAbilityInSlot(SlotTag))
+	{
+		Internal_RemoveAbilityInSlot(SlotTag);	
+	}
 	Internal_AddAbilityInSlot(SlotTag, SpawnedAbility);
 	if(SlotTag == EquippedSlot)
 	{
@@ -60,8 +71,8 @@ void UAbilityComponent::AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityCla
 
 void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag& SlotTag)
 {
-	const TScriptInterface<IAbility> Ability = Internal_FindAbility(SlotTag);
-	if(!Ability)
+	const TWeakInterfacePtr<IAbility> Ability = Internal_FindAbility(SlotTag);
+	if(!Ability.IsValid())
 	{
 		return;
 	}
@@ -70,8 +81,8 @@ void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag& SlotTag)
 
 void UAbilityComponent::TryStopAbilityInSlot(const FGameplayTag& SlotTag)
 {
-	const TScriptInterface<IAbility> Ability = Internal_FindAbility(SlotTag);
-	if(!Ability)
+	const TWeakInterfacePtr<IAbility> Ability = Internal_FindAbility(SlotTag);
+	if(!Ability.IsValid())
 	{
 		return;
 	}
@@ -80,8 +91,8 @@ void UAbilityComponent::TryStopAbilityInSlot(const FGameplayTag& SlotTag)
 
 void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate) const
 {
-	const TScriptInterface<IActivationMechanism> MechanismToActivate = AwaitingActivationDetails.MechanismAwaitingActivation;
-	if(!MechanismToActivate)
+	const TWeakInterfacePtr<IActivationMechanism> MechanismToActivate = AwaitingActivationDetails.MechanismAwaitingActivation;
+	if(MechanismToActivate.IsStale())
 	{
 		return;
 	}
@@ -98,7 +109,7 @@ void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate) const
 	}	
 }
 
-TScriptInterface<IAbility> UAbilityComponent::Internal_SpawnAbilityFromClass(TSubclassOf<AActor> AbilityClass) const
+TWeakInterfacePtr<IAbility> UAbilityComponent::Internal_SpawnAbilityFromClass(TSubclassOf<AActor> AbilityClass) const
 {
 	if(!AbilityClass || !AbilityClass->ImplementsInterface(UAbility::StaticClass()))
 	{
@@ -109,7 +120,7 @@ TScriptInterface<IAbility> UAbilityComponent::Internal_SpawnAbilityFromClass(TSu
 	return AbilityObj;
 }
 
-void UAbilityComponent::Internal_InitAndAttachAbilityToOwnerMesh(TScriptInterface<IAbility> AbilityToAttach) const
+void UAbilityComponent::Internal_InitAndAttachAbilityToOwnerMesh(TWeakInterfacePtr<IAbility> AbilityToAttach) const
 {
 	if(const ACharacter* CharOwner = Cast<ACharacter>(GetOwner()))
 	{
@@ -123,9 +134,9 @@ void UAbilityComponent::Internal_InitAndAttachAbilityToOwnerMesh(TScriptInterfac
 	}
 }
 
-void UAbilityComponent::Internal_DestroyAbility(TScriptInterface<IAbility> AbilityToRemove)
+void UAbilityComponent::Internal_DestroyAbility(TWeakInterfacePtr<IAbility> AbilityToRemove)
 {
-	if(!AbilityToRemove)
+	if(AbilityToRemove.IsStale())
 	{
 		return;
 	}
@@ -133,15 +144,18 @@ void UAbilityComponent::Internal_DestroyAbility(TScriptInterface<IAbility> Abili
 	AbilityToRemove->DestroyAbility();
 }
 
-void UAbilityComponent::Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, TScriptInterface<IAbility> AbilityToAdd)
+void UAbilityComponent::Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, TWeakInterfacePtr<IAbility> AbilityToAdd)
 {
-	SlottedAbilities.Add(SlotTag, AbilityToAdd);
+	if(AbilityToAdd.IsValid())
+	{
+		SlottedAbilities.Add(SlotTag, AbilityToAdd);	
+	}	
 }
 
 void UAbilityComponent::Internal_RemoveAbilityInSlot(const FGameplayTag& SlotTag)
 {
-	const TScriptInterface<IAbility> AbilityToRemove = Internal_FindAbility(SlotTag);
-	if(!AbilityToRemove)
+	const TWeakInterfacePtr<IAbility> AbilityToRemove = Internal_FindAbility(SlotTag);
+	if(AbilityToRemove.IsStale())
 	{
 		return;
 	}
@@ -149,7 +163,7 @@ void UAbilityComponent::Internal_RemoveAbilityInSlot(const FGameplayTag& SlotTag
 	SlottedAbilities.Remove(SlotTag);
 }
 
-TScriptInterface<IAbility> UAbilityComponent::Internal_FindAbility(const FGameplayTag& SlotTag) const
+TWeakInterfacePtr<IAbility> UAbilityComponent::Internal_FindAbility(const FGameplayTag& SlotTag) const
 {
 	if(!HasAbilityInSlot(SlotTag))
 	{

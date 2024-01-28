@@ -1,6 +1,5 @@
 ﻿#include "Ability/Trigger/MontageTrigger.h"
 
-#include "ActorComponent/ActorAssetManagerComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
@@ -9,40 +8,26 @@
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTagTypes.h"
 
-void UMontageTrigger::InitTrigger()
+void UMontageTrigger::InitTriggerMechanism()
 {
 	K2_HandleInitTrigger();
-	if(!MontageToPlay.IsValid())
-	{
-		if(!GetOwner())
-		{
-			return;
-		}
-		
-		if(UActorAssetManagerComponent* ActorAssetManagerComponent = GetOwner()->FindComponentByClass<UActorAssetManagerComponent>())
-		{
-			FLoadedAnimMontageEvent LoadedAnimMontageEvent = FLoadedAnimMontageEvent();
-			ActorAssetManagerComponent->K2_Async_LoadAnimMontageObject(MontageToPlay, true, LoadedAnimMontageEvent);
-		}
-	}
-	
 	CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>();
+	check(CharacterAnimationComponent.IsValid())
 }
 
-void UMontageTrigger::PressTrigger()
+void UMontageTrigger::HandleSuccessfulTriggerPressed()
 {	
 	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::ComboActivated))
 	{
 		Internal_IncrementComboCounter();
 	} else
 	{
-		UKismetSystemLibrary::PrintString(this, "Soft Reset");
 		Internal_ResetComboCounter();
 	}
 	Internal_StartMontage();
 }
 
-void UMontageTrigger::ReleaseTrigger()
+void UMontageTrigger::HandleTriggerReleased()
 {
 	FTriggerEventPayload ReleaseTriggerEventPayload;
 	ReleaseTriggerEventPayload.ActivationLevel = 0;
@@ -64,11 +49,12 @@ void UMontageTrigger::ResetTrigger()
 
 void UMontageTrigger::HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload)
 {
-	if(CharacterMontageEndedPayload.EndedMontage == MontageToPlay.Get() && CharacterMontageEndedPayload.UpcomingMontage != MontageToPlay.Get())
+	if(CharacterMontageEndedPayload.EndedMontage.Get() == MontageToPlay.Get() && CharacterMontageEndedPayload.UpcomingMontage.Get() != MontageToPlay.Get())
 	{
+		UKismetSystemLibrary::PrintString(this, "Resetting");
 		ResetTrigger();
-		CharacterAnimationComponent->OnCharacterMontageEnded().RemoveDynamic(this, &ThisClass::HandleMontageEnded);
 	}
+	CharacterAnimationComponent->OnCharacterMontageEnded().RemoveDynamic(this, &ThisClass::HandleMontageEnded);
 }
 
 FAnimMontagePlayData UMontageTrigger::Internal_GetPlayData() const
@@ -96,7 +82,7 @@ void UMontageTrigger::Internal_StartMontage()
 		return;
 	}
 	
-	if(CharacterAnimationComponent.IsValid())
+	if(!CharacterAnimationComponent.IsStale())
 	{
 		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
 		CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
@@ -122,7 +108,6 @@ void UMontageTrigger::Internal_StartMontage()
 
 void UMontageTrigger::Internal_IncrementComboCounter()
 {
-	UKismetSystemLibrary::PrintString(this, FString::FromInt(ComboSectionIncrement + 1));
 	if(++ComboSectionIncrement > MaxComboSections)
 	{
 		Internal_ResetComboCounter();

@@ -16,5 +16,5 @@ class COMMONGAMECLASSES_API UActivationNotifyState : public UAnimNotifyState
 	GENERATED_BODY()
 	
 protected:
-	UAbilityComponent* GetAbilityComponentFromOwner(const USkeletalMeshComponent* MeshComp) const;
+	TObjectPtr<UAbilityComponent> GetAbilityComponentFromOwner(const TObjectPtr<USkeletalMeshComponent> MeshComp) const;
 };

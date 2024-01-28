@@ -1,7 +1,5 @@
 #include "ActorComponent/BotBehaviorComponent.h"
 
-#include "ActorComponent/ActorAssetManagerComponent.h"
-
 UBotBehaviorComponent::UBotBehaviorComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;

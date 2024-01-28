@@ -46,9 +46,9 @@ private:
 	void Internal_InteractionFinished();
 	
 	UPROPERTY()
-	TArray<UMeshComponent*> OwnerMeshes;
+	TArray<TWeakObjectPtr<UMeshComponent>> OwnerMeshes;
 	UPROPERTY()
-	AActor* CachedInstigatingActor;
+	TWeakObjectPtr<AActor> CachedInstigatingActor;
 	UPROPERTY()
 	FTimeline Timeline;
 

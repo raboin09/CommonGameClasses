@@ -1,6 +1,6 @@
 ﻿#include "Ability/Trigger/BurstTrigger.h"
 
-void UBurstTrigger::PressTrigger()
+void UBurstTrigger::HandleSuccessfulTriggerPressed()
 {
 	bTriggerHeld = true;
 	if(TimeBetweenBurstShots <= 0.f)
@@ -11,11 +11,14 @@ void UBurstTrigger::PressTrigger()
 		}
 	} else
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BurstFire, this, &ThisClass::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);	
+		if(GetOwnerWorld())
+		{
+			GetOwnerWorld()->GetTimerManager().SetTimer(TimerHandle_BurstFire, this, &ThisClass::Internal_BurstFireTick, TimeBetweenBurstShots, true, 0.f);	
+		}
 	}
 }
 
-void UBurstTrigger::ReleaseTrigger()
+void UBurstTrigger::HandleTriggerReleased()
 {
 	bTriggerHeld = false;
 	FTriggerEventPayload ReleaseTriggerEventPayload;
@@ -29,7 +32,10 @@ void UBurstTrigger::Internal_BurstFireTick()
 	if(++BurstFireCount > NumberOfActivations)
 	{
 		BurstFireCount = 0;
-		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_BurstFire);
+		if(GetOwnerWorld())
+		{
+			GetOwnerWorld()->GetTimerManager().ClearTimer(TimerHandle_BurstFire);	
+		}
 		return;
 	}
 	FTriggerEventPayload PressTriggerEventPayload;

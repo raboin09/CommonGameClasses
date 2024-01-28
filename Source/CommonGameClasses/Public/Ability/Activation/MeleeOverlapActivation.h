@@ -14,7 +14,7 @@ class COMMONGAMECLASSES_API UMeleeOverlapActivation : public UBaseActivation
 	GENERATED_BODY()
 
 public:
-	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) override;	
+	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;	
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
 
@@ -58,7 +58,7 @@ private:
 	void Internal_StopAttack();
 
 	UPROPERTY(Transient)
-	TArray<AActor*> HitActors;
+	TArray<TWeakObjectPtr<AActor>> HitActors;
 	UPROPERTY(Transient)
 	bool bRecordedHit;
 	

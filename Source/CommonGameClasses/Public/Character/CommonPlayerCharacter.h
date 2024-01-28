@@ -30,8 +30,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CUSTOM|Input", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> MoveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CUSTOM|Input", Meta = (DisplayThumbnail = false))
-	TObjectPtr<UInputAction> SprintAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CUSTOM|Input", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> AimAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM|Input", Meta = (ClampMin = 0, ForceUnits = "x"))
@@ -52,6 +50,5 @@ private:
 	void Input_OnLookMouse(const FInputActionValue& ActionValue);
 	void Input_OnLook(const FInputActionValue& ActionValue);
 	void Input_OnMove(const FInputActionValue& ActionValue);
-	void Input_OnSprint(const FInputActionValue& ActionValue);
 	void Input_OnAim(const FInputActionValue& ActionValue);
 };

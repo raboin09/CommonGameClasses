@@ -67,5 +67,5 @@ protected:
 	float DeathBuffer;
 
 	UPROPERTY()
-	TArray<AActor*> HitActors;
+	TArray<TWeakObjectPtr<AActor>> HitActors;
 };

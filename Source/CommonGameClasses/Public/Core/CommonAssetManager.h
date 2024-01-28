@@ -13,38 +13,36 @@ UCLASS()
 class COMMONGAMECLASSES_API UCommonAssetManager : public UAssetManager
 {
 	GENERATED_BODY()
-	
+
 public:
 	static UCommonAssetManager& Get();
-
+	
 	template<typename AssetType>
-	static AssetType* Sync_GetAsset(const TSoftObjectPtr<AssetType>& AssetPointer, bool bKeepInMemory = true);	
+	static AssetType* Sync_GetAsset(const TSoftObjectPtr<AssetType>& AssetPointer, bool bKeepInMemory = true);
 	template<typename AssetType>
 	static TSubclassOf<AssetType> Sync_GetSubclass(const TSoftClassPtr<AssetType>& AssetPointer, bool bKeepInMemory = true);
 
-	template<typename AssetType>
-	static AssetType* Async_GetAsset(const TSoftObjectPtr<AssetType>& AssetPointer, bool bKeepInMemory = true);	
-	template<typename AssetType>
-	static TSubclassOf<AssetType> Async_GetSubclass(const TSoftClassPtr<AssetType>& AssetPointer, bool bKeepInMemory = true);
-	
+	template<typename AssetType = UObject>
+	static void Async_LoadSoftObject(TSoftObjectPtr<AssetType>, FStreamableDelegate Delegate = FStreamableDelegate());
+	template<typename AssetType = UObject>
+	static void Async_LoadSoftClass(TSoftObjectPtr<AssetType>, FStreamableDelegate Delegate = FStreamableDelegate());
+
 protected:
 	static UObject* SynchronousLoadAsset(const FSoftObjectPath& AssetPath);
 	void AddLoadedAsset(const UObject* Asset);
 	
-private:
-	
-	// Assets loaded and tracked by the asset manager.
 	UPROPERTY()
 	TSet<TObjectPtr<const UObject>> LoadedAssets;
-
 	FCriticalSection LoadedAssetsCritical;
 };
 
-template<typename AssetType>
+template <typename AssetType>
 AssetType* UCommonAssetManager::Sync_GetAsset(const TSoftObjectPtr<AssetType>& AssetPointer, bool bKeepInMemory)
 {
 	AssetType* LoadedAsset = nullptr;
+
 	const FSoftObjectPath& AssetPath = AssetPointer.ToSoftObjectPath();
+
 	if (AssetPath.IsValid())
 	{
 		LoadedAsset = AssetPointer.Get();
@@ -60,10 +58,11 @@ AssetType* UCommonAssetManager::Sync_GetAsset(const TSoftObjectPtr<AssetType>& A
 			Get().AddLoadedAsset(Cast<UObject>(LoadedAsset));
 		}
 	}
+
 	return LoadedAsset;
 }
 
-template<typename AssetType>
+template <typename AssetType>
 TSubclassOf<AssetType> UCommonAssetManager::Sync_GetSubclass(const TSoftClassPtr<AssetType>& AssetPointer, bool bKeepInMemory)
 {
 	TSubclassOf<AssetType> LoadedSubclass;
@@ -88,3 +87,16 @@ TSubclassOf<AssetType> UCommonAssetManager::Sync_GetSubclass(const TSoftClassPtr
 
 	return LoadedSubclass;
 }
+
+template <typename AssetType>
+void UCommonAssetManager::Async_LoadSoftObject(TSoftObjectPtr<AssetType>, FStreamableDelegate Delegate)
+{
+	
+}
+
+template <typename AssetType>
+void UCommonAssetManager::Async_LoadSoftClass(TSoftObjectPtr<AssetType>, FStreamableDelegate Delegate)
+{
+	
+}
+

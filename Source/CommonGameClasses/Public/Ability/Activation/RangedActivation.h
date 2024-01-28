@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "BaseActivation.h"
 #include "Actors/CommonActor.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonAbilityTypes.h"
 #include "RangedActivation.generated.h"
 
@@ -20,7 +19,7 @@ class COMMONGAMECLASSES_API URangedActivation : public UBaseActivation
 public:
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
-	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) override;
+	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
 
 protected:
 	// Ranged Activation 
@@ -72,9 +71,9 @@ private:
 	UPROPERTY(Transient)
 	float CurrentFiringSpread;
 	UPROPERTY()
-	const AAIController* OwningAIController;
+	TWeakObjectPtr<AAIController> OwningAIController;
 	UPROPERTY()
-	const APlayerController* OwningPlayerController;
+	TWeakObjectPtr<APlayerController> OwningPlayerController;
 
 public:
 	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };

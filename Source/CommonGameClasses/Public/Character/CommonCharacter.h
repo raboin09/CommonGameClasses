@@ -12,7 +12,6 @@
 #include "CommonCharacter.generated.h"
 
 class UCommonAnimInstance;
-class UActorAssetManagerComponent;
 class UMountManagerComponent;
 struct FGameplayTag;
 class IMountable;
@@ -77,8 +76,6 @@ protected:
 	TObjectPtr<UEffectContainerComponent> EffectContainerComponent;
 	UPROPERTY()
 	TObjectPtr<UGameplayTagComponent> GameplayTagComponent;
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UActorAssetManagerComponent> ActorAssetManagerComponent;
 
 	////////////////////////////////
 	/// Knockbacks and Hit Reacts
@@ -104,11 +101,6 @@ public:
 	/////////////////////////////////
 public:
 	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Dead); }
-	FORCEINLINE UGameplayTagComponent* GetGameplayTagComponent() const { return GameplayTagComponent; }
+	FORCEINLINE TWeakObjectPtr<UGameplayTagComponent> GetGameplayTagComponent() const { return GameplayTagComponent; }
 	FORCEINLINE TWeakObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return Cast<UCommonAnimInstance>(AnimationInstance); }
-
-private:
-	// Load Events
-	UFUNCTION()
-	virtual void HandleDefaultAbilityLoaded(TSoftClassPtr<ACommonAbility> LoadedAbilityClass);
 };

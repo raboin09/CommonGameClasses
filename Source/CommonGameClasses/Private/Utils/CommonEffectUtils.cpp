@@ -108,7 +108,8 @@ void UCommonEffectUtils::ApplyEffectAtLocation(AActor* InstigatingActor, TSubcla
 	FTransform SpawnTransform = FTransform();
 	SpawnTransform.SetLocation(Location);
 
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(EffectToApply, InstigatingActor, Cast<APawn>(InstigatingActor));
+	check(EffectToApply)
+	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(EffectToApply.Get(), InstigatingActor, Cast<APawn>(InstigatingActor));
 	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	if(bActivateImmediately)
 	{
@@ -245,114 +246,3 @@ void UCommonEffectUtils::TryApplyShieldHealToActor(const AActor* ReceivingActor,
 		ShieldEnergyComponent->ApplyShieldHeal(Heal);
 	}
 }
-
-UFXSystemAsset* UCommonEffectUtils::GetVFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)
-{
-	if(RowHandle.IsNull() || RowHandle.RowName.IsNone())
-	{
-		return nullptr;
-	}
-	
-	const FEffectImpactVFX* FoundRow = RowHandle.DataTable->FindRow<FEffectImpactVFX>(RowHandle.RowName, RowHandle.RowName.ToString());
-	if(!FoundRow)
-	{
-		return nullptr;
-	}	
-	const FEffectImpactVFX& OutRow = *FoundRow;
-	
-	if (bIsValidHeadshot && OutRow.FleshHeadshotFX)
-	{
-		return OutRow.FleshHeadshotFX;
-	}
-
-	if(!IsValid(SurfaceMaterial))
-	{
-		return OutRow.DefaultFX;  
-	}
-
-	UNiagaraSystem* SelectedParticle;
-	switch (SurfaceMaterial->SurfaceType)
-	{
-	case COMMON_SURFACE_Default: SelectedParticle = OutRow.DefaultFX;
-		break;
-	case COMMON_SURFACE_Concrete: SelectedParticle = OutRow.ConcreteFX;
-		break;
-	case COMMON_SURFACE_Dirt: SelectedParticle = OutRow.DirtFX;
-		break;
-	case COMMON_SURFACE_Water: SelectedParticle = OutRow.WaterFX;
-		break;
-	case COMMON_SURFACE_Metal: SelectedParticle = OutRow.MetalFX;
-		break;
-	case COMMON_SURFACE_Wood: SelectedParticle = OutRow.WoodFX;
-		break;
-	case COMMON_SURFACE_Grass: SelectedParticle = OutRow.GrassFX;
-		break;
-	case COMMON_SURFACE_Glass: SelectedParticle = OutRow.GlassFX;
-		break;
-	case COMMON_SURFACE_Flesh: SelectedParticle = OutRow.FleshFX;
-		break;
-	case COMMON_SURFACE_Plastic: SelectedParticle = OutRow.PlasticFX;
-		break;
-	case COMMON_SURFACE_Sand: SelectedParticle = OutRow.SandFX;
-		break;
-	case COMMON_SURFACE_Ice: SelectedParticle = OutRow.FleshFX;
-		break;
-	default: SelectedParticle = OutRow.DefaultFX;
-	}
-	return SelectedParticle ? SelectedParticle : OutRow.DefaultFX;
-}
-
-USoundCue* UCommonEffectUtils::GetSFXAssetFromKey(const FDataTableRowHandle& RowHandle, const UPhysicalMaterial* SurfaceMaterial, bool bIsValidHeadshot)
-{
-	if(RowHandle.IsNull() || RowHandle.RowName.IsNone())
-	{
-		return nullptr;
-	}
-	
-	const FEffectImpactSFX* FoundRow = RowHandle.DataTable->FindRow<FEffectImpactSFX>(RowHandle.RowName, SurfaceMaterial->GetFullName());
-	if(!FoundRow)
-	{
-		return nullptr;
-	}
-
-	if(!IsValid(SurfaceMaterial))
-	{
-		return FoundRow->DefaultSound;
-	}
-	
-	const FEffectImpactSFX& OutRow = *FoundRow;	
-	if (bIsValidHeadshot && OutRow.FleshHeadshotSound)
-	{
-		return OutRow.FleshHeadshotSound;
-	}
-
-	USoundCue* SelectedSound;
-	switch (SurfaceMaterial->SurfaceType)
-	{
-	case COMMON_SURFACE_Concrete: SelectedSound = OutRow.ConcreteSound;
-		break;
-	case COMMON_SURFACE_Dirt: SelectedSound = OutRow.DirtSound;
-		break;
-	case COMMON_SURFACE_Water: SelectedSound = OutRow.WaterSound;
-		break;
-	case COMMON_SURFACE_Metal: SelectedSound = OutRow.MetalSound;
-		break;
-	case COMMON_SURFACE_Wood: SelectedSound = OutRow.WoodSound;
-		break;
-	case COMMON_SURFACE_Grass: SelectedSound = OutRow.GrassSound;
-		break;
-	case COMMON_SURFACE_Glass: SelectedSound = OutRow.GlassSound;
-		break;
-	case COMMON_SURFACE_Flesh: SelectedSound = OutRow.FleshSound;
-		break;
-	case COMMON_SURFACE_Plastic: SelectedSound = OutRow.PlasticSound;
-		break;
-	case COMMON_SURFACE_Sand: SelectedSound = OutRow.SandSound;
-		break;
-	case COMMON_SURFACE_Ice: SelectedSound = OutRow.IceSound;
-		break;
-	default: SelectedSound = OutRow.DefaultSound;
-	}
-	return SelectedSound ? SelectedSound : OutRow.DefaultSound;
-}
-

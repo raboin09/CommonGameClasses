@@ -17,7 +17,7 @@ class COMMONGAMECLASSES_API ITriggerMechanism
 {
 	GENERATED_BODY()
 public:
-	virtual void InitTrigger() {}
+	virtual void InitTriggerMechanism() {}
 	virtual void PressTrigger() PURE_VIRTUAL(ITriggerMechanism::PressTrigger,)
 	virtual void ReleaseTrigger() PURE_VIRTUAL(ITriggerMechanism::ReleaseTrigger,)
 	
@@ -29,14 +29,18 @@ public:
 	FORCEINLINE FTriggerEvent& OnTriggerPressed() { return TriggerPressedEvent; }
 	FORCEINLINE FTriggerEvent& OnTriggerReleased() { return TriggerReleasedEvent; }
 	
-	FORCEINLINE virtual void SetInstigator(APawn* InPawn) { PawnInstigator = InPawn; }
-	FORCEINLINE virtual APawn* GetInstigator() const { return PawnInstigator; }
-	FORCEINLINE virtual void SetOwner(AActor* InActor) { AbilityOwner = InActor; }
-	FORCEINLINE virtual AActor* GetOwner() const { return AbilityOwner; }
+	FORCEINLINE virtual void SetInstigator(TWeakObjectPtr<APawn> InPawn) { PawnInstigator = InPawn; }
+	FORCEINLINE virtual void SetOwner(TWeakObjectPtr<AActor> InActor) { AbilityOwner = InActor; }
+	
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual APawn* GetInstigator() const { return PawnInstigator.Get(); }
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual AActor* GetOwner() const { return AbilityOwner.Get(); }
 	
 protected:
-	AActor* AbilityOwner = nullptr;
-	APawn* PawnInstigator = nullptr;
+	FORCEINLINE virtual UWorld* GetOwnerWorld() const { return GetInstigator() ? GetInstigator()->GetWorld() : nullptr; }
+	TWeakObjectPtr<AActor> AbilityOwner = nullptr;
+	TWeakObjectPtr<APawn> PawnInstigator = nullptr;
 	
 	FTriggerEvent TriggerPressedEvent;
 	FTriggerEvent TriggerReleasedEvent;

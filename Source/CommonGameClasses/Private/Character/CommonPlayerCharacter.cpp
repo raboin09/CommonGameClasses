@@ -67,7 +67,6 @@ void ACommonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 		EnhancedInput->BindAction(LookMouseAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnLookMouse);
 		EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnLook);
 		EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnMove);
-		EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnSprint);
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnAim);
 	}
 }
@@ -96,11 +95,6 @@ void ACommonPlayerCharacter::Input_OnMove(const FInputActionValue& ActionValue)
 	const FVector RightDirection = UAlsMath::PerpendicularCounterClockwiseXY(ForwardDirection);
 
 	AddMovementInput(ForwardDirection * Value.Y + RightDirection * Value.X);
-}
-
-void ACommonPlayerCharacter::Input_OnSprint(const FInputActionValue& ActionValue)
-{
-	SetDesiredGait(ActionValue.Get<bool>() ? AlsGaitTags::Sprinting : AlsGaitTags::Running);
 }
 
 void ACommonPlayerCharacter::Input_OnAim(const FInputActionValue& ActionValue)

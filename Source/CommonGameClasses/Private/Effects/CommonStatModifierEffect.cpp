@@ -3,7 +3,6 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonCombatUtils.h"
 #include "Utils/CommonEffectUtils.h"
 
@@ -89,7 +88,7 @@ float ACommonStatModifierEffect::CalculateModifierValues() const
 
 void ACommonStatModifierEffect::CalculateModifier(const FModifierExpression& ModifierExpression, const FGameplayTag& ModifierTag, float& ModifiedBaseValue) const
 {
-	AActor* ModifierActor = nullptr;
+	TWeakObjectPtr<AActor> ModifierActor = nullptr;
 	switch (ModifierExpression.ModifierActor)
 	{
 	case EModifierActor::Instigator:
@@ -102,7 +101,7 @@ void ACommonStatModifierEffect::CalculateModifier(const FModifierExpression& Mod
 		break;
 	}
 
-	if(!UGameplayTagComponent::ActorHasGameplayTag(ModifierActor, ModifierTag))
+	if(!UGameplayTagComponent::ActorHasGameplayTag(ModifierActor.Get(), ModifierTag))
 	{
 		return;
 	}
@@ -137,28 +136,28 @@ void ACommonStatModifierEffect::Internal_MoveSpeedStatChange(float ModifiedStatV
 void ACommonStatModifierEffect::Internal_AllDamage(float ModifiedStatValue) const
 {
 	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
-	UCommonEffectUtils::TryApplyDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
+	UCommonEffectUtils::TryApplyDamageToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), HitReactEvent.DamageTaken, HitReactEvent);
 }
 
 void ACommonStatModifierEffect::Internal_HealthDamage(float ModifiedStatValue) const
 {
 	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
-	UCommonEffectUtils::TryApplyHealthDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
+	UCommonEffectUtils::TryApplyHealthDamageToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), HitReactEvent.DamageTaken, HitReactEvent);
 }
 
 void ACommonStatModifierEffect::Internal_ShieldDamage(float ModifiedStatValue) const
 {
 	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
-	UCommonEffectUtils::TryApplyShieldDamageToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, HitReactEvent.DamageTaken, HitReactEvent);
+	UCommonEffectUtils::TryApplyShieldDamageToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), HitReactEvent.DamageTaken, HitReactEvent);
 }
 
 void ACommonStatModifierEffect::Internal_HealthMaxWounds(float ModifiedStatValue)
 {
-	UCommonEffectUtils::TryAddMaxWoundsToActor(EffectContext.ReceivingActor, ModifiedStatValue);
-	AActor* ReceivingActor = EffectContext.ReceivingActor;
+	UCommonEffectUtils::TryAddMaxWoundsToActor(EffectContext.ReceivingActor.Get(), ModifiedStatValue);
+	TWeakObjectPtr<AActor> ReceivingActor = EffectContext.ReceivingActor;
 	ReversalFunc = [ModifiedStatValue, ReceivingActor]
 	{
-		UCommonEffectUtils::TryAddMaxWoundsToActor(ReceivingActor, ModifiedStatValue);
+		UCommonEffectUtils::TryAddMaxWoundsToActor(ReceivingActor.Get(), ModifiedStatValue);
 	};
 }
 
@@ -176,11 +175,10 @@ FDamageHitReactEvent ACommonStatModifierEffect::Internal_GenerateHitReactEvent(f
 
 void ACommonStatModifierEffect::Internal_HealthHeal(float ModifiedStatValue) const
 {
-	UCommonEffectUtils::TryApplyHealthHealToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, ModifiedStatValue);
+	UCommonEffectUtils::TryApplyHealthHealToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), ModifiedStatValue);
 }
 
 void ACommonStatModifierEffect::Internal_ShieldHeal(float ModifiedStatValue) const
 {
-	UKismetSystemLibrary::PrintString(this, "Stat Heal");
-	UCommonEffectUtils::TryApplyShieldHealToActor(EffectContext.ReceivingActor, EffectContext.InstigatingActor, ModifiedStatValue);
+	UCommonEffectUtils::TryApplyShieldHealToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), ModifiedStatValue);
 }

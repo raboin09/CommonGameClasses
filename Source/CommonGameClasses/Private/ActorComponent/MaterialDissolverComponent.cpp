@@ -53,9 +53,9 @@ void UMaterialDissolverComponent::Internal_TimelineDissolveUpdate(float Value)
 {
 	if(DissolveDynamicMaterialInstances.Num() > 0)
 	{
-		for(UMaterialInstanceDynamic* CurrInst : DissolveDynamicMaterialInstances)
+		for(TSoftObjectPtr<UMaterialInstanceDynamic> CurrInst : DissolveDynamicMaterialInstances)
 		{
-			if(CurrInst)
+			if(CurrInst.IsValid())
 			{
 				CurrInst->SetScalarParameterValue(DissolveParameterName, Value);
 			}
@@ -65,7 +65,7 @@ void UMaterialDissolverComponent::Internal_TimelineDissolveUpdate(float Value)
 
 void UMaterialDissolverComponent::InitDissolveTimeline()
 {	
-	if(MeshComponent)
+	if(MeshComponent.IsValid())
 	{
 		for(int i = 0; i<MeshComponent->GetMaterials().Num(); i++)
 		{
@@ -73,11 +73,11 @@ void UMaterialDissolverComponent::InitDissolveTimeline()
 		}
 	}
 
-	if(DissolveCurveFloat)
+	if(DissolveCurveFloat.IsValid())
 	{
 		FOnTimelineFloat DissolveProgressFunction;
 		DissolveProgressFunction.BindDynamic(this, &ThisClass::Internal_TimelineDissolveUpdate);
-		DissolveTimeline.AddInterpFloat(DissolveCurveFloat, DissolveProgressFunction);
+		DissolveTimeline.AddInterpFloat(DissolveCurveFloat.Get(), DissolveProgressFunction);
 		DissolveTimeline.SetLooping(false);
 	}
 	

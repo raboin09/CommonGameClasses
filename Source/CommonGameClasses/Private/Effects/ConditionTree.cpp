@@ -7,7 +7,7 @@
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/ShieldEnergyComponent.h"
 
-AActor* UConditionExpression::GetPropertyOwner(EPropertyOwner PropertyOwner, const FEffectContext& InEffectContext) const
+TWeakObjectPtr<AActor> UConditionExpression::GetPropertyOwner(EPropertyOwner PropertyOwner, const FEffectContext& InEffectContext) const
 {
 	switch (PropertyOwner) {
 		case EPropertyOwner::Instigator: return InEffectContext.InstigatingActor;
@@ -48,8 +48,8 @@ bool UFloatLeafConditionNode::AreConditionsTrue(const FEffectContext& InEffectCo
 
 float UFloatLeafConditionNode::GetProperty(const FEffectContext& InEffectContext) const
 {
-	const AActor* PropertyOwnerActor = GetPropertyOwner(PropertyOwner, InEffectContext);
-	if(!PropertyOwnerActor)
+	const TWeakObjectPtr<AActor> PropertyOwnerActor = GetPropertyOwner(PropertyOwner, InEffectContext);
+	if(!PropertyOwnerActor.IsValid())
 	{
 		return 0.f;
 	}
@@ -79,15 +79,15 @@ float UFloatLeafConditionNode::GetProperty(const FEffectContext& InEffectContext
 
 bool UGameplayTagConditionNode::AreConditionsTrue(const FEffectContext& InEffectContext) const
 {
-	AActor* TagActor = GetPropertyOwner(PropertyOwner, InEffectContext);
-	if(!TagActor)
+	TWeakObjectPtr<AActor> TagActor = GetPropertyOwner(PropertyOwner, InEffectContext);
+	if(!TagActor.IsValid())
 	{
 		return false;
 	}
 	
 	switch (Operator) {
-		case ETagOperator::HasTagsAny: return UGameplayTagComponent::ActorHasAnyGameplayTags(TagActor, ConditionTags, bExactMatch);
-		case ETagOperator::HasTagsAll: return UGameplayTagComponent::ActorHasAnyGameplayTags(TagActor, ConditionTags, bExactMatch);
+		case ETagOperator::HasTagsAny: return UGameplayTagComponent::ActorHasAnyGameplayTags(TagActor.Get(), ConditionTags, bExactMatch);
+		case ETagOperator::HasTagsAll: return UGameplayTagComponent::ActorHasAnyGameplayTags(TagActor.Get(), ConditionTags, bExactMatch);
 		default: return false;
 	}
 }
