@@ -89,11 +89,12 @@ void UAbilityComponent::TryStopAbilityInSlot(const FGameplayTag& SlotTag)
 	Ability->TryEndAbility();
 }
 
-void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate) const
+void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate)
 {
 	const TWeakInterfacePtr<IActivationMechanism> MechanismToActivate = AwaitingActivationDetails.MechanismAwaitingActivation;
-	if(MechanismToActivate.IsStale())
+	if(!MechanismToActivate.IsValid())
 	{
+		ResetAwaitingActivationDetails();
 		return;
 	}
 

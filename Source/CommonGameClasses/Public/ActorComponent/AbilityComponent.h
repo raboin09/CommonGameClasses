@@ -42,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void TryStopAbilityInSlot(const FGameplayTag& SlotTag);
 
-	void TryActivateAwaitingMechanism(bool bShouldActivate) const;
+	void TryActivateAwaitingMechanism(bool bShouldActivate);
 	
 private:
 	TWeakInterfacePtr<IAbility> Internal_SpawnAbilityFromClass(TSubclassOf<AActor> AbilityClass) const;
