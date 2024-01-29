@@ -23,13 +23,20 @@ protected:
 	// UBaseTrigger overrides
 	virtual void HandleSuccessfulTriggerPressed() override;
 	virtual void HandleTriggerReleased() override;
+
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
+	FName K2N_GetNextMontageSection() const;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	TObjectPtr<UAnimMontage> MontageToPlay;
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
+	bool bHasCombos = false;
+	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
 	int32 MaxComboSections = 3;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	bool bRandomizeMontages = false;
+	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	bool bRandomizeMontageSection = false;
+	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	FString ComboPrefix = "Combo";
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	bool bShouldPlayerLockOnToNearestTarget = false;
 	
@@ -38,7 +45,6 @@ private:
 	void HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload);
 	
 	FAnimMontagePlayData Internal_GetPlayData() const;
-	FName Internal_GetNextMontageSection() const;
 	void Internal_StartMontage();
 
 	TWeakObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
@@ -48,5 +54,4 @@ private:
 	void Internal_ResetComboCounter();
 	
 	int32 ComboSectionIncrement;
-	const FString ComboPrefix = "Combo";
 };

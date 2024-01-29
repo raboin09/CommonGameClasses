@@ -168,7 +168,7 @@ bool ACommonAbility::TryStartAbility()
 		return true;
 	}
 
-	// It's a standard ability with a Trigger, Activation, and (maybe) a Cost so proceed to the normal activation sequence
+	// It's an ability with a Trigger (Activation and Cooldown mechanism may be present), so proceed to press the trigger
 	return Internal_StartNormalAbility();
 }
 
@@ -199,6 +199,11 @@ void ACommonAbility::DestroyAbility()
 
 void ACommonAbility::Internal_SetMeshToUse()
 {
+	if(MeshType == EMeshType::None)
+	{
+		return;
+	}
+
 	if(MeshType == EMeshType::AbilityMesh)
 	{
 		if(AbilitySkeletalMesh && AbilitySkeletalMesh->GetSkeletalMeshAsset())
@@ -227,15 +232,6 @@ void ACommonAbility::Internal_SetMeshToUse()
 		if(UMeshComponent* MeshComp = CurrInstigator->FindComponentByClass<UMeshComponent>())
 		{
 			MeshToUse =  MeshComp;
-		}
-	}
-
-	// Fallback in case nothing else is found
-	if (!MeshToUse.IsValid())
-	{
-		if (UMeshComponent* MeshComp = GetInstigator()->FindComponentByClass<UMeshComponent>())
-		{
-			MeshToUse = MeshComp;
 		}
 	}
 }
@@ -432,11 +428,17 @@ void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventP
 
 void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& TriggeredEventPayload) const
 {
+	// If there's a Trigger with no Activation (e.g. Jump just plays a montage) then start the cooldown immediately
 	if (!ActivationMechanism)
 	{
+		if (CooldownMechanism)
+		{
+			CooldownMechanism->StartCooldownTimer();
+		}
 		return;
 	}
 
+	// Does the Activation happen immediately (e.g. firing a weapon) or should it wait (e.g. swinging a sword montage having an Activation notify)
 	if (TriggeredEventPayload.bStartActivationImmediately)
 	{
 		// Pass some info from the Trigger to Activation (needed for things like charge-up weapons, throwing grenades with a predicted location, etc)
@@ -461,7 +463,15 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& TriggeredEventPayload)
 {
 	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::RequestingStart);
-	if (!ActivationMechanism || TriggeredEventPayload.bMontageDrivesActivation)
+
+	// If there's a Trigger with no Activation (e.g. Jump just plays a montage) then reset the ability
+	if(!ActivationMechanism)
+	{
+		UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::Active);
+		return;
+	}
+	
+	if (TriggeredEventPayload.bMontageDrivesActivation)
 	{
 		return;
 	}

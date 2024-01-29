@@ -4,8 +4,9 @@
 
 void UK2_AbilityTrigger::K2N_PressTrigger_Implementation(FTriggerEventPayload& TriggerEventPayload)
 {
+	K2_HandleBeforePressedTrigger();
+	K2_HandleAfterPressedTrigger();
 	TriggerPressedEvent.Broadcast(TriggerEventPayload);
-	K2_HandlePressedTrigger();
 }
 
 void UK2_AbilityTrigger::K2N_ReleaseTrigger_Implementation(FTriggerEventPayload& TriggerEventPayload)

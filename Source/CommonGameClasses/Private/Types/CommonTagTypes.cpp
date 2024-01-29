@@ -3,7 +3,8 @@
 namespace CommonGameSlot
 {
 	UE_DEFINE_GAMEPLAY_TAG(SlotMain, FName{TEXTVIEW("Slot.Main")})
-	UE_DEFINE_GAMEPLAY_TAG(SlotAlt, FName{TEXTVIEW("Slot.Alt")})	
+	UE_DEFINE_GAMEPLAY_TAG(SlotAlt, FName{TEXTVIEW("Slot.Alt")})
+	UE_DEFINE_GAMEPLAY_TAG(SlotJump, FName{TEXTVIEW("Slot.Jump")})	
 }
 
 namespace CommonGameActorType

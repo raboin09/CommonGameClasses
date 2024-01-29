@@ -19,7 +19,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleInitTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandlePressedTrigger();
+	void K2_HandleBeforePressedTrigger();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void K2_HandleAfterPressedTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleReleasedTrigger();
 };
