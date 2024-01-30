@@ -18,8 +18,10 @@ class COMMONGAMECLASSES_API UBaseComplexTrigger : public UBaseTrigger
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleInitTrigger();
+	// Run this just before the TriggerPress event is broadcast
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleBeforePressedTrigger();
+	// Run this right after the TriggerPress event is broadcast
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleAfterPressedTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")

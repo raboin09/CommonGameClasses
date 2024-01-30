@@ -17,8 +17,9 @@ protected:
 	void K2N_Activate(const FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void K2N_Deactivate();
-
+	
 public:
 	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { K2N_Activate(TriggerEventPayload); }	
 	FORCEINLINE virtual void Deactivate() override { K2N_Deactivate(); }
+	FORCEINLINE virtual float GetOutlineRange() const override { return DEFAULT_OUTLINE_DISTANCE; }
 };

@@ -46,6 +46,9 @@ protected:
 	virtual void HandleDeath();
 	UFUNCTION(BlueprintCallable)
 	void SetMoveSpeedRatioIncrease(float Ratio);
+
+	void InitCapsuleDefaults() const;
+	void InitCharacterMeshDefaults() const;
 	
 	////////////////////////////////
 	/// Common Events

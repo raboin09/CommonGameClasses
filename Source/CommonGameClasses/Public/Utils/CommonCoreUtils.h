@@ -35,6 +35,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UInteractionComponent* GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
+	static AActor* GetHoveredInteractionActorByPlayerController(const UObject* ContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UHealthComponent* GetHealthComponentFromActor(UObject* ContextObject);

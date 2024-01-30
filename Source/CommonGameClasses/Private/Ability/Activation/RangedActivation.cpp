@@ -2,8 +2,8 @@
 #include "GameFramework/PlayerController.h"
 #include "AIController.h"
 #include "ActorComponent/MountManagerComponent.h"
-#include "Character/CommonCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Types/CommonTypes.h"
 
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
@@ -165,7 +165,7 @@ FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, F
 	FHitResult Hit(ForceInit);
 	TArray<AActor*> IgnoreActors; 
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
-	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
+	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(COMMON_TRACE_ABILITY);
 	auto DrawDebugTrace = EDrawDebugTrace::None;
 	if(bLineTrace)
 	{

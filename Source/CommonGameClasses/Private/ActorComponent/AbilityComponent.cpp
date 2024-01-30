@@ -41,7 +41,8 @@ void UAbilityComponent::SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSl
 		LastEquippedAbility->UnEquipAbility();
 	}
 	EquippedSlot = NewEquippedSlot;
-	NewEquippedAbility->EquipAbility();	
+	NewEquippedAbility->EquipAbility();
+	AbilityEquipped.Broadcast(FNewAbilityEquippedPayload(NewEquippedAbility));
 }
 
 void UAbilityComponent::BeginPlay()

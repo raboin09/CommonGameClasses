@@ -60,6 +60,8 @@ private:
 	FNewAbilityAdded NewAbilityAdded;
 	UPROPERTY(BlueprintAssignable)
 	FAbilityRemoved AbilityRemoved;
+	UPROPERTY(BlueprintAssignable)
+	FNewAbilityEquipped AbilityEquipped;
 
 	TMap<FGameplayTag, TWeakInterfacePtr<IAbility>> SlottedAbilities;
 public:
@@ -72,7 +74,8 @@ public:
 	
 	FORCEINLINE void ResetAwaitingActivationDetails() { AwaitingActivationDetails = FAwaitingActivationDetails(); }
 	FORCEINLINE void SetMechanismAwaitingActivation(const FAwaitingActivationDetails& InDetails) { AwaitingActivationDetails = InDetails; }
-	
+
+	FORCEINLINE FNewAbilityEquipped& OnNewAbilityEquipped() { return AbilityEquipped; }
 	FORCEINLINE FNewAbilityAdded& OnNewAbilityAdded() { return NewAbilityAdded; }
 	FORCEINLINE FAbilityRemoved& OnAbilityRemoved() { return AbilityRemoved; }
 	FORCEINLINE const FAwaitingActivationDetails& GetAwaitingActivationDetails() const { return AwaitingActivationDetails; }

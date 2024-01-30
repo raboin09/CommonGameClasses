@@ -34,6 +34,7 @@ public:
 	virtual bool TryEndAbility() override;
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) override;
 	virtual void DestroyAbility() override;
+	virtual float GetAbilityOutlineRange() const override;
 	
 protected:
 	virtual void BeginPlay() override;

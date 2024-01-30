@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Types/CommonEventDeclarations.h"
+#include "Types/CommonTypes.h"
 #include "UObject/Interface.h"
 #include "ActivationMechanism.generated.h"
 
@@ -22,10 +23,11 @@ class COMMONGAMECLASSES_API IActivationMechanism
 	GENERATED_BODY()
 
 public:
-	// Activation level is for things like charge-up weapons, combos, etc
+	// Activation level is for things like charge-up weapons, combos, etc. Optional AbilityOutlineRange to adjust outline range based on weapon.
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) PURE_VIRTUAL(IActivationMechanism::InitActivationMechanism,)
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(IActivationMechanism::Activate,)
 	virtual void Deactivate() PURE_VIRTUAL(IActivationMechanism::Deactivate,)
+	FORCEINLINE virtual float GetOutlineRange() const { return INTERACT_OUTLINE_DISTANCE; }
 	
 	FORCEINLINE FAbilityActivationEvent& OnActivation() { return AbilityActivationEvent; }
 	FORCEINLINE FAbilityDeactivationEvent& OnDeactivation() { return AbilityDeactivationEvent; }

@@ -9,8 +9,8 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/CommonCharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Core/ActorTrackingSubsystem.h"
-#include "Core/CommonAssetManager.h"
 #include "Utils/CommonCoreUtils.h"
 
 
@@ -23,6 +23,9 @@ ACommonCharacter ::ACommonCharacter(const FObjectInitializer& ObjectInitializer)
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
 	CommonCharacterMovementComponent = Cast<UCommonCharacterMovementComponent>(GetCharacterMovement());
+
+	InitCapsuleDefaults();
+	InitCharacterMeshDefaults();
 }
 
 float ACommonCharacter::GetMaxSpeedRatio_Implementation() const
@@ -93,4 +96,23 @@ void ACommonCharacter::SetMoveSpeedRatioIncrease(float Ratio)
 		return;
 	}
 	CommonCharacterMovementComponent->SetWalkSpeedRatio(Ratio);
+}
+
+void ACommonCharacter::InitCapsuleDefaults() const
+{
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
+}
+
+void ACommonCharacter::InitCharacterMeshDefaults() const
+{
+	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetCollisionResponseToChannels(ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Block);
 }

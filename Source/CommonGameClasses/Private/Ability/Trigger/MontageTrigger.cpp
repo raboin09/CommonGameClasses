@@ -94,20 +94,20 @@ void UMontageTrigger::Internal_StartMontage()
 	{
 		return;
 	}
+
+	if(bShouldPlayerLockOnToNearestTarget)
+	{
+		if(ULockOnComponent* LockOnComponent = CurrentInstigator->FindComponentByClass<ULockOnComponent>())
+		{
+			LockOnComponent->InterpToBestTargetForMeleeAttack();
+		}
+	}
 	
 	if(!CharacterAnimationComponent.IsStale())
 	{
 		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
 		CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
 		CharacterAnimationComponent->OnCharacterMontageEnded().AddUniqueDynamic(this, &ThisClass::HandleMontageEnded);
-	}
-	
-	if(bShouldPlayerLockOnToNearestTarget && CurrentInstigator->IsPlayerControlled())
-	{
-		if(ULockOnComponent* LockOnComponent = CurrentInstigator->FindComponentByClass<ULockOnComponent>())
-		{
-			LockOnComponent->InterpToBestTargetForMeleeAttack();
-		}
 	}
 }
 

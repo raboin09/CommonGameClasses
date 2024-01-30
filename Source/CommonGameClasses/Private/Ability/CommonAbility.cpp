@@ -69,8 +69,6 @@ void ACommonAbility::InitWeaponMesh(UMeshComponent* InMeshComp) const
 	InMeshComp->SetCollisionObjectType(ECC_WorldDynamic);
 	InMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	InMeshComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-	InMeshComp->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
-	InMeshComp->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	InMeshComp->SetupAttachment(AbilityRoot);
 }
 
@@ -195,6 +193,15 @@ void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
 void ACommonAbility::DestroyAbility()
 {
 	Destroy();
+}
+
+float ACommonAbility::GetAbilityOutlineRange() const
+{
+	if(ActivationMechanism)
+	{
+		return ActivationMechanism->GetOutlineRange();
+	}
+	return DEFAULT_OUTLINE_DISTANCE;
 }
 
 void ACommonAbility::Internal_SetMeshToUse()

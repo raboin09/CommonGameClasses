@@ -5,7 +5,6 @@
 
 #include "ActorComponent/InteractionComponent.h"
 #include "Character/CommonPlayerCharacter.h"
-#include "GameFramework/Character.h"
 #include "Utils/CommonCombatUtils.h"
 #include "Utils/CommonCoreUtils.h"
 
@@ -24,7 +23,7 @@ bool UCommonInteractUtils::AreActorsAllies(const AActor* FirstActor, const AActo
 	return GetAffiliationOfActor(FirstActor) == GetAffiliationOfActor(SecondActor);
 }
 
-bool UCommonInteractUtils::AreActorsEnemies(AActor* FirstActor, AActor* SecondActor)
+bool UCommonInteractUtils::AreActorsEnemies(const AActor* FirstActor, const AActor* SecondActor)
 {
 	if(IsActorNeutral(FirstActor))
 	{
@@ -101,6 +100,7 @@ int32 UCommonInteractUtils::GetOutlineInt(const AActor* InActor)
 		case EAffiliation::Enemies: return OUTLINE_COLOR_RED;
 		case EAffiliation::Neutral: return OUTLINE_COLOR_GRAY;
 		case EAffiliation::Destructible: return OUTLINE_COLOR_RED;
+		case EAffiliation::InteractionActor: return OUTLINE_COLOR_GRAY;
 		default: return OUTLINE_COLOR_GRAY;
 	}
 }

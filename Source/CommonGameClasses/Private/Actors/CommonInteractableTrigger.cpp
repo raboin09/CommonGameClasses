@@ -8,11 +8,6 @@
 ACommonInteractableTrigger::ACommonInteractableTrigger()
 {
 	bDiesAfterOverlap = true;
-
-	CollisionComp->SetCollisionObjectType(ECC_WorldDynamic);
-	CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-
 	TriggerMachine = nullptr;
 }
 

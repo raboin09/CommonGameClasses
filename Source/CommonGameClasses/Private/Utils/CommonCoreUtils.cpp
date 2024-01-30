@@ -66,6 +66,15 @@ UInteractionComponent* UCommonCoreUtils::GetHoveredInteractionComponentByPlayerC
 	return nullptr;
 }
 
+AActor* UCommonCoreUtils::GetHoveredInteractionActorByPlayerController(const UObject* ContextObject)
+{
+	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
+	{
+		return PlayerController->GetCurrentHoveredInteractionActor().Get();
+	}
+	return nullptr;
+}
+
 UHealthComponent* UCommonCoreUtils::GetPlayerCharacterHealthComponent(const UObject* WorldContextObject)
 {
 	if(!WorldContextObject){

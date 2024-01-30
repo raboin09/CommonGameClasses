@@ -19,6 +19,7 @@ public:
 
 protected:	
 	virtual void Fire(int32 ActivationLevel = -1) override;
+	virtual float GetOutlineRange() const override { return DEFAULT_OUTLINE_DISTANCE; }
 	virtual ACommonProjectile* HandleProjectileFire();
 	
 	UPROPERTY(EditDefaultsOnly, Category="Activation")

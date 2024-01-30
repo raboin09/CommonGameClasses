@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "API/Ability/ActivationMechanism.h"
+#include "Types/CommonTypes.h"
 #include "BaseActivation.generated.h"
 
 UCLASS(Abstract, NotBlueprintable)
@@ -15,7 +16,7 @@ public:
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override  PURE_VIRTUAL(AActivationBase::Activate, )
 	virtual void Deactivate() override PURE_VIRTUAL(AActivationBase::Deactivate, )
-
+	
 protected:	
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<UMeshComponent> MeshComponentRef = nullptr;

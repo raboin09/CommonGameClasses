@@ -10,9 +10,12 @@ ACommonInteractableActor::ACommonInteractableActor()
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
 	CollisionComp->InitSphereRadius(15.f);
 	CollisionComp->bTraceComplexOnMove = true;
+	CollisionComp->SetCollisionObjectType(ECC_WorldDynamic);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	CollisionComp->SetCollisionResponseToChannel(COMMON_TRACE_INTERACTION, ECR_Block);
+	CollisionComp->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
 	SetRootComponent(CollisionComp);
 
@@ -26,6 +29,7 @@ ACommonInteractableActor::ACommonInteractableActor()
 	RotatingMovementComponent->RotationRate = FRotator(0.f, 90.f, 0.f);
 
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	InteractionComponent->Affiliation = EAffiliation::InteractionActor;
 	
 	bDiesAfterOverlap = true;
 	DefaultGameplayTags.Add(CommonGameState::Active);

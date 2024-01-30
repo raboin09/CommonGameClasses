@@ -10,15 +10,27 @@
 #define OUTLINE_COLOR_GRAY 255
 #define OUTLINE_COLOR_PURPLE 253
 
+#define MELEE_OUTLINE_DISTANCE 500.f
+#define INTERACT_OUTLINE_DISTANCE 1000.f
+#define DEFAULT_OUTLINE_DISTANCE 3000.f
+
+UENUM(BlueprintType)
+enum class ECameraType : uint8
+{
+	FirstPerson,
+	ThirdPerson,
+	TopDown
+};
+
 UENUM(BlueprintType)
 enum class EAffiliation : uint8
 {
+	None,
 	Allies,
 	Enemies,
-	Neutral,
 	Destructible,
-	All,
-	None
+	InteractionActor,
+	Neutral
 };
 
 UENUM()
@@ -31,8 +43,8 @@ enum class EOutlineColor : uint8
 };
 
 #define COMMON_TRACE_INTERACTION ECC_GameTraceChannel1
-#define COMMON_TRACE_MOUNT ECC_GameTraceChannel2
-#define COMMON_OBJECT_TYPE_PROJECTILE ECC_GameTraceChannel4
+#define COMMON_TRACE_ABILITY ECC_GameTraceChannel2
+#define COMMON_OBJECT_TYPE_PROJECTILE ECC_GameTraceChannel3
 
 #define COMMON_SURFACE_Default		SurfaceType_Default
 #define COMMON_SURFACE_Concrete	SurfaceType1

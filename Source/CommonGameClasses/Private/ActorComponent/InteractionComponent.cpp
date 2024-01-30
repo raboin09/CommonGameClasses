@@ -1,6 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ActorComponent/InteractionComponent.h"
+
+#include "API/Interactable.h"
 #include "Utils/CommonInteractUtils.h"
 
 UInteractionComponent::UInteractionComponent()

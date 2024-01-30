@@ -6,11 +6,13 @@
 #include "GameplayTagContainer.h"
 #include "ActorComponent/InteractionComponent.h"
 #include "ActorComponent/QuestManagerComponent.h"
+#include "Types/CommonTypes.h"
 #include "GameFramework/PlayerController.h"
 #include "CommonPlayerController.generated.h"
 
 class IInteractable;
 class ACommonPlayerCharacter;
+class UInteractionComponent;
 
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonPlayerController : public APlayerController
@@ -21,46 +23,55 @@ public:
 	ACommonPlayerController();
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnPossess(APawn* InPawn) override;
-	virtual void OnUnPossess() override;
-	virtual void BeginPlay() override;
 	
 	//////////////////////////////////////////////
 	/// CommonPlayerController
 	//////////////////////////////////////////////
-	
-	FORCEINLINE TWeakObjectPtr<UInteractionComponent> GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent.Get(); };
-	FORCEINLINE TWeakObjectPtr<ACommonPlayerCharacter> GetCommonPlayerCharacter() const { return PlayerCharacter.Get(); };
-	FORCEINLINE TWeakObjectPtr<UQuestManagerComponent> GetQuestManager() const { return QuestManager; }
+	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerController")
+	void TryStartInteractionWithCurrentInteractable();
+	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerController")
+	void StopInteraction();
 	
 protected:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
 	void K2_HandleNewActorHovered(const UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
-	virtual void K2_HandleNewActorHovered_Implementation(const UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
+	UFUNCTION(BlueprintImplementableEvent,Category="COMMON|PlayerController")
 	void K2_TryStartInteraction();
-	virtual void K2_TryStartInteraction_Implementation();
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|PlayerController")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
 	void K2_StopInteraction();
-	virtual void K2_StopInteraction_Implementation();
 
 	void MoveToNewDestination(const FVector& MoveLocation);
 	
 private:
+	void NewActorHovered(UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
+	void NewActorTargeted(const AActor* NewHoveredActor);
+
+	UFUNCTION()
+	void HandleNewAbilityEquipped(const FNewAbilityEquippedPayload& NewAbilityEquippedPayload);
+	
 	void Internal_TryAssignInteractable();
-	FHitResult Internal_ScanForActorUnderCursor() const;
-	bool IsValidInteractableActorUnderCursor(const FHitResult& HitResult) const;
-	void OnNewActorTargeted(const AActor* NewHoveredActor);
+	FHitResult Internal_ScanForTargetedActors() const;
 	void Internal_CheckDistanceToInteractActor();
-	bool IsInRangeOfInteractable(const UInteractionComponent* InteractionComponent) const;
 	void Internal_ClearCheckDistTimer();
+	void Internal_GetShooterCameraTargetedActor(FHitResult& HitResult) const;
+
+	bool IsInRangeOfInteractable(const UInteractionComponent* InteractionComponent) const;
+	bool IsValidInteractionHitResult(const FHitResult& HitResult) const;
+	bool IsValidInteractionComponent(const TWeakObjectPtr<UInteractionComponent> HitInteractionComponent) const;
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
-	TArray<FGameplayTag> DefaultGameplayTags;	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	TArray<FGameplayTag> DefaultGameplayTags;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
 	float InteractWithAlliesDistance = 150.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Defaults")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
 	float InteractWithEnemiesDistance = 150.f;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	ECameraType CameraType = ECameraType::ThirdPerson;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	float InteractTraceRadius = 15.f;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact|Debug")
+	bool bDrawDebug = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<UQuestManagerComponent> QuestManager;
@@ -71,11 +82,21 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<UInteractionComponent> CurrentHoveredInteractionComponent;
 
+	// This is different for each ability (a melee weapon would only want to outline enemies that are 300 away,
+	// whereas a shotgun would want to be something like 1000 and a sniper rifle might be 3000.
+	// Interactable items should always have the same distance.
+	float ValidAbilityOutlineDistance = 1000.f;
+	
 	// Interact move-to variables
-	UPROPERTY()
 	TWeakObjectPtr<UInteractionComponent> TargetedInteractionComponent;
 	const float DISTANCE_CHECK_RATE = 0.1f;
 	const float MAX_DISTANCE_CHECK_TIME = 7.f;	
 	float CachedDistanceCheckTime = 0.f;
 	FTimerHandle Timer_InteractDistanceCheck;
+
+public:
+	FORCEINLINE TWeakObjectPtr<AActor> GetCurrentHoveredInteractionActor() const { return CurrentHoveredInteractionComponent.IsValid() ? CurrentHoveredInteractionComponent->GetOwner() : nullptr; };
+	FORCEINLINE TWeakObjectPtr<UInteractionComponent> GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent.Get(); };
+	FORCEINLINE TWeakObjectPtr<ACommonPlayerCharacter> GetCommonPlayerCharacter() const { return PlayerCharacter; };
+	FORCEINLINE TWeakObjectPtr<UQuestManagerComponent> GetQuestManager() const { return QuestManager; }
 };

@@ -18,12 +18,12 @@ ACommonDestructibleActor::ACommonDestructibleActor()
 	DestructibleMesh->SetCollisionObjectType(ECC_WorldDynamic);
 	DestructibleMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DestructibleMesh->SetCollisionResponseToChannels(ECR_Block);
-	DestructibleMesh->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Block);
 	SetRootComponent(DestructibleMesh);
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainer"));
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	InteractionComponent->Affiliation = EAffiliation::Destructible;
 }
 
 void ACommonDestructibleActor::BeginPlay()

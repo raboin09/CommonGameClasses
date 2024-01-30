@@ -20,6 +20,7 @@ public:
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
+	FORCEINLINE virtual float GetOutlineRange() const override { return TraceRange; }
 
 protected:
 	// Ranged Activation 

@@ -13,7 +13,7 @@
 #include "Utils/CommonInteractUtils.h"
 #include "Utils/CommonWorldUtils.h"
 
-void UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, EAffiliation AffectedAffiliation, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
+void UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, bool bCanFriendlyFire, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
 {
 	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceLocation.IsZero())
 	{
@@ -37,28 +37,17 @@ void UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingAct
 	TArray<AActor*> CulledHitActors = AllHitActors;
 	for(AActor* CurrActor : AllHitActors)
 	{
-		switch (AffectedAffiliation) {
-		case EAffiliation::Allies:
-				if(!UCommonInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
-				{
-					CulledHitActors.Remove(CurrActor);
-				}
-				break;
-			case EAffiliation::Enemies:
-				if(!UCommonInteractUtils::AreActorsEnemies(CurrActor, InstigatingActor))
-				{
-					CulledHitActors.Remove(CurrActor);
-				}
-				break;
-			case EAffiliation::Neutral:
-				if(!UCommonInteractUtils::IsActorNeutral(CurrActor))
-				{
-					CulledHitActors.Remove(CurrActor);
-				}
-				break;
-			case EAffiliation::All:
-			default:
-				break;
+		if(bCanFriendlyFire && UCommonInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
+		{
+			CulledHitActors.Remove(CurrActor);
+		}
+		else if(UCommonInteractUtils::AreActorsEnemies(CurrActor, InstigatingActor))
+		{
+			CulledHitActors.Remove(CurrActor);
+		}
+		else if(UCommonInteractUtils::IsActorDestructible(CurrActor))
+		{
+			CulledHitActors.Remove(CurrActor);
 		}
 	}
 	

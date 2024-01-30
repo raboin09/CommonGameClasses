@@ -17,6 +17,7 @@ public:
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;	
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
+	FORCEINLINE virtual float GetOutlineRange() const override { return MELEE_OUTLINE_DISTANCE; }
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)

@@ -51,17 +51,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterMontageEnded, const FChara
 // Ability equipped
 ///////////////////////////
 USTRUCT(BlueprintType)
-struct FAbilityFinishedEquipPayload
-{
-	GENERATED_BODY()
-	FAbilityFinishedEquipPayload(){}
-	FAbilityFinishedEquipPayload(const TWeakInterfacePtr<IAbility> InEquippedAbility) : EquippedAbility(InEquippedAbility)	{ }
-	
-	TWeakInterfacePtr<IAbility> EquippedAbility;
-};
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityFinishedEquip, const FAbilityFinishedEquipPayload&, AbilityFinishedEquipPayload);
-
-USTRUCT(BlueprintType)
 struct FNewAbilityEquippedPayload
 {
 	GENERATED_BODY()

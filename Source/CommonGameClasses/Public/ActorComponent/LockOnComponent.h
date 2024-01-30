@@ -16,8 +16,8 @@ public:
 	ULockOnComponent();
 	virtual void BeginPlay() override;
 	
-	void InterpToBestTargetForMeleeAttack(const TFunction<void()>& InFinishedFunction = TFunction<void()>());
-	void InterpToActor(TWeakObjectPtr<AActor> ActorToInterpTo, const TFunction<void()>& InFinishedFunction = TFunction<void()>());
+	void InterpToBestTargetForMeleeAttack();
+	void InterpToActor(TWeakObjectPtr<AActor> ActorToInterpTo);
 	
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -31,9 +31,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	float ConeTraceArcWidth = 55.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	float SweepRadius = 55.f;		
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	float ArcDistance = 300.f;
+	float SweepRadius = 55.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bUseControllerRotation;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
@@ -43,14 +41,14 @@ private:
 	TWeakObjectPtr<AActor> Internal_TraceForTarget() const;
 	static TWeakObjectPtr<AActor> Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults);
 	static FRotator Internal_GetControllerAndActorBlendedRotation(TWeakObjectPtr<AActor> SourceActor);
+	// Check if not nullptr and if in distance
+	bool Internal_IsActorValidTarget(TWeakObjectPtr<AActor> InActor) const;
 	
 	void Internal_StartInterpTransition();
 	UFUNCTION()
 	void Internal_InterpTransitionUpdate(float Alpha);
 	UFUNCTION()
 	void Internal_InterpTransitionFinished();
-
-	TFunction<void()> OnFinishedFunction;
 	
 	FVector TargetActorLocation;
 	FRotator TargetActorRotation;

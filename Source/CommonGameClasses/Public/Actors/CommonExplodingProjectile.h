@@ -12,7 +12,7 @@ class COMMONGAMECLASSES_API ACommonExplodingProjectile : public ACommonProjectil
 	GENERATED_BODY()
 	
 public:
-		ACommonExplodingProjectile();
+	ACommonExplodingProjectile();
 
 protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -27,7 +27,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Explosion")
 	float ExplosionRadius = 512.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Explosion")
-	bool bFriendlyFire = false;
+	bool bCanFriendlyFire = false;
 
 private:
 	void Internal_Explode();
