@@ -17,10 +17,13 @@ class COMMONGAMECLASSES_API UCommonEffectUtils : public UBlueprintFunctionLibrar
 	GENERATED_BODY()
 
 public:
-	static void ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, bool bCanFriendlyFire, bool bValidateHit = true, FVector ValidationTraceStartLocation = FVector::ZeroVector, FName HitValidationBone = "spine_02");
+	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
+	static void ApplyEffectsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, bool bIgnoreAffiliation, bool bValidateHit = true, FVector ValidationTraceStartLocation = FVector::ZeroVector, FName HitValidationBone = "spine_02");
+	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void ApplyEffectAtLocation(AActor* InstigatingActor, TSubclassOf<AActor> EffectToApply, FVector Location, bool bActivateImmediately = true);
-	UFUNCTION(BlueprintCallable, Category="COMMON|Utils")
+	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<AActor> EffectToApply);
+	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void ApplyEffectsToActor(TArray<TSubclassOf<AActor>> EffectsToApply, AActor* ReceivingActor);
 	static void ApplyEffectsToHitResult(TArray<TSubclassOf<AActor>> EffectsToApply, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult = true);
 	static void ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult = true);

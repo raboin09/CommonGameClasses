@@ -3,7 +3,9 @@
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/MountManagerComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
+#include "Utility/AlsConstants.h"
 #include "Utils/CommonCombatUtils.h"
 
 
@@ -143,12 +145,7 @@ void UCharacterAnimationComponent::StopRagdolling()
 }
 
 float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData)
-{
-	if (AnimMontagePlayData.MontageToPlay.IsStale())
-	{
-		return 0.f;
-	}
-	
+{	
 	if(AnimMontagePlayData.MontageToPlay.IsValid())
 	{
 		return OwnerCharacter->PlayAnimMontage(AnimMontagePlayData.MontageToPlay.Get(), AnimMontagePlayData.PlayRate, AnimMontagePlayData.MontageSection);	
@@ -168,6 +165,8 @@ void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVecto
 	}
 	
 	StartRagdolling();
+	// TODO weird hack to stop errors
+	// OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
 	OwnerCharacter->GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
 }
 

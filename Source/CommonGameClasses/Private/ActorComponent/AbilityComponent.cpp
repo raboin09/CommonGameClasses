@@ -16,9 +16,11 @@ UAbilityComponent::UAbilityComponent()
 
 void UAbilityComponent::DestroyAbilities()
 {
-	for(auto KeyVal : SlottedAbilities)
+	TArray<FGameplayTag> AbilityKeys;
+	SlottedAbilities.GetKeys(AbilityKeys);
+	for(const FGameplayTag& Key : AbilityKeys)
 	{
-		Internal_RemoveAbilityInSlot(KeyVal.Key);
+		Internal_RemoveAbilityInSlot(Key);
 	}
 }
 

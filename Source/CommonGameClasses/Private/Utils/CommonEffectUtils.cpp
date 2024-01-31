@@ -13,7 +13,7 @@
 #include "Utils/CommonInteractUtils.h"
 #include "Utils/CommonWorldUtils.h"
 
-void UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, bool bCanFriendlyFire, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
+void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, bool bIgnoreAffiliation, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
 {
 	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceLocation.IsZero())
 	{
@@ -23,71 +23,81 @@ void UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(AActor* InstigatingAct
 	TArray<FHitResult> HitResults;
 	UKismetSystemLibrary::SphereTraceMulti(InstigatingActor, TraceLocation, TraceLocation, TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, {}, EDrawDebugTrace::None, HitResults, true, FLinearColor::Red, FLinearColor::Green, 1.f);
 
-	TArray<AActor*> AllHitActors;
+	TMap<AActor*, FHitResult> UniqueHitActors;
 	for(FHitResult SumHit : HitResults)
 	{
-		AllHitActors.AddUnique(SumHit.GetActor());
+		AActor* HitActor = SumHit.GetActor();
+		if(!HitActor || UniqueHitActors.Contains(HitActor))
+		{
+			continue;
+		}
+		UniqueHitActors.Add(HitActor, SumHit);
 	}
-
-	if(HitResults.Num() <= 0)
+		
+	if(UniqueHitActors.Num() <= 0)
 	{
 		return;
 	}
 
-	TArray<AActor*> CulledHitActors = AllHitActors;
-	for(AActor* CurrActor : AllHitActors)
+	TArray<AActor*> HitActorArray;
+	UniqueHitActors.GetKeys(HitActorArray);
+	for(AActor* CurrActor : HitActorArray)
 	{
-		if(bCanFriendlyFire && UCommonInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
+		if(!CurrActor)
 		{
-			CulledHitActors.Remove(CurrActor);
+			UniqueHitActors.Remove(CurrActor);
+			continue;
 		}
-		else if(UCommonInteractUtils::AreActorsEnemies(CurrActor, InstigatingActor))
+		
+		if(!UniqueHitActors.Contains(CurrActor))
 		{
-			CulledHitActors.Remove(CurrActor);
+			continue;
 		}
-		else if(UCommonInteractUtils::IsActorDestructible(CurrActor))
+		
+		if(!bIgnoreAffiliation && UCommonInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
 		{
-			CulledHitActors.Remove(CurrActor);
+			UniqueHitActors.Remove(CurrActor);
 		}
 	}
 	
 	if(bValidateHit)
 	{
-		TArray<AActor*> ValidatedHitActors;
-		for(AActor* CurrActor : CulledHitActors)
+		TArray<AActor*> UniqueHitKeys;
+		UniqueHitActors.GetKeys(HitActorArray);
+		UniqueHitActors.GetKeys(UniqueHitKeys);
+		
+		for(AActor* CurrActor : UniqueHitKeys)
 		{
 			if(!CurrActor)
 			{
 				continue;
 			}
-		
-			if(ValidatedHitActors.Contains(CurrActor))
-			{
-				continue;
-			}
-
+			
 			USkeletalMeshComponent* MeshComponent = CurrActor->FindComponentByClass<USkeletalMeshComponent>();
 			if(!MeshComponent || !MeshComponent->DoesSocketExist(HitValidationBone))
 			{
 				continue;
 			}
 
-			CulledHitActors.Remove(CurrActor);
+			// Remove this actor to check temporarily so the line trace to it isn't ignored
+			HitActorArray.Remove(CurrActor);
 
 			FHitResult ValidationLineTraceHit;
-			UKismetSystemLibrary::LineTraceSingle(InstigatingActor, ValidationTraceStartLocation, MeshComponent->GetSocketLocation(HitValidationBone), ValidationTraceType, true, CulledHitActors, EDrawDebugTrace::None, ValidationLineTraceHit, true, FLinearColor::Red, FLinearColor::Green, 15.f);
+			UKismetSystemLibrary::LineTraceSingle(InstigatingActor, ValidationTraceStartLocation, MeshComponent->GetSocketLocation(HitValidationBone), ValidationTraceType, true, HitActorArray, EDrawDebugTrace::None, ValidationLineTraceHit, true, FLinearColor::Red, FLinearColor::Green, 15.f);
+			
 			if(ValidationLineTraceHit.bBlockingHit)
 			{
 				ApplyEffectsToHitResult(EffectsToApply, ValidationLineTraceHit, InstigatingActor);
 			}
 			
-			ValidatedHitActors.AddUnique(CurrActor);
+			// Re-add this actor to the line trace to it is ignored for future validations
+			HitActorArray.Add(CurrActor);
 		}
 	} else
 	{
-		for(FHitResult Hit : HitResults)
+		for(TTuple<AActor*, FHitResult> CurrHit: UniqueHitActors)
 		{
-			ApplyEffectsToHitResult(EffectsToApply, Hit, InstigatingActor);
+			ApplyEffectsToHitResult(EffectsToApply, CurrHit.Value, InstigatingActor);
 		}
 	}
 }

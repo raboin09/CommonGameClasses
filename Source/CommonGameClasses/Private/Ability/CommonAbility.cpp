@@ -13,7 +13,6 @@
 #include "Ability/Trigger/BaseComplexTrigger.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTypes.h"
@@ -21,6 +20,8 @@
 ACommonAbility::ACommonAbility()
 {
 	AbilityRoot = CreateDefaultSubobject<USphereComponent>(TEXT("SphereRoot"));
+	AbilityRoot->SetCollisionResponseToAllChannels(ECR_Ignore);
+	AbilityRoot->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetRootComponent(AbilityRoot);
 
 	AbilitySkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AbilitySkeletalMesh"));
