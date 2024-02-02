@@ -166,7 +166,7 @@ void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVecto
 	
 	StartRagdolling();
 	// TODO weird hack to stop errors
-	// OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
+	OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
 	OwnerCharacter->GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
 }
 

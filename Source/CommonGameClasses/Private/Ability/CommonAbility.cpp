@@ -15,7 +15,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
-#include "Types/CommonTypes.h"
+#include "..\..\Public\Types\CommonInteractTypes.h"
 
 ACommonAbility::ACommonAbility()
 {
@@ -367,7 +367,7 @@ void ACommonAbility::SetActivationMechanism()
 bool ACommonAbility::Internal_StartNormalAbility()
 {
 	// If no costs are required or has required resource cost, fire ability off
-	if (!ResourceContainer || ResourceContainer->TrySpendResource(ResourceCost))
+	if (!ResourceContainer || ResourceContainer->TryConsumeResourceAmount(ResourceCost))
 	{
 		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
 		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Active);

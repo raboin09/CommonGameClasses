@@ -21,8 +21,8 @@ class COMMONGAMECLASSES_API IResourceContainer
 	GENERATED_BODY()
 
 public:
-	virtual bool TrySpendResource(const float RequestedAmount) PURE_VIRTUAL(IResourceContainer::TrySpendResource, return false; )
-	virtual void GiveResource(const float AmountToGive) PURE_VIRTUAL(IResourceContainer::GiveResource, )
+	virtual bool TryConsumeResourceAmount(const float RequestedAmount) PURE_VIRTUAL(IResourceContainer::TryConsumeResourceAmount, return false; )
+	virtual void TryGiveResourceAmount(const float AmountToGive) PURE_VIRTUAL(IResourceContainer::TryGiveResourceAmount, )
 	virtual float GetAvailableResourceAmount() const PURE_VIRTUAL(IResourceContainer::GiveResource, return -1.f; )
 	virtual float GetMaxResourceAmount() const PURE_VIRTUAL(IResourceContainer::GetMaxResourceAmount, return -1.f; )
 };

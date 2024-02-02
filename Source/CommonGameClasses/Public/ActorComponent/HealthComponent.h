@@ -17,7 +17,7 @@ public:
 	UHealthComponent();
 	virtual void BeginPlay() override;
 	
-	virtual float CalculateResourceCost(const float RequestedAmount) const override;
+	virtual float CalculateConsumptionAmount(const float RequestedAmount) const override;
 	
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void TakeDamage(const float RawDamage, AActor* InstigatingActor, const FDamageHitReactEvent& HitReactEvent);

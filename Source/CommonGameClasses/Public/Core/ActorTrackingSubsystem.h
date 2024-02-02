@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/CommonTypes.h"
+#include "..\Types\CommonInteractTypes.h"
 #include "UObject/Object.h"
 #include "ActorTrackingSubsystem.generated.h"
 

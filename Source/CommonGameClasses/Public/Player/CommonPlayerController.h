@@ -6,11 +6,10 @@
 #include "GameplayTagContainer.h"
 #include "ActorComponent/InteractionComponent.h"
 #include "ActorComponent/QuestManagerComponent.h"
-#include "Types/CommonTypes.h"
 #include "GameFramework/PlayerController.h"
+#include "Types/CommonCoreTypes.h"
 #include "CommonPlayerController.generated.h"
 
-class IInteractable;
 class ACommonPlayerCharacter;
 class UInteractionComponent;
 

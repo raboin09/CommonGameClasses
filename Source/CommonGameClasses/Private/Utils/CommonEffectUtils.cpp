@@ -13,16 +13,19 @@
 #include "Utils/CommonInteractUtils.h"
 #include "Utils/CommonWorldUtils.h"
 
-void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceLocation, float TraceRadius, ETraceTypeQuery ValidationTraceType, bool bIgnoreAffiliation, bool bValidateHit, FVector ValidationTraceStartLocation, FName HitValidationBone)
+void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceOrigin, float TraceRadius, ETraceTypeQuery ValidationTraceType,
+	bool bIgnoreAffiliation, bool bValidateHit, FName HitValidationBone, bool bOverrideValidationStartLocation, FVector ValidationTraceStartOverride)
 {
-	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceLocation.IsZero())
+	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceOrigin.IsZero())
 	{
 		return;
 	}
 
+	// Get all actors in radius around the point
 	TArray<FHitResult> HitResults;
-	UKismetSystemLibrary::SphereTraceMulti(InstigatingActor, TraceLocation, TraceLocation, TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, {}, EDrawDebugTrace::None, HitResults, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+	UKismetSystemLibrary::SphereTraceMulti(InstigatingActor, TraceOrigin, TraceOrigin, TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, {}, EDrawDebugTrace::None, HitResults, true, FLinearColor::Red, FLinearColor::Green, 1.f);
 
+	// Only process 1 hit per actor
 	TMap<AActor*, FHitResult> UniqueHitActors;
 	for(FHitResult SumHit : HitResults)
 	{
@@ -39,27 +42,21 @@ void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<T
 		return;
 	}
 
+	// Remove any actors that are allies (unless friendly fire is allowed) or neutral 
 	TArray<AActor*> HitActorArray;
 	UniqueHitActors.GetKeys(HitActorArray);
 	for(AActor* CurrActor : HitActorArray)
 	{
-		if(!CurrActor)
+		if(UCommonInteractUtils::IsActorNeutral(CurrActor))
 		{
 			UniqueHitActors.Remove(CurrActor);
-			continue;
-		}
-		
-		if(!UniqueHitActors.Contains(CurrActor))
-		{
-			continue;
-		}
-		
-		if(!bIgnoreAffiliation && UCommonInteractUtils::AreActorsAllies(CurrActor, InstigatingActor))
+		} else if(UCommonInteractUtils::AreActorsAllies(CurrActor, InstigatingActor) && !bIgnoreAffiliation)
 		{
 			UniqueHitActors.Remove(CurrActor);
 		}
 	}
-	
+
+	// If bValidateHit is true, check if there's nothing between the actor and the source location of the effect (e.g. a wall between them would invalidate the effect if bValidateHit is true) 
 	if(bValidateHit)
 	{
 		TArray<AActor*> UniqueHitKeys;
@@ -83,7 +80,8 @@ void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<T
 			HitActorArray.Remove(CurrActor);
 
 			FHitResult ValidationLineTraceHit;
-			UKismetSystemLibrary::LineTraceSingle(InstigatingActor, ValidationTraceStartLocation, MeshComponent->GetSocketLocation(HitValidationBone), ValidationTraceType, true, HitActorArray, EDrawDebugTrace::None, ValidationLineTraceHit, true, FLinearColor::Red, FLinearColor::Green, 15.f);
+			const FVector& ValidationStart = bOverrideValidationStartLocation ? ValidationTraceStartOverride : TraceOrigin;
+			UKismetSystemLibrary::LineTraceSingle(InstigatingActor, ValidationStart, MeshComponent->GetSocketLocation(HitValidationBone), ValidationTraceType, true, HitActorArray, EDrawDebugTrace::None, ValidationLineTraceHit, true, FLinearColor::Red, FLinearColor::Green, 15.f);
 			
 			if(ValidationLineTraceHit.bBlockingHit)
 			{
@@ -171,77 +169,4 @@ void UCommonEffectUtils::ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectCl
 	
 	UEffectContainerComponent* EffectContainerComponent = HitActor->FindComponentByClass<UEffectContainerComponent>();
 	EffectContainerComponent->TryApplyEffectToContainerFromHitResult(BaseEffectClass, Impact, InstigatingActor, bShouldRotateHitResult);
-}
-
-void UCommonEffectUtils::TryAddMaxWoundsToActor(const AActor* ReceivingActor, float MaxWoundsToAdd)
-{
-	if(!ReceivingActor)
-		return;
-	UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>();
-	if (!HealthComponent)
-	{
-		return;
-	}
-	HealthComponent->AddMaxWounds(MaxWoundsToAdd);
-}
-
-void UCommonEffectUtils::TryApplyDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
-{
-	if(!ReceivingActor)
-		return;
-
-	if(UShieldEnergyComponent* ShieldEnergyComponent = ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
-	{
-		Damage = ShieldEnergyComponent->TakeShieldDamage(Damage, InstigatingActor, HitReactEvent);
-	}
-
-	if(UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>())
-	{
-		HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
-	}
-}
-
-void UCommonEffectUtils::TryApplyHealthDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
-{
-	if(!ReceivingActor)
-		return;
-
-	if(UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>())
-	{
-		HealthComponent->TakeDamage(Damage, InstigatingActor, HitReactEvent);
-	}
-
-}
-
-void UCommonEffectUtils::TryApplyHealthHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
-{
-	if(!ReceivingActor)
-		return;
-
-	if(UHealthComponent* HealthComponent = ReceivingActor->FindComponentByClass<UHealthComponent>())
-	{
-		HealthComponent->ApplyHeal(Heal, InstigatingActor);
-	}
-}
-
-void UCommonEffectUtils::TryApplyShieldDamageToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Damage, const FDamageHitReactEvent& HitReactEvent)
-{
-	if(!ReceivingActor)
-		return;
-	
-	if(UShieldEnergyComponent* ShieldEnergyComponent = ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
-	{
-		ShieldEnergyComponent->TakeShieldDamage(Damage, InstigatingActor, HitReactEvent);
-	}
-}
-
-void UCommonEffectUtils::TryApplyShieldHealToActor(const AActor* ReceivingActor, AActor* InstigatingActor, float Heal)
-{
-	if(!ReceivingActor)
-		return;
-	
-	if(UShieldEnergyComponent* ShieldEnergyComponent = ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
-	{
-		ShieldEnergyComponent->ApplyShieldHeal(Heal);
-	}
 }

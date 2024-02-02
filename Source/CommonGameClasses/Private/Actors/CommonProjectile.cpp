@@ -6,7 +6,7 @@
 #include "ActorComponent/EffectContainerComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 

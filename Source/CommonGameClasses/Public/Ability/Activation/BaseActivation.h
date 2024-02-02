@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "API/Ability/ActivationMechanism.h"
-#include "Types/CommonTypes.h"
+#include "..\..\Types\CommonInteractTypes.h"
 #include "BaseActivation.generated.h"
 
 UCLASS(Abstract, NotBlueprintable)

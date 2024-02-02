@@ -6,7 +6,7 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/InteractionComponent.h"
-#include "Types/CommonTypes.h"
+#include "..\..\Public\Types\CommonInteractTypes.h"
 #include "Types/CommonTagTypes.h"
 
 

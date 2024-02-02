@@ -2,15 +2,11 @@
 
 
 #include "Utils/CommonCombatUtils.h"
-#include "Utils/CommonCoreUtils.h"
-#include "Character/CommonPlayerCharacter.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Utils/CommonInteractUtils.h"
+#include "ActorComponent/ShieldEnergyComponent.h"
 
 float UCommonCombatUtils::GetHitImpulseValue(EHitReactType InHit)
 {
-	const float Multiplier = 30000.f;
+	constexpr float Multiplier = 40000.f;
 	switch (InHit)
 	{
 	case EHitReactType::Knockback_Tiny: return .25f * Multiplier;

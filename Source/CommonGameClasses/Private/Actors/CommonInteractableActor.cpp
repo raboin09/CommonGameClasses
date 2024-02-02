@@ -2,6 +2,7 @@
 #include "ActorComponent/InteractionComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/RotatingMovementComponent.h"
+#include "Types/CommonCoreTypes.h"
 
 ACommonInteractableActor::ACommonInteractableActor()
 {

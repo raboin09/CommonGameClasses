@@ -15,13 +15,13 @@ public:
 	///////////////////////////////////
 	/// IResourceContainer overrides
 	////////////////////////////////////
-	virtual bool TrySpendResource(const float RequestedAmount) override;
-	virtual void GiveResource(const float AmountToGive) override;
+	virtual bool TryConsumeResourceAmount(const float RequestedAmount) override;
+	virtual void TryGiveResourceAmount(const float AmountToGive) override;
 
 	///////////////////////////////////
 	/// ResourceComponent overrides
 	////////////////////////////////////
-	virtual float CalculateResourceCost(const float RequestedAmount) const override;
+	virtual float CalculateConsumptionAmount(const float RequestedAmount) const override;
 	
 protected:
 	virtual void BeginPlay() override;

@@ -23,7 +23,7 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	TObjectPtr<UCurveFloat> LockOnTransitionCurve;
+	float LockOnSlideDuration = .25f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FVector TraceOffset = FVector(0.f, 0.f, 50.f);
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
@@ -33,9 +33,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	float SweepRadius = 55.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	bool bUseControllerRotation;
+	bool bUseControllerRotation = false;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	bool bDrawDebug;
+	bool bDrawDebug = false;
 	
 private:
 	TWeakObjectPtr<AActor> Internal_TraceForTarget() const;
@@ -46,7 +46,7 @@ private:
 	
 	void Internal_StartInterpTransition();
 	UFUNCTION()
-	void Internal_InterpTransitionUpdate(float Alpha);
+	void Internal_InterpTransitionUpdate();
 	UFUNCTION()
 	void Internal_InterpTransitionFinished();
 	

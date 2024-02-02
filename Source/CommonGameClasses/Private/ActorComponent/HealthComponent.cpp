@@ -36,13 +36,13 @@ void UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingActo
 
 	float ActualDamageToApply = RawDamage;
 	// If incoming damage is NOT lethal, apply damage and return. Otherwise, broadcast death event.
-	if(!CanSpendResourceAmount(RawDamage))
+	if(!CanConsumeResourceAmount(RawDamage))
 	{
 		ActualDamageToApply = GetCurrentHealth();
 	}
 
 	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
-	TrySpendResource(ActualDamageToApply);
+	TryConsumeResourceAmount(ActualDamageToApply);
 	
 	if(GetAvailableResourceAmount() <= 0)
 	{
@@ -75,7 +75,7 @@ void UHealthComponent::ApplyHeal(const float RawHeal, AActor* InstigatingActor)
 {
 	const float Delta = RawHeal;
 	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
-	GiveResource(Delta);
+	TryGiveResourceAmount(Delta);
 	const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
 	if(Delta > 0)
 	{
@@ -109,7 +109,7 @@ void UHealthComponent::AddMaxWounds(float MaxWoundsToAdd)
 	}
 }
 
-float UHealthComponent::CalculateResourceCost(const float RequestedAmount) const
+float UHealthComponent::CalculateConsumptionAmount(const float RequestedAmount) const
 {
 	return RequestedAmount;
 }

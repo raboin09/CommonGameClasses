@@ -50,15 +50,15 @@ void UMontageTrigger::HandleTriggerReleased()
 
 void UMontageTrigger::ResetTrigger()
 {
+	TArray<FGameplayTag> StateTagsToRemove;
+	StateTagsToRemove.Add(CommonGameAbilityEvent::Active);
+	StateTagsToRemove.Add(CommonGameAbilityEvent::Activated);
 	if(bHasCombos)
 	{
-		Internal_ResetComboCounter();
-		TArray<FGameplayTag> StateTagsToRemove;
 		StateTagsToRemove.Add(CommonGameAbilityEvent::ComboActivated);
-		StateTagsToRemove.Add(CommonGameAbilityEvent::Active);
-		StateTagsToRemove.Add(CommonGameAbilityEvent::Activated);
-		UGameplayTagComponent::RemoveTagsFromActor(GetOwner(), StateTagsToRemove);	
+		Internal_ResetComboCounter();
 	}
+	UGameplayTagComponent::RemoveTagsFromActor(GetOwner(), StateTagsToRemove);
 }
 
 void UMontageTrigger::HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload)

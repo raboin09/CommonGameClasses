@@ -11,6 +11,7 @@
 #include "ActorComponent/CommonCharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Core/ActorTrackingSubsystem.h"
+#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonCoreUtils.h"
 
 

@@ -65,11 +65,11 @@ private:
 
 	TMap<FGameplayTag, TWeakInterfacePtr<IAbility>> SlottedAbilities;
 public:
-	UFUNCTION(BlueprintCallable, Category = "COMMON")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
 	FORCEINLINE TScriptInterface<IAbility> GetAbilityInSlot(const FGameplayTag& SlotTag) const { return Internal_FindAbility(SlotTag).ToScriptInterface(); }
 	FORCEINLINE TWeakInterfacePtr<IAbility> GetAbilityInSlot_Weak(const FGameplayTag& SlotTag) const { return Internal_FindAbility(SlotTag); }
 	
-	UFUNCTION(BlueprintCallable, Category = "COMMON")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
 	FORCEINLINE bool HasAbilityInSlot(const FGameplayTag& SlotTag) const { return SlottedAbilities.Contains(SlotTag); }
 	
 	FORCEINLINE void ResetAwaitingActivationDetails() { AwaitingActivationDetails = FAwaitingActivationDetails(); }

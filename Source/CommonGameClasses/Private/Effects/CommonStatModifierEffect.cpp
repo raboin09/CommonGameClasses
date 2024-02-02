@@ -1,6 +1,9 @@
 ﻿#include "Effects/CommonStatModifierEffect.h"
 
+#include "ActorComponent/CommonCharacterMovementComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
+#include "ActorComponent/HealthComponent.h"
+#include "ActorComponent/ShieldEnergyComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utils/CommonCombatUtils.h"
@@ -38,12 +41,14 @@ void ACommonStatModifierEffect::DestroyEffect()
 
 void ACommonStatModifierEffect::K2N_ApplyStatChange_Implementation(float ModifiedStatValue)
 {
+	if(!EffectContext.ReceivingActor.IsValid())
+	{
+		return;
+	}
+	
 	switch (StatEffectData->StatToModify) {
 		case EEffectStatType::HealShield:
 			Internal_ShieldHeal(ModifiedStatValue);
-			break;
-		case EEffectStatType::MaxWounds:
-			Internal_HealthMaxWounds(ModifiedStatValue);
 			break;
 		case EEffectStatType::HealHealth:
 			Internal_HealthHeal(ModifiedStatValue);
@@ -123,12 +128,13 @@ void ACommonStatModifierEffect::CalculateModifier(const FModifierExpression& Mod
 
 void ACommonStatModifierEffect::Internal_MoveSpeedStatChange(float ModifiedStatValue)
 {
-	if(UCharacterMovementComponent* MovementComponent = EffectContext.ReceivingActor->FindComponentByClass<UCharacterMovementComponent>())
+	if(UCommonCharacterMovementComponent* MovementComponent = EffectContext.ReceivingActor->FindComponentByClass<UCommonCharacterMovementComponent>())
 	{
-		MovementComponent->MaxWalkSpeed += ModifiedStatValue;
-		ReversalFunc = [ModifiedStatValue, MovementComponent]
+		// TODO Find a way to only revert modifier instead of reverting to 1.f
+		MovementComponent->SetWalkSpeedRatio(ModifiedStatValue);
+		ReversalFunc = [MovementComponent]
 		{
-			MovementComponent->MaxWalkSpeed -= ModifiedStatValue;
+			MovementComponent->SetWalkSpeedRatio(1.0);
 		};
 	}
 }
@@ -136,29 +142,33 @@ void ACommonStatModifierEffect::Internal_MoveSpeedStatChange(float ModifiedStatV
 void ACommonStatModifierEffect::Internal_AllDamage(float ModifiedStatValue) const
 {
 	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
-	UCommonEffectUtils::TryApplyDamageToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), HitReactEvent.DamageTaken, HitReactEvent);
+	if(UShieldEnergyComponent* ShieldEnergyComponent = EffectContext.ReceivingActor.Get()->FindComponentByClass<UShieldEnergyComponent>())
+	{
+		ModifiedStatValue = ShieldEnergyComponent->TakeShieldDamage(ModifiedStatValue, EffectContext.InstigatingActor.Get(), HitReactEvent);
+	}
+
+	if(UHealthComponent* HealthComponent = EffectContext.ReceivingActor.Get()->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->TakeDamage(ModifiedStatValue, EffectContext.InstigatingActor.Get(), HitReactEvent);
+	}
 }
 
 void ACommonStatModifierEffect::Internal_HealthDamage(float ModifiedStatValue) const
 {
 	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
-	UCommonEffectUtils::TryApplyHealthDamageToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), HitReactEvent.DamageTaken, HitReactEvent);
+	if(UHealthComponent* HealthComponent = EffectContext.ReceivingActor->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->TakeDamage(ModifiedStatValue, EffectContext.InstigatingActor.Get(), HitReactEvent);
+	}
 }
 
 void ACommonStatModifierEffect::Internal_ShieldDamage(float ModifiedStatValue) const
 {
 	const FDamageHitReactEvent& HitReactEvent = Internal_GenerateHitReactEvent(ModifiedStatValue);
-	UCommonEffectUtils::TryApplyShieldDamageToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), HitReactEvent.DamageTaken, HitReactEvent);
-}
-
-void ACommonStatModifierEffect::Internal_HealthMaxWounds(float ModifiedStatValue)
-{
-	UCommonEffectUtils::TryAddMaxWoundsToActor(EffectContext.ReceivingActor.Get(), ModifiedStatValue);
-	TWeakObjectPtr<AActor> ReceivingActor = EffectContext.ReceivingActor;
-	ReversalFunc = [ModifiedStatValue, ReceivingActor]
+	if(UShieldEnergyComponent* ShieldEnergyComponent = EffectContext.ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
 	{
-		UCommonEffectUtils::TryAddMaxWoundsToActor(ReceivingActor.Get(), ModifiedStatValue);
-	};
+		ShieldEnergyComponent->TakeShieldDamage(ModifiedStatValue, EffectContext.InstigatingActor.Get(), HitReactEvent);
+	}
 }
 
 FDamageHitReactEvent ACommonStatModifierEffect::Internal_GenerateHitReactEvent(float ModifiedStatValue) const
@@ -175,10 +185,16 @@ FDamageHitReactEvent ACommonStatModifierEffect::Internal_GenerateHitReactEvent(f
 
 void ACommonStatModifierEffect::Internal_HealthHeal(float ModifiedStatValue) const
 {
-	UCommonEffectUtils::TryApplyHealthHealToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), ModifiedStatValue);
+	if(UHealthComponent* HealthComponent = EffectContext.ReceivingActor.Get()->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->ApplyHeal(ModifiedStatValue, EffectContext.InstigatingActor.Get());
+	}
 }
 
 void ACommonStatModifierEffect::Internal_ShieldHeal(float ModifiedStatValue) const
 {
-	UCommonEffectUtils::TryApplyShieldHealToActor(EffectContext.ReceivingActor.Get(), EffectContext.InstigatingActor.Get(), ModifiedStatValue);
+	if(UShieldEnergyComponent* ShieldEnergyComponent = EffectContext.ReceivingActor->FindComponentByClass<UShieldEnergyComponent>())
+	{
+		ShieldEnergyComponent->ApplyShieldHeal(ModifiedStatValue);
+	}
 }

@@ -82,7 +82,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly)
 	TObjectPtr<USkeletalMeshComponent> AbilitySkeletalMesh;
 	UPROPERTY(VisibleDefaultsOnly)
-	TObjectPtr<USphereComponent> AbilityRoot;dddddddddddd
+	TObjectPtr<USphereComponent> AbilityRoot;
 	
 private:
 	void InitWeaponMesh(UMeshComponent* InMeshComp) const;

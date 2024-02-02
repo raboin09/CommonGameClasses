@@ -8,11 +8,6 @@ UMaterialDissolverComponent::UMaterialDissolverComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-
-	// Load Dissolve Curve here from BP
-	DissolveCurveFloat = LoadObject<UCurveFloat>(nullptr, UTF8_TO_TCHAR("/Script/Engine.CurveFloat'/CommonGameClasses/CommonCurves/COMMON_Curve_Dissolve.COMMON_Curve_Dissolve'"));
-	DissolveParameterName = "Dissolve Amount";
-	ColorParameterName = "Color";
 	MeshComponent = nullptr;
 }
 
@@ -20,7 +15,7 @@ void UMaterialDissolverComponent::InitDissolveableMesh(UMeshComponent* InMesh)
 {
 	MeshComponent = InMesh;
 	InitDissolveTimeline();
-	Internal_TimelineDissolveUpdate(StartingDissolveValue);
+	Internal_SetDissolveMeshValues(StartingDissolveValue);
 }
 
 void UMaterialDissolverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -49,7 +44,12 @@ void UMaterialDissolverComponent::Internal_TimelineDissolveEnd()
 	SetComponentTickEnabled(false);
 }
 
-void UMaterialDissolverComponent::Internal_TimelineDissolveUpdate(float Value)
+void UMaterialDissolverComponent::Internal_TimelineDissolveUpdate()
+{
+	Internal_SetDissolveMeshValues(DissolveTimeline.GetPlaybackPosition() / DissolveTimeline.GetTimelineLength());
+}
+
+void UMaterialDissolverComponent::Internal_SetDissolveMeshValues(float Value)
 {
 	if(DissolveDynamicMaterialInstances.Num() > 0)
 	{
@@ -73,15 +73,15 @@ void UMaterialDissolverComponent::InitDissolveTimeline()
 		}
 	}
 
-	if(DissolveCurveFloat.IsValid())
-	{
-		FOnTimelineFloat DissolveProgressFunction;
-		DissolveProgressFunction.BindDynamic(this, &ThisClass::Internal_TimelineDissolveUpdate);
-		DissolveTimeline.AddInterpFloat(DissolveCurveFloat.Get(), DissolveProgressFunction);
-		DissolveTimeline.SetLooping(false);
-	}
+	DissolveTimeline.SetLooping(false);
 	
-	FOnTimelineEvent CoverLerpFinishedEvent;
-	CoverLerpFinishedEvent.BindDynamic(this, &ThisClass::Internal_TimelineDissolveEnd);
-	DissolveTimeline.SetTimelineFinishedFunc(CoverLerpFinishedEvent);
+	FOnTimelineEvent DissolveProgressFunction;
+	DissolveProgressFunction.BindDynamic(this, &ThisClass::Internal_TimelineDissolveUpdate);
+	DissolveTimeline.SetTimelinePostUpdateFunc(DissolveProgressFunction);
+	
+	FOnTimelineEvent DissolveFinishedEvent;
+	DissolveFinishedEvent.BindDynamic(this, &ThisClass::Internal_TimelineDissolveEnd);
+	DissolveTimeline.SetTimelineFinishedFunc(DissolveFinishedEvent);
+	
+	SetComponentTickEnabled(false);
 }

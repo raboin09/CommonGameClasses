@@ -6,6 +6,7 @@
 #include "ActorComponent/InteractionComponent.h"
 #include "AI/CommonAIController.h"
 #include "Components/CapsuleComponent.h"
+#include "Types/CommonCoreTypes.h"
 
 ACommonAICharacter::ACommonAICharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

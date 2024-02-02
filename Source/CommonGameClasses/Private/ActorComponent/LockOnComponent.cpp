@@ -14,25 +14,26 @@ ULockOnComponent::ULockOnComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-	LockOnTransitionCurve = nullptr;
-	bUseControllerRotation = false;
-	bDrawDebug = false;
 	SelectedActor = nullptr;
 }
 
 void ULockOnComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	check(LockOnTransitionCurve)
-	FOnTimelineFloat InterpUpdateFunction;
-	InterpUpdateFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionUpdate);
-	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, InterpUpdateFunction);
-	LockOnInterpTimeline.SetLooping(false);
 
+	LockOnInterpTimeline.SetTimelineLength(LockOnSlideDuration);
+	LockOnInterpTimeline.SetTimelineLengthMode(TL_TimelineLength);
+	LockOnInterpTimeline.SetLooping(false);
+	
+	FOnTimelineEvent InterpUpdateFunction;
+	InterpUpdateFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionUpdate);
+	LockOnInterpTimeline.SetTimelinePostUpdateFunc(InterpUpdateFunction);
+	
 	FOnTimelineEvent InterpFinishedFunction;
 	InterpFinishedFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionFinished);
 	LockOnInterpTimeline.SetTimelineFinishedFunc(InterpFinishedFunction);
+	
+	SetComponentTickEnabled(false);
 }
 
 void ULockOnComponent::InterpToBestTargetForMeleeAttack()
@@ -103,7 +104,7 @@ void ULockOnComponent::Internal_StartInterpTransition()
 	LockOnInterpTimeline.IsPlaying() ? LockOnInterpTimeline.Play() : LockOnInterpTimeline.PlayFromStart();
 }
 
-void ULockOnComponent::Internal_InterpTransitionUpdate(float Alpha)
+void ULockOnComponent::Internal_InterpTransitionUpdate()
 {
 	if(!SelectedActor.IsValid())
 	{
@@ -113,6 +114,7 @@ void ULockOnComponent::Internal_InterpTransitionUpdate(float Alpha)
 	FTransform TargetTransform;
 	TargetTransform.SetLocation(FVector(TargetActorLocation.X, TargetActorLocation.Y, SelectedActorTransform.GetLocation().Z));
 	TargetTransform.SetRotation(FQuat(TargetActorRotation));
+	const float Alpha = LockOnInterpTimeline.GetPlaybackPosition() / LockOnInterpTimeline.GetTimelineLength();
 	const FTransform& NewActorTransform = UKismetMathLibrary::TLerp(SelectedActorTransform, TargetTransform, Alpha, ELerpInterpolationMode::QuatInterp);
 	GetOwner()->SetActorLocationAndRotation(NewActorTransform.GetTranslation(), NewActorTransform.GetRotation(), true);
 }

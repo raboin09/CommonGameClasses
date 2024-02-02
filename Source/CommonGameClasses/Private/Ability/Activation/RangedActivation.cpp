@@ -3,7 +3,7 @@
 #include "AIController.h"
 #include "ActorComponent/MountManagerComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonTypes.h"
+#include "Types/CommonCoreTypes.h"
 
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)

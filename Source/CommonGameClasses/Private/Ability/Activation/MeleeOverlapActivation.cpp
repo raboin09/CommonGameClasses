@@ -4,6 +4,7 @@
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Types/CommonCoreTypes.h"
 #include "Types/CommonTagTypes.h"
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"

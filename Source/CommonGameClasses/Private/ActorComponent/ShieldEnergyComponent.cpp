@@ -7,16 +7,16 @@ float UShieldEnergyComponent::TakeShieldDamage(const float RawDamage, AActor* In
 {
 	float AppliedDamage = RawDamage;
 	// If damage is greater than current energy, do that damage instead
-	if(!CanSpendResourceAmount(RawDamage))
+	if(!CanConsumeResourceAmount(RawDamage))
 	{
 		AppliedDamage = GetCurrentEnergy();
 	}
-	TrySpendResource(AppliedDamage);
+	TryConsumeResourceAmount(AppliedDamage);
 	// Return any spillover damage (if there's un-applied damage, it needs to be applied to HP)
 	return FMath::Max(RawDamage - AppliedDamage, 0.f);
 }
 
 void UShieldEnergyComponent::ApplyShieldHeal(const float RawHeal, AActor* InstigatingActor)
 {
-	GiveResource(RawHeal);
+	TryGiveResourceAmount(RawHeal);
 }
