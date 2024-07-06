@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Core/ActorTrackingSubsystem.h"
+#include "Systems/ActorTrackingSubsystem.h"
 
 #include "ActorComponent/InteractionComponent.h"
 #include "API/Questable.h"
@@ -112,10 +112,10 @@ void UActorTrackingSubsystem::TryRemoveActorFromQuestableArray(AActor* InActor)
 		return;
 	}
 
-	UActorTrackingSubsystem* GameMode = Cast<UActorTrackingSubsystem>(UGameplayStatics::GetGameMode(InActor));
-	if (!GameMode)
+	UActorTrackingSubsystem* ActorTrackingSubsystem = InActor->GetWorld()->GetSubsystem<UActorTrackingSubsystem>();
+	if (!ActorTrackingSubsystem)
 	{
 		return;
 	}
-	GameMode->QuestRelevantActors.Remove(InActor);
+	ActorTrackingSubsystem->QuestRelevantActors.Remove(InActor);
 }

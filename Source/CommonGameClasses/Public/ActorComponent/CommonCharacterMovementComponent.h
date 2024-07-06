@@ -3,8 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AlsCharacterMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "CommonCharacterMovementComponent.generated.h"
+
+USTRUCT(BlueprintType)
+struct FCharacterGroundAnimInfo
+{
+	GENERATED_BODY()
+
+	FCharacterGroundAnimInfo()
+		: LastUpdateFrame(0)
+		, GroundDistance(0.0f)
+	{}
+
+	uint64 LastUpdateFrame;
+
+	UPROPERTY(BlueprintReadOnly)
+	FHitResult GroundHitResult;
+
+	UPROPERTY(BlueprintReadOnly)
+	float GroundDistance;
+};
 
 
 class ACommonCharacter;
@@ -13,14 +32,16 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=(
 	"Character Movement: Jumping / Falling", "Character Movement: Gravity", "Character Movement: (Networking)", "Character Movement: Swimming", "Character Movement: Flying", "Character Movement: Custom Movement",
 	"CharacterMovement (Rotation Settings)", "Character Movement: Physics Interaction", "Character Movement", "Character Movement: Avoidance", "Root Motion", "Character Movement: Nav Mesh Movement",
 	"Nav Movement", "Velocity", "PlanarMovement", "MovementComponent", "Tags", "ComponentReplication", "Activation", "Cooking", "Events", "AssetUserData", "Replication", "Navigation"))
-class COMMONGAMECLASSES_API UCommonCharacterMovementComponent : public UAlsCharacterMovementComponent
+class COMMONGAMECLASSES_API UCommonCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
 
 public:
-	virtual void SetWalkSpeedRatio(float Ratio);
+	const FCharacterGroundAnimInfo& GetGroundInfo();
 	
-private:
+protected:
+	FCharacterGroundAnimInfo CachedGroundInfo;
+	
 	UPROPERTY()
 	TWeakObjectPtr<ACommonCharacter> OwnerCharacter;
 };

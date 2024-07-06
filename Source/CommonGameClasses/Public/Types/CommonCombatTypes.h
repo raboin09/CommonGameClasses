@@ -38,7 +38,7 @@ struct FDamageHitReactEvent
 
 
 UENUM(BlueprintType)
-enum class EEffectStatType
+enum class EEffectStatType : uint8
 {
 	None,
 	Damage_All UMETA(DisplayName = "Damage All (Affects Health and Shields)"),

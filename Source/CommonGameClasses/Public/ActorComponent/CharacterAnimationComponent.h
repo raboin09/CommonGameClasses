@@ -54,7 +54,7 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<ACommonCharacter> OwnerCharacter;
 	UPROPERTY()
-	TWeakObjectPtr<UAnimInstance> OwnerAnimInstance;
+	TWeakObjectPtr<UCommonAnimInstance> OwnerAnimInstance;
 	UPROPERTY()
 	TWeakObjectPtr<UGameplayTagComponent> OwningTagComponent;
 	UPROPERTY()
@@ -70,7 +70,7 @@ private:
 	FVector LastRagdollVelocity = FVector::ZeroVector;
 
 public:
-	FORCEINLINE TWeakObjectPtr<UAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
+	FORCEINLINE TWeakObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
 	FORCEINLINE FCharacterMontageEnded& OnCharacterMontageEnded() { return CharacterMontageEnded; }
 	FORCEINLINE TWeakObjectPtr<UAnimMontage> GetCurrentPlayingMontage() const { return OwnerCharacter.IsValid() ? OwnerCharacter->GetCurrentMontage() : nullptr; }
 };

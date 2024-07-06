@@ -46,14 +46,14 @@ enum class EEffectDurationType : uint8
 {
 	Instant UMETA(DisplayName = "Instant (Destroyed after activation)"),
 	Timer UMETA(DisplayName = "Timed (Destroyed after duration)"),
-	Infinite UMETA(DisplayName = "Infinite (Never destroyed)"),
+	Infinite UMETA(DisplayName = "Infinite (Never destroyed of its own accord)"),
 	FirstActivation UMETA(DisplayName = "Until First Successful Activation (Destroyed after activation)")
 };
 
 UENUM()
 enum class EEffectTickInterval : uint8
 {
-	Apply_Once UMETA(DisplayName = "Apply once"),
+	Apply_Once_Persistent UMETA(DisplayName = "Apply once (persistent)"),
 	Apply_Every_Quarter_Second UMETA(DisplayName = "Apply every .25 seconds"),
 	Apply_Every_Half_Second UMETA(DisplayName = "Apply every .5 seconds"),
 	Apply_Every_Second UMETA(DisplayName = "Apply every second"),
@@ -121,11 +121,11 @@ struct FEffectInitializationData
 	FEffectValidTargets ValidTargets;
 
 	// How long the effect ticks (and tries to activate)
-	UPROPERTY(EditDefaultsOnly, meta=(ClampMin="1.0", EditCondition = "DurationType != EEffectDurationType::Instant"))
+	UPROPERTY(EditDefaultsOnly, meta=(ClampMin="1.0", EditCondition = "DurationType != EEffectDurationType::Instant && DurationType != EEffectDurationType::Infinite"))
 	double EffectDuration = 1.0;	
 	// How often the effect ticks in the effect container
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "DurationType != EEffectDurationType::Instant"))
-	EEffectTickInterval TickInterval = EEffectTickInterval::Apply_Once;
+	EEffectTickInterval TickInterval = EEffectTickInterval::Apply_Once_Persistent;
 	
 	// These tags arent applied, they are simply descriptors of the tag (e.g. Poison, CrowdControl, etc).
 	// Useful for abilities like "Cure" that remove all effects with the "Poison" tag.

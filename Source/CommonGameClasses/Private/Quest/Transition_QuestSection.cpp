@@ -4,8 +4,8 @@
 #include "Quest/Transition_QuestSection.h"
 
 #include "API/Questable.h"
-#include "Core/ActorTrackingSubsystem.h"
-#include "Core/CommonGameMode.h"
+#include "Character/CommonPlayerCharacter.h"
+#include "Systems/ActorTrackingSubsystem.h"
 #include "Quest/QuestStateMachine.h"
 #include "Utils/CommonCoreUtils.h"
 
@@ -85,13 +85,13 @@ void UTransition_QuestSection::DeactivateAllObjectivesOfClass(UClass* ObjectiveC
 {
 	if(ObjectiveClass)
 	{
-		ACommonGameMode* GameMode = UCommonCoreUtils::GetCommonGameMode(this);
-		if (!GameMode)
+		const ACommonPlayerCharacter* PlayerCharacter = UCommonCoreUtils::GetCommonPlayerCharacter(this);
+		if (!PlayerCharacter)
 		{
 			return;
 		}
 
-		UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(GameMode->GetWorld());
+		UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(PlayerCharacter->GetWorld());
 		
 		for(TWeakObjectPtr<AActor> CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
 		{

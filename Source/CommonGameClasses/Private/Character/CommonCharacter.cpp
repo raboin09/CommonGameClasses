@@ -10,28 +10,45 @@
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/CommonCharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Core/ActorTrackingSubsystem.h"
+#include "Systems/ActorTrackingSubsystem.h"
 #include "Types/CommonCoreTypes.h"
 #include "Utils/CommonCoreUtils.h"
 
 
-ACommonCharacter ::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super {ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(CharacterMovementComponentName)}
+ACommonCharacter ::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super {ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(ACharacter::CharacterMovementComponentName)}
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	GameplayTagComponent = CreateDefaultSubobject<UGameplayTagComponent>(TEXT("GameplayTagComponent"));
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainerComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
-	CommonCharacterMovementComponent = Cast<UCommonCharacterMovementComponent>(GetCharacterMovement());
 
+	UCommonCharacterMovementComponent* CommonMoveComp = CastChecked<UCommonCharacterMovementComponent>(GetCharacterMovement());
+	CommonMoveComp->GravityScale = 1.0f;
+	CommonMoveComp->MaxAcceleration = 2400.0f;
+	CommonMoveComp->BrakingFrictionFactor = 1.0f;
+	CommonMoveComp->BrakingFriction = 6.0f;  
+	CommonMoveComp->GroundFriction = 8.0f;  
+	CommonMoveComp->BrakingDecelerationWalking = 1400.0f; 
+	CommonMoveComp->bUseControllerDesiredRotation = false;
+	CommonMoveComp->bOrientRotationToMovement = false;
+	CommonMoveComp->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	CommonMoveComp->bAllowPhysicsRotationDuringAnimRootMotion = false;
+	CommonMoveComp->GetNavAgentPropertiesRef().bCanCrouch = true;
+	CommonMoveComp->bCanWalkOffLedgesWhenCrouching = true;
+	CommonMoveComp->SetCrouchedHalfHeight(65.0f);
+	
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
+
+	BaseEyeHeight = 80.0f;
+	CrouchedEyeHeight = 50.0f;
+	
 	InitCapsuleDefaults();
 	InitCharacterMeshDefaults();
-}
-
-float ACommonCharacter::GetMaxSpeedRatio_Implementation() const
-{
-	return 1.f;
 }
 
 void ACommonCharacter::PostInitializeComponents()
@@ -88,15 +105,6 @@ void ACommonCharacter::HandleDeath()
 	DetachFromControllerPendingDestroy();
 	AbilityComponent->DestroyAbilities();
 	K2_HandleDeath();
-}
-
-void ACommonCharacter::SetMoveSpeedRatioIncrease(float Ratio)
-{
-	if(!CommonCharacterMovementComponent)
-	{
-		return;
-	}
-	CommonCharacterMovementComponent->SetWalkSpeedRatio(Ratio);
 }
 
 void ACommonCharacter::InitCapsuleDefaults() const

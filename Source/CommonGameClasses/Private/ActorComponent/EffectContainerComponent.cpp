@@ -5,8 +5,8 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Effects/CommonEffect.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Systems/CommonSpawnSubsystem.h"
 #include "Utils/CommonCombatUtils.h"
-#include "Utils/CommonWorldUtils.h"
 
 DECLARE_CYCLE_STAT(TEXT("CommonClasses_EffectContainerTick"), STAT_CommonClasses_StatsEffectContainerTicks, STATGROUP_StatSystem);
 
@@ -17,7 +17,17 @@ UEffectContainerComponent::UEffectContainerComponent()
 	CachedWorld = nullptr;
 }
 
-void UEffectContainerComponent::TryApplyEffectToContainerFromHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, TWeakObjectPtr<AActor> InstigatingActor, bool bShouldRotateHitResult)
+ void UEffectContainerComponent::TryRemoveAllTaggedEffects(const FGameplayTag& RemoveEffectsWithTag)
+ {
+	Internal_RemoveEffectsWithTag(RemoveEffectsWithTag, nullptr);
+ }
+
+ void UEffectContainerComponent::TryRemoveAllEffectsOfClass(TSubclassOf<AActor> EffectClassToRemove)
+ {
+	Internal_RemoveEffectsWithClass(EffectClassToRemove);
+ }
+
+ void UEffectContainerComponent::TryApplyEffectToContainerFromHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, TWeakObjectPtr<AActor> InstigatingActor, bool bShouldRotateHitResult)
 {
 	if(!BaseEffectClass || !BaseEffectClass->ImplementsInterface(UEffect::StaticClass()))
 	{
@@ -54,7 +64,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	{
 		SpawnTransform = FTransform(UCommonCombatUtils::GetRotationFromComponentHit(Impact), Impact.ImpactPoint);
 	}
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass, InstigatingActor.Get(), Cast<APawn>(InstigatingActor));
+	ACommonEffect* EffectActor = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(ContextObject.Get(), BaseEffectClass, InstigatingActor.Get(), Cast<APawn>(InstigatingActor));
 	TScriptInterface<IEffect> SpawnedEffect;
 	SpawnedEffect.SetObject(EffectActor);
 	SpawnedEffect.SetInterface(Cast<IEffect>(EffectActor));
@@ -63,7 +73,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	EffectContext.ReceivingActor = Impact.GetActor();
 	EffectContext.SurfaceHit = Impact;
 	EffectContext.HitDirection = Impact.ImpactNormal;
-	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	UCommonSpawnSubsystem::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	if (!SpawnedEffect)
 	{
 		return nullptr;
@@ -92,7 +102,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubcl
 
 	const FTransform& SpawnTransform = GetOwner()->GetActorTransform();
 
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(BaseEffectClass.Get());
+	ACommonEffect* EffectActor = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(this, BaseEffectClass.Get());
 	if (!EffectActor)
 	{
 		return nullptr;
@@ -103,7 +113,7 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstance(TSubcl
 	EffectContext.InstigatingActor = InstigatingActor;
 	EffectContext.ReceivingActor = GetOwner();
 	EffectActor->SetEffectContext(EffectContext);
-	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	UCommonSpawnSubsystem::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	return EffectActor;
 }
 
@@ -129,23 +139,45 @@ void UEffectContainerComponent::Internal_RemoveEffectsWithTags(const TArray<FGam
 {
 	for(const FGameplayTag& CurrTag : InTags)
 	{
-		TArray<int32> EffectKeys;
-		EffectsToTick.GetKeys(EffectKeys);
-		for(const int32 Key : EffectKeys)
-		{
-			if(const auto Effect = EffectsToTick.Find(Key); Effect->TickingEffect)
-			{
-				if(Effect->TickingEffect->GetEffectTags().Contains(CurrTag) && Effect->TickingEffect != IncomingEffect)
-				{
-					Effect->TickingEffect->DestroyEffect();
-					EffectsToTick.Remove(Key);
-				}
-			}
-		}
+		Internal_RemoveEffectsWithTag(CurrTag, IncomingEffect);
 	}
 }
 
-bool UEffectContainerComponent::Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect)
+ void UEffectContainerComponent::Internal_RemoveEffectsWithTag(const FGameplayTag& InTag, TScriptInterface<IEffect> IncomingEffect)
+ {
+	TArray<int32> EffectKeys;
+	EffectsToTick.GetKeys(EffectKeys);
+	for(const int32 Key : EffectKeys)
+	{
+		if(const auto Effect = EffectsToTick.Find(Key); Effect->TickingEffect)
+		{
+			if(Effect->TickingEffect->GetEffectTags().Contains(InTag) && Effect->TickingEffect != IncomingEffect)
+			{
+				Effect->TickingEffect->DestroyEffect();
+				EffectsToTick.Remove(Key);
+			}
+		}
+	}
+ }
+
+ void UEffectContainerComponent::Internal_RemoveEffectsWithClass(TSubclassOf<AActor> EffectClassToRemove)
+ {
+	TArray<int32> EffectKeys;
+	EffectsToTick.GetKeys(EffectKeys);
+	for(const int32 Key : EffectKeys)
+	{
+		if(const auto Effect = EffectsToTick.Find(Key); Effect->TickingEffect)
+		{
+			if(Effect->TickingEffect.GetObject()->IsA(EffectClassToRemove))
+			{
+				Effect->TickingEffect->DestroyEffect();
+				EffectsToTick.Remove(Key);
+			}
+		}
+	}
+ }
+
+ bool UEffectContainerComponent::Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect)
 {
 	if(!IncomingEffect)
 	{
@@ -184,12 +216,14 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 		return;
 
 	const FEffectInitializationData& EffectInitializationData = CurrentEffect->GetEffectInitializationData();
+	const bool bIsInfinite = EffectInitializationData.DurationType == EEffectDurationType::Infinite;
 
 	// No need to run an Apply_Once effect
 	// Check if ApplyOnce effect has expired
-	if(EffectInitializationData.TickInterval == EEffectTickInterval::Apply_Once)
+	if(EffectInitializationData.TickInterval == EEffectTickInterval::Apply_Once_Persistent)
 	{
-		if(TickingEffect.ExpirationTime <= CachedWorld->GetTimeSeconds())
+		// If not infinite and is expired, destroy
+		if(TickingEffect.ExpirationTime <= CachedWorld->GetTimeSeconds() && !bIsInfinite)
 		{
 			Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
 		}
@@ -203,7 +237,6 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 		return;
 	}
 	
-	const bool bIsInfinite = EffectInitializationData.DurationType == EEffectDurationType::Infinite;
 	if (!bIsInfinite && --TickingEffect.RemainingTickActivations < 0)
 	{
 		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
@@ -264,6 +297,43 @@ bool UEffectContainerComponent::HasEffectClassAlready(const UClass* EffectClass)
 	return false;
 }
 
+int32 GenerateModulus(EEffectTickInterval EffectInterval)
+{
+	switch (EffectInterval)
+	{
+	case EEffectTickInterval::Apply_Every_Quarter_Second: return 1;
+	case EEffectTickInterval::Apply_Every_Half_Second: return 2;
+	case EEffectTickInterval::Apply_Every_Second: return 8;
+	case EEffectTickInterval::Apply_Every_Two_Seconds: return 16;
+	case EEffectTickInterval::Apply_Every_Three_Seconds: return 24;
+	case EEffectTickInterval::Apply_Every_Five_Seconds: return 40;
+	default: return -1;
+	}
+}
+
+double ConvertIntervalToNumTicks(EEffectTickInterval EffectInterval)
+{
+	switch (EffectInterval)
+	{
+	case EEffectTickInterval::Apply_Every_Quarter_Second: return .25;
+	case EEffectTickInterval::Apply_Every_Half_Second: return .5;
+	case EEffectTickInterval::Apply_Every_Second: return 1;
+	case EEffectTickInterval::Apply_Every_Two_Seconds: return 2;
+	case EEffectTickInterval::Apply_Every_Three_Seconds: return 3;
+	case EEffectTickInterval::Apply_Every_Five_Seconds: return 5;
+	default: return -1;
+	}
+}
+
+int32 GenerateNumTicks(EEffectTickInterval EffectInterval, double Duration)
+{
+	const double Interval = ConvertIntervalToNumTicks(EffectInterval);
+	double Remainder = 0;
+	const int32 NumTicks = UKismetMathLibrary::FMod(Duration, Interval, Remainder);
+	return NumTicks;
+}
+
+
 FTickingEffect UEffectContainerComponent::Internal_GenerateTickingEffectStruct(TScriptInterface<IEffect> IncomingEffect)
 {
 	const FEffectInitializationData& EffectInitializationData = IncomingEffect->GetEffectInitializationData();
@@ -303,7 +373,7 @@ void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterfa
 	}
 	
 	// Activate the Apply_Once effects only once when added to the tick container 
-	if(IncomingEffect->GetEffectInitializationData().TickInterval == EEffectTickInterval::Apply_Once)
+	if(IncomingEffect->GetEffectInitializationData().TickInterval == EEffectTickInterval::Apply_Once_Persistent)
 	{
 		Internal_ActivateEffect(NewTickingEffect);
 	}
@@ -344,40 +414,4 @@ void UEffectContainerComponent::Internal_DestroyEffect(TScriptInterface<IEffect>
 		Internal_StopTicking();
 	}
 	IncomingEffect->DestroyEffect();
-}
-
-double UEffectContainerComponent::ConvertIntervalToNumTicks(EEffectTickInterval EffectInterval)
-{
-	switch (EffectInterval)
-	{
-	case EEffectTickInterval::Apply_Every_Quarter_Second: return .25;
-	case EEffectTickInterval::Apply_Every_Half_Second: return .5;
-	case EEffectTickInterval::Apply_Every_Second: return 1;
-	case EEffectTickInterval::Apply_Every_Two_Seconds: return 2;
-	case EEffectTickInterval::Apply_Every_Three_Seconds: return 3;
-	case EEffectTickInterval::Apply_Every_Five_Seconds: return 5;
-	default: return -1;
-	}
-}
-
-int32 UEffectContainerComponent::GenerateNumTicks(EEffectTickInterval EffectInterval, double Duration)
-{
-	const double Interval = ConvertIntervalToNumTicks(EffectInterval);
-	double Remainder = 0;
-	const int32 NumTicks = UKismetMathLibrary::FMod(Duration, Interval, Remainder);
-	return NumTicks;
-}
-
-int32 UEffectContainerComponent::GenerateModulus(EEffectTickInterval EffectInterval)
-{
-	switch (EffectInterval)
-	{
-	case EEffectTickInterval::Apply_Every_Quarter_Second: return 1;
-	case EEffectTickInterval::Apply_Every_Half_Second: return 2;
-	case EEffectTickInterval::Apply_Every_Second: return 8;
-	case EEffectTickInterval::Apply_Every_Two_Seconds: return 16;
-	case EEffectTickInterval::Apply_Every_Three_Seconds: return 24;
-	case EEffectTickInterval::Apply_Every_Five_Seconds: return 40;
-	default: return -1;
-	}
 }

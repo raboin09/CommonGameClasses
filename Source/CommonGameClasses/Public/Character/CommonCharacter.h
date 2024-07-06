@@ -3,11 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AlsCharacter.h"
-#include "AlsAnimationInstance.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Animation/CommonAnimInstance.h"
 #include "API/Taggable.h"
+#include "GameFramework/Character.h"
 #include "Types/CommonTagTypes.h"
 #include "CommonCharacter.generated.h"
 
@@ -21,20 +20,15 @@ class UCommonCharacterMovementComponent;
 class UEffectContainerComponent;
 class UCharacterAnimationComponent;
 class UAbilityComponent;
-class UAlsAnimationInstance;
+class UCommonCameraComponent;
 
-UCLASS(Abstract, NotBlueprintable, HideCategories=("Replication", "SkinWeights", "HLOD", "PathTracing", "Mobile", "Navigation",
-	"VirtualTexture","ActorTick", "ComponentTick", "Tags", "Physics", "AssetUserData", "Collision", "Lighting", "Activation", "Variable", "Cooking", "Rendering", "Clothing",
-	"Actor", "Pawn", "State"), AutoExpandCategories=("CUSTOM"))
-class COMMONGAMECLASSES_API ACommonCharacter : public AAlsCharacter, public ITaggable
+UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("CUSTOM"))
+class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggable
 {
 	GENERATED_BODY()
 
 public:
 	ACommonCharacter(const FObjectInitializer& ObjectInitializer);
-
-	UFUNCTION(BlueprintNativeEvent)
-	float GetMaxSpeedRatio() const;
 	
 protected:
 	virtual void PostInitializeComponents() override;
@@ -44,8 +38,6 @@ protected:
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	UFUNCTION(BlueprintCallable)
 	virtual void HandleDeath();
-	UFUNCTION(BlueprintCallable)
-	void SetMoveSpeedRatioIncrease(float Ratio);
 
 	void InitCapsuleDefaults() const;
 	void InitCharacterMeshDefaults() const;
@@ -54,7 +46,7 @@ protected:
 	/// Common Events
 	////////////////////////////////
 protected:
-	UFUNCTION(BlueprintImplementableEvent, Category = "COMMON|Character")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleDeath();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
@@ -73,8 +65,6 @@ protected:
 	TObjectPtr<UAbilityComponent> AbilityComponent;
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UCommonCharacterMovementComponent> CommonCharacterMovementComponent;
 	UPROPERTY()
 	TObjectPtr<UEffectContainerComponent> EffectContainerComponent;
 	UPROPERTY()
@@ -104,6 +94,6 @@ public:
 	/////////////////////////////////
 public:
 	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Dead); }
-	FORCEINLINE TWeakObjectPtr<UGameplayTagComponent> GetGameplayTagComponent() const { return GameplayTagComponent; }
-	FORCEINLINE TWeakObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return Cast<UCommonAnimInstance>(AnimationInstance); }
+	FORCEINLINE TObjectPtr<UGameplayTagComponent> GetGameplayTagComponent() const { return GameplayTagComponent; }
+	FORCEINLINE TObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return Cast<UCommonAnimInstance>(GetMesh()->GetAnimInstance()); }
 };

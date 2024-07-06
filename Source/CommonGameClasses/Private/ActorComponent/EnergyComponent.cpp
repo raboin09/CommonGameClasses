@@ -9,11 +9,11 @@ void UEnergyComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	BroadcastEnergyChangedEvent();
-}
+}  
 
 bool UEnergyComponent::TryConsumeResourceAmount(const float RequestedAmount)
 {
-	if(Super::TryConsumeResourceAmount(RequestedAmount))
+	if(Super::TryConsumeResourceAmount(RequestedAmount))  
 	{
 		BroadcastEnergyChangedEvent();
 		return true;

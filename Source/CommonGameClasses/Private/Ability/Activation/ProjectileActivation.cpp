@@ -2,7 +2,7 @@
 
 #include "Ability/Activation/ProjectileActivation.h"
 #include "Actors/CommonProjectile.h"
-#include "Utils/CommonWorldUtils.h"
+#include "Systems/CommonSpawnSubsystem.h"
 
 UProjectileActivation::UProjectileActivation()
 {
@@ -59,7 +59,7 @@ ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector
 	check(ProjectileClass)
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
-	if (ACommonProjectile* Projectile = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(ProjectileClass.Get(), GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+	if (ACommonProjectile* Projectile = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(this, ProjectileClass.Get(), GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
 	{		
 		Projectile->InitVelocity(ProjectileVelocity);
 		Projectile->SetLifeSpan(ProjectileLife);
@@ -70,7 +70,7 @@ ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector
 		{
 			Projectile->IgnoreActor(TempActor);
 		}
-		UCommonWorldUtils::FinishSpawningActor_Deferred(Projectile, SpawnTrans);
+		UCommonSpawnSubsystem::FinishSpawningActor_Deferred( Projectile, SpawnTrans);
 		return Projectile;
 	}
 	return nullptr;

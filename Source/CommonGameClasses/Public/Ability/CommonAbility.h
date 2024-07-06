@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/Ability.h"
+#include "Trigger/BurstTrigger.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonAbility.generated.h"
@@ -17,7 +18,6 @@ class UBaseComplexTrigger;
 class UAbilityComponent;
 class UBaseActivation;
 class UBaseTrigger;
-class UBurstTrigger;
 enum class EResourceContainerLocation : uint8;
 
 UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM|Ability"))

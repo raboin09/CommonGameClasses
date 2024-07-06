@@ -1,7 +1,5 @@
 ﻿#include "Effects/CommonEffect.h"
-
 #include "ActorComponent/GameplayTagComponent.h"
-#include "Utils/CommonCombatUtils.h"
 
 
 ACommonEffect::ACommonEffect()
@@ -29,16 +27,6 @@ void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
 		return;
 	}
 	UGameplayTagComponent::RemoveTagsFromActor(EffectContext.ReceivingActor.Get(), GetEffectInitializationData().TagsToApply);
-}
-
-bool ACommonEffect::Internal_IsValidHeadshot() const
-{
-	bool bPlayerControlled = false;	
-	if(const APawn* CastedPawn = Cast<APawn>(EffectContext.SurfaceHit.GetActor()))
-	{
-		bPlayerControlled = CastedPawn->IsPlayerControlled();	
-	}
-	return UCommonCombatUtils::IsBoneNameHead(EffectContext.SurfaceHit.BoneName) && !bPlayerControlled;
 }
 
 void ACommonEffect::PlayEffectFX()

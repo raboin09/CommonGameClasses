@@ -5,9 +5,8 @@
 
 #include "API/Ability/Ability.h"
 #include "API/Ability/ActivationMechanism.h"
-#include "Core/CommonAssetManager.h"
 #include "GameFramework/Character.h"
-#include "Utils/CommonWorldUtils.h"
+#include "Systems/CommonSpawnSubsystem.h"
 
 UAbilityComponent::UAbilityComponent()
 {
@@ -54,7 +53,7 @@ void UAbilityComponent::BeginPlay()
 
 void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag& SlotTag)
 {
-	const TSubclassOf<AActor> ClassToSpawn = UCommonAssetManager::Sync_GetSubclass(AbilityClass);
+	const TSubclassOf<AActor> ClassToSpawn = AbilityClass.LoadSynchronous();
 	const TWeakInterfacePtr<IAbility> SpawnedAbility = Internal_SpawnAbilityFromClass(ClassToSpawn);
 	if(!SpawnedAbility.IsValid())
 	{
@@ -119,8 +118,8 @@ TWeakInterfacePtr<IAbility> UAbilityComponent::Internal_SpawnAbilityFromClass(TS
 	{
 		return nullptr;
 	}
-	AActor* AbilityObj = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<AActor>(AbilityClass, GetOwner(), Cast<APawn>(GetOwner()));
-	UCommonWorldUtils::FinishSpawningActor_Deferred(AbilityObj, GetOwner()->GetTransform());
+	AActor* AbilityObj = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<AActor>(this, AbilityClass, GetOwner(), Cast<APawn>(GetOwner()));
+	UCommonSpawnSubsystem::FinishSpawningActor_Deferred(AbilityObj, GetOwner()->GetTransform());
 	return AbilityObj;
 }
 

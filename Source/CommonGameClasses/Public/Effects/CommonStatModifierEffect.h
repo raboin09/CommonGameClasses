@@ -63,6 +63,5 @@ private:
 	void Internal_ShieldDamage(float ModifiedStatValue) const;
 	void Internal_HealthHeal(float ModifiedStatValue) const;
 	void Internal_ShieldHeal(float ModifiedStatValue) const;
-	void Internal_HealthMaxWounds(float ModifiedStatValue);
 	FDamageHitReactEvent Internal_GenerateHitReactEvent(float ModifiedStatValue) const;
 };

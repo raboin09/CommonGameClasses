@@ -5,16 +5,13 @@
 #include "Effects/CommonEffect.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/DataTable.h"
-#include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/EffectContainerComponent.h"
-#include "ActorComponent/ShieldEnergyComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonCombatTypes.h"
+#include "Systems/CommonSpawnSubsystem.h"
 #include "Utils/CommonInteractUtils.h"
-#include "Utils/CommonWorldUtils.h"
 
 void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceOrigin, float TraceRadius, ETraceTypeQuery ValidationTraceType,
-	bool bIgnoreAffiliation, bool bValidateHit, FName HitValidationBone, bool bOverrideValidationStartLocation, FVector ValidationTraceStartOverride)
+                                              bool bIgnoreAffiliation, bool bValidateHit, FName HitValidationBone, bool bOverrideValidationStartLocation, FVector ValidationTraceStartOverride)
 {
 	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceOrigin.IsZero())
 	{
@@ -102,12 +99,13 @@ void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<T
 
 void UCommonEffectUtils::ApplyEffectAtLocation(AActor* InstigatingActor, TSubclassOf<AActor> EffectToApply, FVector Location, bool bActivateImmediately)
 {
+	check(InstigatingActor)
 	FTransform SpawnTransform = FTransform();
 	SpawnTransform.SetLocation(Location);
 
 	check(EffectToApply)
-	ACommonEffect* EffectActor = UCommonWorldUtils::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(EffectToApply.Get(), InstigatingActor, Cast<APawn>(InstigatingActor));
-	UCommonWorldUtils::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
+	ACommonEffect* EffectActor = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonEffect>(InstigatingActor, EffectToApply.Get(), InstigatingActor, Cast<APawn>(InstigatingActor));
+	UCommonSpawnSubsystem::FinishSpawningActor_Deferred(EffectActor, SpawnTransform);
 	if(bActivateImmediately)
 	{
 		EffectActor->TryActivateEffect();
@@ -126,6 +124,26 @@ void UCommonEffectUtils::ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<
 		return;
 	}
 	EffectContainerComponent->TryApplyEffectToContainer(EffectToApply, ReceivingActor);
+}
+
+void UCommonEffectUtils::RemoveTaggedEffectsFromActor(AActor* ReceivingActor, const FGameplayTag& RemoveEffectsWithTag)
+{
+	UEffectContainerComponent* EffectContainerComponent = ReceivingActor->FindComponentByClass<UEffectContainerComponent>();
+	if (!EffectContainerComponent)
+	{
+		return;
+	}
+	EffectContainerComponent->TryRemoveAllTaggedEffects(RemoveEffectsWithTag);
+}
+
+void UCommonEffectUtils::RemoveEffectsWithClassFromActor(AActor* ReceivingActor, TSubclassOf<AActor> EffectClassToRemove)
+{
+	UEffectContainerComponent* EffectContainerComponent = ReceivingActor->FindComponentByClass<UEffectContainerComponent>();
+	if (!EffectContainerComponent)
+	{
+		return;
+	}
+	EffectContainerComponent->TryRemoveAllEffectsOfClass(EffectClassToRemove);
 }
 
 void UCommonEffectUtils::ApplyEffectsToActor(TArray<TSubclassOf<AActor>> EffectsToApply, AActor* ReceivingActor)

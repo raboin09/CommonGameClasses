@@ -86,7 +86,7 @@ void UGameplayTagComponent::RemoveTagFromActor(AActor* InActor, const FGameplayT
 	}
 }
 
-UGameplayTagComponent* UGameplayTagComponent::GetGameplayTagComponentFromActor(AActor* InActor)
+UGameplayTagComponent* UGameplayTagComponent::GetGameplayTagComponentFromActor(const AActor* InActor)
 {
 	if(!InActor)
 	{
@@ -104,7 +104,7 @@ bool UGameplayTagComponent::ComponentHasNameTag(UActorComponent* InComp, FName I
 	return false;
 }
 
-bool UGameplayTagComponent::ActorHasAnyGameplayTags(AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
+bool UGameplayTagComponent::ActorHasAnyGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
 {
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{
@@ -113,7 +113,7 @@ bool UGameplayTagComponent::ActorHasAnyGameplayTags(AActor* InActor, TArray<FGam
 	return false;
 }
 
-bool UGameplayTagComponent::ActorHasAllGameplayTags(AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
+bool UGameplayTagComponent::ActorHasAllGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
 {
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{
@@ -122,7 +122,7 @@ bool UGameplayTagComponent::ActorHasAllGameplayTags(AActor* InActor, TArray<FGam
 	return false;
 }
 
-bool UGameplayTagComponent::ActorHasGameplayTag(AActor* InActor, FGameplayTag InTag, bool bExact)
+bool UGameplayTagComponent::ActorHasGameplayTag(const AActor* InActor, FGameplayTag InTag, bool bExact)
 {
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{

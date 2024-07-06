@@ -80,8 +80,7 @@ protected:
 	FEffectContext EffectContext;
 
 private:
-	bool Internal_IsValidHeadshot() const;
-
+	
 	// Add and remove tags
 	void Internal_AddAndRemoveTagsFromReceiver_Activation();
 	// If Effect added tags and EffectData has bShouldRemoveAppliedTagsWhenDestroyed, remove applied tags

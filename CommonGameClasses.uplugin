@@ -23,8 +23,6 @@
 				"Engine",
 				"AIModule",
 				"PhysicsCore",
-				"ALS",
-				"ALSCamera",
 				"SMSystem"
 			]
 		}
@@ -40,10 +38,6 @@
 		},
 		{
 			"Name": "SMSystem",
-			"Enabled": true
-		},
-		{
-			"Name": "ALS",
 			"Enabled": true
 		}
 	]

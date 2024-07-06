@@ -8,6 +8,7 @@
 #include "CommonResourceTypes.h"
 #include "CommonQuestTypes.h"
 #include "Quest/QuestStateMachine.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "CommonEventDeclarations.generated.h"
 
 class ACommonCharacter;

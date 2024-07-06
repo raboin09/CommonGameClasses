@@ -24,6 +24,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void ApplyEffectToActor(AActor* ReceivingActor, TSubclassOf<AActor> EffectToApply);
 	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
+	static void RemoveTaggedEffectsFromActor(AActor* ReceivingActor, const FGameplayTag& RemoveEffectsWithTag);
+	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
+	static void RemoveEffectsWithClassFromActor(AActor* ReceivingActor,TSubclassOf<AActor> EffectClassToRemove);
+	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void ApplyEffectsToActor(TArray<TSubclassOf<AActor>> EffectsToApply, AActor* ReceivingActor);
 	static void ApplyEffectsToHitResult(TArray<TSubclassOf<AActor>> EffectsToApply, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult = true);
 	static void ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult = true);

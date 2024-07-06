@@ -7,7 +7,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utils/CommonCombatUtils.h"
-#include "Utils/CommonEffectUtils.h"
 
 UBaseStatsModifierData::UBaseStatsModifierData()
 {
@@ -131,10 +130,10 @@ void ACommonStatModifierEffect::Internal_MoveSpeedStatChange(float ModifiedStatV
 	if(UCommonCharacterMovementComponent* MovementComponent = EffectContext.ReceivingActor->FindComponentByClass<UCommonCharacterMovementComponent>())
 	{
 		// TODO Find a way to only revert modifier instead of reverting to 1.f
-		MovementComponent->SetWalkSpeedRatio(ModifiedStatValue);
-		ReversalFunc = [MovementComponent]
+		MovementComponent->MaxWalkSpeed += ModifiedStatValue;
+		ReversalFunc = [MovementComponent, ModifiedStatValue]
 		{
-			MovementComponent->SetWalkSpeedRatio(1.0);
+			MovementComponent->MaxWalkSpeed -= ModifiedStatValue;
 		};
 	}
 }

@@ -35,7 +35,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	float DissolveDuration = 1.f;
 
-private:
+private:  
 	UFUNCTION()
 	void Internal_TimelineDissolveEnd();
 	UFUNCTION()

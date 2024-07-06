@@ -3,9 +3,7 @@
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/MountManagerComponent.h"
 #include "GameFramework/Character.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
-#include "Utility/AlsConstants.h"
 #include "Utils/CommonCombatUtils.h"
 
 
@@ -119,7 +117,8 @@ void UCharacterAnimationComponent::SetAnimationOverlay(const FGameplayTag& NewOv
 	{
 		return;
 	}
-	OwnerCharacter->SetOverlayMode(NewOverlay);
+	// TODO ALS
+	// OwnerCharacter->SetOverlayMode(NewOverlay);
 }
 
 void UCharacterAnimationComponent::StartRagdolling()
@@ -129,7 +128,8 @@ void UCharacterAnimationComponent::StartRagdolling()
 		return;
 	}
 	OwningTagComponent->AddTag(CommonGameState::Ragdoll);
-	OwnerCharacter->StartRagdolling();
+	// TODO ALS
+	// OwnerCharacter->StartRagdolling();
 	SetComponentTickEnabled(true);
 }
 
@@ -140,7 +140,8 @@ void UCharacterAnimationComponent::StopRagdolling()
 		return;
 	}
 	OwningTagComponent->RemoveTag(CommonGameState::Ragdoll);
-	OwnerCharacter->StopRagdolling();
+	// TODO ALS
+	// OwnerCharacter->StopRagdolling();
 	SetComponentTickEnabled(false);
 }
 
@@ -166,7 +167,7 @@ void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVecto
 	
 	StartRagdolling();
 	// TODO weird hack to stop errors
-	OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
+	// OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
 	OwnerCharacter->GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
 }
 
