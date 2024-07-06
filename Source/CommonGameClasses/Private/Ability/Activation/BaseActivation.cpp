@@ -1,6 +1,6 @@
 ﻿#include "Ability/Activation/BaseActivation.h"
 
-void UBaseActivation::InitActivationMechanism(UMeshComponent* OwnerMeshComponent)
+void UBaseActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent)
 {
 	MeshComponentRef = OwnerMeshComponent;
 }

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "API/Ability/ActivationMechanism.h"
+#include "..\..\Types\CommonInteractTypes.h"
 #include "BaseActivation.generated.h"
 
 UCLASS(Abstract, NotBlueprintable)
@@ -12,14 +13,11 @@ class COMMONGAMECLASSES_API UBaseActivation : public UObject, public IActivation
 	GENERATED_BODY()
 
 public:
-	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) override;
+	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override  PURE_VIRTUAL(AActivationBase::Activate, )
 	virtual void Deactivate() override PURE_VIRTUAL(AActivationBase::Deactivate, )
-
+	
 protected:	
-	UPROPERTY()
-	UMeshComponent* MeshComponentRef = nullptr;
-
-private:
-	void InitAssignMeshComponentRef();
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<UMeshComponent> MeshComponentRef = nullptr;
 };

@@ -19,7 +19,8 @@ class COMMONGAMECLASSES_API URangedActivation : public UBaseActivation
 public:
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
-	virtual void InitActivationMechanism(UMeshComponent* OwnerMeshComponent) override;
+	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
+	FORCEINLINE virtual float GetOutlineRange() const override { return TraceRange; }
 
 protected:
 	// Ranged Activation 
@@ -39,13 +40,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
 	// Socket where the muzzle or hand is
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(EditCondition = "LineTraceDirection == ELineTraceDirection::Mesh", EditConditionHides))
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
-	bool bAimOriginIsPlayerEyesInsteadOfWeapon;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = 0.f))
 	float TraceRange = 1000.f;
-
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	float TraceRadius = 20.f;
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bHasFiringSpread = false;
 	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
@@ -54,6 +54,9 @@ protected:
 	float FiringSpreadIncrement = 1.0f;
 	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
 	float FiringSpreadMax = 10.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	bool bDrawDebugTrace = false;
 	
 private:
 	void Internal_AssignOwningController();
@@ -69,9 +72,9 @@ private:
 	UPROPERTY(Transient)
 	float CurrentFiringSpread;
 	UPROPERTY()
-	const AAIController* OwningAIController;
+	TWeakObjectPtr<AAIController> OwningAIController;
 	UPROPERTY()
-	const APlayerController* OwningPlayerController;
+	TWeakObjectPtr<APlayerController> OwningPlayerController;
 
 public:
 	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };

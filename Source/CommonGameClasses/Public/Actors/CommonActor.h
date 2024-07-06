@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "API/Taggable.h"
 #include "GameFramework/Actor.h"
+#include "Types/CommonEventDeclarations.h"
 #include "CommonActor.generated.h"
 
 struct FGameplayTag;
@@ -17,6 +18,7 @@ class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable
 
 public:
 	ACommonActor();
+	
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	
@@ -32,5 +34,5 @@ protected:
 	TArray<FGameplayTag> DefaultGameplayTags;
 
 	UPROPERTY()
-	UGameplayTagComponent* GameplayTagComponent;
+	TObjectPtr<UGameplayTagComponent> GameplayTagComponent;
 };

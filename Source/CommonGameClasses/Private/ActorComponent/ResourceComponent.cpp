@@ -3,6 +3,10 @@
 
 #include "ActorComponent/ResourceComponent.h"
 
+#include "ActorComponent/GameplayTagComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Types/CommonTagTypes.h"
+
 UResourceComponent::UResourceComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -20,22 +24,22 @@ bool UResourceComponent::CanRegen() const
 	return RegenAmount > 0.f && RegenRate > 0.f;
 }
 
-bool UResourceComponent::TrySpendResource(const float RequestedAmount)
+bool UResourceComponent::TryConsumeResourceAmount(const float RequestedAmount)
 {
-	if(!CanSpendResourceAmount(RequestedAmount))
+	if(!CanConsumeResourceAmount(RequestedAmount))
 	{
 		return false;
 	}
-	const float Delta = CalculateResourceCost(RequestedAmount);
+	const float Delta = CalculateConsumptionAmount(RequestedAmount);
 	const float ActualResourcesTaken = ResourcePoolContainer.ConsumeResources(Delta);
-	if(!bIsRegenTicking)
+	if(!bIsRegenTicking && !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Dead))
 	{
 		Internal_StartRegenTimer();	
 	}
 	return ActualResourcesTaken > 0;
 }
 
-void UResourceComponent::GiveResource(const float AmountToGive)
+void UResourceComponent::TryGiveResourceAmount(const float AmountToGive)
 {
 	const float Delta = AmountToGive;
 	ResourcePoolContainer.GiveResources(Delta);
@@ -45,9 +49,9 @@ void UResourceComponent::GiveResource(const float AmountToGive)
 	}
 }
 
-bool UResourceComponent::CanSpendResourceAmount(const float RequestedAmount)
+bool UResourceComponent::CanConsumeResourceAmount(const float RequestedAmount)
 {
-	return ResourcePoolContainer.HasResources() && ResourcePoolContainer.GetSumOfAllResourcePools() > RequestedAmount;
+	return ResourcePoolContainer.HasResources() && ResourcePoolContainer.GetSumOfAllResourcePools() >= RequestedAmount;
 }
 
 void UResourceComponent::Internal_StartRegenTimer()
@@ -57,9 +61,9 @@ void UResourceComponent::Internal_StartRegenTimer()
 		return;
 	}
 	bIsRegenTicking = true;
-	GetWorld()->GetTimerManager().SetTimer(Timer_RegenRate, this, &UResourceComponent::Internal_TickRegen, RegenRate, true);
+	GetWorld()->GetTimerManager().SetTimer(Timer_RegenRate, this, &ThisClass::Internal_TickRegen, RegenRate, true);
 }
-
+  
 void UResourceComponent::Internal_StopRegenTimer()
 {
 	if(!CanRegen())
@@ -72,5 +76,5 @@ void UResourceComponent::Internal_StopRegenTimer()
 
 void UResourceComponent::Internal_TickRegen()
 {
-	GiveResource(RegenAmount);
+	TryGiveResourceAmount(RegenAmount);
 }

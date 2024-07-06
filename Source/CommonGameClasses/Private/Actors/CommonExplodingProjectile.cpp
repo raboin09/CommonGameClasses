@@ -2,7 +2,6 @@
 
 
 #include "Actors/CommonExplodingProjectile.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Utils/CommonEffectUtils.h"
 
 ACommonExplodingProjectile::ACommonExplodingProjectile()
@@ -28,20 +27,21 @@ void ACommonExplodingProjectile::HandleActorDeath()
 	Super::HandleActorDeath();
 }
 
-void ACommonExplodingProjectile::K2_HandleImpact_Implementation(const FHitResult& HitResult)
+void ACommonExplodingProjectile::K2N_HandleImpact_Implementation(const FHitResult& HitResult)
 {
 	Internal_Explode();
 }
 
 void ACommonExplodingProjectile::OnImpact(const FHitResult& HitResult)
 {
-	K2_HandleImpact_Implementation(HitResult);
+	K2N_HandleImpact_Implementation(HitResult);
 	HandleActorDeath();
 }
 
 void ACommonExplodingProjectile::Internal_Explode()
 {
 	bExplodedAlready = true;
-	UCommonEffectUtils::ApplyEffectsToHitResultsInRadius(GetOwner(), ProjectileEffectsToApply, GetActorLocation(), ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), bFriendlyFire ? EAffiliation::All : EAffiliation::Enemies, true, GetActorLocation());
+	UCommonEffectUtils::ApplyEffectsInRadius(GetInstigator(), ProjectileEffectsToApply, GetActorLocation(), ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), bCanFriendlyFire);
 	K2_HandleExplosion();
 }
+  

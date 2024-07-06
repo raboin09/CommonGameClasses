@@ -3,10 +3,10 @@
 
 #include "ActorComponent/QuestManagerComponent.h"
 #include "API/Questable.h"
-#include "Core/ActorTrackingSubsystem.h"
 #include "SMSystem/Public/SMUtils.h"
 #include "Quest/QuestStateMachine.h"
 #include "Quest/Transition_QuestSection.h"
+#include "Systems/ActorTrackingSubsystem.h"
 #include "Utils/CommonCoreUtils.h"
 
 UQuestManagerComponent::UQuestManagerComponent()
@@ -79,7 +79,7 @@ void UQuestManagerComponent::ActivateQuestInstance(TSubclassOf<UQuestStateMachin
 	{
 		if(CurrTrans)
 		{
-			CurrTrans->OnQuestUpdated().AddUObject(this, &UQuestManagerComponent::HandleQuestUpdate);
+			CurrTrans->OnQuestUpdated().AddUObject(this, &ThisClass::HandleQuestUpdate);
 		}		
 	}
 	QuestUpdate.Broadcast(FQuestUpdateEventPayload(TempQuest));
@@ -97,7 +97,7 @@ void UQuestManagerComponent::DeactivateAllQuests()
 
 void UQuestManagerComponent::HandleQuestUpdate(const FQuestUpdateEventPayload& QuestObjectiveEventPayload)
 {
-	if(!QuestObjectiveEventPayload.UpdatedQuest)
+	if(!QuestObjectiveEventPayload.UpdatedQuest.IsValid())
 		return;
 
 	if(QuestObjectiveEventPayload.UpdatedQuest->IsQuestComplete())
@@ -116,7 +116,7 @@ UQuestStateMachine* UQuestManagerComponent::GetActiveQuest(int32 QuestID)
 void UQuestManagerComponent::DeactivateQuest(int32 QuestID)
 {
 	if(const UQuestStateMachine* QuestInst = GetActiveQuest(QuestID))	{
-		if(QuestInst->QuestData.QuestStateMachineInstance)
+		if(QuestInst->QuestData.QuestStateMachineInstance.IsValid())
 		{
 			QuestInst->QuestData.QuestStateMachineInstance->Stop();
 		}
@@ -128,7 +128,7 @@ bool UQuestManagerComponent::IsQuestComplete(int32 QuestID)
 {
 	if(const UQuestStateMachine* QuestInst = GetActiveQuest(QuestID))
 	{
-		if(QuestInst->QuestData.QuestStateMachineInstance)
+		if(QuestInst->QuestData.QuestStateMachineInstance.IsValid())
 		{
 			return  QuestInst->QuestData.QuestStateMachineInstance->IsInEndState();
 		}

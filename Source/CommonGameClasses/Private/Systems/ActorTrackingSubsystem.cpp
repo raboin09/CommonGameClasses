@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Core/ActorTrackingSubsystem.h"
+#include "Systems/ActorTrackingSubsystem.h"
 
 #include "ActorComponent/InteractionComponent.h"
 #include "API/Questable.h"
@@ -9,18 +9,18 @@
 #include "Kismet/KismetMathLibrary.h"
 
 
-UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromWorld(const UWorld* World)
+UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromWorld(const TWeakObjectPtr<UWorld> World)
 {
-	if (IsValid(World))
+	if (World.IsValid())
 	{
 		return World->GetSubsystem<UActorTrackingSubsystem>();
 	}
 	return nullptr;
 }
 
-UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromActor(const AActor* Actor)
+UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromActor(const TWeakObjectPtr<AActor> Actor)
 {
-	if (IsValid(Actor))
+	if (Actor.IsValid())
 	{
 		return GetSubsystemFromWorld(Actor->GetWorld());
 	}
@@ -93,7 +93,14 @@ TArray<AActor*> UActorTrackingSubsystem::GetAllActorsOfClass_TrackedOnly(TSubcla
 			continue;
 		}
 
-		OutActors.Append(ClassEntry.Value.Actors);
+		for(TWeakObjectPtr<AActor> WeakActor : ClassEntry.Value.Actors)
+		{
+			if(WeakActor.IsStale())
+			{
+				continue; 
+			}
+			OutActors.Add(WeakActor.Get());
+		}
 	}
 	return OutActors;
 }
@@ -105,10 +112,10 @@ void UActorTrackingSubsystem::TryRemoveActorFromQuestableArray(AActor* InActor)
 		return;
 	}
 
-	UActorTrackingSubsystem* GameMode = Cast<UActorTrackingSubsystem>(UGameplayStatics::GetGameMode(InActor));
-	if (!GameMode)
+	UActorTrackingSubsystem* ActorTrackingSubsystem = InActor->GetWorld()->GetSubsystem<UActorTrackingSubsystem>();
+	if (!ActorTrackingSubsystem)
 	{
 		return;
 	}
-	GameMode->QuestRelevantActors.Remove(InActor);
+	ActorTrackingSubsystem->QuestRelevantActors.Remove(InActor);
 }

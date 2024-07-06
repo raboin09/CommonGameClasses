@@ -4,48 +4,54 @@
 
 #include "CoreMinimal.h"
 #include "BaseComplexTrigger.h"
-#include "BaseTrigger.h"
-#include "API/Ability/TriggerMechanism.h"
 #include "MontageTrigger.generated.h"
 
+class UCharacterAnimationComponent;
 struct FAnimMontagePlayData;
 
 UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API UMontageTrigger : public UBaseComplexTrigger
 {
 	GENERATED_BODY()
-
-public:
-	virtual void PressTrigger() override;
-	virtual void ReleaseTrigger() override;
-	virtual void ResetTrigger() override;
-	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return false; }
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void K2_AfterPressedTrigger();
 	
 protected:
+	// ITriggerMechanism overrides
+	virtual void InitTriggerMechanism() override;
+	virtual void ResetTrigger() override;
+	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return false; }
+	
+	// UBaseTrigger overrides
+	virtual void HandleSuccessfulTriggerPressed() override;
+	virtual void HandleTriggerReleased() override;
+
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
+	FName K2N_GetNextMontageSection() const;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	UAnimMontage* MontageToPlay;
+	TObjectPtr<UAnimMontage> MontageToPlay;
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
+	bool bHasCombos = false;
+	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
 	int32 MaxComboSections = 3;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	bool bRandomizeMontages = false;
+	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	bool bRandomizeMontageSection = false;
+	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	FString ComboPrefix = "Combo";
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	bool bShouldPlayerLockOnToNearestTarget = false;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
-	FName CachedComboSection;
 	
 private:
+	UFUNCTION()
+	void HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload);
+	
 	FAnimMontagePlayData Internal_GetPlayData() const;
-	FName Internal_GetNextMontageSection() const;
 	void Internal_StartMontage();
 
+	TWeakObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
+	
 	// COMBO VARIABLES
 	void Internal_IncrementComboCounter();
 	void Internal_ResetComboCounter();
 	
 	int32 ComboSectionIncrement;
-	const FString ComboPrefix = "Combo";
-	FTimerHandle Timer_MaxComboWindow;
 };

@@ -19,9 +19,9 @@ public:
 	UAmmoComponent();
 	virtual void BeginPlay() override;
 	
-	virtual void GiveResource(const float AmountToGive) override;
-	virtual bool TrySpendResource(const float RequestedAmount) override;
-	virtual float CalculateResourceCost(const float RequestedAmount) const override;
+	virtual void TryGiveResourceAmount(const float AmountToGive) override;
+	virtual bool TryConsumeResourceAmount(const float RequestedAmount) override;
+	virtual float CalculateConsumptionAmount(const float RequestedAmount) const override;
 	
 protected:
 	// Ammo be default doesn't regenerate (unless it has a heat mechanism where overheating is reaching 0 resources)
@@ -33,12 +33,14 @@ protected:
 	bool bInfiniteClip = false;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	bool bAmmoRegenerates = false;
+
+	UPROPERTY(BlueprintAssignable)
+	FAmmoAmountChangedEvent AmmoAmountChanged;
+	UPROPERTY(BlueprintAssignable)
+	FOutOfAmmoEvent OutOfAmmo;
 	
 private:
 	void BroadcastAmmoUsage();
-	
-	FAmmoAmountChangedEvent AmmoAmountChanged;
-	FOutOfAmmoEvent OutOfAmmo;
 
 public:
 	FORCEINLINE FAmmoAmountChangedEvent& OnAmmoAmountChanged() { return AmmoAmountChanged; }

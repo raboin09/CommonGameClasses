@@ -3,12 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AlsCharacter.h"
-#include "Ability/CommonAbility.h"
+#include "ActorComponent/GameplayTagComponent.h"
+#include "Animation/CommonAnimInstance.h"
 #include "API/Taggable.h"
+#include "GameFramework/Character.h"
 #include "Types/CommonTagTypes.h"
 #include "CommonCharacter.generated.h"
 
+class UCommonAnimInstance;
+class UMountManagerComponent;
 struct FGameplayTag;
 class IMountable;
 class UHealthComponent;
@@ -16,71 +19,60 @@ class UGameplayTagComponent;
 class UCommonCharacterMovementComponent;
 class UEffectContainerComponent;
 class UCharacterAnimationComponent;
+class UAbilityComponent;
+class UCommonCameraComponent;
 
-UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("CUSTOM", "CUSTOM|Defaults"), PrioritizeCategories = "CUSTOM",
-	AutoCollapseCategories=("Actor Tick", "Component Tick", "Tags", "Physics", "Asset User Data", "Collision", "Lighting", "Activation", "Variable", "Cooking", "Rendering", "Clothing"),
-	HideCategories=("Replication", "Component Replication", "Skin Weights", "HLOD", "Path Tracing", "Mobile", "Navigation", "Virtual Texture"))
-class COMMONGAMECLASSES_API ACommonCharacter : public AAlsCharacter, public ITaggable
+UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("CUSTOM"))
+class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggable
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	ACommonCharacter(const FObjectInitializer& ObjectInitializer);
 	
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
-
+	
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
+	UFUNCTION(BlueprintCallable)
+	virtual void HandleDeath();
+
+	void InitCapsuleDefaults() const;
+	void InitCharacterMeshDefaults() const;
 	
 	////////////////////////////////
 	/// Common Events
 	////////////////////////////////
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "COMMON|Character")
-	void K2_OnDeath();
-	virtual void K2_OnDeath_Implementation();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
+	void K2_HandleDeath();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload);
-
+	
 	////////////////////////////////
 	/// Common Variables
 	////////////////////////////////
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
 	TArray<FGameplayTag> DefaultGameplayTags;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
-	TMap<FGameplayTag, TSubclassOf<ACommonAbility>> DefaultAbilities;
+	TMap<FGameplayTag, TSoftClassPtr<ACommonAbility>> DefaultAbilities;
 
 	UPROPERTY(BlueprintReadOnly)
-	UAbilityComponent* AbilityComponent;
+	TObjectPtr<UAbilityComponent> AbilityComponent;
 	UPROPERTY(BlueprintReadOnly)
-	UCharacterAnimationComponent* CharacterAnimationComponent;
+	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
 	UPROPERTY()
-	UEffectContainerComponent* EffectContainerComponent;
+	TObjectPtr<UEffectContainerComponent> EffectContainerComponent;
 	UPROPERTY()
-	UGameplayTagComponent* GameplayTagComponent;
-
-	////////////////////////////////
-	/// Mounts
-	////////////////////////////////
-public:
-	FORCEINLINE void AssignNewMountable(UObject* InMountableObject, const FHitResult& InHitResult);
-	FORCEINLINE TScriptInterface<IMountable> GetCurrentMount() const { return CurrentMount; }
-	FORCEINLINE bool IsMounted() const { return CurrentMount != nullptr; }
-	FORCEINLINE bool CanGetInCover() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::CannotMount); }
-protected:
-	UPROPERTY()
-	TScriptInterface<IMountable> CurrentMount;
+	TObjectPtr<UGameplayTagComponent> GameplayTagComponent;
 
 	////////////////////////////////
 	/// Knockbacks and Hit Reacts
 	////////////////////////////////
-public:
-	UFUNCTION(BlueprintImplementableEvent)
-	UAnimMontage* K2_GetHitReactAnimation(const FGameplayTag& HitReactDirection) const;
 	
 private:
 	UPROPERTY(Transient)
@@ -91,14 +83,17 @@ private:
 	/////////////////////////////////
 	/// Animation
 	/////////////////////////////////
-protected:
+public:
 	UFUNCTION(BlueprintImplementableEvent)
-	UAnimMontage* K2_GetGetUpAnimation(bool bIsFaceUp) const;
+	TSoftObjectPtr<UAnimMontage> K2_GetGetUpAnimation(bool bIsFaceUp) const;
+	UFUNCTION(BlueprintImplementableEvent)
+	TSoftObjectPtr<UAnimMontage> K2_GetHitReactAnimation(const FGameplayTag& HitReactDirection) const;
 	
 	/////////////////////////////////
 	/// FORCEINLINE
 	/////////////////////////////////
 public:
 	FORCEINLINE bool IsAlive() { return !UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Dead); }
-	FORCEINLINE UGameplayTagComponent* GetGameplayTagComponent() const { return GameplayTagComponent; } 
+	FORCEINLINE TObjectPtr<UGameplayTagComponent> GetGameplayTagComponent() const { return GameplayTagComponent; }
+	FORCEINLINE TObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return Cast<UCommonAnimInstance>(GetMesh()->GetAnimInstance()); }
 };

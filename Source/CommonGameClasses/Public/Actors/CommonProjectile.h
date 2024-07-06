@@ -24,8 +24,8 @@ public:
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON")
-	void K2_HandleImpact(const FHitResult& HitResult);
-	virtual void K2_HandleImpact_Implementation(const FHitResult& HitResult);
+	void K2N_HandleImpact(const FHitResult& HitResult);
+	virtual void K2N_HandleImpact_Implementation(const FHitResult& HitResult);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
 	void K2_HandleActorDeath();
 	UFUNCTION()
@@ -34,18 +34,18 @@ protected:
 	void ApplyMissEffects(const FHitResult Impact);
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	UProjectileMovementComponent* MovementComp;
+	TObjectPtr<UProjectileMovementComponent> MovementComp;
 	UPROPERTY(VisibleDefaultsOnly)
-	UParticleSystemComponent* ParticleComp;
+	TObjectPtr<UParticleSystemComponent> ParticleComp;
 	UPROPERTY(VisibleDefaultsOnly)
-	USphereComponent* CollisionComp;
+	TObjectPtr<USphereComponent> CollisionComp;
 	UPROPERTY(VisibleDefaultsOnly)
-	UStaticMeshComponent* SummonedMesh;
+	TObjectPtr<UStaticMeshComponent> SummonedMesh;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Projectile", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> ProjectileEffectsToApply;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Projectile")
 	float DeathBuffer = 0.f;
 
 public:
-	FORCEINLINE void AddAdditionalEffectsToApply(TArray<TSubclassOf<AActor>> AdditionalEffectsToApply) { ProjectileEffectsToApply.Append(AdditionalEffectsToApply);}
+	FORCEINLINE void AddAdditionalEffectsToApply(const TArray<TSubclassOf<AActor>>& AdditionalEffectsToApply) { ProjectileEffectsToApply.Append(AdditionalEffectsToApply);}
 };

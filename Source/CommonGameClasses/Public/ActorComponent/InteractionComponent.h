@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/TimelineComponent.h"
-#include "Types/CommonTypes.h"
+#include "..\Types\CommonInteractTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "InteractionComponent.generated.h"
 
@@ -46,9 +46,9 @@ private:
 	void Internal_InteractionFinished();
 	
 	UPROPERTY()
-	TArray<UMeshComponent*> OwnerMeshes;
+	TArray<TWeakObjectPtr<UMeshComponent>> OwnerMeshes;
 	UPROPERTY()
-	AActor* CachedInstigatingActor;
+	TWeakObjectPtr<AActor> CachedInstigatingActor;
 	UPROPERTY()
 	FTimeline Timeline;
 

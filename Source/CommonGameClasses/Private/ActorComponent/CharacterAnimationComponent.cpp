@@ -1,6 +1,7 @@
 ﻿
 #include "ActorComponent/CharacterAnimationComponent.h"
-
+#include "ActorComponent/HealthComponent.h"
+#include "ActorComponent/MountManagerComponent.h"
 #include "GameFramework/Character.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
@@ -9,14 +10,16 @@
 UCharacterAnimationComponent::UCharacterAnimationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 	OwnerCharacter = nullptr;
+	OwnerAnimInstance = nullptr;
 	OwningTagComponent = nullptr;
 }
 
 void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter, CommonGameState::Ragdoll))
+	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter.Get(), CommonGameState::Ragdoll))
 	{
 		Internal_RagdollUpdate();
 	}
@@ -26,25 +29,72 @@ void UCharacterAnimationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	OwnerCharacter = Cast<ACommonCharacter>(GetOwner());
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
 	OwningTagComponent = OwnerCharacter->GetGameplayTagComponent();
+	OwnerAnimInstance = OwnerCharacter->GetAnimInstance();
+	
+	if(OwnerAnimInstance.IsValid())
+	{
+		OwnerAnimInstance->OnMontageEnded.AddDynamic(this, &ThisClass::HandleMontageEnded);
+	}
+	
+	if(UHealthComponent* HealthComponent = OwnerCharacter->FindComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->OnCurrentWoundHealthChanged().AddDynamic(this, &ThisClass::HandleCurrentWoundChangedEvent);
+		HealthComponent->OnActorDeath().AddDynamic(this, &ThisClass::HandleActorDeathEvent);
+	}
+}
+
+void UCharacterAnimationComponent::HandleMontageEnded(UAnimMontage* EndedMontage, bool bInterrupted)
+{
+	const FCharacterMontageEndedPayload CharacterMontageEndedPayload = FCharacterMontageEndedPayload(EndedMontage, GetCurrentPlayingMontage().Get(), bInterrupted);
+	CharacterMontageEnded.Broadcast(CharacterMontageEndedPayload);
+}
+
+void UCharacterAnimationComponent::HandleCurrentWoundChangedEvent(const FCurrentWoundEventPayload& CurrentWoundEventPayload)
+{
+	if(!CurrentWoundEventPayload.bNaturalChange)
+	{
+		return;
+	}
+	Internal_TryStartCharacterKnockback(CurrentWoundEventPayload.DamageHitReactEvent, true);
+}
+
+void UCharacterAnimationComponent::HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload)
+{
+	Internal_TryStartCharacterKnockback(DeathEventPayload.HitReactEvent, false);
+}
+
+float UCharacterAnimationComponent::HandleMontageLoadedEvent(TSoftObjectPtr<UAnimMontage> LoadedAnimMontage)
+{
+	if(!CachedMontageData.Contains(LoadedAnimMontage))
+	{
+		return -1.f;
+	}
+	const FAnimMontagePlayData& AnimMontagePlayData = CachedMontageData[LoadedAnimMontage];
+	CachedMontageData.Remove(LoadedAnimMontage);
+	if(AnimMontagePlayData.bForcePlay)
+	{
+		return ForcePlayAnimMontage(AnimMontagePlayData);
+	}
+	return TryPlayAnimMontage(AnimMontagePlayData);
 }
 
 float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
 {
-	if(!OwnerCharacter || OwnerCharacter->GetCurrentMontage())
+	if(!OwnerCharacter.IsValid() || OwnerCharacter->GetCurrentMontage())
 	{
 		return -1.f;
 	}
-	return OwnerCharacter->PlayAnimMontage(AnimMontageData.MontageToPlay);
+	return Internal_PlayMontage(AnimMontageData);
 }
 
 void UCharacterAnimationComponent::StopAnimMontage(UAnimMontage* Montage)
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
@@ -53,7 +103,7 @@ void UCharacterAnimationComponent::StopAnimMontage(UAnimMontage* Montage)
 
 float UCharacterAnimationComponent::ForcePlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
 {
-	if(!AnimMontageData.MontageToPlay)
+	if(!AnimMontageData.MontageToPlay.IsValid())
 	{
 		return -1.f;
 	}
@@ -63,52 +113,61 @@ float UCharacterAnimationComponent::ForcePlayAnimMontage(const FAnimMontagePlayD
 
 void UCharacterAnimationComponent::SetAnimationOverlay(const FGameplayTag& NewOverlay)
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
-	OwnerCharacter->SetOverlayMode(NewOverlay);
+	// TODO ALS
+	// OwnerCharacter->SetOverlayMode(NewOverlay);
 }
 
 void UCharacterAnimationComponent::StartRagdolling()
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
 	OwningTagComponent->AddTag(CommonGameState::Ragdoll);
-	OwnerCharacter->StartRagdolling();
+	// TODO ALS
+	// OwnerCharacter->StartRagdolling();
+	SetComponentTickEnabled(true);
 }
 
 void UCharacterAnimationComponent::StopRagdolling()
 {
-	if(!OwnerCharacter)
+	if(!OwnerCharacter.IsValid())
 	{
 		return;
 	}
 	OwningTagComponent->RemoveTag(CommonGameState::Ragdoll);
-	OwnerCharacter->StopRagdolling();
+	// TODO ALS
+	// OwnerCharacter->StopRagdolling();
+	SetComponentTickEnabled(false);
 }
 
 float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData)
-{
-	if (!AnimMontagePlayData.MontageToPlay)
+{	
+	if(AnimMontagePlayData.MontageToPlay.IsValid())
 	{
-		return 0.f;
-	}	
-	AnimMontagePlayData.MontageToPlay->bEnableAutoBlendOut = AnimMontagePlayData.bShouldBlendOut;
-	return OwnerCharacter->PlayAnimMontage(AnimMontagePlayData.MontageToPlay, AnimMontagePlayData.PlayRate, AnimMontagePlayData.MontageSection);
+		return OwnerCharacter->PlayAnimMontage(AnimMontagePlayData.MontageToPlay.Get(), AnimMontagePlayData.PlayRate, AnimMontagePlayData.MontageSection);	
+	}
+	return 0.f;
 }
 
 void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange)
 {
 	// TODO Add condition for knocking character off of mount on hit reactions
-	if(OwnerCharacter->IsMounted())
+	if(const UMountManagerComponent* MountManager = GetOwner()->FindComponentByClass<UMountManagerComponent>())
 	{
-		return;
+		if(MountManager->IsMounted())
+		{
+			return;
+		}	
 	}
 	
 	StartRagdolling();
+	// TODO weird hack to stop errors
+	// OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
 	OwnerCharacter->GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
 }
 
@@ -121,7 +180,7 @@ void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
 	
 	if (LastRagdollVelocity.Size() > 100)
 	{
-		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery, .1f, false);
+		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, .1f, false);
 	}
 	else
 	{
@@ -136,16 +195,18 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 	{
 		ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(EHitReactType::Knockback_VeryLight);
 	}
-	else if(bShouldRecoverFromKnockback && ImpulseValue == 0.f)
+	
+	else if((bShouldRecoverFromKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Immovable))
 	{
 		return;
 	}
+	
 	const float KnockdownDuration = UCommonCombatUtils::GetKnockbackRecoveryTime(HitReactEvent.HitReactType);
 	const FName HitBoneName = UCommonCombatUtils::GetNearestValidBoneForImpact(HitReactEvent.HitResult.BoneName);
 	Internal_ApplyCharacterKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);
 	if(bShouldRecoverFromKnockback)
 	{
-		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
+		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
 	}
 }
 
@@ -163,12 +224,10 @@ void UCharacterAnimationComponent::Internal_TryPlayHitReact(const FDamageHitReac
 	
 	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Chainsaw || HitReactEvent.DeathReactType == EHitReactType::HitReact_Chainsaw)
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactChainsaw);
-		PlayData.bShouldBlendOut = false;
+		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactChainsaw).Get();
 	} else
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection));
-		PlayData.bShouldBlendOut = true;
+		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();
 	}
 	
 	ForcePlayAnimMontage(PlayData);

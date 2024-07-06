@@ -10,4 +10,7 @@ UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API UAreaOfEffectActivation : public UBaseActivation
 {
 	GENERATED_BODY()
+
+protected:
+	FORCEINLINE virtual float GetOutlineRange() const override { return DEFAULT_OUTLINE_DISTANCE; }
 };

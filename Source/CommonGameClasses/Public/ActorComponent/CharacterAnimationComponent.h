@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "Character/CommonCharacter.h"
 #include "Components/ActorComponent.h"
+#include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CharacterAnimationComponent.generated.h"
 
-struct FAnimMontagePlayData;
+class UCommonAnimInstance;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API UCharacterAnimationComponent : public UActorComponent
@@ -21,9 +22,11 @@ public:
 	float TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
 	void StopAnimMontage(UAnimMontage* Montage = nullptr);
 	float ForcePlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
-	
+
 	void SetAnimationOverlay(const FGameplayTag& NewOverlay);
+	UFUNCTION(BlueprintCallable)
 	void StartRagdolling();
+	UFUNCTION(BlueprintCallable)
 	void StopRagdolling();
 	
 protected:
@@ -31,6 +34,15 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UFUNCTION()
+	void HandleMontageEnded(UAnimMontage* EndedMontage, bool bInterrupted);
+	UFUNCTION()
+	void HandleCurrentWoundChangedEvent(const FCurrentWoundEventPayload& CurrentWoundEventPayload);
+	UFUNCTION()
+	void HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload);
+	UFUNCTION()
+	float HandleMontageLoadedEvent(TSoftObjectPtr<UAnimMontage> LoadedAnimMontage);
+	
 	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
 	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
 	void Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bShouldRecoverFromKnockback = true);
@@ -40,12 +52,25 @@ private:
 	void Internal_RagdollUpdate();
 	
 	UPROPERTY()
-	ACommonCharacter* OwnerCharacter;
+	TWeakObjectPtr<ACommonCharacter> OwnerCharacter;
 	UPROPERTY()
-	UGameplayTagComponent* OwningTagComponent;
+	TWeakObjectPtr<UCommonAnimInstance> OwnerAnimInstance;
+	UPROPERTY()
+	TWeakObjectPtr<UGameplayTagComponent> OwningTagComponent;
+	UPROPERTY()
+	FCharacterMontageEnded CharacterMontageEnded;	
+	
 	FRotator ControlRotation;
+
+	// Used for async loading, will play anim after loaded
+	TMap<TSoftObjectPtr<UAnimMontage>, FAnimMontagePlayData> CachedMontageData;
 
 	// Ragdolling
 	FTimerHandle TimerHandle_Ragdoll;
 	FVector LastRagdollVelocity = FVector::ZeroVector;
+
+public:
+	FORCEINLINE TWeakObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
+	FORCEINLINE FCharacterMontageEnded& OnCharacterMontageEnded() { return CharacterMontageEnded; }
+	FORCEINLINE TWeakObjectPtr<UAnimMontage> GetCurrentPlayingMontage() const { return OwnerCharacter.IsValid() ? OwnerCharacter->GetCurrentMontage() : nullptr; }
 };

@@ -1,6 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ActorComponent/InteractionComponent.h"
+
+#include "API/Interactable.h"
 #include "Utils/CommonInteractUtils.h"
 
 UInteractionComponent::UInteractionComponent()
@@ -46,11 +48,11 @@ void UInteractionComponent::Internal_SetupInteractionTimeline()
 	Timeline.SetLooping(false);
 	
 	FOnTimelineEvent InteractProgressFunction;
-	InteractProgressFunction.BindDynamic(this, &UInteractionComponent::Internal_InteractionTick);
+	InteractProgressFunction.BindDynamic(this, &ThisClass::Internal_InteractionTick);
 	Timeline.SetTimelinePostUpdateFunc(InteractProgressFunction);
 	
 	FOnTimelineEvent InteractFinishedEvent;
-	InteractFinishedEvent.BindDynamic(this, &UInteractionComponent::Internal_InteractionFinished);
+	InteractFinishedEvent.BindDynamic(this, &ThisClass::Internal_InteractionFinished);
 	Timeline.SetTimelineFinishedFunc(InteractFinishedEvent);
 
 	SetComponentTickEnabled(false);
@@ -58,9 +60,9 @@ void UInteractionComponent::Internal_SetupInteractionTimeline()
 
 void UInteractionComponent::SwitchOutlineOnAllMeshes(bool bShouldOutline)
 {
-	for(UMeshComponent* CurrMesh : OwnerMeshes)
+	for(TWeakObjectPtr<UMeshComponent> CurrMesh : OwnerMeshes)
 	{
-		if(CurrMesh)
+		if(!CurrMesh.IsStale())
 		{
 			const int32 OutlineColorInt = UCommonInteractUtils::GetOutlineInt(GetOwner());
 			CurrMesh->SetRenderCustomDepth(bShouldOutline);
@@ -123,12 +125,12 @@ void UInteractionComponent::Internal_InteractionFinished()
 {
 	// If the instigator has been set, we want to finish the this interaction because the timeline is in the forward direction.
 	// If not, the timeline was moving backward (and resetting) so ignore this
-	if(CachedInstigatingActor)
+	if(CachedInstigatingActor.IsValid())
 	{
-		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor, true));	
+		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor.Get(), true));	
 	} else
 	{
-		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(CachedInstigatingActor, false));	
+		InteractionStartedEvent.Broadcast(FInteractionStartedEventPayload(nullptr, false));	
 	}
 	SetComponentTickEnabled(false);
 }

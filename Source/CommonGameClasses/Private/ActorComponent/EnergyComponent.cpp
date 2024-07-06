@@ -9,11 +9,11 @@ void UEnergyComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	BroadcastEnergyChangedEvent();
-}
+}  
 
-bool UEnergyComponent::TrySpendResource(const float RequestedAmount)
+bool UEnergyComponent::TryConsumeResourceAmount(const float RequestedAmount)
 {
-	if(Super::TrySpendResource(RequestedAmount))
+	if(Super::TryConsumeResourceAmount(RequestedAmount))  
 	{
 		BroadcastEnergyChangedEvent();
 		return true;
@@ -21,9 +21,9 @@ bool UEnergyComponent::TrySpendResource(const float RequestedAmount)
 	return false;
 }
 
-void UEnergyComponent::GiveResource(const float AmountToGive)
+void UEnergyComponent::TryGiveResourceAmount(const float AmountToGive)
 {
-	Super::GiveResource(AmountToGive);
+	Super::TryGiveResourceAmount(AmountToGive);
 	BroadcastEnergyChangedEvent();
 }
 
@@ -35,7 +35,7 @@ void UEnergyComponent::BroadcastEnergyChangedEvent() const
 	EnergyAmountChanged.Broadcast(EnergyEventPayload);
 }
 
-float UEnergyComponent::CalculateResourceCost(const float RequestedAmount) const
+float UEnergyComponent::CalculateConsumptionAmount(const float RequestedAmount) const
 {
 	return RequestedAmount;
 }

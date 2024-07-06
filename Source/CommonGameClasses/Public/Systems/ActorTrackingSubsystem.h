@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/CommonTypes.h"
+#include "..\Types\CommonInteractTypes.h"
 #include "UObject/Object.h"
 #include "ActorTrackingSubsystem.generated.h"
 
@@ -21,7 +21,7 @@ struct FWorldActorTrackerEntry
 	};
 	
 	UPROPERTY()
-	TArray<AActor*> Actors;
+	TArray<TWeakObjectPtr<AActor>> Actors;
 };
 
 /**
@@ -33,8 +33,8 @@ class COMMONGAMECLASSES_API UActorTrackingSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	static UActorTrackingSubsystem* GetSubsystemFromWorld(const UWorld* World);
-	static UActorTrackingSubsystem* GetSubsystemFromActor(const AActor* Actor);
+	static UActorTrackingSubsystem* GetSubsystemFromWorld(const TWeakObjectPtr<UWorld> World);
+	static UActorTrackingSubsystem* GetSubsystemFromActor(const TWeakObjectPtr<AActor> Actor);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|ActorTracking")
 	TArray<AActor*> GetAllActorsOfClass_TrackedOnly(TSubclassOf<AActor> ActorClass);
@@ -44,11 +44,11 @@ public:
 	void TryRemoveActorFromQuestableArray(AActor* InActor);
 	
 	UPROPERTY()
-	TArray<AActor*> QuestRelevantActors;
+	TArray<TWeakObjectPtr<AActor>> QuestRelevantActors;
 	UPROPERTY()
-	TArray<AActor*> AlliedActors;
+	TArray<TWeakObjectPtr<AActor>> AlliedActors;
 	UPROPERTY()
-	TArray<AActor*> EnemyActors;
+	TArray<TWeakObjectPtr<AActor>> EnemyActors;
 	UPROPERTY()
 	TMap<EAffiliation, FWorldActorTrackerEntry> ActorsOfAffiliation;
 	UPROPERTY()

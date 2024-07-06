@@ -7,41 +7,72 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonTagTypes.h"
+#include "Utils/CommonCoreUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
 ULockOnComponent::ULockOnComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	SelectedActor = nullptr;
 }
 
 void ULockOnComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	FOnTimelineFloat CoverLerpFunction;
-	CoverLerpFunction.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionUpdate);
-	LockOnInterpTimeline.AddInterpFloat(LockOnTransitionCurve, CoverLerpFunction);
+
+	LockOnInterpTimeline.SetTimelineLength(LockOnSlideDuration);
+	LockOnInterpTimeline.SetTimelineLengthMode(TL_TimelineLength);
 	LockOnInterpTimeline.SetLooping(false);
-
-	FOnTimelineEvent CoverLerpFinishedEvent;
-	CoverLerpFinishedEvent.BindDynamic(this, &ULockOnComponent::Internal_InterpTransitionFinished);
-	LockOnInterpTimeline.SetTimelineFinishedFunc(CoverLerpFinishedEvent);
+	
+	FOnTimelineEvent InterpUpdateFunction;
+	InterpUpdateFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionUpdate);
+	LockOnInterpTimeline.SetTimelinePostUpdateFunc(InterpUpdateFunction);
+	
+	FOnTimelineEvent InterpFinishedFunction;
+	InterpFinishedFunction.BindDynamic(this, &ThisClass::Internal_InterpTransitionFinished);
+	LockOnInterpTimeline.SetTimelineFinishedFunc(InterpFinishedFunction);
+	
+	SetComponentTickEnabled(false);
 }
 
-void ULockOnComponent::InterpToBestTargetForMeleeAttack(TFunction<void()> InFinishedFunction)
+void ULockOnComponent::InterpToBestTargetForMeleeAttack()
 {
-	InterpToActor(Internal_TraceForTarget(), InFinishedFunction);
+	const AActor* OwnerActor = GetOwner();
+	if(!OwnerActor)
+	{
+		return;
+	}
+
+	TWeakObjectPtr<AActor> SelectedTarget;
+	// If player controlled owner, interp to hovered actor if withiin valid distance
+	if(UCommonCoreUtils::IsObjectPlayerControlled(OwnerActor))
+	{
+		SelectedTarget = UCommonCoreUtils::GetHoveredInteractionActorByPlayerController(this);
+	}
+
+	if(!Internal_IsActorValidTarget(SelectedTarget))
+	{
+		SelectedTarget = Internal_TraceForTarget();
+		if(!SelectedTarget.IsValid())
+		{
+			return;
+		}
+	}
+	
+	UGameplayTagComponent::AddTagToActor(SelectedTarget.Get(), CommonGameState::Stunned);
+	InterpToActor(SelectedTarget);	
 }
 
-void ULockOnComponent::InterpToActor(AActor* ActorToInterpTo, TFunction<void()> InFinishedFunction)
+void ULockOnComponent::InterpToActor(TWeakObjectPtr<AActor> ActorToInterpTo)
 {
+	SetComponentTickEnabled(true);
 	SelectedActor = ActorToInterpTo;
-	if(!SelectedActor)
+	if(!SelectedActor.IsValid())
 	{
 		return;
 	}
 	
-	OnFinishedFunction = InFinishedFunction;	
 	if(AActor* SourceActor = GetOwner(); bUseControllerRotation)
 	{
 		SourceActor->SetActorRotation(Internal_GetControllerAndActorBlendedRotation(SourceActor));
@@ -66,16 +97,16 @@ void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void ULockOnComponent::Internal_StartInterpTransition()
 {
-	if(!SelectedActor)
+	if(!SelectedActor.IsValid())
 	{
 		return;
 	}
 	LockOnInterpTimeline.IsPlaying() ? LockOnInterpTimeline.Play() : LockOnInterpTimeline.PlayFromStart();
 }
 
-void ULockOnComponent::Internal_InterpTransitionUpdate(float Alpha)
+void ULockOnComponent::Internal_InterpTransitionUpdate()
 {
-	if(!SelectedActor)
+	if(!SelectedActor.IsValid())
 	{
 		return;
 	}
@@ -83,24 +114,22 @@ void ULockOnComponent::Internal_InterpTransitionUpdate(float Alpha)
 	FTransform TargetTransform;
 	TargetTransform.SetLocation(FVector(TargetActorLocation.X, TargetActorLocation.Y, SelectedActorTransform.GetLocation().Z));
 	TargetTransform.SetRotation(FQuat(TargetActorRotation));
+	const float Alpha = LockOnInterpTimeline.GetPlaybackPosition() / LockOnInterpTimeline.GetTimelineLength();
 	const FTransform& NewActorTransform = UKismetMathLibrary::TLerp(SelectedActorTransform, TargetTransform, Alpha, ELerpInterpolationMode::QuatInterp);
 	GetOwner()->SetActorLocationAndRotation(NewActorTransform.GetTranslation(), NewActorTransform.GetRotation(), true);
 }
 
 void ULockOnComponent::Internal_InterpTransitionFinished()
 {
-	SelectedActor = nullptr;
-	if(OnFinishedFunction)
-	{
-		OnFinishedFunction();
-	}
-	OnFinishedFunction.Reset();
+	UGameplayTagComponent::RemoveTagFromActor(SelectedActor.Get(), CommonGameState::Stunned);
+	SelectedActor.Reset();
+	SetComponentTickEnabled(false);
 }
 
-AActor* ULockOnComponent::Internal_TraceForTarget() const
+TWeakObjectPtr<AActor> ULockOnComponent::Internal_TraceForTarget() const
 {
-	AActor* SourceActor = GetOwner();
-	if(!SourceActor)
+	TWeakObjectPtr<AActor> SourceActor = GetOwner();
+	if(!SourceActor.IsValid())
 	{
 		return nullptr;
 	}
@@ -120,10 +149,10 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 		{
 			StartTrace = SourceActor->GetActorLocation() + TraceOffset;
 			FRotator FinalRot = Internal_GetControllerAndActorBlendedRotation(SourceActor);
-			EndTrace = StartTrace + (FinalRot.Vector().RotateAngleAxis(YawFinal, FVector(0, 0, 1))) * ArcDistance;
+			EndTrace = StartTrace + (FinalRot.Vector().RotateAngleAxis(YawFinal, FVector(0, 0, 1))) * MELEE_OUTLINE_DISTANCE;
 		} else
 		{
-			FVector RotatedVector = SourceActor->GetActorForwardVector().RotateAngleAxis(YawFinal, FVector(0, 0, 1)) * ArcDistance;
+			FVector RotatedVector = SourceActor->GetActorForwardVector().RotateAngleAxis(YawFinal, FVector(0, 0, 1)) * MELEE_OUTLINE_DISTANCE;
 			StartTrace = SourceActor->GetActorLocation() + TraceOffset;
 			EndTrace = RotatedVector + StartTrace;
 			StartTrace += TraceOffset;
@@ -131,9 +160,9 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 
 		TArray<TEnumAsByte <EObjectTypeQuery>> ObjectTypes;
 		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-		UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, SweepRadius, ObjectTypes, false, { SourceActor }, bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, TempHitResults, true);
+		UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, SweepRadius, ObjectTypes, false, { SourceActor.Get() }, bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, TempHitResults, true);
 		for (FHitResult HitResult : TempHitResults) {
-			if(UCommonInteractUtils::AreActorsEnemies(SourceActor, HitResult.GetActor()))
+			if(UCommonInteractUtils::AreActorsEnemies(SourceActor.Get(), HitResult.GetActor()))
 			{
 				OutHitResults.Add(HitResult);
 			}
@@ -142,7 +171,7 @@ AActor* ULockOnComponent::Internal_TraceForTarget() const
 	return Internal_FindBestTargetFromActors(OutHitResults);
 }
 
-AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults) const
+TWeakObjectPtr<AActor> ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults)
 {
 	if(PotentialHitResults.Num() <= 0)
 	{
@@ -160,7 +189,7 @@ AActor* ULockOnComponent::Internal_FindBestTargetFromActors(TArray<FHitResult> P
 	return HitActors[0];
 }
 
-FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor) const
+FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(TWeakObjectPtr<AActor> SourceActor)
 {
 	const APlayerController* PlayerController = nullptr;
 	if(const APawn* PawnObj = Cast<APawn>(SourceActor))
@@ -180,3 +209,17 @@ FRotator ULockOnComponent::Internal_GetControllerAndActorBlendedRotation(AActor*
 	return FRotator(StartRot.Pitch, TempRot.Yaw, StartRot.Roll);
 }
 
+bool ULockOnComponent::Internal_IsActorValidTarget(TWeakObjectPtr<AActor> InActor) const
+{
+	if(!InActor.IsValid())
+	{
+		return false;
+	}
+
+	const AActor* OwnerActor = GetOwner();
+	if(!OwnerActor)
+	{
+		return false;
+	}
+	return UKismetMathLibrary::Vector_Distance(InActor->GetActorLocation(), OwnerActor->GetActorLocation()) > MELEE_OUTLINE_DISTANCE;
+}

@@ -10,24 +10,36 @@ void UHitscanActivation::Fire(int32 ActivationLevel)
 
 void UHitscanActivation::Internal_FireShot()
 {
-	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), 20.f);
-	K2_ProcessInstantHit(Impact);
+	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), TraceRadius);
+	K2N_ProcessInstantHit(Impact);
 }
 
-void UHitscanActivation::K2_ProcessInstantHit_Implementation(const FHitResult& Impact)
+void UHitscanActivation::K2N_ProcessInstantHit_Implementation(const FHitResult& Impact)
 {
 	const AActor* HitActor = Impact.GetActor();
-	K2_PlayTrailFX(HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
-	if(!HitActor || UCommonInteractUtils::AreActorsAllies(HitActor, GetOwner()))
+	K2_PlayTrailFX(Impact.TraceStart, HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
+	if(!HitActor || UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
+		if(bDrawDebugTrace)
+		{
+			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Red, false, .5f, 0, 1.f);
+		}
 		return;
 	}
 
 	if(!HitActor->FindComponentByClass<UEffectContainerComponent>())
 	{
+		if(bDrawDebugTrace)
+		{
+			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Red, false, .5f, 0, 1.f);
+		}
 		Internal_PlayWeaponMissEffectFX(Impact);
 	} else
 	{
+		if(bDrawDebugTrace)
+		{
+			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Green, false, .5f, 0, 1.f);	
+		}
 		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
 	}
 }

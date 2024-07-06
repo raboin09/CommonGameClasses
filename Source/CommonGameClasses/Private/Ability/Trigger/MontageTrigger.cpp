@@ -1,4 +1,5 @@
 ﻿#include "Ability/Trigger/MontageTrigger.h"
+
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/LockOnComponent.h"
@@ -6,53 +7,80 @@
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Types/CommonTagTypes.h"
 
-void UMontageTrigger::PressTrigger()
-{	
-	if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::ComboWindowEnabled))
-	{
-		UGameplayTagComponent::AddTagToActor(GetOwner(), CommonGameAbilityEvent::ComboActivated);
-		UGameplayTagComponent::RemoveTagFromActor(GetOwner(), CommonGameAbilityEvent::ComboWindowEnabled);
-		Internal_IncrementComboCounter();
-		if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
-		{
-			Internal_StartMontage();
-		}
-	}
-	else if(!UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Active))
-	{
-		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Committed))
-		{
-			return;
-		}
-		Internal_StartMontage();
-	}
+void UMontageTrigger::InitTriggerMechanism()
+{
+	K2_HandleInitTrigger();
+	CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>();
+	check(CharacterAnimationComponent.IsValid())
 }
 
-void UMontageTrigger::ReleaseTrigger()
+void UMontageTrigger::HandleSuccessfulTriggerPressed()
+{
+	if(bHasCombos)
+	{
+		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::ComboActivated))
+		{
+			Internal_IncrementComboCounter();
+		} else
+		{
+			Internal_ResetComboCounter();
+		}
+	}
+	K2_HandleBeforePressedTrigger();
+	Internal_StartMontage();
+	K2_HandleAfterPressedTrigger();
+	FTriggerEventPayload PressTriggerEventPayload;
+	PressTriggerEventPayload.ActivationLevel = bHasCombos ? ComboSectionIncrement : 1;
+	// Activation waits for montage notify to start
+	PressTriggerEventPayload.bStartActivationImmediately = false;
+	PressTriggerEventPayload.bMontageDrivesActivation = true;
+	TriggerPressedEvent.Broadcast(PressTriggerEventPayload);
+}
+
+void UMontageTrigger::HandleTriggerReleased()
 {
 	FTriggerEventPayload ReleaseTriggerEventPayload;
-	ReleaseTriggerEventPayload.ActivationLevel = 0;
+	ReleaseTriggerEventPayload.ActivationLevel = -1;
+	// We wait for the montage notify to active the weapon
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
 	ReleaseTriggerEventPayload.bMontageDrivesActivation = true;
 	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
+	K2_HandleReleasedTrigger();
 }
 
 void UMontageTrigger::ResetTrigger()
 {
-	Internal_ResetComboCounter();
+	TArray<FGameplayTag> StateTagsToRemove;
+	StateTagsToRemove.Add(CommonGameAbilityEvent::Active);
+	StateTagsToRemove.Add(CommonGameAbilityEvent::Activated);
+	if(bHasCombos)
+	{
+		StateTagsToRemove.Add(CommonGameAbilityEvent::ComboActivated);
+		Internal_ResetComboCounter();
+	}
+	UGameplayTagComponent::RemoveTagsFromActor(GetOwner(), StateTagsToRemove);
+}
+
+void UMontageTrigger::HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload)
+{
+	if(CharacterMontageEndedPayload.EndedMontage.Get() == MontageToPlay.Get() && CharacterMontageEndedPayload.UpcomingMontage.Get() != MontageToPlay.Get())
+	{
+		ResetTrigger();
+	}
+	CharacterAnimationComponent->OnCharacterMontageEnded().RemoveDynamic(this, &ThisClass::HandleMontageEnded);
 }
 
 FAnimMontagePlayData UMontageTrigger::Internal_GetPlayData() const
 {
 	FAnimMontagePlayData PlayData;	
-	PlayData.MontageToPlay = MontageToPlay;
-	PlayData.MontageSection = Internal_GetNextMontageSection();
+	PlayData.MontageToPlay = MontageToPlay.Get();
+	PlayData.MontageSection = K2N_GetNextMontageSection();
 	return PlayData;
 }
 
-FName UMontageTrigger::Internal_GetNextMontageSection() const
+FName UMontageTrigger::K2N_GetNextMontageSection_Implementation() const
 {
-	if(bRandomizeMontages)
+	if(bRandomizeMontageSection)
 	{
 		return FName(ComboPrefix + FString::FromInt(UKismetMathLibrary::RandomIntegerInRange(1, MaxComboSections)));
 	}
@@ -66,29 +94,21 @@ void UMontageTrigger::Internal_StartMontage()
 	{
 		return;
 	}
-	
-	if(UCharacterAnimationComponent* CharacterAnimationComponent = CurrentInstigator->FindComponentByClass<UCharacterAnimationComponent>())
-	{
-		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
-		CachedComboSection = PlayData.MontageSection;
-		CharacterAnimationComponent->TryPlayAnimMontage(PlayData);
-	}
-	
+
 	if(bShouldPlayerLockOnToNearestTarget)
 	{
-		if(ULockOnComponent* LockOnComponent = CurrentInstigator->FindComponentByClass<ULockOnComponent>(); LockOnComponent && CurrentInstigator->IsPlayerControlled())
+		if(ULockOnComponent* LockOnComponent = CurrentInstigator->FindComponentByClass<ULockOnComponent>())
 		{
 			LockOnComponent->InterpToBestTargetForMeleeAttack();
 		}
 	}
-	K2_AfterPressedTrigger();
-
-	FTriggerEventPayload PressTriggerEventPayload;
-	PressTriggerEventPayload.ActivationLevel = ComboSectionIncrement;
-	// Activation waits for montage notify to start
-	PressTriggerEventPayload.bStartActivationImmediately = false;
-	PressTriggerEventPayload.bMontageDrivesActivation = true;
-	TriggerPressedEvent.Broadcast(PressTriggerEventPayload);
+	
+	if(!CharacterAnimationComponent.IsStale())
+	{
+		const FAnimMontagePlayData PlayData = Internal_GetPlayData();
+		CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
+		CharacterAnimationComponent->OnCharacterMontageEnded().AddUniqueDynamic(this, &ThisClass::HandleMontageEnded);
+	}
 }
 
 void UMontageTrigger::Internal_IncrementComboCounter()

@@ -16,14 +16,14 @@ public:
 	ULockOnComponent();
 	virtual void BeginPlay() override;
 	
-	void InterpToBestTargetForMeleeAttack(TFunction<void()> InFinishedFunction = TFunction<void()>());
-	void InterpToActor(AActor* ActorToInterpTo, TFunction<void()> InFinishedFunction = TFunction<void()>());
+	void InterpToBestTargetForMeleeAttack();
+	void InterpToActor(TWeakObjectPtr<AActor> ActorToInterpTo);
 	
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	UCurveFloat* LockOnTransitionCurve;
+	float LockOnSlideDuration = .25f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	FVector TraceOffset = FVector(0.f, 0.f, 50.f);
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
@@ -31,32 +31,30 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	float ConeTraceArcWidth = 55.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	float SweepRadius = 55.f;		
+	float SweepRadius = 55.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	float ArcDistance = 300.f;
+	bool bUseControllerRotation = false;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	bool bUseControllerRotation;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	bool bDrawDebug;
+	bool bDrawDebug = false;
 	
 private:
-	AActor* Internal_TraceForTarget() const;
-	AActor* Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults) const;
-	FRotator Internal_GetControllerAndActorBlendedRotation(AActor* SourceActor) const;
+	TWeakObjectPtr<AActor> Internal_TraceForTarget() const;
+	static TWeakObjectPtr<AActor> Internal_FindBestTargetFromActors(TArray<FHitResult> PotentialHitResults);
+	static FRotator Internal_GetControllerAndActorBlendedRotation(TWeakObjectPtr<AActor> SourceActor);
+	// Check if not nullptr and if in distance
+	bool Internal_IsActorValidTarget(TWeakObjectPtr<AActor> InActor) const;
 	
 	void Internal_StartInterpTransition();
 	UFUNCTION()
-	void Internal_InterpTransitionUpdate(float Alpha);
+	void Internal_InterpTransitionUpdate();
 	UFUNCTION()
 	void Internal_InterpTransitionFinished();
-
-	TFunction<void()> OnFinishedFunction;
 	
 	FVector TargetActorLocation;
 	FRotator TargetActorRotation;
 
 	UPROPERTY(Transient)
-	AActor* SelectedActor;
+	TWeakObjectPtr<AActor> SelectedActor;
 	UPROPERTY()
 	FTimeline LockOnInterpTimeline;
 };

@@ -3,14 +3,47 @@
 
 #include "ActorComponent/AbilityComponent.h"
 
+#include "API/Ability/Ability.h"
 #include "API/Ability/ActivationMechanism.h"
 #include "GameFramework/Character.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Utils/CommonWorldUtils.h"
+#include "Systems/CommonSpawnSubsystem.h"
 
 UAbilityComponent::UAbilityComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UAbilityComponent::DestroyAbilities()
+{
+	TArray<FGameplayTag> AbilityKeys;
+	SlottedAbilities.GetKeys(AbilityKeys);
+	for(const FGameplayTag& Key : AbilityKeys)
+	{
+		Internal_RemoveAbilityInSlot(Key);
+	}
+}
+
+void UAbilityComponent::SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSlot)
+{
+	const TWeakInterfacePtr<IAbility> NewEquippedAbility = Internal_FindAbility(NewEquippedSlot);
+	if(NewEquippedAbility.IsStale())
+	{
+		return;
+	}
+
+	if(NewEquippedSlot == EquippedSlot)
+	{
+		return;
+	}
+
+	const TWeakInterfacePtr<IAbility> LastEquippedAbility = Internal_FindAbility(EquippedSlot);
+	if(!LastEquippedAbility.IsStale())
+	{
+		LastEquippedAbility->UnEquipAbility();
+	}
+	EquippedSlot = NewEquippedSlot;
+	NewEquippedAbility->EquipAbility();
+	AbilityEquipped.Broadcast(FNewAbilityEquippedPayload(NewEquippedAbility));
 }
 
 void UAbilityComponent::BeginPlay()
@@ -18,32 +51,30 @@ void UAbilityComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UAbilityComponent::AddAbilityFromClassInSlot(TSubclassOf<AActor> AbilityClass, const FGameplayTag& SlotTag)
+void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag& SlotTag)
 {
-	if(!AbilityClass || !AbilityClass->ImplementsInterface(UAbility::StaticClass()))
+	const TSubclassOf<AActor> ClassToSpawn = AbilityClass.LoadSynchronous();
+	const TWeakInterfacePtr<IAbility> SpawnedAbility = Internal_SpawnAbilityFromClass(ClassToSpawn);
+	if(!SpawnedAbility.IsValid())
 	{
 		return;
 	}
-	AActor* AbilityObj = UCommonWorldUtils::SpawnActorToPersistentWorld_Deferred<AActor>(AbilityClass, GetOwner(), Cast<APawn>(GetOwner()));
-	UCommonWorldUtils::FinishSpawningActor_Deferred(AbilityObj, GetOwner()->GetTransform());
-	const TScriptInterface<IAbility> SpawnedAbility = AbilityObj;
-	SlottedAbilities.Add(SlotTag, SpawnedAbility);
-	if(const ACharacter* CharOwner = Cast<ACharacter>(GetOwner()))
+	Internal_InitAndAttachAbilityToOwnerMesh(SpawnedAbility);
+	if(HasAbilityInSlot(SlotTag))
 	{
-		SpawnedAbility->InitAbility(CharOwner->GetMesh());
-	} else if(const APawn* PawnOwner = Cast<ACharacter>(GetOwner()))
+		Internal_RemoveAbilityInSlot(SlotTag);	
+	}
+	Internal_AddAbilityInSlot(SlotTag, SpawnedAbility);
+	if(SlotTag == EquippedSlot)
 	{
-		if(UMeshComponent* MeshComp = PawnOwner->FindComponentByClass<UMeshComponent>())
-		{
-			SpawnedAbility->InitAbility(MeshComp);
-		}
+		SpawnedAbility->EquipAbility();	
 	}
 }
 
 void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag& SlotTag)
 {
-	const TScriptInterface<IAbility> Ability = Internal_FindAbility(SlotTag);
-	if(!Ability)
+	const TWeakInterfacePtr<IAbility> Ability = Internal_FindAbility(SlotTag);
+	if(!Ability.IsValid())
 	{
 		return;
 	}
@@ -52,8 +83,8 @@ void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag& SlotTag)
 
 void UAbilityComponent::TryStopAbilityInSlot(const FGameplayTag& SlotTag)
 {
-	const TScriptInterface<IAbility> Ability = Internal_FindAbility(SlotTag);
-	if(!Ability)
+	const TWeakInterfacePtr<IAbility> Ability = Internal_FindAbility(SlotTag);
+	if(!Ability.IsValid())
 	{
 		return;
 	}
@@ -62,9 +93,10 @@ void UAbilityComponent::TryStopAbilityInSlot(const FGameplayTag& SlotTag)
 
 void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate)
 {
-	const TScriptInterface<IActivationMechanism> MechanismToActivate = AwaitingActivationDetails.MechanismAwaitingActivation;
-	if(!MechanismToActivate)
+	const TWeakInterfacePtr<IActivationMechanism> MechanismToActivate = AwaitingActivationDetails.MechanismAwaitingActivation;
+	if(!MechanismToActivate.IsValid())
 	{
+		ResetAwaitingActivationDetails();
 		return;
 	}
 
@@ -80,9 +112,63 @@ void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate)
 	}	
 }
 
-TScriptInterface<IAbility> UAbilityComponent::Internal_FindAbility(const FGameplayTag& SlotTag)
+TWeakInterfacePtr<IAbility> UAbilityComponent::Internal_SpawnAbilityFromClass(TSubclassOf<AActor> AbilityClass) const
 {
-	if(!SlottedAbilities.Contains(SlotTag))
+	if(!AbilityClass || !AbilityClass->ImplementsInterface(UAbility::StaticClass()))
+	{
+		return nullptr;
+	}
+	AActor* AbilityObj = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<AActor>(this, AbilityClass, GetOwner(), Cast<APawn>(GetOwner()));
+	UCommonSpawnSubsystem::FinishSpawningActor_Deferred(AbilityObj, GetOwner()->GetTransform());
+	return AbilityObj;
+}
+
+void UAbilityComponent::Internal_InitAndAttachAbilityToOwnerMesh(TWeakInterfacePtr<IAbility> AbilityToAttach) const
+{
+	if(const ACharacter* CharOwner = Cast<ACharacter>(GetOwner()))
+	{
+		AbilityToAttach->InitAbility(CharOwner->GetMesh());
+	} else if(const APawn* PawnOwner = Cast<ACharacter>(GetOwner()))
+	{
+		if(UMeshComponent* MeshComp = PawnOwner->FindComponentByClass<UMeshComponent>())
+		{
+			AbilityToAttach->InitAbility(MeshComp);
+		}
+	}
+}
+
+void UAbilityComponent::Internal_DestroyAbility(TWeakInterfacePtr<IAbility> AbilityToRemove)
+{
+	if(AbilityToRemove.IsStale())
+	{
+		return;
+	}
+	AbilityToRemove->UnEquipAbility();
+	AbilityToRemove->DestroyAbility();
+}
+
+void UAbilityComponent::Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, TWeakInterfacePtr<IAbility> AbilityToAdd)
+{
+	if(AbilityToAdd.IsValid())
+	{
+		SlottedAbilities.Add(SlotTag, AbilityToAdd);	
+	}	
+}
+
+void UAbilityComponent::Internal_RemoveAbilityInSlot(const FGameplayTag& SlotTag)
+{
+	const TWeakInterfacePtr<IAbility> AbilityToRemove = Internal_FindAbility(SlotTag);
+	if(AbilityToRemove.IsStale())
+	{
+		return;
+	}
+	Internal_DestroyAbility(AbilityToRemove);
+	SlottedAbilities.Remove(SlotTag);
+}
+
+TWeakInterfacePtr<IAbility> UAbilityComponent::Internal_FindAbility(const FGameplayTag& SlotTag) const
+{
+	if(!HasAbilityInSlot(SlotTag))
 	{
 		return nullptr;
 	}

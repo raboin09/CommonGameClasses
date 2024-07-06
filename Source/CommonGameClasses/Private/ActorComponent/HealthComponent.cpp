@@ -2,8 +2,7 @@
 
 
 #include "ActorComponent/HealthComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonCoreTypes.h"
+#include "ActorComponent/CharacterAnimationComponent.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -23,70 +22,75 @@ void UHealthComponent::BeginPlay()
 	CurrentHealthChanged.Broadcast(WoundEventPayload);
 }
 
-float UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingActor, const FDamageHitReactEvent& HitReactEvent)
+void UHealthComponent::TakeDamage(const float RawDamage, AActor* InstigatingActor, const FDamageHitReactEvent& HitReactEvent)
 {
+	// If the owner is already dead, apply hit react but don't do any damage
 	if(!ResourcePoolContainer.HasResources())
 	{
 		FCurrentWoundEventPayload WoundEventPayload;
 		WoundEventPayload.DamageHitReactEvent = HitReactEvent;
 		WoundEventPayload.bNaturalChange = true;
-		CurrentHealthChanged.Broadcast(WoundEventPayload);	
-		return 0.f;
+		CurrentHealthChanged.Broadcast(WoundEventPayload);
+		return;
+	}
+
+	float ActualDamageToApply = RawDamage;
+	// If incoming damage is NOT lethal, apply damage and return. Otherwise, broadcast death event.
+	if(!CanConsumeResourceAmount(RawDamage))
+	{
+		ActualDamageToApply = GetCurrentHealth();
 	}
 
 	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
-	if(!CanSpendResourceAmount(RawDamage))
+	TryConsumeResourceAmount(ActualDamageToApply);
+	
+	if(GetAvailableResourceAmount() <= 0)
 	{
-		return false;
-	}
-	const float Delta = CalculateResourceCost(RawDamage);
-	const float ActualResourcesTaken = ResourcePoolContainer.ConsumeResources(Delta);
-	const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
-	if(ResourcePoolContainer.HasResources())
-	{
+		FActorDeathEventPayload DeathEventPayload;
+		DeathEventPayload.DyingDamage = RawDamage;
+		DeathEventPayload.DyingActor = GetOwner();
+		DeathEventPayload.KillingActor = InstigatingActor;
+		DeathEventPayload.HitReactEvent = HitReactEvent;
+		DeathEventPayload.HitResult = HitReactEvent.HitResult;
+		ActorDeath.Broadcast(DeathEventPayload);	
+	} else {
+		const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
 		FCurrentWoundEventPayload WoundEventPayload;
 		WoundEventPayload.InstigatingActor = InstigatingActor;
 		WoundEventPayload.ReceivingActor = GetOwner();
 		WoundEventPayload.NewWound = NewWound;
 		WoundEventPayload.OldWound = OldWound;
 		WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
-		WoundEventPayload.Delta = ActualResourcesTaken;
+		WoundEventPayload.Delta = ActualDamageToApply;
 		WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
 		WoundEventPayload.bNaturalChange = true;
 		WoundEventPayload.bWasDamage = true;
 		WoundEventPayload.DamageHitReactEvent = HitReactEvent;
-		WoundEventPayload.DamageHitReactEvent.DamageTaken = ActualResourcesTaken;
-		CurrentHealthChanged.Broadcast(WoundEventPayload);		
-	} else
-	{
-		FActorDeathEventPayload DeathEventPayload;
-		DeathEventPayload.DyingDamage = ActualResourcesTaken;
-		DeathEventPayload.DyingActor = GetOwner();
-		DeathEventPayload.KillingActor = InstigatingActor;
-		DeathEventPayload.HitReactEvent = HitReactEvent;
-		DeathEventPayload.HitResult = HitReactEvent.HitResult;
-		ActorDeath.Broadcast(DeathEventPayload);
+		WoundEventPayload.DamageHitReactEvent.DamageTaken = RawDamage;
+		CurrentHealthChanged.Broadcast(WoundEventPayload);
 	}
-	return ActualResourcesTaken;
 }
 
 void UHealthComponent::ApplyHeal(const float RawHeal, AActor* InstigatingActor)
 {
 	const float Delta = RawHeal;
 	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
-	ResourcePoolContainer.GiveResources(Delta);
+	TryGiveResourceAmount(Delta);
 	const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
-	FCurrentWoundEventPayload WoundEventPayload;
-	WoundEventPayload.InstigatingActor = InstigatingActor;
-	WoundEventPayload.ReceivingActor = GetOwner();
-	WoundEventPayload.NewWound = NewWound;
-	WoundEventPayload.OldWound = OldWound;
-	WoundEventPayload.bWasDamage = false;
-	WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
-	WoundEventPayload.Delta = Delta;
-	WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
-	WoundEventPayload.bNaturalChange = true;
-	CurrentHealthChanged.Broadcast(WoundEventPayload);
+	if(Delta > 0)
+	{
+		FCurrentWoundEventPayload WoundEventPayload;
+		WoundEventPayload.InstigatingActor = InstigatingActor;
+		WoundEventPayload.ReceivingActor = GetOwner();
+		WoundEventPayload.NewWound = NewWound;
+		WoundEventPayload.OldWound = OldWound;
+		WoundEventPayload.bWasDamage = false;
+		WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
+		WoundEventPayload.Delta = Delta;
+		WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
+		WoundEventPayload.bNaturalChange = true;
+		CurrentHealthChanged.Broadcast(WoundEventPayload);	
+	}
 }
 
 void UHealthComponent::AddMaxWounds(float MaxWoundsToAdd)
@@ -94,57 +98,18 @@ void UHealthComponent::AddMaxWounds(float MaxWoundsToAdd)
 	const float OldWounds = ResourcePoolContainer.NumPoolsInContainer;
 	ResourcePoolContainer.AddToMaxResourcesPerPool(MaxWoundsToAdd);
 	const float NewWounds = ResourcePoolContainer.NumPoolsInContainer;
-	FMaxWoundsEventPayload MaxWoundsEventPayload;
-	MaxWoundsEventPayload.Delta = NewWounds - OldWounds;
-	MaxWoundsEventPayload.NewMaxWounds = NewWounds;
-	MaxWoundsEventPayload.OldMaxWounds = OldWounds;
-	MaxWoundsChanged.Broadcast(MaxWoundsEventPayload);	
+	const float Delta = NewWounds - OldWounds;
+	if(Delta > 0)
+	{
+		FMaxWoundsEventPayload MaxWoundsEventPayload;
+		MaxWoundsEventPayload.Delta = Delta;
+		MaxWoundsEventPayload.NewMaxWounds = NewWounds;
+		MaxWoundsEventPayload.OldMaxWounds = OldWounds;
+		MaxWoundsChanged.Broadcast(MaxWoundsEventPayload);		
+	}
 }
 
-float UHealthComponent::CalculateResourceCost(const float RequestedAmount) const
+float UHealthComponent::CalculateConsumptionAmount(const float RequestedAmount) const
 {
 	return RequestedAmount;
-}
-
-bool UHealthComponent::TrySpendResource(const float RequestedAmount)
-{
-	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
-	const float OldSum = ResourcePoolContainer.GetSumOfAllResourcePools();
-	if(Super::TrySpendResource(RequestedAmount))
-	{
-		const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
-		FCurrentWoundEventPayload WoundEventPayload;
-		WoundEventPayload.InstigatingActor = GetOwner();
-		WoundEventPayload.ReceivingActor = GetOwner();
-		WoundEventPayload.NewWound = NewWound;
-		WoundEventPayload.OldWound = OldWound;
-		WoundEventPayload.bWasDamage = false;
-		WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
-		WoundEventPayload.Delta = OldSum - ResourcePoolContainer.GetSumOfAllResourcePools();
-		WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
-		WoundEventPayload.bNaturalChange = true;
-		CurrentHealthChanged.Broadcast(WoundEventPayload);
-		return true;
-	}
-	return false;
-}
-
-void UHealthComponent::GiveResource(const float AmountToGive)
-{
-	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
-	const float OldSum = ResourcePoolContainer.GetSumOfAllResourcePools();
-	Super::GiveResource(AmountToGive);
-	const float Delta = OldSum - ResourcePoolContainer.GetSumOfAllResourcePools();
-	const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
-	FCurrentWoundEventPayload WoundEventPayload;
-	WoundEventPayload.InstigatingActor = GetOwner();
-	WoundEventPayload.ReceivingActor = GetOwner();
-	WoundEventPayload.NewWound = NewWound;
-	WoundEventPayload.OldWound = OldWound;
-	WoundEventPayload.bWasDamage = false;
-	WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
-	WoundEventPayload.Delta = Delta;
-	WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
-	WoundEventPayload.bNaturalChange = true;
-	CurrentHealthChanged.Broadcast(WoundEventPayload);
 }

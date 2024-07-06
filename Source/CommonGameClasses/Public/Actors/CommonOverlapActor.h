@@ -30,11 +30,11 @@ class COMMONGAMECLASSES_API ACommonOverlapActor : public ACommonActor
 	void Deactivate();
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
-	UMeshComponent* GetMesh() const;
-	virtual UMeshComponent* GetMesh_Implementation() const PURE_VIRTUAL(ACommonOverlapActor::GetMesh_Implementation, return nullptr;);
+	UMeshComponent* K2N_GetMesh() const;
+	virtual UMeshComponent* K2N_GetMesh_Implementation() const PURE_VIRTUAL(ACommonOverlapActor::K2N_GetMesh_Implementation, return nullptr;);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
-	UShapeComponent* GetCollisionComponent() const;
-	virtual UShapeComponent* GetCollisionComponent_Implementation() const  PURE_VIRTUAL(ACommonOverlapActor::GetCollisionComponent_Implementation, return nullptr;);
+	UShapeComponent* K2N_GetCollisionComponent() const;
+	virtual UShapeComponent* K2N_GetCollisionComponent_Implementation() const  PURE_VIRTUAL(ACommonOverlapActor::K2N_GetCollisionComponent_Implementation, return nullptr;);
 	
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON")
@@ -43,11 +43,11 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|Events")
-	void K2_HandleOverlapEvent(AActor* OtherActor, const FHitResult& HitResult);
-	virtual void K2_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult);
+	void K2N_HandleOverlapEvent(AActor* OtherActor, const FHitResult& HitResult);
+	virtual void K2N_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Events")
-	void K2_HandleEndOverlapEvent(AActor* ExitingActor);
-	virtual void K2_HandleEndOverlapEvent_Implementation(AActor* ExitingActor);
+	void K2N_HandleEndOverlapEvent(AActor* ExitingActor);
+	virtual void K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor);
 	
 	virtual void HandleActorDeath();	
 	UFUNCTION()
@@ -67,5 +67,5 @@ protected:
 	float DeathBuffer;
 
 	UPROPERTY()
-	TArray<AActor*> HitActors;
+	TArray<TWeakObjectPtr<AActor>> HitActors;
 };

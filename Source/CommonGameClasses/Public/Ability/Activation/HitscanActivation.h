@@ -13,9 +13,9 @@ class COMMONGAMECLASSES_API UHitscanActivation : public URangedActivation
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_PlayTrailFX(const FVector& EndPoint);
+	void K2_PlayTrailFX(const FVector& StartPoint, const FVector& EndPoint);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2_ProcessInstantHit(const FHitResult& Impact);
+	void K2N_ProcessInstantHit(const FHitResult& Impact);
 	
 	virtual void Fire(int32 ActivationLevel = -1) override;
 	

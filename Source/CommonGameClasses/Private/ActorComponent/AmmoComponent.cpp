@@ -15,15 +15,15 @@ void UAmmoComponent::BeginPlay()
 	BroadcastAmmoUsage();
 }
 
-void UAmmoComponent::GiveResource(const float AmountToGive)
+void UAmmoComponent::TryGiveResourceAmount(const float AmountToGive)
 {
-	Super::GiveResource(AmountToGive);
+	Super::TryGiveResourceAmount(AmountToGive);
 	BroadcastAmmoUsage();
 }
 
-bool UAmmoComponent::TrySpendResource(const float RequestedAmount)
+bool UAmmoComponent::TryConsumeResourceAmount(const float RequestedAmount)
 {
-	if(Super::TrySpendResource(RequestedAmount))
+	if(Super::TryConsumeResourceAmount(RequestedAmount))
 	{
 		BroadcastAmmoUsage();
 		return true;
@@ -31,7 +31,7 @@ bool UAmmoComponent::TrySpendResource(const float RequestedAmount)
 	return false;
 }
 
-float UAmmoComponent::CalculateResourceCost(const float RequestedAmount) const
+float UAmmoComponent::CalculateConsumptionAmount(const float RequestedAmount) const
 {
 	return RequestedAmount;
 }

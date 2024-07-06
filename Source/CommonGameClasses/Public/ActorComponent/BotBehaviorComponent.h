@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "Components/ActorComponent.h"
 #include "BotBehaviorComponent.generated.h"
-
-class UBehaviorTree;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API UBotBehaviorComponent : public UActorComponent
@@ -18,6 +17,7 @@ class COMMONGAMECLASSES_API UBotBehaviorComponent : public UActorComponent
 	////////////////////////////////
 public:
 	UBotBehaviorComponent();
+	virtual void BeginPlay() override;
 
 	////////////////////////////////
 	/// Events
@@ -31,11 +31,11 @@ public:
 	////////////////////////////////
 protected:
 	UPROPERTY(EditAnywhere, Category="CUSTOM|Defaults")
-	UBehaviorTree* DefaultBehaviorTree;
+	TSoftObjectPtr<UBehaviorTree> DefaultBehaviorTree;
 
 	/////////////////////////////////
 	/// FORCEINLINE
 	/////////////////////////////////
 public:
-	FORCEINLINE virtual UBehaviorTree* GetDefaultBehavior() const { return DefaultBehaviorTree; }
+	FORCEINLINE virtual TSoftObjectPtr<UBehaviorTree> GetDefaultBehavior() const { return DefaultBehaviorTree; }
 };

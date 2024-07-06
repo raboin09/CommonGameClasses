@@ -6,8 +6,8 @@
 #include "ActorComponent/HealthComponent.h"
 #include "Player/CommonPlayerController.h"
 #include "Character/CommonPlayerCharacter.h"
-#include "Core/CommonGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Systems/ActorTrackingSubsystem.h"
 #include "Types/CommonCoreTypes.h"
 
 ACommonPlayerController* UCommonCoreUtils::GetCommonPlayerController(const UObject* ContextObject)
@@ -19,7 +19,7 @@ ACommonPlayerCharacter* UCommonCoreUtils::GetCommonPlayerCharacter(const UObject
 {
 	if (const ACommonPlayerController* CurrCon = GetCommonPlayerController(ContextObject))
 	{
-		return CurrCon->GetCommonPlayerCharacter();
+		return CurrCon->GetCommonPlayerCharacter().Get();
 	}
 	return nullptr;
 }
@@ -52,16 +52,20 @@ UActorTrackingSubsystem* UCommonCoreUtils::GetActorTrackingSubsystem(const UObje
 	return nullptr;
 }
 
-ACommonGameMode* UCommonCoreUtils::GetCommonGameMode(const UObject* ContextObject)
-{
-	return Cast<ACommonGameMode>(UGameplayStatics::GetGameMode(ContextObject));
-}
-
 UInteractionComponent* UCommonCoreUtils::GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject)
 {
 	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
 	{
-		return PlayerController->GetCurrentHoveredInteractionComponent();
+		return PlayerController->GetCurrentHoveredInteractionComponent().Get();
+	}
+	return nullptr;
+}
+
+AActor* UCommonCoreUtils::GetHoveredInteractionActorByPlayerController(const UObject* ContextObject)
+{
+	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
+	{
+		return PlayerController->GetCurrentHoveredInteractionActor().Get();
 	}
 	return nullptr;
 }
@@ -92,32 +96,7 @@ UQuestManagerComponent* UCommonCoreUtils::GetQuestManager(const UObject* Context
 {
 	if (const ACommonPlayerController* BaseCon = GetCommonPlayerController(ContextObject))
 	{
-		return BaseCon->GetQuestManager();
+		return BaseCon->GetQuestManager().Get();
 	}
-	return nullptr;
-}
-
-UCommonGameInstance* UCommonCoreUtils::GetCommonGameInstance(const UObject* ContextObject)
-{
-	UGameInstance* GameInst = UGameplayStatics::GetGameInstance(ContextObject);
-	if(!GameInst)
-	{
-		COMMON_LOG(Error, "GameplayStatics error getting GameInstance")
-	}
-	if(UCommonGameInstance* CastedGameInst = Cast<UCommonGameInstance>(GameInst))
-	{
-		return CastedGameInst;
-	}
-	COMMON_LOG(Error, "CoreUtils error getting BaseGameInstance")
-	return nullptr;
-}
-
-TScriptInterface<ILevelLoadingManager> UCommonCoreUtils::GetLevelLoadingManager(const UObject* ContextObject)
-{
-	if(const UCommonGameInstance* GameInst = GetCommonGameInstance(ContextObject))
-	{
-		return GameInst->GetLevelLoadingManager();
-	}
-	COMMON_LOG(Error, "CoreUtils error getting Loading Manager")
 	return nullptr;
 }

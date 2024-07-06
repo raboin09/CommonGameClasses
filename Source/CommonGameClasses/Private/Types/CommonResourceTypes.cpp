@@ -41,6 +41,7 @@ void FResourcePoolContainer::GiveResources(float ResourcesToGive)
 {
 	if(ResourcePools.Num() == 0)
 		return;
+	
 	FResourcePool& CurrResourcePool = GetCurrentResourcePool();
 	if(ResourcesToGive + CurrResourcePool.CurrentResources > CurrResourcePool.MaxResourcesInPool)
 	{
@@ -88,13 +89,13 @@ FResourcePool& FResourcePoolContainer::GetCurrentResourcePool()
 	
 	for(FResourcePool& CurrResourcePool : ResourcePools)
 	{
-		// If a ResourcePool has 0 < X < 100 health, it's the Current Resource Pool
+		// If a ResourcePool has 0 < X < 100 resources, it's the Current Resource Pool
 		if(CurrResourcePool.CurrentResources > 0 && !CurrResourcePool.IsFullPool())
 		{
 			return CurrResourcePool;
 		}
 
-		// If a ResourcePool has 100 HP but the previous has 0, then it's the Current Resource Pool (ex. 0|0|100|100 , then the third is our Current Resource Pool)
+		// If a ResourcePool has 100 resources but the previous has 0, then it's the Current Resource Pool (ex. 0|0|100|100 , then the third is our Current Resource Pool)
 		if(CurrResourcePool.ResourcePoolIndex > 0 && ResourcePools[CurrResourcePool.ResourcePoolIndex - 1].CurrentResources <= 0 && CurrResourcePool.CurrentResources > 0)
 		{
 			return CurrResourcePool;

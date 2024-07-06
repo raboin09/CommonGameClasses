@@ -7,41 +7,91 @@
 #include "GameplayTagContainer.h"
 #include "CommonResourceTypes.h"
 #include "CommonQuestTypes.h"
-#include "API/Ability/Ability.h"
+#include "Quest/QuestStateMachine.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "CommonEventDeclarations.generated.h"
 
+class ACommonCharacter;
+class ACommonActor;
+class ACommonAbility;
+class UBehaviorTree;
+class IAbility;
+
 ///////////////////////////
-// ABILITY ADDED
+// Montage Ended
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FCharacterMontageEndedPayload
+{
+	GENERATED_BODY()
+	FCharacterMontageEndedPayload()
+	{
+		EndedMontage = nullptr;
+		UpcomingMontage = nullptr;
+		bInterrupted = false;
+	}
+	
+	FCharacterMontageEndedPayload(const TObjectPtr<UAnimMontage> InMontage, const TObjectPtr<UAnimMontage> InUpcomingMontage, const bool bInInterrupted)
+	{
+		EndedMontage = InMontage;
+		UpcomingMontage = InUpcomingMontage;
+		bInterrupted = bInInterrupted;
+	}
+
+	UPROPERTY()
+	TWeakObjectPtr<UAnimMontage> UpcomingMontage;
+	UPROPERTY()
+	TWeakObjectPtr<UAnimMontage> EndedMontage;
+	UPROPERTY()
+	bool bInterrupted;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterMontageEnded, const FCharacterMontageEndedPayload&, CharacterMontageEndedPayload);
+
+
+///////////////////////////
+// Ability equipped
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FNewAbilityEquippedPayload
+{
+	GENERATED_BODY()
+	FNewAbilityEquippedPayload(){}
+	FNewAbilityEquippedPayload(const TWeakInterfacePtr<IAbility> InEquippedAbility) : NewEquippedAbility(InEquippedAbility)	{ }
+	
+	TWeakInterfacePtr<IAbility> NewEquippedAbility;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewAbilityEquipped, const FNewAbilityEquippedPayload&, NewAbilityEquippedPayload);
+
+///////////////////////////
+// Ability added
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FNewAbilityAddedPayload
 {
 	GENERATED_BODY()
 	FNewAbilityAddedPayload(){}
-	FNewAbilityAddedPayload(const TScriptInterface<IAbility> InAddedAbility) : AddedAbility(InAddedAbility)	{ }
+	FNewAbilityAddedPayload(const TWeakInterfacePtr<IAbility> InAddedAbility) : AddedAbility(InAddedAbility)	{ }
 
-	UPROPERTY()
-	TScriptInterface<IAbility> AddedAbility;
+	TWeakInterfacePtr<IAbility> AddedAbility;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNewAbilityAdded, const FNewAbilityAddedPayload&, NewAbilityAddedPayload);
 
 ///////////////////////////
-// ABILITY REMOVED
+// Ability removed
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FAbilityRemovedPayload
 {
 	GENERATED_BODY()
 	FAbilityRemovedPayload(){}
-	FAbilityRemovedPayload(const TScriptInterface<IAbility> InAbility) : RemovedAbility(InAbility) { }
+	FAbilityRemovedPayload(const TWeakInterfacePtr<IAbility> InAbility) : RemovedAbility(InAbility) { }
 
-	UPROPERTY()
-	TScriptInterface<IAbility> RemovedAbility;
+	TWeakInterfacePtr<IAbility> RemovedAbility;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityRemoved, const FAbilityRemovedPayload&, AbilityRemovedPayload);
 
 ///////////////////////////
-// NEW LEVEL LOADED
+// New level added
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FNewLevelLoadedEventPayload
@@ -57,7 +107,7 @@ struct FNewLevelLoadedEventPayload
 	}
 
 	UPROPERTY()
-	UWorld* NewStreamedWorld;
+	TWeakObjectPtr<UWorld> NewStreamedWorld;
 };
 DECLARE_EVENT_OneParam(ILevelLoadingManager, FNewLevelLoadedEvent, const FNewLevelLoadedEventPayload&);
 
@@ -196,7 +246,7 @@ struct FGameplayTagAddedEventPayload
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag AddedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload&)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameplayTagAddedEvent, const FGameplayTagAddedEventPayload&, GameplayTagAddedEventPayload);
 
 ///////////////////////////////////////
 // Gameplay tag removed
@@ -216,10 +266,10 @@ struct FGameplayTagRemovedEventPayload
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag RemovedTag;
 };
-DECLARE_EVENT_OneParam(UGameplayTagComponent, FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload&)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameplayTagRemovedEvent, const FGameplayTagRemovedEventPayload&, GameplayTagRemovedEventPayload);
 
 ///////////////////////////
-// DEATH EVENT
+// Death event
 ///////////////////////////
 USTRUCT(BlueprintType)
 struct FActorDeathEventPayload
@@ -229,15 +279,15 @@ struct FActorDeathEventPayload
 	UPROPERTY()
 	float DyingDamage = 0.f;
 	UPROPERTY()
-	AActor* DyingActor = nullptr;
+	TWeakObjectPtr<AActor> DyingActor = nullptr;
 	UPROPERTY()
-	AActor* KillingActor = nullptr;
+	TWeakObjectPtr<AActor> KillingActor = nullptr;
 	UPROPERTY()
 	FHitResult HitResult = FHitResult();
 	UPROPERTY()
 	FDamageHitReactEvent HitReactEvent = FDamageHitReactEvent();
 };
-DECLARE_EVENT_OneParam(UHealthComponent, FActorDeath, const FActorDeathEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorDeath, const FActorDeathEventPayload&, ActorDeathEventPayload);
 
 ///////////////////////////
 // MAX WOUNDS EVENT
@@ -254,7 +304,7 @@ struct FMaxWoundsEventPayload
 	UPROPERTY()
 	float Delta = 0.f;
 };
-DECLARE_EVENT_OneParam(UHealthComponent, FMaxWoundsChanged, const FMaxWoundsEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMaxWoundsChanged, const FMaxWoundsEventPayload&, MaxWoundsEventPayload);
 
 ///////////////////////////
 // CURRENT WOUND EVENT
@@ -281,14 +331,14 @@ struct FCurrentWoundEventPayload
 	UPROPERTY()
 	FDamageHitReactEvent DamageHitReactEvent = FDamageHitReactEvent();
 	UPROPERTY()
-	AActor* ReceivingActor = nullptr;
+	TWeakObjectPtr<AActor> ReceivingActor = nullptr;
 	UPROPERTY()
-	AActor* InstigatingActor = nullptr;
+	TWeakObjectPtr<AActor> InstigatingActor = nullptr;
 };
-DECLARE_EVENT_OneParam(UHealthComponent, FCurrentWoundHealthChanged, const FCurrentWoundEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCurrentWoundHealthChanged, const FCurrentWoundEventPayload&, CurrentWoundEventPayload);
 
 ///////////////////////////////////////
-// QUEST EVENT
+// Quest Event
 ///////////////////////////////////////
 USTRUCT(BlueprintType)
 struct FQuestObjectiveEventPayload
@@ -297,7 +347,7 @@ struct FQuestObjectiveEventPayload
 	
 	// The overlapped actor, quest objective, or killed AI character
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* EventObjective = nullptr;
+	TWeakObjectPtr<AActor> EventObjective = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EQuestObjectiveAction EventAction = EQuestObjectiveAction::None;
 
@@ -316,7 +366,7 @@ struct FQuestObjectiveEventPayload
 DECLARE_EVENT_OneParam(UQuestObjectiveComponent, FQuestObjectiveEvent, const FQuestObjectiveEventPayload&);
 
 ///////////////////////////////////////
-// QUEST UPDATE
+// Quest Update
 ///////////////////////////////////////
 
 USTRUCT(BlueprintType)
@@ -325,9 +375,9 @@ struct FQuestUpdateEventPayload
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UQuestStateMachine* UpdatedQuest = nullptr;
+	TWeakObjectPtr<UQuestStateMachine> UpdatedQuest = nullptr;
 
-	FQuestUpdateEventPayload(UQuestStateMachine* InUpdatedQuest)
+	FQuestUpdateEventPayload(TWeakObjectPtr<UQuestStateMachine> InUpdatedQuest)
 	{
 		UpdatedQuest = InUpdatedQuest;
 	}
@@ -348,12 +398,7 @@ struct FEnergyChangedEventPayload
 {
 	GENERATED_BODY()
 
-	FEnergyChangedEventPayload()
-	{
-		CurrentEnergy = -1.f;
-		MaxEnergy = -1.f;
-	}
-
+	FEnergyChangedEventPayload() { }	
 	FEnergyChangedEventPayload(const float InCurrentEnergy, const float InMaxEnergy)
 	{
 		CurrentEnergy = InCurrentEnergy;
@@ -361,11 +406,11 @@ struct FEnergyChangedEventPayload
 	}
 
 	UPROPERTY(BlueprintReadOnly)
-	float CurrentEnergy;
+	float CurrentEnergy = -1.f;
 	UPROPERTY(BlueprintReadOnly)
-	float MaxEnergy;
+	float MaxEnergy = -1.f;
 };
-DECLARE_EVENT_OneParam(UManaComponent, FEnergyAmountChangedEvent, const FEnergyChangedEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEnergyAmountChangedEvent, const FEnergyChangedEventPayload&, EnergyChangedEventPayload);
 
 ///////////////////////////
 // AMMO AMOUNT CHANGED
@@ -375,24 +420,21 @@ struct FAmmoAmountChangedPayload
 {
 	GENERATED_BODY()
 
+	FAmmoAmountChangedPayload() {}
 	FAmmoAmountChangedPayload(int32 InCurrAmmoInClip, int32 InClipCapacity, int32 InCurrentAmmo, int32 InMaxClips)
 		: CurrentAmmoInClip(InCurrAmmoInClip), ClipCapacity(InClipCapacity),  CurrentAmmo(InCurrentAmmo), MaxAmmo(InMaxClips) {}
-
-	FAmmoAmountChangedPayload(): CurrentAmmoInClip(0), ClipCapacity(0), CurrentAmmo(0), MaxAmmo(0)
-	{
-	}
-
+	
 	UPROPERTY()
-	int32 CurrentAmmoInClip;
+	int32 CurrentAmmoInClip = 0;
 	UPROPERTY()
-	int32 ClipCapacity;
+	int32 ClipCapacity = 0;
 	UPROPERTY()
-	int32 CurrentAmmo;
+	int32 CurrentAmmo = 0;
 	UPROPERTY()
-	int32 MaxAmmo;
+	int32 MaxAmmo = 0;
 	
 };
-DECLARE_EVENT_OneParam(UAmmoComponent, FAmmoAmountChangedEvent, const FAmmoAmountChangedPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAmmoAmountChangedEvent, const FAmmoAmountChangedPayload&, AmmoAmountChangedPayload);
 
 ///////////////////////////
 // AMMO AMOUNT CHANGED
@@ -405,11 +447,11 @@ struct FOutOfAmmoEventPayload
 	UPROPERTY()
 	bool bCompletelyOutOfAmmo = false;
 };
-DECLARE_EVENT_OneParam(UAmmoComponent, FOutOfAmmoEvent, const FOutOfAmmoEventPayload&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOutOfAmmoEvent, const FOutOfAmmoEventPayload&, OutOfAmmoEventPayload);
 
-///////////////////////////
-// INTERACTION EVENT OCCURRED
-///////////////////////////
+//////////////////////////////
+// Interaction event occurred
+//////////////////////////////
 USTRUCT(BlueprintType)
 struct FInteractionStartedEventPayload
 {
@@ -424,16 +466,16 @@ struct FInteractionStartedEventPayload
 		: InstigatingActor(InInstigator), bIsStarting(bIsStarting) {	}
 	
 	UPROPERTY(BlueprintReadOnly)
-	AActor* InstigatingActor = nullptr;
+	TWeakObjectPtr<AActor> InstigatingActor = nullptr;
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsStarting = true;
 
 };
 DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionStartedEvent, const FInteractionStartedEventPayload);
 
-///////////////////////////
-// INTERACTION EVENT OCCURRED
-///////////////////////////
+//////////////////////////////
+// Interaction event occurred
+//////////////////////////////
 USTRUCT(BlueprintType)
 struct FInteractionInitiatedEventPayload
 {
@@ -448,14 +490,14 @@ struct FInteractionInitiatedEventPayload
 		: InstigatingActor(InInstigator) {	}
 	
 	UPROPERTY(BlueprintReadOnly)
-	AActor* InstigatingActor = nullptr;
+	TWeakObjectPtr<AActor> InstigatingActor = nullptr;
 
 };
 DECLARE_EVENT_OneParam(UInteractionComponent, FInteractionInitiatedEvent, const FInteractionInitiatedEventPayload);
 
-///////////////////////////
-// INTERACTION EVENT OCCURRED
-///////////////////////////
+/////////////////////////////////////
+// Interaction outline event occurred
+/////////////////////////////////////
 USTRUCT(BlueprintType)
 struct FInteractionOutlinedEventPayload
 {

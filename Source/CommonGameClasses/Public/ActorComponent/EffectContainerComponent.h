@@ -52,22 +52,27 @@ class COMMONGAMECLASSES_API UEffectContainerComponent : public UActorComponent
 
 public:
 	UEffectContainerComponent();
+
+	void TryRemoveAllTaggedEffects(const FGameplayTag& RemoveEffectsWithTag);
+	void TryRemoveAllEffectsOfClass(TSubclassOf<AActor> EffectClassToRemove);
 	
-	void TryApplyEffectToContainerFromHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult = true);
-	void TryApplyEffectToContainer(TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor);
+	void TryApplyEffectToContainerFromHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, TWeakObjectPtr<AActor> InstigatingActor, bool bShouldRotateHitResult = true);
+	void TryApplyEffectToContainer(TSubclassOf<AActor> BaseEffectClass, TWeakObjectPtr<AActor> InstigatingActor);
 	
 	// This is static so that projectile/hitscan misses can still create the Sound/Visual FX on the ground 
-	static TScriptInterface<IEffect> CreateEffectInstanceFromHitResult(UObject* ContextObject, TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult = true);
+	static TScriptInterface<IEffect> CreateEffectInstanceFromHitResult(TWeakObjectPtr<UObject> ContextObject, TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, TWeakObjectPtr<AActor> InstigatingActor, bool bShouldRotateHitResult = true);
 	
 protected:
 	virtual void BeginPlay() override;
 	
 private:
-	TScriptInterface<IEffect> CreateEffectInstance(TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor) const;
+	TScriptInterface<IEffect> CreateEffectInstance(TSubclassOf<AActor> BaseEffectClass, TWeakObjectPtr<AActor> InstigatingActor) const;
 
 	bool Internal_TryActivateEffect(TScriptInterface<IEffect> IncomingEffect);
 	void Internal_ApplyEffect(TScriptInterface<IEffect> IncomingEffect);
 	void Internal_RemoveEffectsWithTags(const TArray<FGameplayTag>& InTags, TScriptInterface<IEffect> IncomingEffect);
+	void Internal_RemoveEffectsWithTag(const FGameplayTag& InTag, TScriptInterface<IEffect> IncomingEffect);
+	void Internal_RemoveEffectsWithClass(TSubclassOf<AActor> EffectClassToRemove);
 	
 	void Internal_TickEffects();
 	void Internal_TickEffect(int32 CurrentTickingEffectKey);
@@ -76,9 +81,6 @@ private:
 	
 	int32 GetTickingEffectIndex(const UClass* EffectClass);
 	bool HasEffectClassAlready(const UClass* EffectClass) const;
-	static int32 GenerateModulus(EEffectTickInterval EffectInterval);
-	static double ConvertIntervalToNumTicks(EEffectTickInterval EffectInterval);
-	static int32 GenerateNumTicks(EEffectTickInterval EffectInterval, double Duration);
 	
 	FORCEINLINE TArray<int32> GetKeys() const { TArray<int32> Keys; EffectsToTick.GetKeys(Keys); return Keys; }
 	void Internal_AddEffectToTickContainer(TScriptInterface<IEffect> IncomingEffect);
@@ -87,7 +89,7 @@ private:
 	FTickingEffect Internal_GenerateTickingEffectStruct(TScriptInterface<IEffect> EffectInitializationData);
 
 	UPROPERTY()
-	const UWorld* CachedWorld;
+	TWeakObjectPtr<UWorld> CachedWorld;
 	TSet<UClass*> CurrentEffectClasses;
 	TMap<int32, FTickingEffect> EffectsToTick;
 	

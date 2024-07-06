@@ -4,11 +4,9 @@
 #include "Actors/CommonProjectile.h"
 #include "NiagaraFunctionLibrary.h"
 #include "ActorComponent/EffectContainerComponent.h"
-#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
@@ -23,9 +21,9 @@ ACommonProjectile::ACommonProjectile()
 
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	CollisionComp->SetCollisionProfileName("BlockAllDynamic");
 	CollisionComp->SetCollisionObjectType(COMMON_OBJECT_TYPE_PROJECTILE);
 	CollisionComp->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
+	CollisionComp->SetCollisionProfileName("BlockAllDynamic");
 	CollisionComp->InitSphereRadius(5.0f);
 	CollisionComp->bTraceComplexOnMove = true;
 	SetRootComponent(CollisionComp);
@@ -33,8 +31,6 @@ ACommonProjectile::ACommonProjectile()
 	SummonedMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SummonedMesh"));
 	SummonedMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SummonedMesh->SetCollisionProfileName("BlockAllDynamic");
-	SummonedMesh->SetCollisionObjectType(COMMON_OBJECT_TYPE_PROJECTILE);
-	SummonedMesh->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
 	SummonedMesh->SetupAttachment(RootComponent);
 	SummonedMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SummonedMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -53,7 +49,7 @@ void ACommonProjectile::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	if(MovementComp)
 	{
-		MovementComp->OnProjectileStop.AddDynamic(this, &ACommonProjectile::OnImpact);
+		MovementComp->OnProjectileStop.AddDynamic(this, &ThisClass::OnImpact);
 	}
 }
 
@@ -78,7 +74,7 @@ void ACommonProjectile::InitVelocity(const FVector& ShootDirection) const
 	}
 }
 
-void ACommonProjectile::K2_HandleImpact_Implementation(const FHitResult& HitResult)
+void ACommonProjectile::K2N_HandleImpact_Implementation(const FHitResult& HitResult)
 {
 	UCommonEffectUtils::ApplyEffectsToHitResult(ProjectileEffectsToApply, HitResult, GetInstigator());
 }
@@ -99,7 +95,7 @@ void ACommonProjectile::OnImpact(const FHitResult& HitResult)
 
 	if(HitActor->FindComponentByClass<UEffectContainerComponent>() && !UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
-		K2_HandleImpact(HitResult);
+		K2N_HandleImpact(HitResult);
 	} else
 	{
 		ApplyMissEffects(HitResult);

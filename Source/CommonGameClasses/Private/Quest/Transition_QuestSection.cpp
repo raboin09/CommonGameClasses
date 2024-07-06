@@ -4,8 +4,8 @@
 #include "Quest/Transition_QuestSection.h"
 
 #include "API/Questable.h"
-#include "Core/ActorTrackingSubsystem.h"
-#include "Core/CommonGameMode.h"
+#include "Character/CommonPlayerCharacter.h"
+#include "Systems/ActorTrackingSubsystem.h"
 #include "Quest/QuestStateMachine.h"
 #include "Utils/CommonCoreUtils.h"
 
@@ -27,18 +27,18 @@ void UTransition_QuestSection::OnTransitionInitialized_Implementation()
 
 void UTransition_QuestSection::ActivateQuest()
 {
-	for(TSubclassOf<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
+	for(TSoftClassPtr<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
 	{
-		ActivateAllObjectivesOfClass(CurrClass);
+		ActivateAllObjectivesOfClass(CurrClass.Get());
 	}
 }
 
 void UTransition_QuestSection::DeactivateQuest()
 {
 	QuestUpdated.RemoveAll(this);
-	for(TSubclassOf<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
+	for(TSoftClassPtr<AActor> CurrClass : QuestSectionData.TargetObjectiveClasses)
 	{
-		DeactivateAllObjectivesOfClass(CurrClass);
+		DeactivateAllObjectivesOfClass(CurrClass.Get());
 	}
 }
 
@@ -51,16 +51,16 @@ void UTransition_QuestSection::ActivateAllObjectivesOfClass(UClass* ObjectiveCla
 
 	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UCommonCoreUtils::GetActorTrackingSubsystem(this))
 	{
-		for(AActor* CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
+		for(TWeakObjectPtr<AActor> CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
 		{
-			if(!CurrActor)
+			if(CurrActor.IsStale())
 			{
 				continue;
 			}
 		
 			if(QuestSectionData.ObjectiveTag.IsNone() || CurrActor->ActorHasTag(QuestSectionData.ObjectiveTag))
 			{
-				ActivateQuestObjectiveActor(CurrActor);	
+				ActivateQuestObjectiveActor(CurrActor.Get());	
 			}
 		}
 	}
@@ -77,7 +77,7 @@ void UTransition_QuestSection::ActivateQuestObjectiveActor(AActor* InActor)
 
 	if(IQuestable* CastedActor = Cast<IQuestable>(InActor))
 	{
-		CastedActor->OnQuestObjectiveEvent().AddUObject(this, &UTransition_QuestSection::HandleQuestEventTrigger);
+		CastedActor->OnQuestObjectiveEvent().AddUObject(this, &ThisClass::HandleQuestEventTrigger);
 	}
 }
 
@@ -85,17 +85,17 @@ void UTransition_QuestSection::DeactivateAllObjectivesOfClass(UClass* ObjectiveC
 {
 	if(ObjectiveClass)
 	{
-		ACommonGameMode* GameMode = UCommonCoreUtils::GetCommonGameMode(this);
-		if (!GameMode)
+		const ACommonPlayerCharacter* PlayerCharacter = UCommonCoreUtils::GetCommonPlayerCharacter(this);
+		if (!PlayerCharacter)
 		{
 			return;
 		}
 
-		UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(GameMode->GetWorld());
+		UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(PlayerCharacter->GetWorld());
 		
-		for(AActor* CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
+		for(TWeakObjectPtr<AActor> CurrActor : ActorTrackingSubsystem->QuestRelevantActors)
 		{
-			DeactivateQuestObjectiveActor(CurrActor);
+			DeactivateQuestObjectiveActor(CurrActor.Get());
 		}
 	}
 }
@@ -110,7 +110,7 @@ void UTransition_QuestSection::DeactivateQuestObjectiveActor(AActor* InActor) co
 
 void UTransition_QuestSection::HandleQuestEventTrigger(const FQuestObjectiveEventPayload& InEvent)
 {
-	if(InEvent.EventObjective && QuestSectionData.ValidObjectiveActions.Contains(InEvent.EventAction))
+	if(InEvent.EventObjective.IsValid() && QuestSectionData.ValidObjectiveActions.Contains(InEvent.EventAction))
 	{
 		ApplyQuestIncrementsForEvent(InEvent.EventAction, InEvent.EventObjective->GetClass());
 	}
@@ -127,7 +127,8 @@ void UTransition_QuestSection::ApplyQuestIncrementsForEvent(EQuestObjectiveActio
 		
 		if(UQuestStateMachine* CurrQuest = Cast<UQuestStateMachine>(GetStateMachineInstance(true)))
 		{
-			QuestUpdated.Broadcast(CurrQuest);
+			const TWeakObjectPtr<UQuestStateMachine> CurrQuestWeak = CurrQuest;
+			QuestUpdated.Broadcast(CurrQuestWeak);
 		}
 	}
 }

@@ -8,7 +8,7 @@
 #include "CooldownMechanism.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UCooldownMechanism : public UInterface
 {
 	GENERATED_BODY()
@@ -33,7 +33,19 @@ public:
 	FORCEINLINE FCooldownStartedEvent& OnCooldownTimerStarted() { return CooldownStartedEvent; }
 	FORCEINLINE FCooldownEndedEvent& OnCooldownTimerEnded() { return CooldownEndedEvent; }
 
+	FORCEINLINE virtual void SetInstigator(TWeakObjectPtr<APawn> InPawn) { PawnInstigator = InPawn; }
+	FORCEINLINE virtual void SetOwner(TWeakObjectPtr<AActor> InActor) { AbilityOwner = InActor; }
+	
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual APawn* GetInstigator() const { return PawnInstigator.Get(); }
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual AActor* GetOwner() const { return AbilityOwner.Get(); }
+	
 protected:
+	FORCEINLINE virtual UWorld* GetOwnerWorld() const { return GetInstigator() ? GetInstigator()->GetWorld() : nullptr; }
+	TWeakObjectPtr<AActor> AbilityOwner = nullptr;
+	TWeakObjectPtr<APawn> PawnInstigator = nullptr;
+	
 	FCooldownTickedEvent CooldownTickedEvent;
 	FCooldownStartedEvent CooldownStartedEvent;
 	FCooldownEndedEvent CooldownEndedEvent;

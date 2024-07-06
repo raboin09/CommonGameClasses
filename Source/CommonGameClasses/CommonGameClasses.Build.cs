@@ -31,10 +31,8 @@ public class CommonGameClasses : ModuleRules
 				"GameplayTasks",
 				"AIModule",
 				"Niagara",
-				"ALS", 
-				"ALSCamera",
 				"SMSystem", 
-				"EnhancedInput"
+				"EnhancedInput",
 			}
 			);
 

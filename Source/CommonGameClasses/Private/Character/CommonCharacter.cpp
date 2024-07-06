@@ -2,33 +2,59 @@
 
 
 #include "Character/CommonCharacter.h"
+
+#include "Ability/CommonAbility.h"
+#include "ActorComponent/AbilityComponent.h"
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
-#include "API/Mountable.h"
-#include "Core/ActorTrackingSubsystem.h"
+#include "ActorComponent/CommonCharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Systems/ActorTrackingSubsystem.h"
+#include "Types/CommonCoreTypes.h"
 #include "Utils/CommonCoreUtils.h"
 
 
-ACommonCharacter::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+ACommonCharacter ::ACommonCharacter(const FObjectInitializer& ObjectInitializer) : Super {ObjectInitializer.SetDefaultSubobjectClass<UCommonCharacterMovementComponent>(ACharacter::CharacterMovementComponentName)}
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	GameplayTagComponent = CreateDefaultSubobject<UGameplayTagComponent>(TEXT("GameplayTagComponent"));
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainerComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
+
+	UCommonCharacterMovementComponent* CommonMoveComp = CastChecked<UCommonCharacterMovementComponent>(GetCharacterMovement());
+	CommonMoveComp->GravityScale = 1.0f;
+	CommonMoveComp->MaxAcceleration = 2400.0f;
+	CommonMoveComp->BrakingFrictionFactor = 1.0f;
+	CommonMoveComp->BrakingFriction = 6.0f;  
+	CommonMoveComp->GroundFriction = 8.0f;  
+	CommonMoveComp->BrakingDecelerationWalking = 1400.0f; 
+	CommonMoveComp->bUseControllerDesiredRotation = false;
+	CommonMoveComp->bOrientRotationToMovement = false;
+	CommonMoveComp->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	CommonMoveComp->bAllowPhysicsRotationDuringAnimRootMotion = false;
+	CommonMoveComp->GetNavAgentPropertiesRef().bCanCrouch = true;
+	CommonMoveComp->bCanWalkOffLedgesWhenCrouching = true;
+	CommonMoveComp->SetCrouchedHalfHeight(65.0f);
+	
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
+
+	BaseEyeHeight = 80.0f;
+	CrouchedEyeHeight = 50.0f;
+	
+	InitCapsuleDefaults();
+	InitCharacterMeshDefaults();
 }
 
 void ACommonCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	UGameplayTagComponent::AddTagsToActor(this, DefaultGameplayTags);
-}
-
-void ACommonCharacter::BeginPlay()
-{
-	Super::BeginPlay();
 	if(!AbilityComponent)
 	{
 		return;
@@ -36,8 +62,22 @@ void ACommonCharacter::BeginPlay()
 	
 	for(auto Ability : DefaultAbilities)
 	{
-		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);		
+		if(Ability.Value.IsNull())
+		{
+			continue;
+		}
+		
+		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);
+		if(Ability.Key == CommonGameSlot::SlotMain)
+		{
+			AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);;
+		}
 	}
+}
+
+void ACommonCharacter::BeginPlay()
+{
+	Super::BeginPlay();
 	
 	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UCommonCoreUtils::GetActorTrackingSubsystem(this))
 	{
@@ -55,26 +95,33 @@ void ACommonCharacter::HandleTagRemoved(const FGameplayTagRemovedEventPayload& T
 	K2_HandleTagRemoved(TagRemovedEventPayload);
 }
 
-void ACommonCharacter::K2_OnDeath_Implementation()
+void ACommonCharacter::HandleDeath()
 {
 	if (!IsAlive())
 	{
 		return;
 	}
 	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Dead);
-	GetMesh()->SetRenderCustomDepth(false);
 	DetachFromControllerPendingDestroy();
-	SetLifeSpan(5.f);
+	AbilityComponent->DestroyAbilities();
+	K2_HandleDeath();
 }
 
-void ACommonCharacter::AssignNewMountable(UObject* InMountableObject, const FHitResult& InHitResult)
+void ACommonCharacter::InitCapsuleDefaults() const
 {
-	if(IMountable* Mount = Cast<IMountable>(InMountableObject))
-	{
-		Mount->OccupyMount(this, FVector::ZeroVector, InHitResult.ImpactNormal);
-		TScriptInterface<IMountable> NewCover;
-		NewCover.SetObject(InMountableObject);
-		NewCover.SetInterface(Mount);
-		CurrentMount = NewCover;
-	}
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
+}
+
+void ACommonCharacter::InitCharacterMeshDefaults() const
+{
+	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetCollisionResponseToChannels(ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Block);
 }

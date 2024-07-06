@@ -9,6 +9,7 @@
 class UBotBehaviorComponent;
 class UAISenseConfig_Sight;
 class UBehaviorTreeComponent;
+class UActorAssetManagerComponent;
 
 UCLASS()
 class COMMONGAMECLASSES_API ACommonAIController : public AAIController
@@ -22,28 +23,34 @@ public:
 	ACommonAIController();
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
-
+	virtual FVector GetFocalPointOnActor(const AActor* Actor) const override;
+	
 	////////////////////////////////
 	/// Common Functions
 	////////////////////////////////
 public:
 	// Start a new behavior tree for the possessed bot
+	UFUNCTION(BlueprintCallable)
 	void InitAIBehavior(UBehaviorTree* BehaviorTree) const;
 	
 private:
 	// Link the bot behavior component to the perception updates
-	void InitPerceptionComponents(const UBotBehaviorComponent* BotBehaviorComponent);
+	void InitPerceptionComponents();
+	UFUNCTION()
+	void HandleBehaviorTreeLoaded(TSoftObjectPtr<UBehaviorTree> LoadedTree);
 
 	////////////////////////////////
 	/// Common Variables
 	////////////////////////////////
-private:
-	UPROPERTY(Transient, VisibleDefaultsOnly)
-	UAISenseConfig_Sight* Sight;
-	UPROPERTY(Transient, VisibleDefaultsOnly)
-	UAIPerceptionComponent* AIPerceptionComponent;
+protected:
+	UPROPERTY()
+	TWeakObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;
+	UPROPERTY(VisibleDefaultsOnly)
+	TObjectPtr<UAISenseConfig_Sight> Sight;
+	UPROPERTY(VisibleDefaultsOnly)
+	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
 	UPROPERTY(Transient)
-	UBlackboardComponent* BlackboardComponent;
+	TObjectPtr<UBlackboardComponent> BlackboardComponent;
 	UPROPERTY(Transient)
-	UBehaviorTreeComponent* BehaviorTreeComponent;
+	TObjectPtr<UBehaviorTreeComponent> BehaviorTreeComponent;
 };

@@ -29,25 +29,27 @@ protected:
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
 	float StartingDissolveValue = 0.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	FName DissolveParameterName;
+	FName DissolveParameterName = "Dissolve Amount";
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
-	FName ColorParameterName;
+	FName ColorParameterName = "Color";
 	UPROPERTY(EditAnywhere, Category="CUSTOM")
-	UCurveFloat* DissolveCurveFloat;
+	float DissolveDuration = 1.f;
 
-private:
+private:  
 	UFUNCTION()
 	void Internal_TimelineDissolveEnd();
 	UFUNCTION()
-	void Internal_TimelineDissolveUpdate(float Value);
+	void Internal_TimelineDissolveUpdate();
+	UFUNCTION()
+	void Internal_SetDissolveMeshValues(float Value);
 	UFUNCTION()
 	void InitDissolveTimeline();
 	
 	UPROPERTY()
 	FTimeline DissolveTimeline;
 	UPROPERTY()
-	UMeshComponent* MeshComponent;
+	TWeakObjectPtr<UMeshComponent> MeshComponent;
 	UPROPERTY()
-	TArray<UMaterialInstanceDynamic*> DissolveDynamicMaterialInstances;
+	TArray<TSoftObjectPtr<UMaterialInstanceDynamic>> DissolveDynamicMaterialInstances;
 };
  

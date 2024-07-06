@@ -8,29 +8,24 @@
 ACommonInteractableTrigger::ACommonInteractableTrigger()
 {
 	bDiesAfterOverlap = true;
-
-	CollisionComp->SetCollisionObjectType(ECC_WorldDynamic);
-	CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-
 	TriggerMachine = nullptr;
 }
 
-void ACommonInteractableTrigger::K2_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
+void ACommonInteractableTrigger::K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
 {
 	if(!TriggerMachine)
 	{
 		return;
 	}
 	
-	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && CanPickup(CastedChar))
+	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && K2N_CanPickup(CastedChar))
 	{
 		TriggerMachine->Stop();
 	}
 
 }
 
-bool ACommonInteractableTrigger::CanPickup(ACharacter* PotentialChar)
+bool ACommonInteractableTrigger::K2N_CanPickup_Implementation(ACharacter* PotentialChar)
 {
 	if(PotentialChar && PotentialChar->IsPlayerControlled())
 	{
@@ -49,7 +44,8 @@ void ACommonInteractableTrigger::ConsumePickup(ACharacter* ConsumingChar)
 	
 	if(!TriggerMachine)
 	{
-		TriggerMachine = USMBlueprintUtils::CreateStateMachineInstance(TriggerLogicClass, this);
+		check(TriggerLogicClass.IsValid())
+		TriggerMachine = USMBlueprintUtils::CreateStateMachineInstance(TriggerLogicClass.Get(), this);
 	}	
 
 	if(TriggerMachine)

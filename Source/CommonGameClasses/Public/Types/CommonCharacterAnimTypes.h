@@ -11,11 +11,10 @@ struct FAnimMontagePlayData
 	GENERATED_BODY()
 
 	UPROPERTY()
-	UAnimMontage* MontageToPlay = nullptr;
+	TWeakObjectPtr<UAnimMontage> MontageToPlay = nullptr;
+	
 	FName MontageSection = NAME_None;
-	bool bShouldBlendOut = true;
 	bool bForcePlay = false;
-	bool bForceInPlace = false;
 	float PlayRate = 1.f;
 };
 

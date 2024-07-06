@@ -22,15 +22,20 @@ public:
 	///////////////////////////////////
 	/// IResourceContainer overrides
 	////////////////////////////////////
-	virtual bool TrySpendResource(const float RequestedAmount) override;
-	virtual void GiveResource(const float AmountToGive) override;
+	virtual bool TryConsumeResourceAmount(const float RequestedAmount) override;
+	virtual void TryGiveResourceAmount(const float AmountToGive) override;
+
+	FORCEINLINE virtual float GetAvailableResourceAmount() const override { return ResourcePoolContainer.GetSumOfAllResourcePools(); }
+	FORCEINLINE virtual float GetMaxResourceAmount() const override { return ResourcePoolContainer.GetMaxSumOfAllResourcePools(); }
 
 protected:
 	virtual void BeginPlay() override;
 
 	virtual bool CanRegen() const;
-	virtual bool CanSpendResourceAmount(const float RequestedAmount);
-	virtual float CalculateResourceCost(const float RequestedAmount) const PURE_VIRTUAL(UResourceComponent::CalculateResourceCost, return 0.f;)
+	virtual bool CanConsumeResourceAmount(const float RequestedAmount);
+	// If there are any modifiers to consider (e.g. if this is HP damage, it will decrease RequestedAmount by half if
+	// the Owner has an "Armored" status.
+	virtual float CalculateConsumptionAmount(const float RequestedAmount) const PURE_VIRTUAL(UResourceComponent::CalculateConsumptionAmount, return 0.f;)
 
 	UPROPERTY(EditAnywhere)
 	int32 NumberOfResourcePools = 1;

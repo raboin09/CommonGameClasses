@@ -16,16 +16,19 @@ class COMMONGAMECLASSES_API UGameplayTagComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	UGameplayTagComponent();
+	virtual void BeginPlay() override;
+	
 	////////////////////////////////////////////
 	// Static Functions
 	////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|GameplayTagComponent")
-	static bool ActorHasAnyGameplayTags(AActor* InActor, TArray<FGameplayTag> InTags, bool bExact = false);
+	static bool ActorHasAnyGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact = false);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|GameplayTagComponent")
-	static bool ActorHasAllGameplayTags(AActor* InActor, TArray<FGameplayTag> InTags, bool bExact = false);
+	static bool ActorHasAllGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact = false);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|GameplayTagComponent")
-	static bool ActorHasGameplayTag(AActor* InActor, FGameplayTag InTag, bool bExact = false);
+	static bool ActorHasGameplayTag(const AActor* InActor, FGameplayTag InTag, bool bExact = false);
 	
 	UFUNCTION(BlueprintCallable, Category="COMMON|GameplayTagComponent")
 	static void AddTagToActor(AActor* InActor, const FGameplayTag& TagToAdd, UGameplayTagComponent* GameplayTagComponent = nullptr);
@@ -37,7 +40,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|GameplayTagComponent")
 	static void RemoveTagsFromActor(AActor* InActor, const TArray<FGameplayTag>& InTags);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|GameplayTagComponent")
-	static UGameplayTagComponent* GetGameplayTagComponentFromActor(AActor* InActor);
+	static UGameplayTagComponent* GetGameplayTagComponentFromActor(const AActor* InActor);
 
 	// Just a catch-all for all non-GameplayTag tag checks
 	static bool ComponentHasNameTag(UActorComponent* InComp, FName InTag);
@@ -52,11 +55,13 @@ public:
 	
 	void RemoveTag(const FGameplayTag& TagToRemove);
 	void AddTag(const FGameplayTag& TagToAdd);
-	virtual void BeginPlay() override;
+
+protected:
+	UPROPERTY(BlueprintAssignable)
+	FGameplayTagAddedEvent GameplayTagAddedEvent;
+	UPROPERTY(BlueprintAssignable)
+	FGameplayTagRemovedEvent GameplayTagRemovedEvent;
 	
 private:	
 	FGameplayTagContainer GameplayTagContainer;
-
-	FGameplayTagAddedEvent GameplayTagAddedEvent;
-	FGameplayTagRemovedEvent GameplayTagRemovedEvent;
 };

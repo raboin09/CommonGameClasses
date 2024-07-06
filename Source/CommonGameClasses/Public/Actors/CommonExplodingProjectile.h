@@ -12,13 +12,13 @@ class COMMONGAMECLASSES_API ACommonExplodingProjectile : public ACommonProjectil
 	GENERATED_BODY()
 	
 public:
-		ACommonExplodingProjectile();
+	ACommonExplodingProjectile();
 
 protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void HandleActorDeath() override;
-	virtual void K2_HandleImpact_Implementation(const FHitResult& HitResult) override;
+	virtual void K2N_HandleImpact_Implementation(const FHitResult& HitResult) override;
 	virtual void OnImpact(const FHitResult& HitResult) override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
@@ -27,7 +27,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Explosion")
 	float ExplosionRadius = 512.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Explosion")
-	bool bFriendlyFire = false;
+	bool bCanFriendlyFire = false;
 
 private:
 	void Internal_Explode();

@@ -4,13 +4,18 @@
 #include "BlueprintGameplayTagLibrary.h"
 #include "Character/CommonCharacter.h"
 
+UGameplayTagComponent::UGameplayTagComponent()
+{
+	PrimaryComponentTick.bCanEverTick = false;
+}
+
 void UGameplayTagComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	if(ITaggable* Taggable = Cast<ITaggable>(GetOwner()))
 	{
-		GameplayTagAddedEvent.AddRaw(Taggable, &ITaggable::HandleTagAdded);
-		GameplayTagRemovedEvent.AddRaw(Taggable, &ITaggable::HandleTagRemoved);	
+		GameplayTagAddedEvent.AddDynamic(Taggable, &ITaggable::HandleTagAdded);
+		GameplayTagRemovedEvent.AddDynamic(Taggable, &ITaggable::HandleTagRemoved);	
 	}
 }
 
@@ -81,7 +86,7 @@ void UGameplayTagComponent::RemoveTagFromActor(AActor* InActor, const FGameplayT
 	}
 }
 
-UGameplayTagComponent* UGameplayTagComponent::GetGameplayTagComponentFromActor(AActor* InActor)
+UGameplayTagComponent* UGameplayTagComponent::GetGameplayTagComponentFromActor(const AActor* InActor)
 {
 	if(!InActor)
 	{
@@ -99,7 +104,7 @@ bool UGameplayTagComponent::ComponentHasNameTag(UActorComponent* InComp, FName I
 	return false;
 }
 
-bool UGameplayTagComponent::ActorHasAnyGameplayTags(AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
+bool UGameplayTagComponent::ActorHasAnyGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
 {
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{
@@ -108,7 +113,7 @@ bool UGameplayTagComponent::ActorHasAnyGameplayTags(AActor* InActor, TArray<FGam
 	return false;
 }
 
-bool UGameplayTagComponent::ActorHasAllGameplayTags(AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
+bool UGameplayTagComponent::ActorHasAllGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
 {
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{
@@ -117,7 +122,7 @@ bool UGameplayTagComponent::ActorHasAllGameplayTags(AActor* InActor, TArray<FGam
 	return false;
 }
 
-bool UGameplayTagComponent::ActorHasGameplayTag(AActor* InActor, FGameplayTag InTag, bool bExact)
+bool UGameplayTagComponent::ActorHasGameplayTag(const AActor* InActor, FGameplayTag InTag, bool bExact)
 {
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{

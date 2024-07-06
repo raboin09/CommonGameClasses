@@ -14,6 +14,8 @@ class UInteractable : public UInterface
 	GENERATED_BODY()
 };
 
+// This interface binds the actor/character to the UInteractionComponent. The UInteractionComponent is used to detect outline switches, interaction events, etc and then it broadcasts
+// those events to the IInteractable owner.
 class COMMONGAMECLASSES_API IInteractable
 {
 	GENERATED_BODY()

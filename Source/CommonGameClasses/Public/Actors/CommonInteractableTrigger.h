@@ -14,17 +14,18 @@ class COMMONGAMECLASSES_API ACommonInteractableTrigger : public ACommonInteracta
 public:
 	ACommonInteractableTrigger();
 	
-	FORCEINLINE virtual UMeshComponent* GetMesh_Implementation() const override { return nullptr; };
+	FORCEINLINE virtual UMeshComponent* K2N_GetMesh_Implementation() const override { return nullptr; };
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_ConsumePickup(ACharacter* ConsumingChar);
-	virtual void K2_HandleEndOverlapEvent_Implementation(AActor* ExitingActor) override;
-	virtual bool CanPickup(ACharacter* PotentialChar) override;
+	
+	virtual void K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor) override;
+	virtual bool K2N_CanPickup_Implementation(ACharacter* PotentialChar) override;
 	virtual void ConsumePickup(ACharacter* ConsumingChar) override;
 
 	UPROPERTY()
-	USMInstance* TriggerMachine;
+	TSoftObjectPtr<USMInstance> TriggerMachine;
 	UPROPERTY(EditInstanceOnly, Category="CUSTOM|Trigger")
-	TSubclassOf<USMInstance> TriggerLogicClass;
+	TSoftClassPtr<USMInstance> TriggerLogicClass;
 };

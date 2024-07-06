@@ -36,6 +36,7 @@ enum class EResourceContainerLocation : uint8
 UENUM(BlueprintType)
 enum class EMeshType : uint8
 {
+	None,
 	InstigatorMesh,
 	AbilityMesh
 };

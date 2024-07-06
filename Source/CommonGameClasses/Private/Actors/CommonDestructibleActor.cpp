@@ -6,7 +6,7 @@
 #include "ActorComponent/GameplayTagComponent.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/InteractionComponent.h"
-#include "Types/CommonTypes.h"
+#include "..\..\Public\Types\CommonInteractTypes.h"
 #include "Types/CommonTagTypes.h"
 
 
@@ -18,12 +18,12 @@ ACommonDestructibleActor::ACommonDestructibleActor()
 	DestructibleMesh->SetCollisionObjectType(ECC_WorldDynamic);
 	DestructibleMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DestructibleMesh->SetCollisionResponseToChannels(ECR_Block);
-	DestructibleMesh->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Block);
 	SetRootComponent(DestructibleMesh);
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	EffectContainerComponent = CreateDefaultSubobject<UEffectContainerComponent>(TEXT("EffectContainer"));
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	InteractionComponent->Affiliation = EAffiliation::Destructible;
 }
 
 void ACommonDestructibleActor::BeginPlay()
@@ -31,7 +31,7 @@ void ACommonDestructibleActor::BeginPlay()
 	Super::BeginPlay();
 	if(HealthComponent)
 	{
-		HealthComponent->OnActorDeath().AddUObject(this, &ACommonDestructibleActor::HandleDeathEvent);
+		HealthComponent->OnActorDeath().AddDynamic(this, &ThisClass::HandleDeathEvent);
 	}
 }
 

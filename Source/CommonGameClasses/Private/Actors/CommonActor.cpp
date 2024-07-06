@@ -2,9 +2,9 @@
 
 
 #include "Actors/CommonActor.h"
+
 #include "ActorComponent/GameplayTagComponent.h"
-#include "Core/ActorTrackingSubsystem.h"
-#include "Core/CommonGameMode.h"
+#include "Systems/ActorTrackingSubsystem.h"
 #include "Utils/CommonCoreUtils.h"
 
 ACommonActor::ACommonActor()
