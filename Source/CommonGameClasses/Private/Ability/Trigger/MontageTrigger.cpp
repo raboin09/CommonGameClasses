@@ -30,7 +30,7 @@ void UMontageTrigger::HandleSuccessfulTriggerPressed()
 	Internal_StartMontage();
 	K2_HandleAfterPressedTrigger();
 	FTriggerEventPayload PressTriggerEventPayload;
-	PressTriggerEventPayload.ActivationLevel = bHasCombos ? ComboSectionIncrement : 1;
+	PressTriggerEventPayload.ActivationLevel = K2N_GetActivationLevel();
 	// Activation waits for montage notify to start
 	PressTriggerEventPayload.bStartActivationImmediately = false;
 	PressTriggerEventPayload.bMontageDrivesActivation = true;
@@ -46,6 +46,11 @@ void UMontageTrigger::HandleTriggerReleased()
 	ReleaseTriggerEventPayload.bMontageDrivesActivation = true;
 	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
 	K2_HandleReleasedTrigger();
+}
+
+int32 UMontageTrigger::K2N_GetActivationLevel_Implementation() const
+{
+	return bHasCombos ? ComboSectionIncrement : 1;
 }
 
 void UMontageTrigger::ResetTrigger()

@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "UObject/Object.h"
-#include "BaseTrigger.generated.h"
+#include "AbilityTriggerBase.generated.h"
 
-/**
+ /**
  * 
  */
 UCLASS(Abstract, NotBlueprintable, BlueprintType)
-class COMMONGAMECLASSES_API UBaseTrigger : public UObject, public ITriggerMechanism
+class COMMONGAMECLASSES_API UAbilityTriggerBase : public UObject, public ITriggerMechanism
 {
 	GENERATED_BODY()
 

@@ -34,6 +34,12 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	USkeletalMeshComponent* GetMesh() const { return OwnerCharacter == nullptr ? nullptr : OwnerCharacter->GetMesh(); };
+	UCapsuleComponent* GetCapsuleComponent() const { return OwnerCharacter == nullptr ? nullptr : OwnerCharacter->GetCapsuleComponent(); };
+	UCharacterMovementComponent* GetCharacterMovement() const { return OwnerCharacter == nullptr ? nullptr : OwnerCharacter->GetCharacterMovement(); };
+	FRotator GetActorRotation() const { return OwnerCharacter == nullptr ? FRotator() : OwnerCharacter->GetActorRotation(); };
+	FVector GetActorLocation() const { return OwnerCharacter == nullptr ? FVector() : OwnerCharacter->GetActorLocation(); };
+	
 	UFUNCTION()
 	void HandleMontageEnded(UAnimMontage* EndedMontage, bool bInterrupted);
 	UFUNCTION()
@@ -49,8 +55,9 @@ private:
 	void Internal_TryPlayHitReact(const FDamageHitReactEvent& HitReactEvent);
 	FGameplayTag Internal_GetHitDirectionTag(const FVector& OriginatingLocation) const;
 	void Internal_TryCharacterKnockbackRecovery();
-	void Internal_RagdollUpdate();
-	
+	void Internal_RagdollUpdate(float DeltaTime);
+	FVector Internal_RagdollTraceGround() const;
+
 	UPROPERTY()
 	TWeakObjectPtr<ACommonCharacter> OwnerCharacter;
 	UPROPERTY()
@@ -66,9 +73,9 @@ private:
 	TMap<TSoftObjectPtr<UAnimMontage>, FAnimMontagePlayData> CachedMontageData;
 
 	// Ragdolling
+	FVector RagdollMeshLocation;
 	FTimerHandle TimerHandle_Ragdoll;
 	FVector LastRagdollVelocity = FVector::ZeroVector;
-
 public:
 	FORCEINLINE TWeakObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
 	FORCEINLINE FCharacterMontageEnded& OnCharacterMontageEnded() { return CharacterMontageEnded; }

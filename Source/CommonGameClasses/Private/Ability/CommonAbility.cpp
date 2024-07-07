@@ -10,12 +10,11 @@
 #include "Components/SphereComponent.h"
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
-#include "Ability/Trigger/BaseComplexTrigger.h"
+#include "Ability/Trigger/ComplexTriggerBase.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
-#include "..\..\Public\Types\CommonInteractTypes.h"
 
 ACommonAbility::ACommonAbility()
 {
@@ -187,7 +186,11 @@ void ACommonAbility::InitAbility(UMeshComponent* OwnerMeshComponent)
 	{
 		return;
 	}
-	MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);
+	
+	if(MeshToUse != OwnerMeshComponent)
+	{
+		MeshToUse->AttachToComponent(OwnerMeshComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocket);	
+	}
 	Internal_HideMesh(true);
 }
 
@@ -236,8 +239,7 @@ void ACommonAbility::Internal_SetMeshToUse()
 		{
 			MeshToUse =  CharOwner->GetMesh();
 		}
-
-		if(UMeshComponent* MeshComp = CurrInstigator->FindComponentByClass<UMeshComponent>())
+		else if(UMeshComponent* MeshComp = CurrInstigator->FindComponentByClass<UMeshComponent>())
 		{
 			MeshToUse =  MeshComp;
 		}

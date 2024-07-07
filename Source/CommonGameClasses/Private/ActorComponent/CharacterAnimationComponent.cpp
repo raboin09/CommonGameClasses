@@ -2,7 +2,9 @@
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/MountManagerComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
 
@@ -21,7 +23,7 @@ void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter.Get(), CommonGameState::Ragdoll))
 	{
-		Internal_RagdollUpdate();
+		Internal_RagdollUpdate(DeltaTime);
 	}
 }
 
@@ -128,8 +130,14 @@ void UCharacterAnimationComponent::StartRagdolling()
 		return;
 	}
 	OwningTagComponent->AddTag(CommonGameState::Ragdoll);
-	// TODO ALS
-	// OwnerCharacter->StartRagdolling();
+	StopAnimMontage();
+
+	OwnerCharacter->GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	OwnerCharacter->GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+	OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", true);
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_None);
+	
 	SetComponentTickEnabled(true);
 }
 
@@ -140,8 +148,12 @@ void UCharacterAnimationComponent::StopRagdolling()
 		return;
 	}
 	OwningTagComponent->RemoveTag(CommonGameState::Ragdoll);
-	// TODO ALS
-	// OwnerCharacter->StopRagdolling();
+	
+	OwnerCharacter->GetMesh()->AttachToComponent(OwnerCharacter->GetCapsuleComponent(), FAttachmentTransformRules::KeepWorldTransform);
+	OwnerCharacter->GetMesh()->SetCollisionObjectType(ECC_Pawn);
+	OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", false);
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	SetComponentTickEnabled(false);
 }
 
@@ -166,8 +178,6 @@ void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVecto
 	}
 	
 	StartRagdolling();
-	// TODO weird hack to stop errors
-	// OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
 	OwnerCharacter->GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
 }
 
@@ -178,7 +188,7 @@ void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
 		return;
 	}
 	
-	if (LastRagdollVelocity.Size() > 100)
+	if (LastRagdollVelocity.Size() > 10)
 	{
 		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, .1f, false);
 	}
@@ -254,7 +264,7 @@ FGameplayTag UCharacterAnimationComponent::Internal_GetHitDirectionTag(const FVe
 	return CommonGameAnimation::HitReactLeft;
 }
 
-void UCharacterAnimationComponent::Internal_RagdollUpdate()
+void UCharacterAnimationComponent::Internal_RagdollUpdate(float DeltaTime)
 {
 	USkeletalMeshComponent* OwnerMesh = OwnerCharacter->GetMesh();
 	if(!OwnerMesh)
@@ -263,4 +273,22 @@ void UCharacterAnimationComponent::Internal_RagdollUpdate()
 	}
 	const FVector NewRagdollVel = OwnerMesh->GetPhysicsLinearVelocity("root");
 	LastRagdollVelocity = (NewRagdollVel != FVector::ZeroVector || OwnerCharacter->IsLocallyControlled()) ? NewRagdollVel : LastRagdollVelocity / 2;
+
+	RagdollMeshLocation = Internal_RagdollTraceGround();
+	OwnerCharacter->SetActorLocation(RagdollMeshLocation, false, nullptr, ETeleportType::TeleportPhysics);
+}
+
+FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
+{
+	FVector TraceStart = OwnerCharacter->GetMesh()->GetSocketLocation("pelvis");
+	TraceStart.Z += 25;
+	FVector TraceEnd = TraceStart;
+	TraceEnd.Z -= 50;
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility);
+	if(Hit.Distance > 10)
+	{
+		return TraceStart;
+	}
+	return Hit.Location;
 }

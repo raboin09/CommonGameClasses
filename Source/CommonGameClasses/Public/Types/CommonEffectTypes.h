@@ -45,9 +45,9 @@ UENUM()
 enum class EEffectDurationType : uint8
 {
 	Instant UMETA(DisplayName = "Instant (Destroyed after activation)"),
-	Timer UMETA(DisplayName = "Timed (Destroyed after duration)"),
+	Timed UMETA(DisplayName = "Timed (Destroyed after duration)"),
 	Infinite UMETA(DisplayName = "Infinite (Never destroyed of its own accord)"),
-	FirstActivation UMETA(DisplayName = "Until First Successful Activation (Destroyed after activation)")
+	Until_First_Successful_Activation UMETA(DisplayName = "Until First Successful Activation (Destroyed after activation)")
 };
 
 UENUM()
@@ -85,7 +85,9 @@ struct FEffectContext
 	// Actor that applied the effect
 	UPROPERTY(BlueprintReadOnly, Category="COMMON")
 	TWeakObjectPtr<AActor> InstigatingActor;
+	UPROPERTY(BlueprintReadOnly, Category="COMMON")
 	FHitResult SurfaceHit;
+	UPROPERTY(BlueprintReadOnly, Category="COMMON")
 	FVector HitDirection;
 };
 

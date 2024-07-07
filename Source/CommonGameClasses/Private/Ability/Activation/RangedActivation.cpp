@@ -177,10 +177,12 @@ FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, F
 	return Hit;
 }
 
-TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision()
+TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision() const
 {
 	TArray<AActor*> IgnoredActors;
+	// Ignore the Character/Pawn instigator AND the Ability owner
 	IgnoredActors.Add(GetInstigator());
+	IgnoredActors.Add(GetOwner());
 	// If instigator is a Character, ignore their mount (if any)
 	if(const UMountManagerComponent* MountManager = GetInstigator()->FindComponentByClass<UMountManagerComponent>())
 	{

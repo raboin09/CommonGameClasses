@@ -31,8 +31,8 @@ void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
 
 void ACommonEffect::PlayEffectFX()
 {
-	K2_PlayEffectSound();
-	K2_PlayEffectVFX(EffectData->bAttachVFXToActor);
+	K2_PlayEffectSound(EffectContext);
+	K2_PlayEffectVFX(EffectData->bAttachVFXToActor, EffectContext);
 }
 
 bool ACommonEffect::CanActivateEffect()

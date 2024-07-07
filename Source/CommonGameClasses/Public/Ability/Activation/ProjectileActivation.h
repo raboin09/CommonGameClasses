@@ -21,10 +21,13 @@ protected:
 	virtual void Fire(int32 ActivationLevel = -1) override;
 	virtual float GetOutlineRange() const override { return DEFAULT_OUTLINE_DISTANCE; }
 	virtual ACommonProjectile* HandleProjectileFire();
+
+	UFUNCTION(BlueprintNativeEvent, Category="Activation")
+	TSubclassOf<ACommonProjectile> K2N_GetProjectileClassToSpawn() const;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
-	TSubclassOf<ACommonProjectile> ProjectileClass;
-	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = "1", EditCondition = "ProjectileClass != nullptr", EditConditionHides))
+	TSubclassOf<ACommonProjectile> DefaultProjectileClass;
+	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = "1"))
 	float ProjectileLife = 10.f;
 
 private:

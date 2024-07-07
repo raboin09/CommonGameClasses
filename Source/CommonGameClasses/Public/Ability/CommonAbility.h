@@ -14,10 +14,10 @@ class UBehaviorTree;
 class UCooldownMechanismImpl;
 class IResourceContainer;
 class USphereComponent;
-class UBaseComplexTrigger;
+class UComplexTriggerBase;
 class UAbilityComponent;
 class UBaseActivation;
-class UBaseTrigger;
+class UAbilityTriggerBase;
 enum class EResourceContainerLocation : uint8;
 
 UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM|Ability"))
@@ -61,7 +61,7 @@ protected:
 	TObjectPtr<UBurstTrigger> SimpleTriggerInstance;
 	// If the ability has more complex trigger logic (playing montages, listening for events, etc), a child BP obj is required.
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "SimpleTriggerInstance == nullptr"))
-	TSubclassOf<UBaseComplexTrigger> ComplexTriggerClass;
+	TSubclassOf<UComplexTriggerBase> ComplexTriggerClass;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TSubclassOf<UBaseActivation> ActivationMechanismClass;
 

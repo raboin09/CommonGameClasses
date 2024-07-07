@@ -29,6 +29,9 @@ class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggab
 
 public:
 	ACommonCharacter(const FObjectInitializer& ObjectInitializer);
+	// Public for resetting mesh props after ragdoll
+	void InitCharacterMeshDefaults() const;
+	void InitCapsuleDefaults() const;
 	
 protected:
 	virtual void PostInitializeComponents() override;
@@ -38,9 +41,6 @@ protected:
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	UFUNCTION(BlueprintCallable)
 	virtual void HandleDeath();
-
-	void InitCapsuleDefaults() const;
-	void InitCharacterMeshDefaults() const;
 	
 	////////////////////////////////
 	/// Common Events

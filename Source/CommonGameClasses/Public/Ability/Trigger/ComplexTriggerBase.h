@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseTrigger.h"
+#include "AbilityTriggerBase.h"
 #include "UObject/Object.h"
-#include "BaseComplexTrigger.generated.h"
+#include "ComplexTriggerBase.generated.h"
 
 /**
  * 
  */
 UCLASS(Abstract, NotBlueprintable, BlueprintType)
-class COMMONGAMECLASSES_API UBaseComplexTrigger : public UBaseTrigger
+class COMMONGAMECLASSES_API UComplexTriggerBase : public UAbilityTriggerBase
 {
 	GENERATED_BODY()
 

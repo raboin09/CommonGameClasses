@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseComplexTrigger.h"
+#include "ComplexTriggerBase.h"
 #include "MontageTrigger.generated.h"
 
 class UCharacterAnimationComponent;
 struct FAnimMontagePlayData;
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API UMontageTrigger : public UBaseComplexTrigger
+class COMMONGAMECLASSES_API UMontageTrigger : public UComplexTriggerBase
 {
 	GENERATED_BODY()
 	
@@ -26,6 +26,8 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
 	FName K2N_GetNextMontageSection() const;
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
+	int32 K2N_GetActivationLevel() const;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Trigger")
 	TObjectPtr<UAnimMontage> MontageToPlay;

@@ -32,7 +32,7 @@ protected:
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
 	FHitResult WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector);
-	TArray<AActor*> GetActorsToIgnoreCollision();
+	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
 	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
@@ -40,7 +40,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
 	// Socket where the muzzle or hand is
-	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(EditCondition = "LineTraceDirection == ELineTraceDirection::Mesh", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	FName MeshSocketName;
 	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = 0.f))
 	float TraceRange = 1000.f;
@@ -48,11 +48,11 @@ protected:
 	float TraceRadius = 20.f;
 	UPROPERTY(EditDefaultsOnly, Category="Activation")
 	bool bHasFiringSpread = false;
-	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float TraceSpread = 5.f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float FiringSpreadIncrement = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float FiringSpreadMax = 10.f;
 
 	UPROPERTY(EditDefaultsOnly, Category="Activation")

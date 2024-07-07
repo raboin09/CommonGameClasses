@@ -1,12 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Ability/Trigger/BaseTrigger.h"
-
+#include "Ability/Trigger/AbilityTriggerBase.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-void UBaseTrigger::PressTrigger()
+void UAbilityTriggerBase::PressTrigger()
 {
 	if(!CanExecuteTriggerEvent())
 	{
@@ -16,12 +15,12 @@ void UBaseTrigger::PressTrigger()
 	HandleSuccessfulTriggerPressed();
 }
 
-void UBaseTrigger::ReleaseTrigger()
+void UAbilityTriggerBase::ReleaseTrigger()
 {
 	HandleTriggerReleased();
 }
 
-bool UBaseTrigger::CanExecuteTriggerEvent() const
+bool UAbilityTriggerBase::CanExecuteTriggerEvent() const
 {
 	if (UGameplayTagComponent::ActorHasAnyGameplayTags(GetOwner(), AbilityBlockedTags))
 	{

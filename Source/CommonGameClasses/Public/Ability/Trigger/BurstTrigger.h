@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseTrigger.h"
+#include "AbilityTriggerBase.h"
 #include "BurstTrigger.generated.h"
 
 UCLASS(BlueprintType, EditInlineNew, DefaultToInstanced)
-class COMMONGAMECLASSES_API UBurstTrigger : public UBaseTrigger
+class COMMONGAMECLASSES_API UBurstTrigger : public UAbilityTriggerBase
 {
 	GENERATED_BODY()
 
