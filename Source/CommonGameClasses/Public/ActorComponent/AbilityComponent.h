@@ -13,8 +13,7 @@ struct FAwaitingActivationDetails
 	GENERATED_BODY()
 
 	TWeakInterfacePtr<IActivationMechanism> MechanismAwaitingActivation = nullptr;
-	int32 ActivationLevel = -1;
-		
+	FTriggerEventPayload TriggerActivationPayload;
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))

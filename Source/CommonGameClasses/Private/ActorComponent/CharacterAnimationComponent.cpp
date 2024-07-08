@@ -5,6 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
 
@@ -129,15 +131,14 @@ void UCharacterAnimationComponent::StartRagdolling()
 	{
 		return;
 	}
-	OwningTagComponent->AddTag(CommonGameState::Ragdoll);
+	UGameplayTagComponent::AddTagToActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
 	StopAnimMontage();
-
-	OwnerCharacter->GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	OwnerCharacter->GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-	OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", true);
+	CachedMeshOffset = GetMesh()->GetRelativeLocation();
+	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", true);
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopActiveMovement();
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_None);
-	
 	SetComponentTickEnabled(true);
 }
 
@@ -147,13 +148,11 @@ void UCharacterAnimationComponent::StopRagdolling()
 	{
 		return;
 	}
-	OwningTagComponent->RemoveTag(CommonGameState::Ragdoll);
-	
-	OwnerCharacter->GetMesh()->AttachToComponent(OwnerCharacter->GetCapsuleComponent(), FAttachmentTransformRules::KeepWorldTransform);
-	OwnerCharacter->GetMesh()->SetCollisionObjectType(ECC_Pawn);
-	OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", false);
+	UGameplayTagComponent::RemoveTagFromActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", false);
 	SetComponentTickEnabled(false);
 }
 
@@ -178,7 +177,7 @@ void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVecto
 	}
 	
 	StartRagdolling();
-	OwnerCharacter->GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
+	GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
 }
 
 void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
@@ -266,27 +265,28 @@ FGameplayTag UCharacterAnimationComponent::Internal_GetHitDirectionTag(const FVe
 
 void UCharacterAnimationComponent::Internal_RagdollUpdate(float DeltaTime)
 {
-	USkeletalMeshComponent* OwnerMesh = OwnerCharacter->GetMesh();
+	USkeletalMeshComponent* OwnerMesh = GetMesh();
 	if(!OwnerMesh)
 	{
 		return;
 	}
-	const FVector NewRagdollVel = OwnerMesh->GetPhysicsLinearVelocity("root");
+	const FVector NewRagdollVel = OwnerMesh->GetPhysicsLinearVelocity("pelvis");
 	LastRagdollVelocity = (NewRagdollVel != FVector::ZeroVector || OwnerCharacter->IsLocallyControlled()) ? NewRagdollVel : LastRagdollVelocity / 2;
 
 	RagdollMeshLocation = Internal_RagdollTraceGround();
-	OwnerCharacter->SetActorLocation(RagdollMeshLocation, false, nullptr, ETeleportType::TeleportPhysics);
+	OwnerCharacter->GetCapsuleComponent()->SetWorldLocation(RagdollMeshLocation - CachedMeshOffset);
 }
 
 FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
 {
-	FVector TraceStart = OwnerCharacter->GetMesh()->GetSocketLocation("pelvis");
-	TraceStart.Z += 25;
+	FVector TraceStart = GetMesh()->GetSocketLocation("pelvis");
 	FVector TraceEnd = TraceStart;
-	TraceEnd.Z -= 50;
+	TraceEnd.Z -= 100;
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility);
-	if(Hit.Distance > 10)
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(OwnerCharacter.Get());
+	UKismetSystemLibrary::LineTraceSingle(this, TraceStart, TraceEnd, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoreActors, EDrawDebugTrace::None, Hit, true);
+	if(!Hit.bBlockingHit)
 	{
 		return TraceStart;
 	}

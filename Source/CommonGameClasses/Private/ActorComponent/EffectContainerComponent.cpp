@@ -258,9 +258,6 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 		}
 		TickingEffect.LastSuccessfulTick = TickCounter;
 	}
-	
-	FString out = "Tick Counter: " + FString::FromInt(TickCounter) + "\nTick Effect Modulus: " + FString::FromInt(TickingEffect.TickModulus) + "\nTick Effect Modulus Offset: " + FString::FromInt(TickingEffect.TickModulusOffset) + "\nLast Successful TicK: " + FString::FromInt(TickingEffect.LastSuccessfulTick);  
-	UKismetSystemLibrary::PrintString(this, *out, true, false, FLinearColor::Green, 25.f);
 }
 
 void UEffectContainerComponent::Internal_TryStartTicking()
@@ -390,16 +387,15 @@ void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterfa
 		// TickingEffects can accept new effect
 		EffectsToTick.Add(NewTickingEffect.TickID, NewTickingEffect);
 		CurrentEffectClasses.Add(IncomingClass);
+		// Activate the Apply_Once effects only once when added to the tick container 
+		if(IncomingEffect->GetEffectInitializationData().TickInterval == EEffectTickInterval::Apply_Once_Persistent)
+		{
+			Internal_ActivateEffect(NewTickingEffect);
+		}
 	} else
 	{
 		// Replace old ticking effect with new one
-		EffectsToTick.Add(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
-	}
-	
-	// Activate the Apply_Once effects only once when added to the tick container 
-	if(IncomingEffect->GetEffectInitializationData().TickInterval == EEffectTickInterval::Apply_Once_Persistent)
-	{
-		Internal_ActivateEffect(NewTickingEffect);
+		EffectsToTick.Emplace(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
 	}
 	Internal_TryStartTicking();
 }

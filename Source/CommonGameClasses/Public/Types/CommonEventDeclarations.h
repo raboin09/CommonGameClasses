@@ -179,16 +179,17 @@ struct FTriggerEventPayload
 	// For other things (like hitscan guns and buffs/AoE abilities), should be true
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bStartActivationImmediately = true;
-
 	// If a Montage handles activation instead of the Ability
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bMontageDrivesActivation = false;
 	
-	// How long has this trigger been pulled (charge/release guns and burst) 
+	// Optional: How long has this trigger been pulled (charge/release guns and burst)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ActivationLevel = 0;
-	
-	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
+	// Optional: Tag descriptor for the activation (to determine what bullet the Activation should spawn, etc)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTag ActivationDescriptorTag;
+	// Optional: Location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ActivationSourceLocation = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

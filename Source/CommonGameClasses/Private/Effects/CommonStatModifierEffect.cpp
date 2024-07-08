@@ -130,10 +130,18 @@ void ACommonStatModifierEffect::Internal_MoveSpeedStatChange(float ModifiedStatV
 	if(UCommonCharacterMovementComponent* MovementComponent = EffectContext.ReceivingActor->FindComponentByClass<UCommonCharacterMovementComponent>())
 	{
 		// TODO Find a way to only revert modifier instead of reverting to 1.f
-		MovementComponent->MaxWalkSpeed += ModifiedStatValue;
-		ReversalFunc = [MovementComponent, ModifiedStatValue]
+		float ActualModifiedValue = ModifiedStatValue;
+		if(MovementComponent->MaxWalkSpeed + ModifiedStatValue >= StatEffectData->ClampedMax)
 		{
-			MovementComponent->MaxWalkSpeed -= ModifiedStatValue;
+			ActualModifiedValue = StatEffectData->ClampedMax;
+		} else if(MovementComponent->MaxWalkSpeed + ModifiedStatValue <= StatEffectData->ClampedMin)
+		{
+			ActualModifiedValue = StatEffectData->ClampedMin;
+		}
+		MovementComponent->MaxWalkSpeed += ActualModifiedValue;
+		ReversalFunc = [MovementComponent, ActualModifiedValue]
+		{
+			MovementComponent->MaxWalkSpeed -= ActualModifiedValue;
 		};
 	}
 }

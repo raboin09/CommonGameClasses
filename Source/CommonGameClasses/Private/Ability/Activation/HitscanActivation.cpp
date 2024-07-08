@@ -3,7 +3,7 @@
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
-void UHitscanActivation::Fire(int32 ActivationLevel)
+void UHitscanActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 {
 	Internal_FireShot();
 }

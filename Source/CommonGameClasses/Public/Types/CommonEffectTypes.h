@@ -115,7 +115,7 @@ struct FEffectInitializationData
 	bool bShouldReverseChangesAfterDestroy = true;
 	UPROPERTY(EditDefaultsOnly)
 	EEffectDurationType DurationType = EEffectDurationType::Instant;
-	// If false, the effect won't reset. If true, the effect duration will reset.
+	// If true, new effects of the same class can exist in the same effect container. If false, the effect duration will reset and just 1 effect of this class will remain.
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "DurationType != EEffectDurationType::Instant"))
 	bool bEffectCanStack = false;
 	// Required/Blocked tags that the receiving Actor must (not) have in order to activate this effect

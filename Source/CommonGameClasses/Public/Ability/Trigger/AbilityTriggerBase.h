@@ -30,15 +30,15 @@ protected:
 	virtual bool CanExecuteTriggerEvent() const;
 
 	// What tags does the owning ability (e.g. a Shotgun) REQUIRE to fire successfully
-	UPROPERTY(EditAnywhere, Category = "Trigger")
+	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
 	TArray<FGameplayTag> AbilityRequiredTags;
 	// What tags BLOCK the owning ability (e.g. a Shotgun) from firing successfully
-	UPROPERTY(EditAnywhere, Category = "Trigger")
+	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
 	TArray<FGameplayTag> AbilityBlockedTags;
 	// What tags does the instigator (e.g. the player's ACharacter) REQUIRE to fire successfully
-	UPROPERTY(EditAnywhere, Category = "Trigger")
+	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
 	TArray<FGameplayTag> InstigatorRequiredTags;
 	// What tags BLOCK the instigator (e.g. the player's ACharacter) from firing successfully
-	UPROPERTY(EditAnywhere, Category = "Trigger")
+	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
 	TArray<FGameplayTag> InstigatorBlockedTags;
 };

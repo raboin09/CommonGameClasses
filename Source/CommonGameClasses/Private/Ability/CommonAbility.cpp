@@ -465,7 +465,7 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 		// in the parent AbilityComponent
 		FAwaitingActivationDetails AwaitingActivationDetails;
 		AwaitingActivationDetails.MechanismAwaitingActivation = ActivationMechanism;
-		AwaitingActivationDetails.ActivationLevel = TriggeredEventPayload.ActivationLevel;
+		AwaitingActivationDetails.TriggerActivationPayload = TriggeredEventPayload;
 		OwningAbilityComponent->SetMechanismAwaitingActivation(AwaitingActivationDetails);
 	}
 }

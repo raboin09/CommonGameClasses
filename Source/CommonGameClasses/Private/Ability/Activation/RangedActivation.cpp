@@ -8,7 +8,7 @@
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
-	Fire(TriggerEventPayload.ActivationLevel);
+	Fire(TriggerEventPayload);
 	K2_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
 }

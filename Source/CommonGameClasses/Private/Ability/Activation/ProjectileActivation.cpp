@@ -9,19 +9,19 @@ UProjectileActivation::UProjectileActivation()
 	bHasFiringSpread = false;
 }
 
-void UProjectileActivation::Fire(int32 ActivationLevel)
+void UProjectileActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 {
-	HandleProjectileFire();
+	HandleProjectileFire(TriggerEventPayload);
 }
 
-ACommonProjectile* UProjectileActivation::HandleProjectileFire()
+ACommonProjectile* UProjectileActivation::HandleProjectileFire(const FTriggerEventPayload& TriggerEventPayload)
 {
 	FVector Origin, ProjectileVelocity;
 	Internal_AimAndShootProjectile(Origin, ProjectileVelocity);
-	return Internal_SpawnProjectile(Origin, ProjectileVelocity);
+	return Internal_SpawnProjectile(Origin, ProjectileVelocity, TriggerEventPayload);
 }
 
-TSubclassOf<ACommonProjectile> UProjectileActivation::K2N_GetProjectileClassToSpawn_Implementation() const
+TSubclassOf<ACommonProjectile> UProjectileActivation::K2N_GetProjectileClassToSpawn_Implementation(const FTriggerEventPayload& TriggerEventPayload) const
 {
 	return DefaultProjectileClass;
 }
@@ -56,12 +56,17 @@ void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 		{
 			ProjectileVelocity = AdjustedDir;
 		}
+
+		if(bDrawDebugTrace)
+		{
+			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Red, false, .5f, 0, 1.f);
+		}
 	}
 }
 
-ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity)
+ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity, const FTriggerEventPayload& TriggerEventPayload)
 {
-	const TSubclassOf<ACommonProjectile> ProjectileClassToSpawn = K2N_GetProjectileClassToSpawn();
+	const TSubclassOf<ACommonProjectile> ProjectileClassToSpawn = K2N_GetProjectileClassToSpawn(TriggerEventPayload);
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
 	if (ACommonProjectile* Projectile = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(this, ProjectileClassToSpawn, GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))

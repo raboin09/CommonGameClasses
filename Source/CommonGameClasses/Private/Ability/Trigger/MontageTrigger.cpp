@@ -31,6 +31,7 @@ void UMontageTrigger::HandleSuccessfulTriggerPressed()
 	K2_HandleAfterPressedTrigger();
 	FTriggerEventPayload PressTriggerEventPayload;
 	PressTriggerEventPayload.ActivationLevel = K2N_GetActivationLevel();
+	PressTriggerEventPayload.ActivationDescriptorTag = K2N_GetActivationDescriptorTag();
 	// Activation waits for montage notify to start
 	PressTriggerEventPayload.bStartActivationImmediately = false;
 	PressTriggerEventPayload.bMontageDrivesActivation = true;

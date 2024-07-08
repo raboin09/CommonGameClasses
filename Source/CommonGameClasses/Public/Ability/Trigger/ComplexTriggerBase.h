@@ -26,4 +26,12 @@ protected:
 	void K2_HandleAfterPressedTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleReleasedTrigger();
+
+	
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
+	int32 K2N_GetActivationLevel() const;
+	virtual int32 K2N_GetActivationLevel_Implementation() const;
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
+	FGameplayTag K2N_GetActivationDescriptorTag() const;
+	virtual FGameplayTag K2N_GetActivationDescriptorTag_Implementation() const;
 };

@@ -102,10 +102,8 @@ void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate)
 
 	if(bShouldActivate)
 	{
-		FTriggerEventPayload MontageActivationPayload;
-		MontageActivationPayload.bStartActivationImmediately = true;
-		MontageActivationPayload.ActivationLevel = AwaitingActivationDetails.ActivationLevel;
-		MechanismToActivate->Activate(MontageActivationPayload);	
+		AwaitingActivationDetails.TriggerActivationPayload.bStartActivationImmediately = true;
+		MechanismToActivate->Activate(AwaitingActivationDetails.TriggerActivationPayload);	
 	} else
 	{
 		MechanismToActivate->Deactivate();		

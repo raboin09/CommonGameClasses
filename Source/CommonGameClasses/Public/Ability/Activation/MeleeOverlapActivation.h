@@ -31,21 +31,21 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_HandleWeaponTraceEnd();
 	
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	float TraceRadius = 10.f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	bool bCanHitMultipleEnemies = true;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	bool bFriendlyFire = false;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	FName Socket_TraceStart = "TraceStart";
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	FName Socket_TraceEnd = "TraceEnd";
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	float TraceTickRate = .01f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
-	UPROPERTY(EditDefaultsOnly, Category="Activation|Debug")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Debug")
 	bool bDrawDebug = false;
 	
 private:

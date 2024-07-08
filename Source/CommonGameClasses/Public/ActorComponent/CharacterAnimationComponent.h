@@ -76,6 +76,8 @@ private:
 	FVector RagdollMeshLocation;
 	FTimerHandle TimerHandle_Ragdoll;
 	FVector LastRagdollVelocity = FVector::ZeroVector;
+	FVector CachedMeshOffset;
+	
 public:
 	FORCEINLINE TWeakObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }
 	FORCEINLINE FCharacterMontageEnded& OnCharacterMontageEnded() { return CharacterMontageEnded; }
