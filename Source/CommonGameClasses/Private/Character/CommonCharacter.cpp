@@ -70,7 +70,7 @@ void ACommonCharacter::PostInitializeComponents()
 		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);
 		if(Ability.Key == CommonGameSlot::SlotMain)
 		{
-			AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);;
+			AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);
 		}
 	}
 }

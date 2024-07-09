@@ -51,8 +51,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleUnEquip();
 	
-	UFUNCTION(BlueprintCallable)
-	float PlayAnimMontage(UAnimMontage* MontageToPlay);
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	float PlayAnimMontage(UAnimMontage* MontageToPlay);	
 	
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM")
 	TObjectPtr<UCooldownMechanismImpl> CooldownMechanism;
@@ -126,4 +126,9 @@ private:
 	
 	UPROPERTY()
 	FTimerHandle Timer_OnEquipFinished;
+
+public:
+	FORCEINLINE virtual UObject* GetTriggerMechanismObject() const override { return TriggerMechanism.GetObject(); }
+	FORCEINLINE virtual UObject* GetActivationMechanismObject() const override { return ActivationMechanism.GetObject(); }
+	FORCEINLINE virtual UCooldownMechanismImpl* GetCooldownMechanismObject() const override { return CooldownMechanism; }
 }; 

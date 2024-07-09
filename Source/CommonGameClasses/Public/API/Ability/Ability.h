@@ -7,6 +7,7 @@
 #include "UObject/Interface.h"
 #include "Ability.generated.h"
 
+class UCooldownMechanismImpl;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UAbility : public UInterface
@@ -27,6 +28,13 @@ public:
 	
 	virtual bool TryStartAbility() PURE_VIRTUAL(IAbility::TryStartAbility, return false;)
 	virtual bool TryEndAbility() PURE_VIRTUAL(IAbility::TryEndAbility, return false;)
+
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual UObject* GetTriggerMechanismObject() const PURE_VIRTUAL(IAbility::GetTriggerMechanismObject, return nullptr;)
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual UObject* GetActivationMechanismObject() const PURE_VIRTUAL(IAbility::GetActivationMechanismObject, return nullptr;)
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual UCooldownMechanismImpl* GetCooldownMechanismObject() const PURE_VIRTUAL(IAbility::GetCooldownMechanismObject, return nullptr;)
 	
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IAbility::InitAbility, )
 	virtual void DestroyAbility() PURE_VIRTUAL(IAbility::DestroyAbility, )
