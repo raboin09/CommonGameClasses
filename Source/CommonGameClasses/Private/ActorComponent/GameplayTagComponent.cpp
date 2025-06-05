@@ -106,6 +106,11 @@ bool UGameplayTagComponent::ComponentHasNameTag(UActorComponent* InComp, FName I
 
 bool UGameplayTagComponent::ActorHasAnyGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
 {
+	if(InTags.Num() == 0)
+	{
+		return false;
+	}
+	
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{
 		return UBlueprintGameplayTagLibrary::HasAnyTags(FoundComponent->GetTagContainer(), FGameplayTagContainer::CreateFromArray(InTags), bExact);
@@ -115,6 +120,11 @@ bool UGameplayTagComponent::ActorHasAnyGameplayTags(const AActor* InActor, TArra
 
 bool UGameplayTagComponent::ActorHasAllGameplayTags(const AActor* InActor, TArray<FGameplayTag> InTags, bool bExact)
 {
+	if(InTags.Num() == 0)
+	{
+		return true;
+	}
+	
 	if(UGameplayTagComponent* FoundComponent = GetGameplayTagComponentFromActor(InActor))
 	{
 		return UBlueprintGameplayTagLibrary::HasAllTags(FoundComponent->GetTagContainer(), FGameplayTagContainer::CreateFromArray(InTags), bExact);

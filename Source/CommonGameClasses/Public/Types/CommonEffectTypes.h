@@ -71,12 +71,14 @@ struct FEffectContext
 	{
 		InstigatingActor = nullptr;
 		ReceivingActor = nullptr;
+		HitDirection = FVector::ZeroVector;
 	}
 
 	FEffectContext(AActor* InOriginator, AActor* InReceiver)
 	{
 		InstigatingActor = InOriginator;
 		ReceivingActor = InReceiver;
+		HitDirection = FVector::ZeroVector;
 	}
 
 	// Actor that the effect is being applied to

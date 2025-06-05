@@ -33,7 +33,7 @@ bool UCommonInteractUtils::AreActorsEnemies(const AActor* FirstActor, const AAct
 	if(IsActorNeutral(SecondActor))
 	{
 		return false;
-	}	
+	}	  
 	return GetAffiliationOfActor(FirstActor) != GetAffiliationOfActor(SecondActor);
 }
 

@@ -7,17 +7,16 @@
 #include "Character/CommonPlayerCharacter.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "ActorComponent/QuestManagerComponent.h"
 #include "ActorComponent/InteractionComponent.h"
 #include "API/Ability/Ability.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Player/AbilityOutliner.h"
 #include "Utils/CommonInteractUtils.h"
 
 ACommonPlayerController::ACommonPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	QuestManager = CreateDefaultSubobject<UQuestManagerComponent>(TEXT("QuestManager"));
 }
 
 void ACommonPlayerController::Tick(float DeltaSeconds)
@@ -68,7 +67,14 @@ void ACommonPlayerController::HandleNewAbilityEquipped(const FNewAbilityEquipped
 		ValidAbilityOutlineDistance = DEFAULT_OUTLINE_DISTANCE;
 	} else
 	{
-		ValidAbilityOutlineDistance = NewAbilityEquippedPayload.NewEquippedAbility->GetAbilityOutlineRange();	
+		TWeakInterfacePtr<IAbility> AbilityWeakPtr = NewAbilityEquippedPayload.NewEquippedAbility.Get();
+		if(UObject* AbilityObject = AbilityWeakPtr.GetObject(); const IAbilityOutliner* AbilityOutliner = Cast<IAbilityOutliner>(AbilityObject))
+		{
+			ValidAbilityOutlineDistance = AbilityOutliner->GetAbilityOutlineRange();
+		} else
+		{
+			ValidAbilityOutlineDistance = DEFAULT_OUTLINE_DISTANCE;
+		}
 	}
 
 	if(!CurrentHoveredInteractionComponent.IsValid())

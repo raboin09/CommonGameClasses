@@ -231,9 +231,9 @@ void UCharacterAnimationComponent::Internal_TryPlayHitReact(const FDamageHitReac
 	PlayData.MontageSection = FName();
 	PlayData.PlayRate = 1.f;
 	
-	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Chainsaw || HitReactEvent.DeathReactType == EHitReactType::HitReact_Chainsaw)
+	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Special1 || HitReactEvent.DeathReactType == EHitReactType::HitReact_Special1)
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactChainsaw).Get();
+		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactSpecial1).Get();
 	} else
 	{
 		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();

@@ -11,11 +11,13 @@ void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload
 	Fire(TriggerEventPayload);
 	K2_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
+	K2_OnActivation();
 }
 
 void URangedActivation::Deactivate()
 {
 	AbilityDeactivationEvent.Broadcast({});
+	K2_OnDeactivation();
 }
 
 void URangedActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent)
@@ -52,7 +54,6 @@ void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 	{
 		EndTrace = StartTrace + AimDirection * TraceRange;
 	}
-	
 }
 
 FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const

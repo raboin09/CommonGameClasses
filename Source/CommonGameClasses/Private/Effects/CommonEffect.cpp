@@ -37,12 +37,12 @@ void ACommonEffect::PlayEffectFX()
 
 bool ACommonEffect::CanActivateEffect()
 {
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(EffectContext.ReceivingActor.Get(), GetBlockedTags()))
+	if (GetBlockedTags().Num() != 0 && UGameplayTagComponent::ActorHasAnyGameplayTags(EffectContext.ReceivingActor.Get(), GetBlockedTags()))
 	{
 		return false;
 	}
 
-	if (!UGameplayTagComponent::ActorHasAllGameplayTags(EffectContext.ReceivingActor.Get(), GetRequiredTags()))
+	if (GetRequiredTags().Num() != 0 && !UGameplayTagComponent::ActorHasAllGameplayTags(EffectContext.ReceivingActor.Get(), GetRequiredTags()))
 	{
 		return false;
 	}

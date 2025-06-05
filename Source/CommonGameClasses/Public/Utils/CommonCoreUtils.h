@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "ActorComponent/QuestManagerComponent.h"
 #include "CommonCoreUtils.generated.h"
 
+class UActorTrackingSubsystem;
 class UHealthComponent;
 class ACommonPlayerCharacter;
 class ACommonPlayerController;
@@ -35,8 +35,6 @@ public:
 	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static UHealthComponent* GetHealthComponentFromActor(UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static UQuestManagerComponent* GetQuestManager(const UObject* ContextObject);
 
 	template<typename M, typename I>
 	static FORCEINLINE TScriptInterface<I> CreateInterfaceOfType(UObject* OuterObject)

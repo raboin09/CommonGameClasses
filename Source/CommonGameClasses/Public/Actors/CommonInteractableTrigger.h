@@ -20,12 +20,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void K2_ConsumePickup(ACharacter* ConsumingChar);
 	
-	virtual void K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor) override;
 	virtual bool K2N_CanPickup_Implementation(ACharacter* PotentialChar) override;
 	virtual void ConsumePickup(ACharacter* ConsumingChar) override;
-
-	UPROPERTY()
-	TSoftObjectPtr<USMInstance> TriggerMachine;
-	UPROPERTY(EditInstanceOnly, Category="CUSTOM|Trigger")
-	TSoftClassPtr<USMInstance> TriggerLogicClass;
 };

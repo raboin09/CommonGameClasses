@@ -41,7 +41,6 @@ public:
 	
 	void EmptyQuestRelevantArray();
 	void TryAddActorToTrackedArrays(AActor* InActor);
-	void TryRemoveActorFromQuestableArray(AActor* InActor);
 	
 	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> QuestRelevantActors;

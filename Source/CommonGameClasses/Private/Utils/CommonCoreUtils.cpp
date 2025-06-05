@@ -91,12 +91,3 @@ UHealthComponent* UCommonCoreUtils::GetHealthComponentFromActor(UObject* Context
 	}
 	return nullptr;
 }
-
-UQuestManagerComponent* UCommonCoreUtils::GetQuestManager(const UObject* ContextObject)
-{
-	if (const ACommonPlayerController* BaseCon = GetCommonPlayerController(ContextObject))
-	{
-		return BaseCon->GetQuestManager().Get();
-	}
-	return nullptr;
-}

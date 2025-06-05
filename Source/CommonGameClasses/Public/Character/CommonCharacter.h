@@ -74,12 +74,7 @@ protected:
 	/// Knockbacks and Hit Reacts
 	////////////////////////////////
 	
-private:
-	UPROPERTY(Transient)
-	FTimerHandle TimerHandle_HideWeapons;
-	UPROPERTY(Transient)
-	EHitReactType LastKnownHitReact;
-	
+private:	
 	/////////////////////////////////
 	/// Animation
 	/////////////////////////////////

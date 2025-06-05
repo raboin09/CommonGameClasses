@@ -33,7 +33,7 @@ bool UCommonCombatUtils::ShouldHitKnockback(EHitReactType InHit)
 	case EHitReactType::Knockback_Huge:
 		return true;
 	case EHitReactType::HitReact_Light:
-	case EHitReactType::HitReact_Chainsaw:
+	case EHitReactType::HitReact_Special1:
 	case EHitReactType::None:
 	default:
 		return false;

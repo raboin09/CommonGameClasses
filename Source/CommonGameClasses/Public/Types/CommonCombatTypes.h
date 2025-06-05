@@ -21,7 +21,7 @@ enum class EHitReactType : uint8
 	Knockback_VeryHeavy,
 	Knockback_Huge,
 	HitReact_Light,
-	HitReact_Chainsaw
+	HitReact_Special1
 };
 
 USTRUCT(BlueprintType)

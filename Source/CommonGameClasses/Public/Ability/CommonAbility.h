@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/Ability.h"
+#include "Player/AbilityOutliner.h"
 #include "Trigger/BurstTrigger.h"
+#include "Trigger/ComplexTriggerBase.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonAbility.generated.h"
@@ -14,27 +16,31 @@ class UBehaviorTree;
 class UCooldownMechanismImpl;
 class IResourceContainer;
 class USphereComponent;
-class UComplexTriggerBase;
 class UAbilityComponent;
 class UBaseActivation;
 class UAbilityTriggerBase;
 enum class EResourceContainerLocation : uint8;
 
 UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM|Ability"))
-class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility
+class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility, public IAbilityOutliner
 {
 	GENERATED_BODY()
 	
 public:
 	ACommonAbility();
-	
+
+	// Begin IAbility interface
 	virtual void EquipAbility() override;
 	virtual void UnEquipAbility() override;
 	virtual bool TryStartAbility() override;
 	virtual bool TryEndAbility() override;
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) override;
 	virtual void DestroyAbility() override;
+	//~ End IAbility interface
+
+	// Begin IAbilityOutliner interface
 	virtual float GetAbilityOutlineRange() const override;
+	//~ End IAbilityOutliner interface
 	
 protected:
 	virtual void BeginPlay() override;
@@ -126,9 +132,4 @@ private:
 	
 	UPROPERTY()
 	FTimerHandle Timer_OnEquipFinished;
-
-public:
-	FORCEINLINE virtual UObject* GetTriggerMechanismObject() const override { return TriggerMechanism.GetObject(); }
-	FORCEINLINE virtual UObject* GetActivationMechanismObject() const override { return ActivationMechanism.GetObject(); }
-	FORCEINLINE virtual UCooldownMechanismImpl* GetCooldownMechanismObject() const override { return CooldownMechanism; }
 }; 
