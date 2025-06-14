@@ -87,7 +87,7 @@ FResourcePool& FResourcePoolContainer::GetCurrentResourcePool()
 		return ResourcePools[ResourcePools.Num() - 1];
 	}
 	
-	for(FResourcePool& CurrResourcePool : ResourcePools)
+	for(FResourcePool& CurrResourcePool : ResourcePools)  
 	{
 		// If a ResourcePool has 0 < X < 100 resources, it's the Current Resource Pool
 		if(CurrResourcePool.CurrentResources > 0 && !CurrResourcePool.IsFullPool())
@@ -105,7 +105,7 @@ FResourcePool& FResourcePoolContainer::GetCurrentResourcePool()
 	// None of the conditions fit, default to full HP
 	return ResourcePools[0];
 }
-
+   
 void FResourcePoolContainer::InitResourceContainer(const float StartingResourcePerPool, const int32 NumResourcePools)
 {
 	ResourcePools.Empty();
@@ -120,7 +120,8 @@ void FResourcePoolContainer::InitResourceContainer(const float StartingResourceP
 
 void FResourcePoolContainer::AddToMaxResourcesPerPool(int32 MaxResourcePoolsToAdd)
 {
-	for(int i=ResourcePools.Num() - 1; i < ResourcePools.Num() + MaxResourcePoolsToAdd - 1; i++)
+	int32 CurrResourcePoolCount = ResourcePools.Num();
+	for(int i= CurrResourcePoolCount - 1; i < CurrResourcePoolCount + MaxResourcePoolsToAdd - 1; i++)
 	{
 		FResourcePool TempResourcePool = FResourcePool();
 		TempResourcePool.CurrentResources = MaxResourcePerPool;
@@ -128,4 +129,4 @@ void FResourcePoolContainer::AddToMaxResourcesPerPool(int32 MaxResourcePoolsToAd
 		ResourcePools.Add(TempResourcePool);
 	}
 	NumPoolsInContainer += MaxResourcePerPool;
-}
+} 

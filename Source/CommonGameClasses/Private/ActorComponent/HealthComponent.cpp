@@ -2,6 +2,8 @@
 
 
 #include "ActorComponent/HealthComponent.h"
+
+#include "NetworkReplayStreaming.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
 
 UHealthComponent::UHealthComponent()
@@ -106,6 +108,29 @@ void UHealthComponent::AddMaxWounds(float MaxWoundsToAdd)
 		MaxWoundsEventPayload.NewMaxWounds = NewWounds;
 		MaxWoundsEventPayload.OldMaxWounds = OldWounds;
 		MaxWoundsChanged.Broadcast(MaxWoundsEventPayload);		
+	}
+}
+
+void UHealthComponent::ApplyFullHeal(AActor* InstigatingActor)
+{
+	const FResourcePool OldWound = ResourcePoolContainer.GetCurrentResourcePool();
+	const float OldWoundRemainer = OldWound.MaxResourcesInPool - OldWound.CurrentResources;
+	ResourcePoolContainer.MaximizeResourceContainer();
+	const FResourcePool NewWound = ResourcePoolContainer.GetCurrentResourcePool();
+	if(OldWoundRemainer > 0 && OldWound.ResourcePoolIndex != NewWound.ResourcePoolIndex)
+	{
+		FCurrentWoundEventPayload WoundEventPayload;
+		WoundEventPayload.InstigatingActor = InstigatingActor;
+		WoundEventPayload.ReceivingActor = GetOwner();
+		WoundEventPayload.NewWound = NewWound;
+		WoundEventPayload.OldWound = OldWound;
+		WoundEventPayload.bWasDamage = false;
+		WoundEventPayload.MaxWounds = ResourcePoolContainer.NumPoolsInContainer;
+		const int32 NumPoolsHealed = (OldWound.ResourcePoolIndex - NewWound.ResourcePoolIndex) - 1;
+		WoundEventPayload.Delta = OldWoundRemainer + (NumPoolsHealed * ResourcePoolContainer.MaxResourcePerPool);
+		WoundEventPayload.Percentage = NewWound.GetResourcePoolPercent();
+		WoundEventPayload.bNaturalChange = true;
+		CurrentHealthChanged.Broadcast(WoundEventPayload);	
 	}
 }
 

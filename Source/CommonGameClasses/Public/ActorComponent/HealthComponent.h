@@ -24,6 +24,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void ApplyHeal(const float RawHeal, AActor* InstigatingActor = nullptr);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
+	void ApplyFullHeal(AActor* InstigatingActor = nullptr);
+	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void AddMaxWounds(float MaxWoundsToAdd);
 
 protected:
