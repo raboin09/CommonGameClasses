@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "API/Effect.h"
 #include "Components/ActorComponent.h"
-#include "Types/CommonAbilityTypes.h"
 #include "EffectContainerComponent.generated.h"
 
 USTRUCT()
@@ -17,17 +16,10 @@ struct FTickingEffect
 	{
 		TickingEffect = nullptr;
 		TickModulus = -1;
+		TickModulusOffset = 0;
 		RemainingTickActivations = -1;
 		TickID = -1;
-		ExpirationTime = -1.f;
-	}
-
-	FTickingEffect(TScriptInterface<IEffect> IncomingEffect, int32 InTickModulus, int32 InExpirationTime, int32 InTickID)
-	{
-		TickModulus = InTickModulus;
-		RemainingTickActivations = InExpirationTime;
-		TickingEffect = IncomingEffect;
-		TickID = InTickID;
+		LastSuccessfulTick = -1;
 		ExpirationTime = -1.f;
 	}
 
@@ -38,7 +30,9 @@ struct FTickingEffect
 
 	TScriptInterface<IEffect> TickingEffect;
 	int32 TickModulus;
+	int32 TickModulusOffset;
 	int32 TickID;
+	int32 LastSuccessfulTick;
 	// Used for periodic activations (Once every .25/.5/1/2/5 seconds)
 	int32 RemainingTickActivations;
 	// Used for ApplyOnce
@@ -77,6 +71,7 @@ private:
 	void Internal_TickEffects();
 	void Internal_TickEffect(int32 CurrentTickingEffectKey);
 	void Internal_TryStartTicking();
+	void Internal_ResetTickCounter();
 	void Internal_StopTicking();
 	
 	int32 GetTickingEffectIndex(const UClass* EffectClass);

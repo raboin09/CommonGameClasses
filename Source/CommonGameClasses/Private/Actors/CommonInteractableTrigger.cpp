@@ -2,27 +2,11 @@
 
 
 #include "Actors/CommonInteractableTrigger.h"
-#include "SMUtils.h"
 #include "GameFramework/Character.h"
 
 ACommonInteractableTrigger::ACommonInteractableTrigger()
 {
 	bDiesAfterOverlap = true;
-	TriggerMachine = nullptr;
-}
-
-void ACommonInteractableTrigger::K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
-{
-	if(!TriggerMachine)
-	{
-		return;
-	}
-	
-	if(ACharacter* CastedChar = Cast<ACharacter>(ExitingActor); CastedChar && K2N_CanPickup(CastedChar))
-	{
-		TriggerMachine->Stop();
-	}
-
 }
 
 bool ACommonInteractableTrigger::K2N_CanPickup_Implementation(ACharacter* PotentialChar)
@@ -37,19 +21,4 @@ bool ACommonInteractableTrigger::K2N_CanPickup_Implementation(ACharacter* Potent
 void ACommonInteractableTrigger::ConsumePickup(ACharacter* ConsumingChar)
 {
 	K2_ConsumePickup(ConsumingChar);
-	if(!TriggerLogicClass)
-	{
-		return;
-	}
-	
-	if(!TriggerMachine)
-	{
-		check(TriggerLogicClass.IsValid())
-		TriggerMachine = USMBlueprintUtils::CreateStateMachineInstance(TriggerLogicClass.Get(), this);
-	}	
-
-	if(TriggerMachine)
-	{
-		TriggerMachine->Start();
-	}
 }

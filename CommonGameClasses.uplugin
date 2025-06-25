@@ -22,8 +22,7 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"AIModule",
-				"PhysicsCore",
-				"SMSystem"
+				"PhysicsCore"
 			]
 		}
 	],
@@ -34,10 +33,6 @@
 		},
 		{
 			"Name": "EnhancedInput",
-			"Enabled": true
-		},
-		{
-			"Name": "SMSystem",
 			"Enabled": true
 		}
 	]

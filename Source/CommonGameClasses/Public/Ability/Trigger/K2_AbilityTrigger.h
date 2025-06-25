@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseComplexTrigger.h"
+#include "ComplexTriggerBase.h"
 #include "API/Ability/TriggerMechanism.h"
 #include "K2_AbilityTrigger.generated.h"
 
@@ -11,7 +11,7 @@
  * 
  */
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API UK2_AbilityTrigger : public UBaseComplexTrigger
+class COMMONGAMECLASSES_API UK2_AbilityTrigger : public UComplexTriggerBase
 {
 	GENERATED_BODY()
 

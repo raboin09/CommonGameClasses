@@ -31,7 +31,6 @@ public class CommonGameClasses : ModuleRules
 				"GameplayTasks",
 				"AIModule",
 				"Niagara",
-				"SMSystem", 
 				"EnhancedInput",
 			}
 			);

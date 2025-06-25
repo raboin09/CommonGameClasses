@@ -3,8 +3,10 @@
 
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
+#include "Types/CommonAbilityTypes.h"
 #include "Effects/CommonEffect.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Systems/CommonSpawnSubsystem.h"
 #include "Utils/CommonCombatUtils.h"
 
@@ -195,14 +197,16 @@ void UEffectContainerComponent::Internal_RemoveEffectsWithTags(const TArray<FGam
 void UEffectContainerComponent::Internal_TickEffects()
 {
 	SCOPE_CYCLE_COUNTER(STAT_CommonClasses_StatsEffectContainerTicks);
-	if (++TickCounter > EFFECT_TICKS_PER_CYCLE)
+	if (TickCounter >= EFFECT_TICKS_PER_CYCLE)
 	{
-		TickCounter = 0;
+		Internal_ResetTickCounter();
 	}
+	
 	for (const int32 CurrentTickingEffectKey : GetKeys())
 	{
 		Internal_TickEffect(CurrentTickingEffectKey);
 	}
+	++TickCounter;
 }
 
 void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKey)
@@ -232,7 +236,8 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 	}		
 
 	// Check if it's not time to tick recurring effect yet
-	if(TickCounter % TickingEffect.TickModulus != 0)
+	const int32 Remainder = (TickCounter % TickingEffect.TickModulus) - TickingEffect.TickModulusOffset;
+	if(Remainder != 0)
 	{
 		return;
 	}
@@ -244,9 +249,14 @@ void UEffectContainerComponent::Internal_TickEffect(int32 CurrentTickingEffectKe
 	}
 	
 	const bool bWasSuccessfulActivation = Internal_TryActivateEffect(CurrentEffect);
-	if(bWasSuccessfulActivation && EffectInitializationData.DurationType == EEffectDurationType::FirstActivation)
+	if(bWasSuccessfulActivation)
 	{
-		Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
+		if(EffectInitializationData.DurationType == EEffectDurationType::Until_First_Successful_Activation)
+		{
+			Internal_DestroyEffect(CurrentEffect, CurrentTickingEffectKey);
+			return;	
+		}
+		TickingEffect.LastSuccessfulTick = TickCounter;
 	}
 }
 
@@ -261,7 +271,17 @@ void UEffectContainerComponent::Internal_TryStartTicking()
 	bIsTicking = true;
 }
 
-void UEffectContainerComponent::Internal_StopTicking()
+ void UEffectContainerComponent::Internal_ResetTickCounter()
+ {
+	for(auto& KeyVal : EffectsToTick)
+	{
+		FTickingEffect& TickingEffect = KeyVal.Value;
+		TickingEffect.TickModulusOffset = TickingEffect.TickModulus - (TickCounter - TickingEffect.LastSuccessfulTick);
+	}
+	TickCounter = 0;
+ }
+
+ void UEffectContainerComponent::Internal_StopTicking()
 {
 	if (CachedWorld.IsStale())
 	{
@@ -303,10 +323,10 @@ int32 GenerateModulus(EEffectTickInterval EffectInterval)
 	{
 	case EEffectTickInterval::Apply_Every_Quarter_Second: return 1;
 	case EEffectTickInterval::Apply_Every_Half_Second: return 2;
-	case EEffectTickInterval::Apply_Every_Second: return 8;
-	case EEffectTickInterval::Apply_Every_Two_Seconds: return 16;
-	case EEffectTickInterval::Apply_Every_Three_Seconds: return 24;
-	case EEffectTickInterval::Apply_Every_Five_Seconds: return 40;
+	case EEffectTickInterval::Apply_Every_Second: return 4;
+	case EEffectTickInterval::Apply_Every_Two_Seconds: return 8;
+	case EEffectTickInterval::Apply_Every_Three_Seconds: return 12;
+	case EEffectTickInterval::Apply_Every_Five_Seconds: return 16;
 	default: return -1;
 	}
 }
@@ -339,6 +359,7 @@ FTickingEffect UEffectContainerComponent::Internal_GenerateTickingEffectStruct(T
 	const FEffectInitializationData& EffectInitializationData = IncomingEffect->GetEffectInitializationData();
 	FTickingEffect TickingEffect;
 	TickingEffect.TickModulus = GenerateModulus(EffectInitializationData.TickInterval);
+	TickingEffect.TickModulusOffset = TickCounter % TickingEffect.TickModulus;
 	TickingEffect.TickID = TickIDCounter++;
 	TickingEffect.TickingEffect = IncomingEffect;
 	const bool bIsInfiniteEffect = EffectInitializationData.DurationType == EEffectDurationType::Infinite;
@@ -366,16 +387,15 @@ void UEffectContainerComponent::Internal_AddEffectToTickContainer(TScriptInterfa
 		// TickingEffects can accept new effect
 		EffectsToTick.Add(NewTickingEffect.TickID, NewTickingEffect);
 		CurrentEffectClasses.Add(IncomingClass);
+		// Activate the Apply_Once effects only once when added to the tick container 
+		if(IncomingEffect->GetEffectInitializationData().TickInterval == EEffectTickInterval::Apply_Once_Persistent)
+		{
+			Internal_ActivateEffect(NewTickingEffect);
+		}
 	} else
 	{
 		// Replace old ticking effect with new one
-		EffectsToTick.Add(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
-	}
-	
-	// Activate the Apply_Once effects only once when added to the tick container 
-	if(IncomingEffect->GetEffectInitializationData().TickInterval == EEffectTickInterval::Apply_Once_Persistent)
-	{
-		Internal_ActivateEffect(NewTickingEffect);
+		EffectsToTick.Emplace(GetTickingEffectIndex(IncomingClass), NewTickingEffect);
 	}
 	Internal_TryStartTicking();
 }

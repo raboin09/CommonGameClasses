@@ -21,7 +21,7 @@ public:
 	virtual void PauseCooldownTimer() override;
 
 protected:
-	UPROPERTY(EditAnywhere, Category="Cooldown")
+	UPROPERTY(EditAnywhere, Category="CUSTOM|Cooldown")
 	float CooldownDuration = 1.f;
 	
 private:

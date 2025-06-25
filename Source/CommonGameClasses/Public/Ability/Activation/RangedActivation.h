@@ -24,7 +24,7 @@ public:
 
 protected:
 	// Ranged Activation 
-	virtual void Fire(int32 ActivationLevel = -1) PURE_VIRTUAL(ARangedActivation::Fire,)
+	virtual void Fire(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(ARangedActivation::Fire,)
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_PlayFireFX(const FVector& SpawnPoint);
@@ -32,30 +32,30 @@ protected:
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
 	FHitResult WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector);
-	TArray<AActor*> GetActorsToIgnoreCollision();
+	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
-	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
 	// Socket where the muzzle or hand is
-	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(EditCondition = "LineTraceDirection == ELineTraceDirection::Mesh", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = 0.f))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(ClampMin = 0.f))
 	float TraceRange = 1000.f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	float TraceRadius = 20.f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	bool bHasFiringSpread = false;
-	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float TraceSpread = 5.f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float FiringSpreadIncrement = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category="Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float FiringSpreadMax = 10.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	bool bDrawDebugTrace = false;
 	
 private:

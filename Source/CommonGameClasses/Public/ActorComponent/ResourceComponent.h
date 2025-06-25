@@ -27,6 +27,8 @@ public:
 
 	FORCEINLINE virtual float GetAvailableResourceAmount() const override { return ResourcePoolContainer.GetSumOfAllResourcePools(); }
 	FORCEINLINE virtual float GetMaxResourceAmount() const override { return ResourcePoolContainer.GetMaxSumOfAllResourcePools(); }
+	UFUNCTION(BlueprintCallable, Category = "COMMON")
+	void InitResourceContainer(const float InStartingResourcePerPool, const int32 InNumResourcePools);
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,7 +45,7 @@ protected:
 	float StartingResourcesPerPool = 100.f;
 	// Give RegenAmount every RegenRate seconds
 	UPROPERTY(EditAnywhere)
-	float RegenAmount = 1.f;
+	float RegenAmount = 0.f;
 	UPROPERTY(EditAnywhere)
 	float RegenRate = 1.f;
 	

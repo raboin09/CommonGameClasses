@@ -4,8 +4,6 @@
 #include "Systems/ActorTrackingSubsystem.h"
 
 #include "ActorComponent/InteractionComponent.h"
-#include "API/Questable.h"
-#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 
@@ -69,12 +67,6 @@ void UActorTrackingSubsystem::TryAddActorToTrackedArrays(AActor* InActor)
 		FWorldActorTrackerEntry& ClassActors = *ActorsOfClass.Find(ActorClass);
 		ClassActors.Actors.Add(InActor);
 	}
-	// Add to quest-relevant arrays
-	if(!ActorClass->ImplementsInterface(UQuestable::StaticClass()))
-	{
-		return;
-	}
-	QuestRelevantActors.AddUnique(InActor);
 }
 
 TArray<AActor*> UActorTrackingSubsystem::GetAllActorsOfClass_TrackedOnly(TSubclassOf<AActor> ActorClass)
@@ -103,19 +95,4 @@ TArray<AActor*> UActorTrackingSubsystem::GetAllActorsOfClass_TrackedOnly(TSubcla
 		}
 	}
 	return OutActors;
-}
-
-void UActorTrackingSubsystem::TryRemoveActorFromQuestableArray(AActor* InActor)
-{
-	if(!InActor || !InActor->GetClass() || !InActor->GetClass()->ImplementsInterface(UQuestable::StaticClass()))
-	{
-		return;
-	}
-
-	UActorTrackingSubsystem* ActorTrackingSubsystem = InActor->GetWorld()->GetSubsystem<UActorTrackingSubsystem>();
-	if (!ActorTrackingSubsystem)
-	{
-		return;
-	}
-	ActorTrackingSubsystem->QuestRelevantActors.Remove(InActor);
 }

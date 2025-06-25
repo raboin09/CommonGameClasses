@@ -70,11 +70,11 @@ protected:
 	void K2_DestroyEffect();
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_PlayEffectSound();
+	void K2_PlayEffectSound(const FEffectContext& Context);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_PlayEffectVFX(const bool bAttachVFXToActor);
+	void K2_PlayEffectVFX(const bool bAttachVFXToActor, const FEffectContext& Context);
 	
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "CUSTOM")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "CUSTOM")
 	TObjectPtr<UEffectData> EffectData;
 	UPROPERTY(BlueprintReadOnly, Category = "CUSTOM")
 	FEffectContext EffectContext;

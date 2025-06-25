@@ -24,6 +24,7 @@ void UMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventP
 	FAbilityActivationEventPayload ActivationEventPayload;
 	ActivationEventPayload.bShouldStartCooldown = false;
 	AbilityActivationEvent.Broadcast(ActivationEventPayload);
+	K2_OnActivation();
 }
 
 void UMeleeOverlapActivation::Deactivate()
@@ -31,6 +32,7 @@ void UMeleeOverlapActivation::Deactivate()
 	Internal_StopAttack();
 	FAbilityDeactivationEventPayload DeactivationEventPayload;
 	AbilityDeactivationEvent.Broadcast(DeactivationEventPayload);
+	K2_OnDeactivation();
 }
 
 void UMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()

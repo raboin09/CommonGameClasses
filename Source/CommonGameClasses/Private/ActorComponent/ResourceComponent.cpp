@@ -12,10 +12,15 @@ UResourceComponent::UResourceComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+void UResourceComponent::InitResourceContainer(const float InStartingResourcePerPool, const int32 InNumResourcePools)
+{
+	ResourcePoolContainer.InitResourceContainer(InStartingResourcePerPool, InNumResourcePools);
+}
+
 void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	ResourcePoolContainer.InitResourceContainer(StartingResourcesPerPool, NumberOfResourcePools);
+	InitResourceContainer(StartingResourcesPerPool, NumberOfResourcePools);
 	Internal_StartRegenTimer();	
 }
 

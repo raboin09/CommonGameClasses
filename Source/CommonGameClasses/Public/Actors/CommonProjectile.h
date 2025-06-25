@@ -39,7 +39,7 @@ protected:
 	TObjectPtr<UParticleSystemComponent> ParticleComp;
 	UPROPERTY(VisibleDefaultsOnly)
 	TObjectPtr<USphereComponent> CollisionComp;
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<UStaticMeshComponent> SummonedMesh;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Projectile", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> ProjectileEffectsToApply;

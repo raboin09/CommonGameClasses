@@ -31,18 +31,18 @@ void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
 
 void ACommonEffect::PlayEffectFX()
 {
-	K2_PlayEffectSound();
-	K2_PlayEffectVFX(EffectData->bAttachVFXToActor);
+	K2_PlayEffectSound(EffectContext);
+	K2_PlayEffectVFX(EffectData->bAttachVFXToActor, EffectContext);
 }
 
 bool ACommonEffect::CanActivateEffect()
 {
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(EffectContext.ReceivingActor.Get(), GetBlockedTags()))
+	if (GetBlockedTags().Num() != 0 && UGameplayTagComponent::ActorHasAnyGameplayTags(EffectContext.ReceivingActor.Get(), GetBlockedTags()))
 	{
 		return false;
 	}
 
-	if (!UGameplayTagComponent::ActorHasAllGameplayTags(EffectContext.ReceivingActor.Get(), GetRequiredTags()))
+	if (GetRequiredTags().Num() != 0 && !UGameplayTagComponent::ActorHasAllGameplayTags(EffectContext.ReceivingActor.Get(), GetRequiredTags()))
 	{
 		return false;
 	}

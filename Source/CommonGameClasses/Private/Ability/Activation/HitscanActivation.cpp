@@ -3,7 +3,7 @@
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
-void UHitscanActivation::Fire(int32 ActivationLevel)
+void UHitscanActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 {
 	Internal_FireShot();
 }
@@ -40,6 +40,7 @@ void UHitscanActivation::K2N_ProcessInstantHit_Implementation(const FHitResult& 
 		{
 			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Green, false, .5f, 0, 1.f);	
 		}
+		K2_OnSuccessfulHit(Impact);
 		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
 	}
 }

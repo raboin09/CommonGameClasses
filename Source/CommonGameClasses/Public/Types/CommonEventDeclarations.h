@@ -6,8 +6,6 @@
 #include "CommonCombatTypes.h"
 #include "GameplayTagContainer.h"
 #include "CommonResourceTypes.h"
-#include "CommonQuestTypes.h"
-#include "Quest/QuestStateMachine.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "CommonEventDeclarations.generated.h"
 
@@ -179,16 +177,17 @@ struct FTriggerEventPayload
 	// For other things (like hitscan guns and buffs/AoE abilities), should be true
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bStartActivationImmediately = true;
-
 	// If a Montage handles activation instead of the Ability
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bMontageDrivesActivation = false;
 	
-	// How long has this trigger been pulled (charge/release guns and burst) 
+	// Optional: How long has this trigger been pulled (charge/release guns and burst)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ActivationLevel = 0;
-	
-	// Optional location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
+	// Optional: Tag descriptor for the activation (to determine what bullet the Activation should spawn, etc)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTag ActivationDescriptorTag;
+	// Optional: Location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ActivationSourceLocation = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -318,76 +317,24 @@ struct FCurrentWoundEventPayload
 	FResourcePool NewWound = FResourcePool();
 	UPROPERTY(BlueprintReadOnly)
 	FResourcePool OldWound = FResourcePool();
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	int32 MaxWounds = 1;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	float Delta = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	float Percentage = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	bool bWasDamage = false;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	bool bNaturalChange = false;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	FDamageHitReactEvent DamageHitReactEvent = FDamageHitReactEvent();
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<AActor> ReceivingActor = nullptr;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<AActor> InstigatingActor = nullptr;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCurrentWoundHealthChanged, const FCurrentWoundEventPayload&, CurrentWoundEventPayload);
-
-///////////////////////////////////////
-// Quest Event
-///////////////////////////////////////
-USTRUCT(BlueprintType)
-struct FQuestObjectiveEventPayload
-{
-	GENERATED_BODY()
-	
-	// The overlapped actor, quest objective, or killed AI character
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TWeakObjectPtr<AActor> EventObjective = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EQuestObjectiveAction EventAction = EQuestObjectiveAction::None;
-
-	FQuestObjectiveEventPayload(AActor* InObjective, EQuestObjectiveAction InAction)
-	{
-		EventObjective = InObjective;
-		EventAction = InAction;
-	}
-
-	FQuestObjectiveEventPayload()
-	{
-		EventObjective = nullptr;
-		EventAction = EQuestObjectiveAction::None;
-	}
-};
-DECLARE_EVENT_OneParam(UQuestObjectiveComponent, FQuestObjectiveEvent, const FQuestObjectiveEventPayload&);
-
-///////////////////////////////////////
-// Quest Update
-///////////////////////////////////////
-
-USTRUCT(BlueprintType)
-struct FQuestUpdateEventPayload
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TWeakObjectPtr<UQuestStateMachine> UpdatedQuest = nullptr;
-
-	FQuestUpdateEventPayload(TWeakObjectPtr<UQuestStateMachine> InUpdatedQuest)
-	{
-		UpdatedQuest = InUpdatedQuest;
-	}
-
-	FQuestUpdateEventPayload()
-	{
-		UpdatedQuest = nullptr;
-	}
-};
-DECLARE_EVENT_OneParam(UQuestObjectiveComponent, FQuestUpdateEvent, const FQuestUpdateEventPayload&);
 
 ///////////////////////////////////////
 // MANA UPDATE

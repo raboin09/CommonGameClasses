@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseComplexTrigger.h"
+#include "ComplexTriggerBase.h"
 #include "MontageTrigger.generated.h"
 
 class UCharacterAnimationComponent;
 struct FAnimMontagePlayData;
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API UMontageTrigger : public UBaseComplexTrigger
+class COMMONGAMECLASSES_API UMontageTrigger : public UComplexTriggerBase
 {
 	GENERATED_BODY()
 	
@@ -23,21 +23,22 @@ protected:
 	// UBaseTrigger overrides
 	virtual void HandleSuccessfulTriggerPressed() override;
 	virtual void HandleTriggerReleased() override;
-
+	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
 	FName K2N_GetNextMontageSection() const;
+	virtual int32 K2N_GetActivationLevel_Implementation() const override;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger")
 	TObjectPtr<UAnimMontage> MontageToPlay;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger")
 	bool bHasCombos = false;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
 	int32 MaxComboSections = 3;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
 	bool bRandomizeMontageSection = false;
-	UPROPERTY(EditDefaultsOnly, Category="Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
 	FString ComboPrefix = "Combo";
-	UPROPERTY(EditDefaultsOnly, Category="Trigger")
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger")
 	bool bShouldPlayerLockOnToNearestTarget = false;
 	
 private:

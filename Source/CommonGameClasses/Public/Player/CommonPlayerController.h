@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "ActorComponent/InteractionComponent.h"
-#include "ActorComponent/QuestManagerComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Types/CommonCoreTypes.h"
 #include "CommonPlayerController.generated.h"
@@ -71,9 +70,6 @@ protected:
 	float InteractTraceRadius = 15.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact|Debug")
 	bool bDrawDebug = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<UQuestManagerComponent> QuestManager;
 	
 private:
 	UPROPERTY()
@@ -97,5 +93,4 @@ public:
 	FORCEINLINE TWeakObjectPtr<AActor> GetCurrentHoveredInteractionActor() const { return CurrentHoveredInteractionComponent.IsValid() ? CurrentHoveredInteractionComponent->GetOwner() : nullptr; };
 	FORCEINLINE TWeakObjectPtr<UInteractionComponent> GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent.Get(); };
 	FORCEINLINE TWeakObjectPtr<ACommonPlayerCharacter> GetCommonPlayerCharacter() const { return PlayerCharacter; };
-	FORCEINLINE TWeakObjectPtr<UQuestManagerComponent> GetQuestManager() const { return QuestManager; }
 };

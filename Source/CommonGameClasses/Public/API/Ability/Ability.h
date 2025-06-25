@@ -7,6 +7,7 @@
 #include "UObject/Interface.h"
 #include "Ability.generated.h"
 
+class UCooldownMechanismImpl;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UAbility : public UInterface
@@ -21,7 +22,7 @@ class COMMONGAMECLASSES_API IAbility
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	virtual void EquipAbility() PURE_VIRTUAL(IAbility::EquipAbility, )
 	virtual void UnEquipAbility() PURE_VIRTUAL(IAbility::UnEquipAbility, )
 	
@@ -30,7 +31,4 @@ public:
 	
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) PURE_VIRTUAL(IAbility::InitAbility, )
 	virtual void DestroyAbility() PURE_VIRTUAL(IAbility::DestroyAbility, )
-
-	// If this is equipped, the PlayerController may need this to know if it should outline an interaction Actor or not
-	virtual float GetAbilityOutlineRange() const PURE_VIRTUAL(IAbility::GetAbilityOutlineRange, return -1.f; )
 };

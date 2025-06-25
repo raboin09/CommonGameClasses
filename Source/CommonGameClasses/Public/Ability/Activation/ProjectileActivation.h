@@ -18,18 +18,21 @@ public:
 	UProjectileActivation();
 
 protected:	
-	virtual void Fire(int32 ActivationLevel = -1) override;
+	virtual void Fire(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual float GetOutlineRange() const override { return DEFAULT_OUTLINE_DISTANCE; }
-	virtual ACommonProjectile* HandleProjectileFire();
+	virtual ACommonProjectile* HandleProjectileFire(const FTriggerEventPayload& TriggerEventPayload);
+
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Activation")
+	TSubclassOf<ACommonProjectile> K2N_GetProjectileClassToSpawn(const FTriggerEventPayload& TriggerEventPayload) const;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Activation")
-	TSubclassOf<ACommonProjectile> ProjectileClass;
-	UPROPERTY(EditDefaultsOnly, Category="Activation", meta=(ClampMin = "1", EditCondition = "ProjectileClass != nullptr", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	TSubclassOf<ACommonProjectile> DefaultProjectileClass;
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(ClampMin = "1"))
 	float ProjectileLife = 10.f;
 
 private:
 	virtual void Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& OutVelocity);
-	virtual ACommonProjectile* Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity);
+	virtual ACommonProjectile* Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity, const FTriggerEventPayload& TriggerEventPayload);
 
 	FORCEINLINE virtual TArray<TSubclassOf<AActor>> Internal_GetAdditionalEffectsToApplyToProjectile() const { return AbilityEffects; };
 };

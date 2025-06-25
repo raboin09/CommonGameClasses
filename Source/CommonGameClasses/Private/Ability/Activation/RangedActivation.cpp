@@ -8,14 +8,16 @@
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
-	Fire(TriggerEventPayload.ActivationLevel);
+	Fire(TriggerEventPayload);
 	K2_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
+	K2_OnActivation();
 }
 
 void URangedActivation::Deactivate()
 {
 	AbilityDeactivationEvent.Broadcast({});
+	K2_OnDeactivation();
 }
 
 void URangedActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent)
@@ -52,7 +54,6 @@ void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 	{
 		EndTrace = StartTrace + AimDirection * TraceRange;
 	}
-	
 }
 
 FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const
@@ -177,10 +178,12 @@ FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, F
 	return Hit;
 }
 
-TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision()
+TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision() const
 {
 	TArray<AActor*> IgnoredActors;
+	// Ignore the Character/Pawn instigator AND the Ability owner
 	IgnoredActors.Add(GetInstigator());
+	IgnoredActors.Add(GetOwner());
 	// If instigator is a Character, ignore their mount (if any)
 	if(const UMountManagerComponent* MountManager = GetInstigator()->FindComponentByClass<UMountManagerComponent>())
 	{

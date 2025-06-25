@@ -43,11 +43,9 @@ protected:
 	void K2_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
-
 	
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CUSTOM|AI")
 	TObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CUSTOM|AI")
 	TObjectPtr<UInteractionComponent> InteractionComponent;
 };

@@ -9,22 +9,27 @@ UProjectileActivation::UProjectileActivation()
 	bHasFiringSpread = false;
 }
 
-void UProjectileActivation::Fire(int32 ActivationLevel)
+void UProjectileActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 {
-	HandleProjectileFire();
+	HandleProjectileFire(TriggerEventPayload);
 }
 
-ACommonProjectile* UProjectileActivation::HandleProjectileFire()
+ACommonProjectile* UProjectileActivation::HandleProjectileFire(const FTriggerEventPayload& TriggerEventPayload)
 {
 	FVector Origin, ProjectileVelocity;
 	Internal_AimAndShootProjectile(Origin, ProjectileVelocity);
-	return Internal_SpawnProjectile(Origin, ProjectileVelocity);
+	return Internal_SpawnProjectile(Origin, ProjectileVelocity, TriggerEventPayload);
+}
+
+TSubclassOf<ACommonProjectile> UProjectileActivation::K2N_GetProjectileClassToSpawn_Implementation(const FTriggerEventPayload& TriggerEventPayload) const
+{
+	return DefaultProjectileClass;
 }
 
 void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrigin, FVector& ProjectileVelocity)
 {
 	OutSpawnOrigin = GetRaycastOriginLocation();
-	if (FHitResult Impact = WeaponTrace(ShouldLineTrace(), TraceRadius); Impact.bBlockingHit)
+	if (const FHitResult Impact = WeaponTrace(ShouldLineTrace(), TraceRadius); Impact.bBlockingHit)
 	{
 		const FVector AdjustedDir = (Impact.ImpactPoint - OutSpawnOrigin).GetSafeNormal();
 		bool bWeaponPenetration = false;
@@ -35,9 +40,9 @@ void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 		}
 		else if (DirectionDot < 0.5f)
 		{
-			FVector MuzzleStartTrace = OutSpawnOrigin - GetRaycastOriginRotation() * 25.0f;
-			FVector MuzzleEndTrace = OutSpawnOrigin;
-			if (FHitResult MuzzleImpact = WeaponTrace(ShouldLineTrace(), TraceRadius, MuzzleStartTrace, MuzzleEndTrace); MuzzleImpact.bBlockingHit)
+			const FVector MuzzleStartTrace = OutSpawnOrigin - GetRaycastOriginRotation() * 25.0f;
+			const FVector MuzzleEndTrace = OutSpawnOrigin;
+			if (const FHitResult MuzzleImpact = WeaponTrace(ShouldLineTrace(), TraceRadius, MuzzleStartTrace, MuzzleEndTrace); MuzzleImpact.bBlockingHit)
 			{
 				bWeaponPenetration = true;
 			}
@@ -51,15 +56,20 @@ void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 		{
 			ProjectileVelocity = AdjustedDir;
 		}
+
+		if(bDrawDebugTrace)
+		{
+			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Red, false, .5f, 0, 1.f);
+		}
 	}
 }
 
-ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity)
+ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity, const FTriggerEventPayload& TriggerEventPayload)
 {
-	check(ProjectileClass)
+	const TSubclassOf<ACommonProjectile> ProjectileClassToSpawn = K2N_GetProjectileClassToSpawn(TriggerEventPayload);
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
-	if (ACommonProjectile* Projectile = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(this, ProjectileClass.Get(), GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
+	if (ACommonProjectile* Projectile = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(this, ProjectileClassToSpawn, GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
 	{		
 		Projectile->InitVelocity(ProjectileVelocity);
 		Projectile->SetLifeSpan(ProjectileLife);
@@ -70,7 +80,7 @@ ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector
 		{
 			Projectile->IgnoreActor(TempActor);
 		}
-		UCommonSpawnSubsystem::FinishSpawningActor_Deferred( Projectile, SpawnTrans);
+		UCommonSpawnSubsystem::FinishSpawningActor_Deferred(Projectile, SpawnTrans);
 		return Projectile;
 	}
 	return nullptr;

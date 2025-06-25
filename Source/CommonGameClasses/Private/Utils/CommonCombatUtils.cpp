@@ -9,13 +9,13 @@ float UCommonCombatUtils::GetHitImpulseValue(EHitReactType InHit)
 	constexpr float Multiplier = 40000.f;
 	switch (InHit)
 	{
-	case EHitReactType::Knockback_Tiny: return .25f * Multiplier;
-	case EHitReactType::Knockback_VeryLight: return .5f * Multiplier;
-	case EHitReactType::Knockback_Light: return .7f * Multiplier;
-	case EHitReactType::Knockback_Medium: return .85f * Multiplier;
-	case EHitReactType::Knockback_Heavy: return 1.f * Multiplier;
-	case EHitReactType::Knockback_VeryHeavy: return 1.15f * Multiplier;
-	case EHitReactType::Knockback_Huge: return 2.f * Multiplier;
+	case EHitReactType::Knockback_Tiny: return 2.f * Multiplier;
+	case EHitReactType::Knockback_VeryLight: return 2.5f * Multiplier;
+	case EHitReactType::Knockback_Light: return 2.7f * Multiplier;
+	case EHitReactType::Knockback_Medium: return 2.85f * Multiplier;
+	case EHitReactType::Knockback_Heavy: return 3.f * Multiplier;
+	case EHitReactType::Knockback_VeryHeavy: return 3.15f * Multiplier;
+	case EHitReactType::Knockback_Huge: return 5.f * Multiplier;
 	default: return 0.f;
 	}
 }
@@ -33,7 +33,7 @@ bool UCommonCombatUtils::ShouldHitKnockback(EHitReactType InHit)
 	case EHitReactType::Knockback_Huge:
 		return true;
 	case EHitReactType::HitReact_Light:
-	case EHitReactType::HitReact_Chainsaw:
+	case EHitReactType::HitReact_Special1:
 	case EHitReactType::None:
 	default:
 		return false;

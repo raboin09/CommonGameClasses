@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Actors/CommonActor.h"
 #include "API/Ability/Ability.h"
+#include "Player/AbilityOutliner.h"
 #include "Trigger/BurstTrigger.h"
+#include "Trigger/ComplexTriggerBase.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonAbility.generated.h"
@@ -14,27 +16,31 @@ class UBehaviorTree;
 class UCooldownMechanismImpl;
 class IResourceContainer;
 class USphereComponent;
-class UBaseComplexTrigger;
 class UAbilityComponent;
 class UBaseActivation;
-class UBaseTrigger;
+class UAbilityTriggerBase;
 enum class EResourceContainerLocation : uint8;
 
 UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM|Ability"))
-class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility
+class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility, public IAbilityOutliner
 {
 	GENERATED_BODY()
 	
 public:
 	ACommonAbility();
-	
+
+	// Begin IAbility interface
 	virtual void EquipAbility() override;
 	virtual void UnEquipAbility() override;
 	virtual bool TryStartAbility() override;
 	virtual bool TryEndAbility() override;
 	virtual void InitAbility(UMeshComponent* OwnerMeshComponent) override;
 	virtual void DestroyAbility() override;
+	//~ End IAbility interface
+
+	// Begin IAbilityOutliner interface
 	virtual float GetAbilityOutlineRange() const override;
+	//~ End IAbilityOutliner interface
 	
 protected:
 	virtual void BeginPlay() override;
@@ -51,8 +57,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void K2_HandleUnEquip();
 	
-	UFUNCTION(BlueprintCallable)
-	float PlayAnimMontage(UAnimMontage* MontageToPlay);
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	float PlayAnimMontage(UAnimMontage* MontageToPlay);	
 	
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM")
 	TObjectPtr<UCooldownMechanismImpl> CooldownMechanism;
@@ -61,7 +67,7 @@ protected:
 	TObjectPtr<UBurstTrigger> SimpleTriggerInstance;
 	// If the ability has more complex trigger logic (playing montages, listening for events, etc), a child BP obj is required.
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "SimpleTriggerInstance == nullptr"))
-	TSubclassOf<UBaseComplexTrigger> ComplexTriggerClass;
+	TSubclassOf<UComplexTriggerBase> ComplexTriggerClass;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TSubclassOf<UBaseActivation> ActivationMechanismClass;
 

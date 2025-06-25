@@ -2,7 +2,11 @@
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/MountManagerComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
 
@@ -21,7 +25,7 @@ void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter.Get(), CommonGameState::Ragdoll))
 	{
-		Internal_RagdollUpdate();
+		Internal_RagdollUpdate(DeltaTime);
 	}
 }
 
@@ -127,9 +131,14 @@ void UCharacterAnimationComponent::StartRagdolling()
 	{
 		return;
 	}
-	OwningTagComponent->AddTag(CommonGameState::Ragdoll);
-	// TODO ALS
-	// OwnerCharacter->StartRagdolling();
+	UGameplayTagComponent::AddTagToActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
+	StopAnimMontage();
+	CachedMeshOffset = GetMesh()->GetRelativeLocation();
+	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", true);
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopActiveMovement();
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetComponentTickEnabled(true);
 }
 
@@ -139,9 +148,11 @@ void UCharacterAnimationComponent::StopRagdolling()
 	{
 		return;
 	}
-	OwningTagComponent->RemoveTag(CommonGameState::Ragdoll);
-	// TODO ALS
-	// OwnerCharacter->StopRagdolling();
+	UGameplayTagComponent::RemoveTagFromActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", false);
 	SetComponentTickEnabled(false);
 }
 
@@ -166,9 +177,7 @@ void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVecto
 	}
 	
 	StartRagdolling();
-	// TODO weird hack to stop errors
-	// OwnerCharacter->GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
-	OwnerCharacter->GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
+	GetMesh()->AddImpulse(Impulse * ImpulseScale, BoneName, bVelocityChange);
 }
 
 void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
@@ -178,7 +187,7 @@ void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
 		return;
 	}
 	
-	if (LastRagdollVelocity.Size() > 100)
+	if (LastRagdollVelocity.Size() > 10)
 	{
 		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, .1f, false);
 	}
@@ -222,9 +231,9 @@ void UCharacterAnimationComponent::Internal_TryPlayHitReact(const FDamageHitReac
 	PlayData.MontageSection = FName();
 	PlayData.PlayRate = 1.f;
 	
-	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Chainsaw || HitReactEvent.DeathReactType == EHitReactType::HitReact_Chainsaw)
+	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Special1 || HitReactEvent.DeathReactType == EHitReactType::HitReact_Special1)
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactChainsaw).Get();
+		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactSpecial1).Get();
 	} else
 	{
 		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();
@@ -254,13 +263,32 @@ FGameplayTag UCharacterAnimationComponent::Internal_GetHitDirectionTag(const FVe
 	return CommonGameAnimation::HitReactLeft;
 }
 
-void UCharacterAnimationComponent::Internal_RagdollUpdate()
+void UCharacterAnimationComponent::Internal_RagdollUpdate(float DeltaTime)
 {
-	USkeletalMeshComponent* OwnerMesh = OwnerCharacter->GetMesh();
+	USkeletalMeshComponent* OwnerMesh = GetMesh();
 	if(!OwnerMesh)
 	{
 		return;
 	}
-	const FVector NewRagdollVel = OwnerMesh->GetPhysicsLinearVelocity("root");
+	const FVector NewRagdollVel = OwnerMesh->GetPhysicsLinearVelocity("pelvis");
 	LastRagdollVelocity = (NewRagdollVel != FVector::ZeroVector || OwnerCharacter->IsLocallyControlled()) ? NewRagdollVel : LastRagdollVelocity / 2;
+
+	RagdollMeshLocation = Internal_RagdollTraceGround();
+	OwnerCharacter->GetCapsuleComponent()->SetWorldLocation(RagdollMeshLocation - CachedMeshOffset);
+}
+
+FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
+{
+	FVector TraceStart = GetMesh()->GetSocketLocation("pelvis");
+	FVector TraceEnd = TraceStart;
+	TraceEnd.Z -= 100;
+	FHitResult Hit;
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(OwnerCharacter.Get());
+	UKismetSystemLibrary::LineTraceSingle(this, TraceStart, TraceEnd, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoreActors, EDrawDebugTrace::None, Hit, true);
+	if(!Hit.bBlockingHit)
+	{
+		return TraceStart;
+	}
+	return Hit.Location;
 }
