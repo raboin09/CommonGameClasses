@@ -24,11 +24,11 @@ struct FResourcePool
 		ResourcePoolIndex = 0;
 	}
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM|Resources")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "CUSTOM|Resources")
 	float CurrentResources = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "CUSTOM|Resources")
 	float MaxResourcesInPool = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "CUSTOM|Resources")
 	int32 ResourcePoolIndex = 0;
 	
 	float GetResourcePoolPercent() const
@@ -48,11 +48,11 @@ struct FResourcePoolContainer
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	TArray<FResourcePool> ResourcePools;
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	float MaxResourcePerPool;
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	int32 NumPoolsInContainer;
 	
 	void InitResourceContainer(const float StartingResourcePerPool, const int32 NumResourcePools);

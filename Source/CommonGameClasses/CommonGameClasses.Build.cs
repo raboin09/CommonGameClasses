@@ -32,6 +32,7 @@ public class CommonGameClasses : ModuleRules
 				"AIModule",
 				"Niagara",
 				"EnhancedInput",
+				"DeveloperSettings"
 			}
 			);
 

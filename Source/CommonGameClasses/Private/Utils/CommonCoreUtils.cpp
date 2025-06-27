@@ -6,9 +6,8 @@
 #include "ActorComponent/HealthComponent.h"
 #include "Player/CommonPlayerController.h"
 #include "Character/CommonPlayerCharacter.h"
+#include "Core/ActorSystems/ActorTrackingSubsystem.h"
 #include "Kismet/GameplayStatics.h"
-#include "Systems/ActorTrackingSubsystem.h"
-#include "Types/CommonCoreTypes.h"
 
 ACommonPlayerController* UCommonCoreUtils::GetCommonPlayerController(const UObject* ContextObject)
 {

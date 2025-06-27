@@ -62,6 +62,7 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 	FGameplayTagRemovedEvent GameplayTagRemovedEvent;
 	
-private:	
+private:
+	UPROPERTY(SaveGame)
 	FGameplayTagContainer GameplayTagContainer;
 };

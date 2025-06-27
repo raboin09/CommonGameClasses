@@ -10,7 +10,7 @@
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/CommonCharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Systems/ActorTrackingSubsystem.h"
+#include "Core/ActorSystems/ActorTrackingSubsystem.h"
 #include "Types/CommonCoreTypes.h"
 #include "Utils/CommonCoreUtils.h"
 

@@ -4,7 +4,7 @@
 #include "Actors/CommonActor.h"
 
 #include "ActorComponent/GameplayTagComponent.h"
-#include "Systems/ActorTrackingSubsystem.h"
+#include "Core/ActorSystems/ActorTrackingSubsystem.h"
 #include "Utils/CommonCoreUtils.h"
 
 ACommonActor::ACommonActor()

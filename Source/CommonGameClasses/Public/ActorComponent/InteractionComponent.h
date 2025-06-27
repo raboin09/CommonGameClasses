@@ -21,7 +21,7 @@ public:
 	void InitiateInteraction(AActor* InstigatingActor, bool bStartingInteraction);
 	FORCEINLINE FVector GetOwnerLocation() const { return GetOwner() ? GetOwner()->GetActorLocation() : FVector::ZeroVector; }
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Interact")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category="CUSTOM|Interact")
 	EAffiliation Affiliation = EAffiliation::Neutral;
 	
 protected:

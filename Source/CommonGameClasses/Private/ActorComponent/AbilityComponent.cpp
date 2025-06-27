@@ -5,8 +5,8 @@
 
 #include "API/Ability/Ability.h"
 #include "API/Ability/ActivationMechanism.h"
+#include "Core/ActorSystems/CommonSpawnSubsystem.h"
 #include "GameFramework/Character.h"
-#include "Systems/CommonSpawnSubsystem.h"
 
 UAbilityComponent::UAbilityComponent()
 {

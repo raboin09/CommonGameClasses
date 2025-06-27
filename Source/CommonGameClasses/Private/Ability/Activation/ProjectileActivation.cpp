@@ -2,7 +2,7 @@
 
 #include "Ability/Activation/ProjectileActivation.h"
 #include "Actors/CommonProjectile.h"
-#include "Systems/CommonSpawnSubsystem.h"
+#include "Core/ActorSystems/CommonSpawnSubsystem.h"
 
 UProjectileActivation::UProjectileActivation()
 {

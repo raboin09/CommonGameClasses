@@ -11,7 +11,7 @@
 
 struct FResourceContainerDefaults;
 
-UCLASS(Abstract, DefaultToInstanced, EditInlineNew, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(Abstract, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API UResourceComponent : public UActorComponent, public IResourceContainer
 {
 	GENERATED_BODY()
@@ -39,22 +39,22 @@ protected:
 	// the Owner has an "Armored" status.
 	virtual float CalculateConsumptionAmount(const float RequestedAmount) const PURE_VIRTUAL(UResourceComponent::CalculateConsumptionAmount, return 0.f;)
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, SaveGame)
 	int32 NumberOfResourcePools = 1;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, SaveGame)
 	float StartingResourcesPerPool = 100.f;
 	// Give RegenAmount every RegenRate seconds
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, SaveGame)
 	float RegenAmount = 0.f;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, SaveGame)
 	float RegenRate = 1.f;
 	
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	FResourcePoolContainer ResourcePoolContainer;
 
 private:
 	FTimerHandle Timer_RegenRate;
-	UPROPERTY()
+	UPROPERTY(Transient)
 	bool bIsRegenTicking = false;
 	
 	void Internal_StartRegenTimer();
