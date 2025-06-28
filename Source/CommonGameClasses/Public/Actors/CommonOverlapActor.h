@@ -20,21 +20,21 @@ class COMMONGAMECLASSES_API ACommonOverlapActor : public ACommonActor
 	ACommonOverlapActor();
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleActivation();
+	void BPI_HandleActivation();
 	UFUNCTION(BlueprintCallable, Category="COMMON")
 	void Activate();
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleDeactivation();
+	void BPI_HandleDeactivation();
 	UFUNCTION(BlueprintCallable, Category="COMMON")
 	void Deactivate();
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
-	UMeshComponent* K2N_GetMesh() const;
-	virtual UMeshComponent* K2N_GetMesh_Implementation() const PURE_VIRTUAL(ACommonOverlapActor::K2N_GetMesh_Implementation, return nullptr;);
+	UMeshComponent* BPN_GetMesh() const;
+	virtual UMeshComponent* BPN_GetMesh_Implementation() const PURE_VIRTUAL(ACommonOverlapActor::BPN_GetMesh_Implementation, return nullptr;);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
-	UShapeComponent* K2N_GetCollisionComponent() const;
-	virtual UShapeComponent* K2N_GetCollisionComponent_Implementation() const  PURE_VIRTUAL(ACommonOverlapActor::K2N_GetCollisionComponent_Implementation, return nullptr;);
+	UShapeComponent* BPN_GetCollisionComponent() const;
+	virtual UShapeComponent* BPN_GetCollisionComponent_Implementation() const  PURE_VIRTUAL(ACommonOverlapActor::BPN_GetCollisionComponent_Implementation, return nullptr;);
 	
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON")
@@ -43,11 +43,11 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|Events")
-	void K2N_HandleOverlapEvent(AActor* OtherActor, const FHitResult& HitResult);
-	virtual void K2N_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult);
+	void BPN_HandleOverlapEvent(AActor* OtherActor, const FHitResult& HitResult);
+	virtual void BPN_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Events")
-	void K2N_HandleEndOverlapEvent(AActor* ExitingActor);
-	virtual void K2N_HandleEndOverlapEvent_Implementation(AActor* ExitingActor);
+	void BPN_HandleEndOverlapEvent(AActor* ExitingActor);
+	virtual void BPN_HandleEndOverlapEvent_Implementation(AActor* ExitingActor);
 	
 	virtual void HandleActorDeath();	
 	UFUNCTION()

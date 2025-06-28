@@ -6,6 +6,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "CommonSaveGameSubsystem.generated.h"
 
+class ISavableComponent;
+class ISavableActor;
 class ACommonPlayerController;
 class UCommonSaveGame;
 
@@ -39,6 +41,10 @@ protected:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCommonSaveGame> CurrentSaveGame;
+
+private:
+	static TArray<TScriptInterface<ISavableActor>> GetAllSavableActors(const UWorld* World);
+	static TArray<TScriptInterface<ISavableComponent>> GetAllSavableComponents(const TScriptInterface<ISavableActor>& SavableActor);
 
 public:
 	FORCEINLINE FOnSaveGameEvent& OnSaveGameLoaded() { return SaveGameLoaded; }

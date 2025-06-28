@@ -5,21 +5,21 @@
 #include "CoreMinimal.h"
 #include "BaseActivation.h"
 #include "Types/CommonEventDeclarations.h"
-#include "K2_AbilityActivation.generated.h"
+#include "BP_AbilityActivation.generated.h"
 
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API UK2_AbilityActivation : public UBaseActivation
+class COMMONGAMECLASSES_API UBP_AbilityActivation : public UBaseActivation
 {
 	GENERATED_BODY()
 
 protected:	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2N_Activate(const FTriggerEventPayload& TriggerEventPayload);
+	void BPN_Activate(const FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2N_Deactivate();
+	void BPN_Deactivate();
 	
 public:
-	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { K2N_Activate(TriggerEventPayload); }	
-	FORCEINLINE virtual void Deactivate() override { K2N_Deactivate(); }
+	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { BPN_Activate(TriggerEventPayload); }	
+	FORCEINLINE virtual void Deactivate() override { BPN_Deactivate(); }
 	FORCEINLINE virtual float GetOutlineRange() const override { return DEFAULT_OUTLINE_DISTANCE; }
 };

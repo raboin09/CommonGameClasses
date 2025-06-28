@@ -74,7 +74,7 @@ void ACommonProjectile::InitVelocity(const FVector& ShootDirection) const
 	}
 }
 
-void ACommonProjectile::K2N_HandleImpact_Implementation(const FHitResult& HitResult)
+void ACommonProjectile::BPN_HandleImpact_Implementation(const FHitResult& HitResult)
 {
 	UCommonEffectUtils::ApplyEffectsToHitResult(ProjectileEffectsToApply, HitResult, GetInstigator());
 }
@@ -95,7 +95,7 @@ void ACommonProjectile::OnImpact(const FHitResult& HitResult)
 
 	if(HitActor->FindComponentByClass<UEffectContainerComponent>() && !UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
-		K2N_HandleImpact(HitResult);
+		BPN_HandleImpact(HitResult);
 	} else
 	{
 		ApplyMissEffects(HitResult);
@@ -117,7 +117,7 @@ void ACommonProjectile::ApplyMissEffects(const FHitResult Impact)
 
 void ACommonProjectile::HandleActorDeath()
 {
-	K2_HandleActorDeath();
+	BPI_HandleActorDeath();
 	if(SummonedMesh)
 	{
 		SummonedMesh->SetVisibility(false);

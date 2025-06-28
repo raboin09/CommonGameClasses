@@ -83,7 +83,15 @@ TScriptInterface<IEffect> UEffectContainerComponent::CreateEffectInstanceFromHit
 	return SpawnedEffect;
 }
 
-void UEffectContainerComponent::BeginPlay()
+ void UEffectContainerComponent::PostComponentLoadedFromSave()
+ {
+	 if(EffectsToTick.Num() > 0)
+	 {
+		 Internal_TryStartTicking();
+	 }
+ }
+
+ void UEffectContainerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	CachedWorld = GetWorld();

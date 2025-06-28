@@ -18,17 +18,17 @@ ACommonAICharacter::ACommonAICharacter(const FObjectInitializer& ObjectInitializ
 
 void ACommonAICharacter::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionStarted(InteractionEventPayload);
+	BPI_HandleInteractionStarted(InteractionEventPayload);
 }
 
 void ACommonAICharacter::HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionInitiated(InteractionEventPayload);
+	BPI_HandleInteractionInitiated(InteractionEventPayload);
 }
 
 void ACommonAICharacter::HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload)
 {
-	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
+	BPI_HandleMeshOutlining(InteractionOutlineEventPayload);
 }
 
 void ACommonAICharacter::HandleDeath()

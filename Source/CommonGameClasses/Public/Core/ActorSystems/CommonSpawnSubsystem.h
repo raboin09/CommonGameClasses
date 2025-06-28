@@ -19,7 +19,7 @@ public:
 	/// K2 Spawn deferred
 	////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, Category="COMMON|WorldUtils")
-	static AActor* K2_SpawnActorToCurrentWorld_Deferred(const UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+	static AActor* BPI_SpawnActorToCurrentWorld_Deferred(const UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 	UFUNCTION(BlueprintCallable)
 	static void FinishSpawningActor_Deferred(AActor* InActor, const FTransform& ActorTransform);
 
@@ -27,7 +27,7 @@ public:
 	/// K2 Spawn instantly
 	////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable)
-	static AActor* K2_SpawnActorToCurrentWorld(const UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+	static AActor* BPI_SpawnActorToCurrentWorld(const UObject* ContextObject, TSubclassOf<AActor> ClassToSpawn, const FTransform& SpawnTransform, AActor* Owner = nullptr, APawn* Instigator = nullptr, ESpawnActorCollisionHandlingMethod CollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 
 	////////////////////////////////////////////////////////////////////
 	/// Native Spawn deferred

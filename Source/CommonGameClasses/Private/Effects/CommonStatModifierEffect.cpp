@@ -24,7 +24,7 @@ bool ACommonStatModifierEffect::TryActivateEffect()
 {
 	if(CanActivateEffect())
 	{
-		K2N_ApplyStatChange(CalculateModifierValues());	
+		BPN_ApplyStatChange(CalculateModifierValues());	
 	}
 	return Super::TryActivateEffect();
 }
@@ -38,7 +38,7 @@ void ACommonStatModifierEffect::DestroyEffect()
 	}
 }
 
-void ACommonStatModifierEffect::K2N_ApplyStatChange_Implementation(float ModifiedStatValue)
+void ACommonStatModifierEffect::BPN_ApplyStatChange_Implementation(float ModifiedStatValue)
 {
 	if(!EffectContext.ReceivingActor.IsValid())
 	{

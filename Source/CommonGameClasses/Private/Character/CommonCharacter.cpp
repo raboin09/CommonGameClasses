@@ -87,12 +87,12 @@ void ACommonCharacter::BeginPlay()
 
 void ACommonCharacter::HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload)
 {
-	K2_HandleTagAdded(TagAddedEventPayload);
+	BPI_HandleTagAdded(TagAddedEventPayload);
 }
 
 void ACommonCharacter::HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload)
 {
-	K2_HandleTagRemoved(TagRemovedEventPayload);
+	BPI_HandleTagRemoved(TagRemovedEventPayload);
 }
 
 void ACommonCharacter::HandleDeath()
@@ -104,7 +104,7 @@ void ACommonCharacter::HandleDeath()
 	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Dead);
 	DetachFromControllerPendingDestroy();
 	AbilityComponent->DestroyAbilities();
-	K2_HandleDeath();
+	BPI_HandleDeath();
 }
 
 void ACommonCharacter::InitCapsuleDefaults() const

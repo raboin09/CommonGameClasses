@@ -233,10 +233,10 @@ void UCharacterAnimationComponent::Internal_TryPlayHitReact(const FDamageHitReac
 	
 	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Special1 || HitReactEvent.DeathReactType == EHitReactType::HitReact_Special1)
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(CommonGameAnimation::HitReactSpecial1).Get();
+		PlayData.MontageToPlay = OwnerCharacter->BPI_GetHitReactAnimation(CommonGameAnimation::HitReactSpecial1).Get();
 	} else
 	{
-		PlayData.MontageToPlay = OwnerCharacter->K2_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();
+		PlayData.MontageToPlay = OwnerCharacter->BPI_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();
 	}
 	
 	ForcePlayAnimMontage(PlayData);

@@ -18,9 +18,9 @@ public:
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_OnActivation();
+	void BPI_OnActivation();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_OnDeactivation();
+	void BPI_OnDeactivation();
 	
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<UMeshComponent> MeshComponentRef = nullptr; 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "API/Core/Savable.h"
+#include "API/Core/SavableActor.h"
 #include "GameFramework/SaveGame.h"
 #include "CommonSaveGame.generated.h"
 

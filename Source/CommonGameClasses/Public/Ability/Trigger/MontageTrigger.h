@@ -25,8 +25,8 @@ protected:
 	virtual void HandleTriggerReleased() override;
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
-	FName K2N_GetNextMontageSection() const;
-	virtual int32 K2N_GetActivationLevel_Implementation() const override;
+	FName BPN_GetNextMontageSection() const;
+	virtual int32 BPN_GetActivationLevel_Implementation() const override;
 	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger")
 	TObjectPtr<UAnimMontage> MontageToPlay;

@@ -9,7 +9,7 @@
 
 void UMontageTrigger::InitTriggerMechanism()
 {
-	K2_HandleInitTrigger();
+	BPI_HandleInitTrigger();
 	CharacterAnimationComponent = GetInstigator()->FindComponentByClass<UCharacterAnimationComponent>();
 	check(CharacterAnimationComponent.IsValid())
 }
@@ -26,12 +26,12 @@ void UMontageTrigger::HandleSuccessfulTriggerPressed()
 			Internal_ResetComboCounter();
 		}
 	}
-	K2_HandleBeforePressedTrigger();
+	BPI_HandleBeforePressedTrigger();
 	Internal_StartMontage();
-	K2_HandleAfterPressedTrigger();
+	BPI_HandleAfterPressedTrigger();
 	FTriggerEventPayload PressTriggerEventPayload;
-	PressTriggerEventPayload.ActivationLevel = K2N_GetActivationLevel();
-	PressTriggerEventPayload.ActivationDescriptorTag = K2N_GetActivationDescriptorTag();
+	PressTriggerEventPayload.ActivationLevel = BPN_GetActivationLevel();
+	PressTriggerEventPayload.ActivationDescriptorTag = BPN_GetActivationDescriptorTag();
 	// Activation waits for montage notify to start
 	PressTriggerEventPayload.bStartActivationImmediately = false;
 	PressTriggerEventPayload.bMontageDrivesActivation = true;
@@ -46,10 +46,10 @@ void UMontageTrigger::HandleTriggerReleased()
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
 	ReleaseTriggerEventPayload.bMontageDrivesActivation = true;
 	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
-	K2_HandleReleasedTrigger();
+	BPI_HandleReleasedTrigger();
 }
 
-int32 UMontageTrigger::K2N_GetActivationLevel_Implementation() const
+int32 UMontageTrigger::BPN_GetActivationLevel_Implementation() const
 {
 	return bHasCombos ? ComboSectionIncrement : 1;
 }
@@ -80,11 +80,11 @@ FAnimMontagePlayData UMontageTrigger::Internal_GetPlayData() const
 {
 	FAnimMontagePlayData PlayData;	
 	PlayData.MontageToPlay = MontageToPlay.Get();
-	PlayData.MontageSection = K2N_GetNextMontageSection();
+	PlayData.MontageSection = BPN_GetNextMontageSection();
 	return PlayData;
 }
 
-FName UMontageTrigger::K2N_GetNextMontageSection_Implementation() const
+FName UMontageTrigger::BPN_GetNextMontageSection_Implementation() const
 {
 	if(bRandomizeMontageSection)
 	{

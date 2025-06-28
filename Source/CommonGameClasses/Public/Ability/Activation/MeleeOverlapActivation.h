@@ -21,15 +21,15 @@ public:
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_HandleMontageActivation();
+	void BPI_HandleMontageActivation();
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_HandleMontageDeactivation();
+	void BPI_HandleMontageDeactivation();
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_HandleValidHit(FHitResult HitResult);
+	void BPI_HandleValidHit(FHitResult HitResult);
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_HandleWeaponTraceStart();
+	void BPI_HandleWeaponTraceStart();
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_HandleWeaponTraceEnd();
+	void BPI_HandleWeaponTraceEnd();
 	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	float TraceRadius = 10.f;

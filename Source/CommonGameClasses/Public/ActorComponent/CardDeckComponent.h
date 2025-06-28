@@ -10,18 +10,18 @@ class COMMONGAMECLASSES_API UCardBase : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|Cards")
-	virtual void OnCardDrawn() { K2_OnCardDrawn();}
+	virtual void OnCardDrawn() { BPI_OnCardDrawn();}
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Cards")
-	void K2_OnCardDrawn();
+	void BPI_OnCardDrawn();
 
 	UFUNCTION(BlueprintCallable, Category="COMMON|Cards")
-	virtual void PlayCard() { K2_OnCardPlayed();}
+	virtual void PlayCard() { BPI_OnCardPlayed();}
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Cards")
-	void K2_OnCardPlayed();
+	void BPI_OnCardPlayed();
 
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Cards")
-	bool K2N_CanAddCard() const;
-	virtual bool K2N_CanAddCard_Implementation() const { return true; }
+	bool BPN_CanAddCard() const;
+	virtual bool BPN_CanAddCard_Implementation() const { return true; }
 };
 
 UCLASS(Blueprintable, BlueprintType)

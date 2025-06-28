@@ -23,7 +23,7 @@ protected:
 	virtual ACommonProjectile* HandleProjectileFire(const FTriggerEventPayload& TriggerEventPayload);
 
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Activation")
-	TSubclassOf<ACommonProjectile> K2N_GetProjectileClassToSpawn(const FTriggerEventPayload& TriggerEventPayload) const;
+	TSubclassOf<ACommonProjectile> BPN_GetProjectileClassToSpawn(const FTriggerEventPayload& TriggerEventPayload) const;
 	
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
 	TSubclassOf<ACommonProjectile> DefaultProjectileClass;

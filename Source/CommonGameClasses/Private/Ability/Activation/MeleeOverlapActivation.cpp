@@ -24,7 +24,7 @@ void UMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventP
 	FAbilityActivationEventPayload ActivationEventPayload;
 	ActivationEventPayload.bShouldStartCooldown = false;
 	AbilityActivationEvent.Broadcast(ActivationEventPayload);
-	K2_OnActivation();
+	BPI_OnActivation();
 }
 
 void UMeleeOverlapActivation::Deactivate()
@@ -32,7 +32,7 @@ void UMeleeOverlapActivation::Deactivate()
 	Internal_StopAttack();
 	FAbilityDeactivationEventPayload DeactivationEventPayload;
 	AbilityDeactivationEvent.Broadcast(DeactivationEventPayload);
-	K2_OnDeactivation();
+	BPI_OnDeactivation();
 }
 
 void UMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()
@@ -41,14 +41,14 @@ void UMeleeOverlapActivation::Internal_StartCollisionRaycastingTick()
 	{
 		return;
 	}
-	K2_HandleWeaponTraceStart();
+	BPI_HandleWeaponTraceStart();
 	GetWorld()->GetTimerManager().SetTimer(Timer_Raycasting, this, &ThisClass::Internal_CheckForCollisionHit, TraceTickRate, true);
 }
 
 void UMeleeOverlapActivation::Internal_StopCollisionRaycastingTick()
 {
 	GetWorld()->GetTimerManager().ClearTimer(Timer_Raycasting);
-	K2_HandleWeaponTraceEnd();
+	BPI_HandleWeaponTraceEnd();
 }
 
 void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
@@ -98,7 +98,7 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 		
 		HitActors.Add(HitActor);
 		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, Hit, GetInstigator());
-		K2_HandleValidHit(Hit);
+		BPI_HandleValidHit(Hit);
 	}
 }
 
@@ -106,7 +106,7 @@ void UMeleeOverlapActivation::Internal_StartAttack()
 {
 	HitActors.Empty();
 	Internal_StartCollisionRaycastingTick();
-	K2_HandleMontageActivation();
+	BPI_HandleMontageActivation();
 }
 
 void UMeleeOverlapActivation::Internal_StopAttack()
@@ -114,5 +114,5 @@ void UMeleeOverlapActivation::Internal_StopAttack()
 	HitActors.Empty();
 	bRecordedHit = false;
 	Internal_StopCollisionRaycastingTick();
-	K2_HandleMontageDeactivation();
+	BPI_HandleMontageDeactivation();
 }

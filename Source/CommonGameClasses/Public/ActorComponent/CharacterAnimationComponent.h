@@ -65,7 +65,7 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<UGameplayTagComponent> OwningTagComponent;
 	UPROPERTY()
-	FCharacterMontageEnded CharacterMontageEnded;	
+	FCharacterMontageEnded CharacterMontageEnded;
 	
 	FRotator ControlRotation;
 

@@ -11,13 +11,13 @@ void UHitscanActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 void UHitscanActivation::Internal_FireShot()
 {
 	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), TraceRadius);
-	K2N_ProcessInstantHit(Impact);
+	BPN_ProcessInstantHit(Impact);
 }
 
-void UHitscanActivation::K2N_ProcessInstantHit_Implementation(const FHitResult& Impact)
+void UHitscanActivation::BPN_ProcessInstantHit_Implementation(const FHitResult& Impact)
 {
 	const AActor* HitActor = Impact.GetActor();
-	K2_PlayTrailFX(Impact.TraceStart, HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
+	BPI_PlayTrailFX(Impact.TraceStart, HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
 	if(!HitActor || UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
 		if(bDrawDebugTrace)
@@ -40,7 +40,7 @@ void UHitscanActivation::K2N_ProcessInstantHit_Implementation(const FHitResult& 
 		{
 			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Green, false, .5f, 0, 1.f);	
 		}
-		K2_OnSuccessfulHit(Impact);
+		BPI_OnSuccessfulHit(Impact);
 		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
 	}
 }

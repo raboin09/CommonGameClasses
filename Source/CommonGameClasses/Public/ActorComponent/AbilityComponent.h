@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActorComponent/GameplayTagComponent.h"
 #include "Types/CommonTagTypes.h"
+#include "API/Ability/ActivationMechanism.h"
 #include "AbilityComponent.generated.h"
 
 USTRUCT()
@@ -61,7 +61,7 @@ private:
 	FAbilityRemoved AbilityRemoved;
 	UPROPERTY(BlueprintAssignable)
 	FNewAbilityEquipped AbilityEquipped;
-
+	
 	TMap<FGameplayTag, TWeakInterfacePtr<IAbility>> SlottedAbilities;
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")

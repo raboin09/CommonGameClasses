@@ -59,7 +59,7 @@ bool UCardDeckComponent::CanAddCardToDeck(const UCardBase* PotentialCard) const
 	{
 		return false;
 	}
-	return PotentialCard->K2N_CanAddCard();
+	return PotentialCard->BPN_CanAddCard();
 }
 
 void UCardDeckComponent::DrawCardFromDeckToHand()

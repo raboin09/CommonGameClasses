@@ -4,11 +4,12 @@
 #include "Core/SaveGame/CommonSaveGameSubsystem.h"
 
 #include "CommonLogTypes.h"
-#include "API/Core/Savable.h"
+#include "API/Core/SavableActor.h"
+#include "API/Core/SavableComponent.h"
 #include "Core/CommonCoreDeveloperSettings.h"
 #include "Core/SaveGame/CommonSaveGame.h"
+#include "Core/SaveGame/CommonSaveGameTypes.h"
 #include "Kismet/GameplayStatics.h"
-#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 void UCommonSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -27,29 +28,29 @@ void UCommonSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UCommonSaveGameSubsystem::WriteSaveGame()
 {
-	TArray<AActor*> SavableActors;
-	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), USavable::StaticClass(), SavableActors);
-	for(AActor* Actor : SavableActors)
+	for(TScriptInterface<ISavableActor> SavableActor : GetAllSavableActors(GetWorld()))
 	{
-		if(!IsValid(Actor))
-		{
-			continue;
-		}
-		UE_LOGFMT(LogCommonGameClassesCore, Log, "Saving {Actor}", *Actor->GetName());
-		ISavable* SavableActor = Cast<ISavable>(Actor);
-		if(!SavableActor)
-		{
-			continue;
-		}
-		FCommonActorSaveData ActorSaveData = SavableActor->CreateActorSaveData();
+		FCommonActorSaveData ActorSaveData = FCommonActorSaveData(SavableActor);
 		FMemoryWriter ActorSaveDataMemoryWriter = FMemoryWriter(ActorSaveData.ByteData);
-		FObjectAndNameAsStringProxyArchive Archiver = FObjectAndNameAsStringProxyArchive(ActorSaveDataMemoryWriter, true);
-		Archiver.ArIsSaveGame = true;
-		Actor->Serialize(Archiver);
+		FCommonActorSaveData::SaveSerializedData(SavableActor, ActorSaveDataMemoryWriter);
 		CurrentSaveGame->ActorSaveData.Add(ActorSaveData.ActorUniqueId, ActorSaveData);
-		UE_LOGFMT(LogCommonGameClassesCore, Log, "Saved {Actor}", *Actor->GetName());
+		SavableActor->PreActorSaved();
+		for(TScriptInterface<ISavableComponent> Component : GetAllSavableComponents(SavableActor))
+		{
+			Component->PreComponentSaved();
+		}
 	}
 	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SaveGameSlot, 0);
+	
+	for(TScriptInterface<ISavableActor> SavableActor : GetAllSavableActors(GetWorld()))
+	{
+		FName ActorId = SavableActor.GetObject()->GetFName();
+		SavableActor->PostActorSaved(*CurrentSaveGame->ActorSaveData.Find(ActorId));
+		for(TScriptInterface<ISavableComponent> Component : GetAllSavableComponents(SavableActor))
+		{
+			Component->PreComponentSaved();
+		}
+	}
 	OnSaveGameLoaded().Broadcast(CurrentSaveGame);
 }
 
@@ -65,35 +66,23 @@ void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName)
 			return;
 		}
 
-		UE_LOGFMT(LogCommonGameClassesCore, Log, "Loaded SaveGame Data.");
 
-		TArray<AActor*> SavableActors;
-		UGameplayStatics::GetAllActorsWithInterface(GetWorld(), USavable::StaticClass(), SavableActors);
-		for(AActor* Actor : SavableActors)
+		for(TScriptInterface<ISavableActor> SavableActor : GetAllSavableActors(GetWorld()))
 		{
-			if(!IsValid(Actor))
+			FName ActorId = SavableActor.GetObject()->GetFName();
+			if(!CurrentSaveGame->ActorSaveData.Contains(ActorId))
 			{
+				UE_LOGFMT(LogCommonGameClassesCore, Warning, "Failed to find actor data for %s", ActorId);
 				continue;
 			}
-			UE_LOGFMT(LogCommonGameClassesCore, Log, "Iterating {Actor}", *Actor->GetName());
-			ISavable* SavableActor = Cast<ISavable>(Actor);
-			if(!SavableActor)
-			{
-				continue;
-			}
-			UE_LOGFMT(LogCommonGameClassesCore, Log, "{Actor} is Savable", *Actor->GetName());
-			if(!CurrentSaveGame->ActorSaveData.Contains(Actor->GetFName()))
-			{
-				UE_LOGFMT(LogCommonGameClassesCore, Warning, "Failed to find actor data for %s", *Actor->GetName());
-				continue;
-			}
-			const FCommonActorSaveData& FoundData = *CurrentSaveGame->ActorSaveData.Find(Actor->GetFName());
+			const FCommonActorSaveData& FoundData = *CurrentSaveGame->ActorSaveData.Find(ActorId);
 			FMemoryReader ActorSaveDataMemoryRead = FMemoryReader(FoundData.ByteData);
-			FObjectAndNameAsStringProxyArchive Archiver = FObjectAndNameAsStringProxyArchive(ActorSaveDataMemoryRead, true);
-			Archiver.ArIsSaveGame = true;
-			Actor->Serialize(Archiver);
-			UE_LOGFMT(LogCommonGameClassesCore, Log, "Applying SaveData to {Actor}", *Actor->GetName());
-			SavableActor->ApplyActorSaveData(FoundData);
+			FCommonActorSaveData::LoadSerializedData(SavableActor, ActorSaveDataMemoryRead);
+			SavableActor->PostActorLoadedFromSave(FoundData);
+			for(TScriptInterface<ISavableComponent> Component : GetAllSavableComponents(SavableActor))
+			{
+				Component->PostComponentLoadedFromSave();
+			}
 		}
 		OnSaveGameLoaded().Broadcast(CurrentSaveGame);
 	}
@@ -108,4 +97,37 @@ void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName)
 void UCommonSaveGameSubsystem::HandlePlayerStarted(ACommonPlayerController* NewPlayerController)
 {
 	
+}
+
+TArray<TScriptInterface<ISavableActor>> UCommonSaveGameSubsystem::GetAllSavableActors(const UWorld* World)
+{
+	TArray<AActor*> SavableActors;
+	UGameplayStatics::GetAllActorsWithInterface(World, USavableActor::StaticClass(), SavableActors);
+
+	TArray<TScriptInterface<ISavableActor>> SavableActorArray;
+	for(AActor* Actor : SavableActors)
+	{
+		SavableActorArray.Add(Actor);
+	}
+	return SavableActorArray;
+}
+
+TArray<TScriptInterface<ISavableComponent>> UCommonSaveGameSubsystem::GetAllSavableComponents(const TScriptInterface<ISavableActor>& SavableActor)
+{
+	if(!SavableActor)
+	{
+		return TArray<TScriptInterface<ISavableComponent>>();
+	}
+	const AActor* Actor = Cast<AActor>(SavableActor.GetObject());
+	if(!Actor)
+	{
+		return TArray<TScriptInterface<ISavableComponent>>();
+	}
+	TArray<UActorComponent*> ActorComponents = Actor->GetComponentsByInterface(USavableComponent::StaticClass());
+	TArray<TScriptInterface<ISavableComponent>> SavableComponentArray;
+	for(UActorComponent* ActorComponent : ActorComponents)
+	{
+		SavableComponentArray.Add(ActorComponent);
+	}
+	return SavableComponentArray;
 }

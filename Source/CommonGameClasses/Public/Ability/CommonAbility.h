@@ -51,11 +51,11 @@ protected:
 
 	// Return how long to delay the execution of HandleEquipFinished (e.g. if playing an equip anim montage, return the duration of the montage)
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	float K2_HandleEquip();
+	float BPI_HandleEquip();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandleEquipFinished();
+	void BPI_HandleEquipFinished();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandleUnEquip();
+	void BPI_HandleUnEquip();
 	
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
 	float PlayAnimMontage(UAnimMontage* MontageToPlay);	

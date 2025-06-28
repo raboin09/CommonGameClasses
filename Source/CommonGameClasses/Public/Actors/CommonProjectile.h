@@ -24,10 +24,10 @@ public:
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON")
-	void K2N_HandleImpact(const FHitResult& HitResult);
-	virtual void K2N_HandleImpact_Implementation(const FHitResult& HitResult);
+	void BPN_HandleImpact(const FHitResult& HitResult);
+	virtual void BPN_HandleImpact_Implementation(const FHitResult& HitResult);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_HandleActorDeath();
+	void BPI_HandleActorDeath();
 	UFUNCTION()
 	virtual void OnImpact(const FHitResult& HitResult);
 	virtual void HandleActorDeath();

@@ -21,7 +21,7 @@ ACommonProjectile* UProjectileActivation::HandleProjectileFire(const FTriggerEve
 	return Internal_SpawnProjectile(Origin, ProjectileVelocity, TriggerEventPayload);
 }
 
-TSubclassOf<ACommonProjectile> UProjectileActivation::K2N_GetProjectileClassToSpawn_Implementation(const FTriggerEventPayload& TriggerEventPayload) const
+TSubclassOf<ACommonProjectile> UProjectileActivation::BPN_GetProjectileClassToSpawn_Implementation(const FTriggerEventPayload& TriggerEventPayload) const
 {
 	return DefaultProjectileClass;
 }
@@ -66,7 +66,7 @@ void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 
 ACommonProjectile* UProjectileActivation::Internal_SpawnProjectile(const FVector& SpawnOrigin, const FVector& ProjectileVelocity, const FTriggerEventPayload& TriggerEventPayload)
 {
-	const TSubclassOf<ACommonProjectile> ProjectileClassToSpawn = K2N_GetProjectileClassToSpawn(TriggerEventPayload);
+	const TSubclassOf<ACommonProjectile> ProjectileClassToSpawn = BPN_GetProjectileClassToSpawn(TriggerEventPayload);
 	FTransform SpawnTrans = FTransform();
 	SpawnTrans.SetLocation(SpawnOrigin);
 	if (ACommonProjectile* Projectile = UCommonSpawnSubsystem::SpawnActorToCurrentWorld_Deferred<ACommonProjectile>(this, ProjectileClassToSpawn, GetOwner(), GetInstigator(), ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))

@@ -6,6 +6,6 @@
 int32 UDiceBase::RollDice()
 {
 	const int32 RolledResult = FMath::RandRange(1, DiceSides);
-	K2_OnDiceRolled(RolledResult);
+	BPI_OnDiceRolled(RolledResult);
 	return RolledResult;
 }

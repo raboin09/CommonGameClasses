@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "API/Effect.h"
+#include "API/Core/SavableComponent.h"
 #include "Components/ActorComponent.h"
 #include "EffectContainerComponent.generated.h"
 
@@ -40,7 +41,7 @@ struct FTickingEffect
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class COMMONGAMECLASSES_API UEffectContainerComponent : public UActorComponent
+class COMMONGAMECLASSES_API UEffectContainerComponent : public UActorComponent, public ISavableComponent
 {
 	GENERATED_BODY()
 
@@ -55,6 +56,10 @@ public:
 	
 	// This is static so that projectile/hitscan misses can still create the Sound/Visual FX on the ground 
 	static TScriptInterface<IEffect> CreateEffectInstanceFromHitResult(TWeakObjectPtr<UObject> ContextObject, TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, TWeakObjectPtr<AActor> InstigatingActor, bool bShouldRotateHitResult = true);
+
+	//~ ISavableComponent Begin ISavableComponent Interface
+	virtual void PostComponentLoadedFromSave() override;
+	//~ ISavableComponent End ISavableComponent Interface
 	
 protected:
 	virtual void BeginPlay() override;
@@ -85,11 +90,15 @@ private:
 
 	UPROPERTY()
 	TWeakObjectPtr<UWorld> CachedWorld;
-	TSet<UClass*> CurrentEffectClasses;
-	TMap<int32, FTickingEffect> EffectsToTick;
 	
-	FTimerHandle Timer_EffectTicker;
-	int32 TickCounter = 0;
+	UPROPERTY(SaveGame)
+	TSet<UClass*> CurrentEffectClasses;
+	UPROPERTY(SaveGame)
+	TMap<int32, FTickingEffect> EffectsToTick;
+	UPROPERTY(SaveGame)
 	int32 TickIDCounter = 0;
+	
 	bool bIsTicking;
+	int32 TickCounter = 0;
+	FTimerHandle Timer_EffectTicker;
 };

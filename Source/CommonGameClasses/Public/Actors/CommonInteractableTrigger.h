@@ -14,12 +14,12 @@ class COMMONGAMECLASSES_API ACommonInteractableTrigger : public ACommonInteracta
 public:
 	ACommonInteractableTrigger();
 	
-	FORCEINLINE virtual UMeshComponent* K2N_GetMesh_Implementation() const override { return nullptr; };
+	FORCEINLINE virtual UMeshComponent* BPN_GetMesh_Implementation() const override { return nullptr; };
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
-	void K2_ConsumePickup(ACharacter* ConsumingChar);
+	void BPI_ConsumePickup(ACharacter* ConsumingChar);
 	
-	virtual bool K2N_CanPickup_Implementation(ACharacter* PotentialChar) override;
+	virtual bool BPN_CanPickup_Implementation(ACharacter* PotentialChar) override;
 	virtual void ConsumePickup(ACharacter* ConsumingChar) override;
 };

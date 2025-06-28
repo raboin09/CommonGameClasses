@@ -38,11 +38,11 @@ public:
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionEventPayload);
+	void BPI_HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
+	void BPI_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
+	void BPI_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CUSTOM|AI")
 	TObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;

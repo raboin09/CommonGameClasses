@@ -32,11 +32,11 @@ public:
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
-	void K2_HandleNewActorHovered(const UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
+	void BPI_HandleNewActorHovered(const UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
 	UFUNCTION(BlueprintImplementableEvent,Category="COMMON|PlayerController")
-	void K2_TryStartInteraction();
+	void BPI_TryStartInteraction();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
-	void K2_StopInteraction();
+	void BPI_StopInteraction();
 
 	void MoveToNewDestination(const FVector& MoveLocation);
 	

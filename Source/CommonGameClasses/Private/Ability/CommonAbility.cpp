@@ -76,7 +76,7 @@ void ACommonAbility::EquipAbility()
 {
 	Internal_HideMesh(false);
 	UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Equipping);
-	const float Duration = K2_HandleEquip();
+	const float Duration = BPI_HandleEquip();
 	if (Duration > 0.0f)
 	{
 		GetWorldTimerManager().SetTimer(Timer_OnEquipFinished, this, &ThisClass::HandleEquipFinished, Duration, false);
@@ -95,7 +95,7 @@ void ACommonAbility::HandleEquipFinished()
 		UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::AutoStartAbility);
 		TryStartAbility();
 	}
-	K2_HandleEquipFinished();
+	BPI_HandleEquipFinished();
 }
 
 float ACommonAbility::PlayAnimMontage(UAnimMontage* MontageToPlay)
@@ -106,7 +106,7 @@ float ACommonAbility::PlayAnimMontage(UAnimMontage* MontageToPlay)
 		return 0.f;
 	}
 
-	K2_HandleEquip();
+	BPI_HandleEquip();
 	FAnimMontagePlayData PlayData = FAnimMontagePlayData();
 	PlayData.MontageToPlay = MontageToPlay;
 	return CharacterAnimationComponent->ForcePlayAnimMontage(PlayData);
@@ -116,7 +116,7 @@ void ACommonAbility::UnEquipAbility()
 {
 	TryEndAbility();
 	Internal_HideMesh(true);
-	K2_HandleUnEquip();
+	BPI_HandleUnEquip();
 }
 
 bool ACommonAbility::TryStartAbility()

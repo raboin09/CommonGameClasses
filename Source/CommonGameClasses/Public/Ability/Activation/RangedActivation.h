@@ -27,7 +27,7 @@ protected:
 	virtual void Fire(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(ARangedActivation::Fire,)
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_PlayFireFX(const FVector& SpawnPoint);
+	void BPI_PlayFireFX(const FVector& SpawnPoint);
 	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;

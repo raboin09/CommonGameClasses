@@ -30,25 +30,25 @@ public:
 	//////////////////////////////////////
 	// ACommonOverlapActor Overrides
 	//////////////////////////////////////
-	FORCEINLINE virtual UShapeComponent* K2N_GetCollisionComponent_Implementation() const override { return CollisionComp; }
+	FORCEINLINE virtual UShapeComponent* BPN_GetCollisionComponent_Implementation() const override { return CollisionComp; }
 	
 protected:	
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionEventPayload);
+	void BPI_HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
+	void BPI_HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
+	void BPI_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleConsumePickup(ACharacter* ConsumingChar);
+	void BPI_HandleConsumePickup(ACharacter* ConsumingChar);
 	
 	virtual void PostInitializeComponents() override;	
-	virtual void K2N_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult) override;
-	FORCEINLINE virtual UMeshComponent* K2N_GetMesh_Implementation() const override { return PickupBase; }
+	virtual void BPN_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult) override;
+	FORCEINLINE virtual UMeshComponent* BPN_GetMesh_Implementation() const override { return PickupBase; }
 	
-	UFUNCTION(BlueprintNativeEvent)
-	bool K2N_CanPickup(ACharacter* PotentialChar);
-	virtual bool K2N_CanPickup_Implementation(ACharacter* PotentialChar);
+	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Events")
+	bool BPN_CanPickup(ACharacter* PotentialChar);
+	virtual bool BPN_CanPickup_Implementation(ACharacter* PotentialChar);
 	
 	virtual void ConsumePickup(ACharacter* ConsumingChar);
 

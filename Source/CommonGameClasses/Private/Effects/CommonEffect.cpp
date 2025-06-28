@@ -31,8 +31,8 @@ void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
 
 void ACommonEffect::PlayEffectFX()
 {
-	K2_PlayEffectSound(EffectContext);
-	K2_PlayEffectVFX(EffectData->bAttachVFXToActor, EffectContext);
+	BPI_PlayEffectSound(EffectContext);
+	BPI_PlayEffectVFX(EffectData->bAttachVFXToActor, EffectContext);
 }
 
 bool ACommonEffect::CanActivateEffect()
@@ -52,7 +52,7 @@ bool ACommonEffect::CanActivateEffect()
 		return EffectData->Conditions->AreConditionsTrue(EffectContext);
 	}
 
-	if(!K2_CanActivateEffect())
+	if(!BPI_CanActivateEffect())
 	{
 		return false;
 	}
@@ -68,13 +68,13 @@ bool ACommonEffect::TryActivateEffect()
 	}
 	PlayEffectFX();
 	Internal_AddAndRemoveTagsFromReceiver_Activation();
-	K2_ActivateEffect();
+	BPI_ActivateEffect();
 	return true;
 }
 
 void ACommonEffect::DestroyEffect()
 {
 	Internal_AddAndRemoveTagsFromReceiver_Deactivation();
-	K2_DestroyEffect();
+	BPI_DestroyEffect();
 	SetLifeSpan(1.f);
 }

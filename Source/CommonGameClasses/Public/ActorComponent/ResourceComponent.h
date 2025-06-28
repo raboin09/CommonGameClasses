@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "API/Ability/ResourceContainer.h"
+#include "API/Core/SavableComponent.h"
 #include "Components/ActorComponent.h"
 #include "Types/CommonResourceTypes.h"
 #include "ResourceComponent.generated.h"
@@ -11,8 +12,8 @@
 
 struct FResourceContainerDefaults;
 
-UCLASS(Abstract, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class COMMONGAMECLASSES_API UResourceComponent : public UActorComponent, public IResourceContainer
+UCLASS(Abstract, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class COMMONGAMECLASSES_API UResourceComponent : public UActorComponent, public IResourceContainer, public ISavableComponent
 {
 	GENERATED_BODY()
 

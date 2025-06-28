@@ -48,8 +48,8 @@ protected:
 
 	// Optionally override one of these in child classes
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void K2N_ApplyStatChange(float ModifiedStatValue);
-	virtual void K2N_ApplyStatChange_Implementation(float ModifiedStatValue);
+	void BPN_ApplyStatChange(float ModifiedStatValue);
+	virtual void BPN_ApplyStatChange_Implementation(float ModifiedStatValue);
 
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM")
 	UBaseStatsModifierData* StatEffectData;

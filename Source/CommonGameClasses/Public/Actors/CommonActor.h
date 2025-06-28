@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "API/Taggable.h"
+#include "API/Core/SavableActor.h"
 #include "GameFramework/Actor.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonActor.generated.h"
@@ -12,7 +13,7 @@ struct FGameplayTag;
 class UGameplayTagComponent;
 
 UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM"), PrioritizeCategories = "CUSTOM")
-class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable
+class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable, public ISavableActor
 {
 	GENERATED_BODY()
 
@@ -23,9 +24,9 @@ public:
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload);
+	void BPI_HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload);
+	void BPI_HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload);
 	
 protected:
 	virtual void BeginPlay() override;

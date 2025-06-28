@@ -17,21 +17,21 @@ class COMMONGAMECLASSES_API UComplexTriggerBase : public UAbilityTriggerBase
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandleInitTrigger();
+	void BPI_HandleInitTrigger();
 	// Run this just before the TriggerPress event is broadcast
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandleBeforePressedTrigger();
+	void BPI_HandleBeforePressedTrigger();
 	// Run this right after the TriggerPress event is broadcast
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandleAfterPressedTrigger();
+	void BPI_HandleAfterPressedTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void K2_HandleReleasedTrigger();
+	void BPI_HandleReleasedTrigger();
 
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
-	int32 K2N_GetActivationLevel() const;
-	virtual int32 K2N_GetActivationLevel_Implementation() const;
+	int32 BPN_GetActivationLevel() const;
+	virtual int32 BPN_GetActivationLevel_Implementation() const;
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
-	FGameplayTag K2N_GetActivationDescriptorTag() const;
-	virtual FGameplayTag K2N_GetActivationDescriptorTag_Implementation() const;
+	FGameplayTag BPN_GetActivationDescriptorTag() const;
+	virtual FGameplayTag BPN_GetActivationDescriptorTag_Implementation() const;
 };

@@ -40,7 +40,7 @@ void ACommonAIController::OnPossess(APawn* InPawn)
 	{
 		// FLoadedBehaviorTreeEvent LoadedBehaviorTreeEvent = FLoadedBehaviorTreeEvent();
 		// LoadedBehaviorTreeEvent.BindDynamic(this, &ThisClass::HandleBehaviorTreeLoaded);
-		// ActorAssetManagerComponent->K2_Async_LoadBehaviorTreeObject(BotBehaviorComponent->GetDefaultBehavior(), false, LoadedBehaviorTreeEvent);
+		// ActorAssetManagerComponent->BPI_Async_LoadBehaviorTreeObject(BotBehaviorComponent->GetDefaultBehavior(), false, LoadedBehaviorTreeEvent);
 	} else
 	{
 		HandleBehaviorTreeLoaded(BotBehaviorComponent->GetDefaultBehavior());

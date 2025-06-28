@@ -9,7 +9,7 @@ ACommonInteractableTrigger::ACommonInteractableTrigger()
 	bDiesAfterOverlap = true;
 }
 
-bool ACommonInteractableTrigger::K2N_CanPickup_Implementation(ACharacter* PotentialChar)
+bool ACommonInteractableTrigger::BPN_CanPickup_Implementation(ACharacter* PotentialChar)
 {
 	if(PotentialChar && PotentialChar->IsPlayerControlled())
 	{
@@ -20,5 +20,5 @@ bool ACommonInteractableTrigger::K2N_CanPickup_Implementation(ACharacter* Potent
 
 void ACommonInteractableTrigger::ConsumePickup(ACharacter* ConsumingChar)
 {
-	K2_ConsumePickup(ConsumingChar);
+	BPI_ConsumePickup(ConsumingChar);
 }

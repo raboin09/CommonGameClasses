@@ -37,17 +37,17 @@ void ACommonDestructibleActor::BeginPlay()
 
 void ACommonDestructibleActor::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionStarted(InteractionEventPayload);
+	BPI_HandleInteractionStarted(InteractionEventPayload);
 }
 
 void ACommonDestructibleActor::HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionInitiated(InteractionEventPayload);
+	BPI_HandleInteractionInitiated(InteractionEventPayload);
 }
 
 void ACommonDestructibleActor::HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload)
 {
-	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
+	BPI_HandleMeshOutlining(InteractionOutlineEventPayload);
 }
 
 void ACommonDestructibleActor::HandleDeathEvent(const FActorDeathEventPayload& EventPayload)
@@ -57,6 +57,6 @@ void ACommonDestructibleActor::HandleDeathEvent(const FActorDeathEventPayload& E
 	{
 		InteractionComponent->SwitchOutlineOnAllMeshes(false);	
 	}
-	K2_HandleDeath(EventPayload.HitResult);
+	BPI_HandleDeath(EventPayload.HitResult);
 	SetLifeSpan(DeathBuffer);
 }

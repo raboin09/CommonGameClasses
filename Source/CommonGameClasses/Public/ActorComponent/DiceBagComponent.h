@@ -29,7 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|Dice")
 	virtual int32 RollDice();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Dice")
-	void K2_OnDiceRolled(int32 RolledResult);
+	void BPI_OnDiceRolled(int32 RolledResult);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COMMON|Dice")

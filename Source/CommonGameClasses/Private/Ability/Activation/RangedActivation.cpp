@@ -9,15 +9,15 @@
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
 	Fire(TriggerEventPayload);
-	K2_PlayFireFX(GetRaycastOriginLocation());
+	BPI_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
-	K2_OnActivation();
+	BPI_OnActivation();
 }
 
 void URangedActivation::Deactivate()
 {
 	AbilityDeactivationEvent.Broadcast({});
-	K2_OnDeactivation();
+	BPI_OnDeactivation();
 }
 
 void URangedActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent)

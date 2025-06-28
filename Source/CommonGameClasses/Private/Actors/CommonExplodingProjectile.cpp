@@ -27,14 +27,14 @@ void ACommonExplodingProjectile::HandleActorDeath()
 	Super::HandleActorDeath();
 }
 
-void ACommonExplodingProjectile::K2N_HandleImpact_Implementation(const FHitResult& HitResult)
+void ACommonExplodingProjectile::BPN_HandleImpact_Implementation(const FHitResult& HitResult)
 {
 	Internal_Explode();
 }
 
 void ACommonExplodingProjectile::OnImpact(const FHitResult& HitResult)
 {
-	K2N_HandleImpact_Implementation(HitResult);
+	BPN_HandleImpact_Implementation(HitResult);
 	HandleActorDeath();
 }
 
@@ -42,6 +42,6 @@ void ACommonExplodingProjectile::Internal_Explode()
 {
 	bExplodedAlready = true;
 	UCommonEffectUtils::ApplyEffectsInRadius(GetInstigator(), ProjectileEffectsToApply, GetActorLocation(), ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), bCanFriendlyFire);
-	K2_HandleExplosion();
+	BPI_HandleExplosion();
 }
   

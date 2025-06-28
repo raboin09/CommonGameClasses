@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "ComplexTriggerBase.h"
 #include "API/Ability/TriggerMechanism.h"
-#include "K2_AbilityTrigger.generated.h"
+#include "BP_AbilityTrigger.generated.h"
 
 /**
  * 
  */
 UCLASS(Abstract, Blueprintable)
-class COMMONGAMECLASSES_API UK2_AbilityTrigger : public UComplexTriggerBase
+class COMMONGAMECLASSES_API UBP_AbilityTrigger : public UComplexTriggerBase
 {
 	GENERATED_BODY()
 
@@ -19,19 +19,19 @@ protected:
 	FORCEINLINE virtual void HandleSuccessfulTriggerPressed() override
 	{
 		FTriggerEventPayload TriggerEventPayload{true, 5};
-		K2N_PressTrigger(TriggerEventPayload);
+		BPN_PressTrigger(TriggerEventPayload);
 	}	
 	FORCEINLINE virtual void HandleTriggerReleased() override
 	{
 		FTriggerEventPayload TriggerEventPayload;
-		K2N_ReleaseTrigger(TriggerEventPayload);
+		BPN_ReleaseTrigger(TriggerEventPayload);
 	}	
-	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return K2_ShouldRetriggerAbilityAfterCooldown(); }
+	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return BPI_ShouldRetriggerAbilityAfterCooldown(); }
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2N_PressTrigger(FTriggerEventPayload& TriggerEventPayload);
+	void BPN_PressTrigger(FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
-	void K2N_ReleaseTrigger(FTriggerEventPayload& TriggerEventPayload);
+	void BPN_ReleaseTrigger(FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	bool K2_ShouldRetriggerAbilityAfterCooldown() const;
+	bool BPI_ShouldRetriggerAbilityAfterCooldown() const;
 };

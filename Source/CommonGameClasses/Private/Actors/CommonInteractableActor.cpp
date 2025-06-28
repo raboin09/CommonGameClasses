@@ -39,43 +39,43 @@ ACommonInteractableActor::ACommonInteractableActor()
 
 void ACommonInteractableActor::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionStarted(InteractionEventPayload);
+	BPI_HandleInteractionStarted(InteractionEventPayload);
 }
 
 void ACommonInteractableActor::HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload)
 {
-	K2_HandleInteractionInitiated(InteractionEventPayload);
+	BPI_HandleInteractionInitiated(InteractionEventPayload);
 }
 
 void ACommonInteractableActor::HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload)
 {
-	K2_HandleMeshOutlining(InteractionOutlineEventPayload);
+	BPI_HandleMeshOutlining(InteractionOutlineEventPayload);
 }
 
-void ACommonInteractableActor::K2N_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
+void ACommonInteractableActor::BPN_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
 {
 	if(ACharacter* CastedChar = Cast<ACharacter>(OtherActor))
 	{
-		if(K2N_CanPickup(CastedChar))
+		if(BPN_CanPickup(CastedChar))
 		{
 			ConsumePickup(CastedChar);
 			if(bDiesAfterOverlap)
 			{
 				PickupBase->SetVisibility(false);
 			}
-			Super::K2N_HandleOverlapEvent_Implementation(OtherActor, HitResult);
+			Super::BPN_HandleOverlapEvent_Implementation(OtherActor, HitResult);
 		}
 	}
 }
 
-bool ACommonInteractableActor::K2N_CanPickup_Implementation(ACharacter* PotentialChar)
+bool ACommonInteractableActor::BPN_CanPickup_Implementation(ACharacter* PotentialChar)
 {
 	return true;
 }
 
 void ACommonInteractableActor::ConsumePickup(ACharacter* ConsumingChar)
 {
-	K2_HandleConsumePickup(ConsumingChar);
+	BPI_HandleConsumePickup(ConsumingChar);
 }
 
 void ACommonInteractableActor::PostInitializeComponents()
@@ -83,6 +83,6 @@ void ACommonInteractableActor::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	if(RotatingMovementComponent)
 	{
-		RotatingMovementComponent->SetUpdatedComponent(K2N_GetMesh());	
+		RotatingMovementComponent->SetUpdatedComponent(BPN_GetMesh());	
 	}
 }

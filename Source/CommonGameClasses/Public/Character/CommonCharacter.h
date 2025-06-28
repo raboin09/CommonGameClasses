@@ -47,11 +47,11 @@ protected:
 	////////////////////////////////
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleDeath();
+	void BPI_HandleDeath();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
+	void BPI_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void K2_HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload);
+	void BPI_HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload);
 	
 	////////////////////////////////
 	/// Common Variables
@@ -80,9 +80,9 @@ private:
 	/////////////////////////////////
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	TSoftObjectPtr<UAnimMontage> K2_GetGetUpAnimation(bool bIsFaceUp) const;
+	TSoftObjectPtr<UAnimMontage> BPI_GetGetUpAnimation(bool bIsFaceUp) const;
 	UFUNCTION(BlueprintImplementableEvent)
-	TSoftObjectPtr<UAnimMontage> K2_GetHitReactAnimation(const FGameplayTag& HitReactDirection) const;
+	TSoftObjectPtr<UAnimMontage> BPI_GetHitReactAnimation(const FGameplayTag& HitReactDirection) const;
 	
 	/////////////////////////////////
 	/// FORCEINLINE

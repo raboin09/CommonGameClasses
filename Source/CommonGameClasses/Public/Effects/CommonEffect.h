@@ -56,7 +56,7 @@ public:
 protected:
 	virtual bool CanActivateEffect();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	bool K2_CanActivateEffect();
+	bool BPI_CanActivateEffect();
 	
 	//////////////////////////
 	/// BaseEffect code
@@ -64,15 +64,15 @@ protected:
 	
 	// BP event that fires after effect has successfully been activated
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_ActivateEffect();
+	void BPI_ActivateEffect();
 	// Optionally override one of these in child classes
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_DestroyEffect();
+	void BPI_DestroyEffect();
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_PlayEffectSound(const FEffectContext& Context);
+	void BPI_PlayEffectSound(const FEffectContext& Context);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void K2_PlayEffectVFX(const bool bAttachVFXToActor, const FEffectContext& Context);
+	void BPI_PlayEffectVFX(const bool bAttachVFXToActor, const FEffectContext& Context);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "CUSTOM")
 	TObjectPtr<UEffectData> EffectData;

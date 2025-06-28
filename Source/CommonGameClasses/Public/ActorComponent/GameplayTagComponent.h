@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "API/Core/SavableComponent.h"
 #include "Types/CommonEventDeclarations.h"
 #include "Components/ActorComponent.h"
 #include "GameplayTagComponent.generated.h"
@@ -12,7 +13,7 @@
  * 
  */
 UCLASS()
-class COMMONGAMECLASSES_API UGameplayTagComponent : public UActorComponent
+class COMMONGAMECLASSES_API UGameplayTagComponent : public UActorComponent, public ISavableComponent
 {
 	GENERATED_BODY()
 
