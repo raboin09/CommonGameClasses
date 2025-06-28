@@ -55,24 +55,6 @@ void ACommonCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	UGameplayTagComponent::AddTagsToActor(this, DefaultGameplayTags);
-	if(!AbilityComponent)
-	{
-		return;
-	}
-	
-	for(auto Ability : DefaultAbilities)
-	{
-		if(Ability.Value.IsNull())
-		{
-			continue;
-		}
-		
-		AbilityComponent->AddAbilityFromClassInSlot(Ability.Value, Ability.Key);
-		if(Ability.Key == CommonGameSlot::SlotMain)
-		{
-			AbilityComponent->SetCurrentEquippedSlot(CommonGameSlot::SlotMain);
-		}
-	}
 }
 
 void ACommonCharacter::BeginPlay()

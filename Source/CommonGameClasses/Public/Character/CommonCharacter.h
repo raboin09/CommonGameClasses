@@ -58,8 +58,6 @@ protected:
 	////////////////////////////////
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
 	TArray<FGameplayTag> DefaultGameplayTags;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
-	TMap<FGameplayTag, TSoftClassPtr<ACommonAbility>> DefaultAbilities;
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UAbilityComponent> AbilityComponent;

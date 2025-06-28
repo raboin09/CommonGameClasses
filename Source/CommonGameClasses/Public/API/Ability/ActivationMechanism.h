@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Types/CommonEventDeclarations.h"
-#include "..\..\Types\CommonInteractTypes.h"
+#include "Types/CommonInteractTypes.h"
 #include "UObject/Interface.h"
 #include "ActivationMechanism.generated.h"
 

@@ -51,6 +51,16 @@ void UAbilityComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
+void UAbilityComponent::PostComponentLoadedFromSave()
+{
+	// AbilityClasses is added to during the loop, so use a copy
+	TMap<FGameplayTag, TSoftClassPtr<AActor>> CopiedMap = AbilityClasses;
+	for(auto KeyVal : CopiedMap)
+	{
+		AddAbilityFromClassInSlot(KeyVal.Value, KeyVal.Key);
+	}
+}
+
 void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag& SlotTag)
 {
 	const TSubclassOf<AActor> ClassToSpawn = AbilityClass.LoadSynchronous();
@@ -64,7 +74,7 @@ void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityC
 	{
 		Internal_RemoveAbilityInSlot(SlotTag);	
 	}
-	Internal_AddAbilityInSlot(SlotTag, SpawnedAbility);
+	Internal_AddAbilityInSlot(SlotTag, SpawnedAbility, ClassToSpawn);
 	if(SlotTag == EquippedSlot)
 	{
 		SpawnedAbility->EquipAbility();	
@@ -110,7 +120,7 @@ void UAbilityComponent::TryActivateAwaitingMechanism(bool bShouldActivate)
 	}	
 }
 
-TWeakInterfacePtr<IAbility> UAbilityComponent::Internal_SpawnAbilityFromClass(TSubclassOf<AActor> AbilityClass) const
+TWeakInterfacePtr<IAbility> UAbilityComponent::Internal_SpawnAbilityFromClass(const TSubclassOf<AActor>& AbilityClass) const
 {
 	if(!AbilityClass || !AbilityClass->ImplementsInterface(UAbility::StaticClass()))
 	{
@@ -145,11 +155,16 @@ void UAbilityComponent::Internal_DestroyAbility(TWeakInterfacePtr<IAbility> Abil
 	AbilityToRemove->DestroyAbility();
 }
 
-void UAbilityComponent::Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, TWeakInterfacePtr<IAbility> AbilityToAdd)
+void UAbilityComponent::Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, TWeakInterfacePtr<IAbility> AbilityToAdd, const TSubclassOf<AActor>& AbilityClass)
 {
 	if(AbilityToAdd.IsValid())
 	{
-		SlottedAbilities.Add(SlotTag, AbilityToAdd);	
+		SlottedAbilities.Add(SlotTag, AbilityToAdd);
+		AbilityClasses.Add(SlotTag, TSoftClassPtr<AActor>(AbilityClass));
+		if(SlotTag == CommonGameSlot::SlotMain)
+		{
+			SetCurrentEquippedSlot(CommonGameSlot::SlotMain);
+		}
 	}	
 }
 
