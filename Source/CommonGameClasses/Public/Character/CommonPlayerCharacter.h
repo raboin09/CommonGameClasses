@@ -6,6 +6,7 @@
 #include "Character/CommonCharacter.h"
 #include "CommonPlayerCharacter.generated.h"
 
+class USpringArmComponent;
 enum class ECameraType : uint8;
 class UCameraComponent;
 
@@ -14,7 +15,11 @@ class COMMONGAMECLASSES_API ACommonPlayerCharacter : public ACommonCharacter
 {
 	GENERATED_BODY()
 
+public:
+	ACommonPlayerCharacter(const FObjectInitializer& ObjectInitializer);
+
 protected:
+	
 	//~ Begin ACharacter interface implementation
 	virtual void PossessedBy(AController* NewController) override;
 	//~ End ACharacter interface implementation
@@ -45,6 +50,18 @@ protected:
 	virtual void SetupTopDownCamera();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_SetupTopDownCamera();
+
+private:
+	void ApplyNewCameraSettings(ECameraType NewCameraType);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Camera")
+	TMap<ECameraType, FCameraTypeSettings> CameraTypeSettings;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "COMMON|PlayerCharacter")
+	TObjectPtr<UCameraComponent> CameraComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "COMMON|PlayerCharacter")
+	TObjectPtr<USpringArmComponent> SpringArmComponent;
 	
 private:
 	FVector2D LastMoveInput;

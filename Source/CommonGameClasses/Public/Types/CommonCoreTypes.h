@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonCoreTypes.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogCommonGameClasses, Log, All);
 
@@ -38,4 +39,47 @@ enum class ECameraType : uint8
 	FirstPerson,
 	ThirdPerson,
 	TopDown
+};
+
+USTRUCT(BlueprintType)
+struct FCameraTypeSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm")	
+	float TargetArmLength = 300.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm")
+	FRotator TargetArmRotation = FRotator(0.f, 0.f, 0.f);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm")
+	FVector TargetArmOffset = FVector(0.f, 0.f, 0.f);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm")
+	bool bSpringArmUsePawnControlRotation = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm")
+	bool bEnableCameraLag = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm", meta=(editcondition="bEnableCameraLag", ClampMin="0.0", ClampMax="1000.0", UIMin = "0.0", UIMax = "1000.0"))
+	float CameraLagSpeed = 10.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm")
+	bool bEnableCameraRotationLag = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm", meta=(editcondition = "bEnableCameraRotationLag", ClampMin="0.0", ClampMax="1000.0", UIMin = "0.0", UIMax = "1000.0"))
+	float CameraRotationLagSpeed = 10.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SpringArm")
+	bool bDoCollisionTest = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn")
+	bool bInheritYaw = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn")
+	bool bInheritPitch = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn")
+	bool bInheritRoll = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
+	bool bCameraUsePawnControlRotation = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta=(ClampMin="45", ClampMax="90"))
+	float FieldOfView = 90.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn")
+	bool bUseControllerRotationYaw = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn")
+	bool bUseControllerRotationPitch = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn")
+	bool bUseControllerRotationRoll = false;
 };
