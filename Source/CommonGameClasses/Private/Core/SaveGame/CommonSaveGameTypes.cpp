@@ -10,6 +10,16 @@ class ISavableActor;
 
 FCommonActorSaveData::FCommonActorSaveData(AActor* Actor)
 {
+	AssignActorSaveData(Actor);
+}
+
+FCommonActorSaveData::FCommonActorSaveData(const TScriptInterface<ISavableActor>& Actor)
+{
+	AssignActorSaveData(Cast<AActor>(Actor.GetObject()));
+}
+
+void FCommonActorSaveData::AssignActorSaveData(AActor* Actor)
+{
 	if(!IsValid(Actor))
 	{
 		return;;
@@ -21,11 +31,6 @@ FCommonActorSaveData::FCommonActorSaveData(AActor* Actor)
 	}
 	ActorUniqueId = Actor->GetFName();
 	SavedTransform = Actor->GetTransform();
-}
-
-FCommonActorSaveData::FCommonActorSaveData(const TScriptInterface<ISavableActor>& Actor)
-{
-	FCommonActorSaveData(Cast<AActor>(Actor.GetObject()));
 }
 
 void FCommonActorSaveData::SaveSerializedData(AActor* Actor, FMemoryWriter& MemoryWriter)

@@ -23,6 +23,8 @@ public:
 	
 	explicit FCommonActorSaveData(AActor* Actor);
 	explicit FCommonActorSaveData(const TScriptInterface<ISavableActor>& Actor);
+
+	void AssignActorSaveData(AActor* Actor);
 	
 	static void SaveSerializedData(AActor* Actor, FMemoryWriter& MemoryWriter);
 	static void LoadSerializedData(AActor* Actor, FMemoryReader& MemoryReader);
