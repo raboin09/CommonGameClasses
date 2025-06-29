@@ -100,11 +100,6 @@ void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName, const int32
 	OnSaveGameLoaded().Broadcast(CurrentSaveGame);
 }
 
-void UCommonSaveGameSubsystem::HandlePlayerStarted(ACommonPlayerController* NewPlayerController)
-{
-	
-}
-
 TArray<TScriptInterface<ISavableActor>> UCommonSaveGameSubsystem::GetAllSavableActors(const UWorld* World)
 {
 	TArray<AActor*> SavableActors;

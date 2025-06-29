@@ -34,9 +34,7 @@ public:
 	void WriteSaveGame(const FString& SlotName, const int32 UserIndex = 0);
 	UFUNCTION(BlueprintCallable, Category = "COMMON|Core|SaveGame")
 	void LoadSaveGame(const FString& SlotName, const int32 UserIndex = 0);
-
-	UFUNCTION(BlueprintCallable, Category = "COMMON|Core|SaveGame")
-	void HandlePlayerStarted(ACommonPlayerController* NewPlayerController);
+	
 protected:
 	FOnSaveGameEvent SaveGameLoaded;
 	FOnSaveGameEvent SaveGameWritten;
