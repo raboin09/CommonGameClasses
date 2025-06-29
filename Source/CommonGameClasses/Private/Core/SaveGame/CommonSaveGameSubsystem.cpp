@@ -25,6 +25,12 @@ void UCommonSaveGameSubsystem::QuickLoad()
 
 void UCommonSaveGameSubsystem::WriteSaveGame(const FString& SlotName, const int32 UserIndex /* = 0 */)
 {
+	if(SlotName.IsEmpty())
+	{
+		UE_LOG(LogCommonGameClassesCore, Warning, TEXT("SaveGame slot name is empty!"));
+		return;
+	}
+	
 	UCommonSaveGame* CurrentSaveGame = FindOrCreateNewSaveFile(SlotName, UserIndex);
 	if (!IsValid(CurrentSaveGame))
 	{
@@ -60,6 +66,12 @@ void UCommonSaveGameSubsystem::WriteSaveGame(const FString& SlotName, const int3
 
 void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName, const int32 UserIndex /* = 0 */)
 {
+	if(SlotName.IsEmpty())
+	{
+		UE_LOG(LogCommonGameClassesCore, Warning, TEXT("SaveGame slot name is empty!"));
+		return;
+	}
+	
 	UCommonSaveGame* CurrentSaveGame = FindOrCreateNewSaveFile(SlotName, UserIndex);
 	if (!IsValid(CurrentSaveGame))
 	{
@@ -78,7 +90,7 @@ void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName, const int32
 		const FCommonActorSaveData& FoundData = *CurrentSaveGame->ActorSaveData.Find(ActorId);
 		FMemoryReader ActorSaveDataMemoryRead = FMemoryReader(FoundData.ByteData);
 		FCommonActorSaveData::LoadSerializedData(SavableActor, ActorSaveDataMemoryRead);
-		UE_LOGFMT(LogCommonGameClassesCore, Warning, "Failed to find actor data for {0}", *ActorId.ToString());
+		UE_LOGFMT(LogCommonGameClassesCore, Log, "Applying actor save data for {0}", *ActorId.ToString());
 		SavableActor->PostActorLoadedFromSave(FoundData);
 		for(TScriptInterface<ISavableComponent> Component : GetAllSavableComponents(SavableActor))
 		{
