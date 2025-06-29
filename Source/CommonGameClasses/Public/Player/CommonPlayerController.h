@@ -9,39 +9,50 @@
 #include "Types/CommonCoreTypes.h"
 #include "CommonPlayerController.generated.h"
 
+class UInputMappingContext;
 class ACommonPlayerCharacter;
 class UInteractionComponent;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(Abstract, Blueprintable, CollapseCategories, AutoExpandCategories=("CUSTOM"), PrioritizeCategories = "CUSTOM")
 class COMMONGAMECLASSES_API ACommonPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
 	ACommonPlayerController();
+
+	//~ Begin APlayerController interface implementation 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void SetupInputComponent() override;
+	//~ End APlayerController interface implementation	
 	
+protected:
 	//////////////////////////////////////////////
 	/// CommonPlayerController
 	//////////////////////////////////////////////
+
+	virtual void SetupInputActions();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
+	void BPI_SetupInputActions();
+	
 	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerController")
 	void TryStartInteractionWithCurrentInteractable();
+	
 	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerController")
 	void StopInteraction();
 	
-protected:
+	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerController")
+	void SetNewCameraType(ECameraType NewCameraType);
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
+	void BPI_NewCameraTypeSelected(ECameraType NewCameraType);
+	
+	void NewActorHovered(UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
 	void BPI_HandleNewActorHovered(const UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
-	UFUNCTION(BlueprintImplementableEvent,Category="COMMON|PlayerController")
-	void BPI_TryStartInteraction();
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerController")
-	void BPI_StopInteraction();
-
-	void MoveToNewDestination(const FVector& MoveLocation);
 	
 private:
-	void NewActorHovered(UInteractionComponent* NewHoveredInteractable, bool bShouldOutline);
+	void MoveToNewDestination(const FVector& MoveLocation);	
 	void NewActorTargeted(const AActor* NewHoveredActor);
 
 	UFUNCTION()
@@ -59,19 +70,27 @@ private:
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UInputMappingContext* DefaultMappingContext;
+	
+	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
 	TArray<FGameplayTag> DefaultGameplayTags;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
 	float InteractWithAlliesDistance = 150.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
 	float InteractWithEnemiesDistance = 150.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
-	ECameraType CameraType = ECameraType::ThirdPerson;
+	ECameraType DefaultCameraType = ECameraType::ThirdPerson;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
 	float InteractTraceRadius = 15.f;
 	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact|Debug")
 	bool bDrawDebug = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="CUSTOM|Interact|Debug")
+	ECameraType CurrentCameraType = ECameraType::None;
 	
 private:
+	FCameraTypeChanged CameraTypeChanged;
+	
 	UPROPERTY()
 	TWeakObjectPtr<ACommonPlayerCharacter> PlayerCharacter;	
 	UPROPERTY()
@@ -93,4 +112,6 @@ public:
 	FORCEINLINE TWeakObjectPtr<AActor> GetCurrentHoveredInteractionActor() const { return CurrentHoveredInteractionComponent.IsValid() ? CurrentHoveredInteractionComponent->GetOwner() : nullptr; };
 	FORCEINLINE TWeakObjectPtr<UInteractionComponent> GetCurrentHoveredInteractionComponent() const { return CurrentHoveredInteractionComponent.Get(); };
 	FORCEINLINE TWeakObjectPtr<ACommonPlayerCharacter> GetCommonPlayerCharacter() const { return PlayerCharacter; };
+	FORCEINLINE ECameraType GetCameraType() const { return CurrentCameraType; };
+	FORCEINLINE FCameraTypeChanged& OnCameraTypeChanged() { return CameraTypeChanged; };
 };

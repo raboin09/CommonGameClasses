@@ -3,6 +3,7 @@
 
 #include "Player/CommonPlayerController.h"
 
+#include "EnhancedInputSubsystems.h"
 #include "ActorComponent/AbilityComponent.h"
 #include "Character/CommonPlayerCharacter.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
@@ -17,6 +18,7 @@
 ACommonPlayerController::ACommonPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	DefaultMappingContext = nullptr;
 }
 
 void ACommonPlayerController::Tick(float DeltaSeconds)
@@ -34,6 +36,22 @@ void ACommonPlayerController::OnPossess(APawn* InPawn)
 	{
 		AbilityComponent->OnNewAbilityEquipped().AddUniqueDynamic(this, &ThisClass::HandleNewAbilityEquipped);
 	}
+	SetNewCameraType(DefaultCameraType);
+}
+
+void ACommonPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+	SetupInputActions();
+}
+
+void ACommonPlayerController::SetupInputActions()
+{
+	BPI_SetupInputActions();
 }
 
 void ACommonPlayerController::MoveToNewDestination(const FVector& MoveLocation)
@@ -143,6 +161,7 @@ void ACommonPlayerController::NewActorHovered(UInteractionComponent* NewlyHovere
 		return;
 	}
 	NewlyHoveredInteractable->SwitchOutlineOnAllMeshes(bShouldOutline);
+	BPI_HandleNewActorHovered(NewlyHoveredInteractable, bShouldOutline);
 }
 
 void ACommonPlayerController::TryStartInteractionWithCurrentInteractable()
@@ -168,6 +187,19 @@ void ACommonPlayerController::StopInteraction()
 		CurrentHoveredInteractionComponent->InitiateInteraction(PlayerCharacter.Get(), false);
 		Internal_ClearCheckDistTimer();
 	}
+}
+
+void ACommonPlayerController::SetNewCameraType(ECameraType NewCameraType)
+{
+	if(NewCameraType == CurrentCameraType)
+	{
+		return;
+	}
+	CurrentCameraType = NewCameraType;
+	FCameraTypeChangedPayload CameraTypeChangedPayload = FCameraTypeChangedPayload();
+	CameraTypeChangedPayload.NewCameraType = CurrentCameraType;
+	OnCameraTypeChanged().Broadcast(CameraTypeChangedPayload);
+	BPI_NewCameraTypeSelected(NewCameraType);
 }
 
 void ACommonPlayerController::Internal_TryAssignInteractable()
@@ -243,7 +275,7 @@ bool ACommonPlayerController::IsValidInteractionComponent(const TWeakObjectPtr<U
 FHitResult ACommonPlayerController::Internal_ScanForTargetedActors() const
 {
 	FHitResult TempResult;
-	switch (CameraType)
+	switch (CurrentCameraType)
 	{
 	case ECameraType::FirstPerson:
 	case ECameraType::ThirdPerson:

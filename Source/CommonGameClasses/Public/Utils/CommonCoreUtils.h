@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "CommonCoreUtils.generated.h"
 
+class UInteractionComponent;
+enum class ECameraType : uint8;
 class UActorTrackingSubsystem;
 class UHealthComponent;
 class ACommonPlayerCharacter;
@@ -21,20 +23,22 @@ class COMMONGAMECLASSES_API UCommonCoreUtils : public UBlueprintFunctionLibrary
 	
 public:
 	static bool IsObjectPlayerControlled(const UObject* Object);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static UActorTrackingSubsystem* GetActorTrackingSubsystem(const UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static ACommonPlayerCharacter* GetCommonPlayerCharacter(const UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static ACommonPlayerController* GetCommonPlayerController(const UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static UInteractionComponent* GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static AActor* GetHoveredInteractionActorByPlayerController(const UObject* ContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
-	static UHealthComponent* GetHealthComponentFromActor(UObject* ContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static UActorTrackingSubsystem* GetActorTrackingSubsystem(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static ACommonPlayerCharacter* GetCommonPlayerCharacter(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static ACommonPlayerController* GetCommonPlayerController(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static ECameraType GetCurrentCameraType(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static UInteractionComponent* GetHoveredInteractionComponentByPlayerController(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static AActor* GetHoveredInteractionActorByPlayerController(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldWorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
+	static UHealthComponent* GetHealthComponentFromActor(UObject* WorldContextObject);
 
 	template<typename M, typename I>
 	static FORCEINLINE TScriptInterface<I> CreateInterfaceOfType(UObject* OuterObject)

@@ -9,14 +9,23 @@
 #include "Core/ActorSystems/ActorTrackingSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
-ACommonPlayerController* UCommonCoreUtils::GetCommonPlayerController(const UObject* ContextObject)
+ACommonPlayerController* UCommonCoreUtils::GetCommonPlayerController(const UObject* WorldContextObject)
 {
-	return Cast<ACommonPlayerController>(UGameplayStatics::GetPlayerController(ContextObject, 0));
+	return Cast<ACommonPlayerController>(UGameplayStatics::GetPlayerController(WorldContextObject, 0));
 }
 
-ACommonPlayerCharacter* UCommonCoreUtils::GetCommonPlayerCharacter(const UObject* ContextObject)
+ECameraType UCommonCoreUtils::GetCurrentCameraType(const UObject* WorldContextObject)
 {
-	if (const ACommonPlayerController* CurrCon = GetCommonPlayerController(ContextObject))
+	if (const ACommonPlayerController* CurrCon = GetCommonPlayerController(WorldContextObject))
+	{
+		return CurrCon->GetCameraType();
+	}
+	return ECameraType::ThirdPerson;
+}
+
+ACommonPlayerCharacter* UCommonCoreUtils::GetCommonPlayerCharacter(const UObject* WorldContextObject)
+{
+	if (const ACommonPlayerController* CurrCon = GetCommonPlayerController(WorldContextObject))
 	{
 		return CurrCon->GetCommonPlayerCharacter().Get();
 	}
@@ -37,32 +46,32 @@ bool UCommonCoreUtils::IsObjectPlayerControlled(const UObject* Object)
 	return false;
 }
 
-UActorTrackingSubsystem* UCommonCoreUtils::GetActorTrackingSubsystem(const UObject* ContextObject)
+UActorTrackingSubsystem* UCommonCoreUtils::GetActorTrackingSubsystem(const UObject* WorldContextObject)
 {
-	if(!ContextObject)
+	if(!WorldContextObject)
 	{
 		return nullptr;
 	}
 	
-	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(ContextObject->GetWorld()))
+	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromWorld(WorldContextObject->GetWorld()))
 	{
 		return ActorTrackingSubsystem;
 	}
 	return nullptr;
 }
 
-UInteractionComponent* UCommonCoreUtils::GetHoveredInteractionComponentByPlayerController(const UObject* ContextObject)
+UInteractionComponent* UCommonCoreUtils::GetHoveredInteractionComponentByPlayerController(const UObject* WorldContextObject)
 {
-	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
+	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(WorldContextObject))
 	{
 		return PlayerController->GetCurrentHoveredInteractionComponent().Get();
 	}
 	return nullptr;
 }
 
-AActor* UCommonCoreUtils::GetHoveredInteractionActorByPlayerController(const UObject* ContextObject)
+AActor* UCommonCoreUtils::GetHoveredInteractionActorByPlayerController(const UObject* WorldContextObject)
 {
-	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(ContextObject))
+	if(const ACommonPlayerController* PlayerController = GetCommonPlayerController(WorldContextObject))
 	{
 		return PlayerController->GetCurrentHoveredInteractionActor().Get();
 	}
@@ -77,14 +86,14 @@ UHealthComponent* UCommonCoreUtils::GetPlayerCharacterHealthComponent(const UObj
 	return GetHealthComponentFromActor(GetCommonPlayerCharacter(WorldContextObject));
 }
 
-UHealthComponent* UCommonCoreUtils::GetHealthComponentFromActor(UObject* ContextObject)
+UHealthComponent* UCommonCoreUtils::GetHealthComponentFromActor(UObject* WorldContextObject)
 {
-	if(!ContextObject || !ContextObject->IsA(AActor::StaticClass()))
+	if(!WorldContextObject || !WorldContextObject->IsA(AActor::StaticClass()))
 	{
 		return nullptr;
 	}
 	
-	if (const AActor* CurrChar = Cast<AActor>(ContextObject))
+	if (const AActor* CurrChar = Cast<AActor>(WorldContextObject))
 	{
 		return CurrChar->FindComponentByClass<UHealthComponent>();
 	}

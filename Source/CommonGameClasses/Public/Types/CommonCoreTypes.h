@@ -34,6 +34,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogCommonGameClasses, Log, All);
 UENUM(BlueprintType)
 enum class ECameraType : uint8
 {
+	None,
 	FirstPerson,
 	ThirdPerson,
 	TopDown

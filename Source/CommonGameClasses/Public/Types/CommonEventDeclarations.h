@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CommonCombatTypes.h"
+#include "CommonCoreTypes.h"
 #include "GameplayTagContainer.h"
 #include "CommonResourceTypes.h"
 #include "UObject/WeakInterfacePtr.h"
@@ -45,6 +46,20 @@ struct FCharacterMontageEndedPayload
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterMontageEnded, const FCharacterMontageEndedPayload&, CharacterMontageEndedPayload);
 
+///////////////////////////
+// Camera type changed
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FCameraTypeChangedPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	ECameraType NewCameraType = ECameraType::None;
+	UPROPERTY()
+	ECameraType OldCameraType = ECameraType::None;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCameraTypeChanged, const FCameraTypeChangedPayload&, CameraTypeChangedPayload);
 
 ///////////////////////////
 // Ability equipped
