@@ -18,5 +18,5 @@ class COMMONGAMECLASSES_API ISavableActor
 public:
 	virtual void PreActorSaved() {}
 	virtual void PostActorSaved(const FCommonActorSaveData& InActorSaveData) {}
-	virtual void PostActorLoadedFromSave(const FCommonActorSaveData& InActorSaveData) PURE_VIRTUAL(ISavable::PostActorLoadedFromSave, )
+	virtual void PostActorLoadedFromSave(const FCommonActorSaveData& InActorSaveData) PURE_VIRTUAL(ISavableActor::PostActorLoadedFromSave, )
 };

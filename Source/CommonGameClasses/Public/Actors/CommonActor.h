@@ -30,7 +30,11 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
-	
+
+public:
+	virtual void PostActorLoadedFromSave(const FCommonActorSaveData& InActorSaveData) override;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
 	TArray<FGameplayTag> DefaultGameplayTags;
 

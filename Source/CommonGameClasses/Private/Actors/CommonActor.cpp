@@ -23,6 +23,11 @@ void ACommonActor::BeginPlay()
 	}
 }
 
+void ACommonActor::PostActorLoadedFromSave(const FCommonActorSaveData& InActorSaveData)
+{
+	SetActorTransform(InActorSaveData.SavedTransform);
+}
+
 void ACommonActor::HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload)
 {
 	BPI_HandleTagAdded(TagAddedEventPayload);
