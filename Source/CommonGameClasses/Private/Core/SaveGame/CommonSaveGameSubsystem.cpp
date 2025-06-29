@@ -60,7 +60,7 @@ void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName)
 	if (UGameplayStatics::DoesSaveGameExist(SaveGameSlot, 0))
 	{
 		CurrentSaveGame = Cast<UCommonSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveGameSlot, 0));
-		if (CurrentSaveGame == nullptr)
+		if (!IsValid(CurrentSaveGame))
 		{
 			UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Failed to load SaveGame Data."));
 			return;
@@ -106,6 +106,10 @@ TArray<TScriptInterface<ISavableActor>> UCommonSaveGameSubsystem::GetAllSavableA
 	TArray<TScriptInterface<ISavableActor>> SavableActorArray;
 	for(AActor* Actor : SavableActors)
 	{
+		if(!IsValid(Actor))
+		{
+			continue;
+		}
 		SavableActorArray.Add(Actor);
 	}
 	return SavableActorArray;
@@ -118,14 +122,20 @@ TArray<TScriptInterface<ISavableComponent>> UCommonSaveGameSubsystem::GetAllSava
 		return TArray<TScriptInterface<ISavableComponent>>();
 	}
 	const AActor* Actor = Cast<AActor>(SavableActor.GetObject());
+	
 	if(!Actor)
 	{
 		return TArray<TScriptInterface<ISavableComponent>>();
 	}
+	
 	TArray<UActorComponent*> ActorComponents = Actor->GetComponentsByInterface(USavableComponent::StaticClass());
 	TArray<TScriptInterface<ISavableComponent>> SavableComponentArray;
 	for(UActorComponent* ActorComponent : ActorComponents)
 	{
+		if(!ActorComponent)
+		{
+			continue;
+		}
 		SavableComponentArray.Add(ActorComponent);
 	}
 	return SavableComponentArray;
