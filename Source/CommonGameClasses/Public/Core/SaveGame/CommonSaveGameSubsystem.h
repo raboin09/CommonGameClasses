@@ -13,6 +13,7 @@ class UCommonSaveGame;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSaveGameEvent, UCommonSaveGame*, SaveObject);
 
+
 /**
  * 
  */
@@ -23,32 +24,31 @@ class COMMONGAMECLASSES_API UCommonSaveGameSubsystem : public UGameInstanceSubsy
 
 public:
 	//~ Begin UGameInstanceSubsystem interface implementation 
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	//~ End UGameInstanceSubsystem interface implementation
 
 	UFUNCTION(BlueprintCallable, Category = "COMMON|Core|SaveGame")
-	void WriteSaveGame();
+	void QuickSave();
 	UFUNCTION(BlueprintCallable, Category = "COMMON|Core|SaveGame")
-	void LoadSaveGame(const FString& SlotName);
+	void QuickLoad();
+	UFUNCTION(BlueprintCallable, Category = "COMMON|Core|SaveGame")
+	void WriteSaveGame(const FString& SlotName, const int32 UserIndex = 0);
+	UFUNCTION(BlueprintCallable, Category = "COMMON|Core|SaveGame")
+	void LoadSaveGame(const FString& SlotName, const int32 UserIndex = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "COMMON|Core|SaveGame")
 	void HandlePlayerStarted(ACommonPlayerController* NewPlayerController);
-
 protected:
-	FString SaveGameSlot = "";
 	FOnSaveGameEvent SaveGameLoaded;
 	FOnSaveGameEvent SaveGameWritten;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UCommonSaveGame> CurrentSaveGame;
 
 private:
 	static TArray<TScriptInterface<ISavableActor>> GetAllSavableActors(const UWorld* World);
 	static TArray<TScriptInterface<ISavableComponent>> GetAllSavableComponents(const TScriptInterface<ISavableActor>& SavableActor);
 
+	static UCommonSaveGame* FindOrCreateNewSaveFile(const FString& SaveGameSlot, int32 UserIdx);
+	
 public:
 	FORCEINLINE FOnSaveGameEvent& OnSaveGameLoaded() { return SaveGameLoaded; }
 	FORCEINLINE FOnSaveGameEvent& OnSaveGameWritten() { return SaveGameWritten; }
-	FORCEINLINE void SetSaveGameSlot(const FString& InSaveGameSlot) { if(!InSaveGameSlot.IsEmpty()) SaveGameSlot = InSaveGameSlot; }
 };
  

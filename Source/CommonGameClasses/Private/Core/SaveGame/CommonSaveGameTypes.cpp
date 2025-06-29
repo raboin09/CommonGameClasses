@@ -24,12 +24,7 @@ void FCommonActorSaveData::AssignActorSaveData(AActor* Actor)
 	{
 		return;;
 	}
-	ISavableActor* SavableActor = Cast<ISavableActor>(Actor);
-	if(!SavableActor)
-	{
-		return;
-	}
-	ActorUniqueId = Actor->GetFName();
+	ActorUniqueId = GetActorSaveId(Actor);
 	SavedTransform = Actor->GetTransform();
 }
 
@@ -53,6 +48,24 @@ void FCommonActorSaveData::SaveSerializedData(const TScriptInterface<ISavableAct
 void FCommonActorSaveData::LoadSerializedData(const TScriptInterface<ISavableActor>& Actor, FMemoryReader& MemoryReader)
 {
 	LoadSerializedData(Cast<AActor>(Actor.GetObject()), MemoryReader);
+}
+
+FName FCommonActorSaveData::GetActorSaveId(const TScriptInterface<ISavableActor>& SavableActor)
+{
+	if(!IsValid(SavableActor.GetObject()))
+	{
+		return NAME_None;
+	}
+	return SavableActor.GetObject()->GetFName();
+}
+
+FName FCommonActorSaveData::GetActorSaveId(const AActor* Actor)
+{
+	if(!IsValid(Actor))
+	{
+		return NAME_None;
+	}
+	return Actor->GetFName();
 }
 
 void FCommonActorSaveData::GetSerializedData(AActor* Actor, FObjectAndNameAsStringProxyArchive& Archiver)

@@ -8,6 +8,12 @@
 #include "CommonCoreDeveloperSettings.generated.h"
 
 class UCommonSaveGame;
+
+namespace CommonSaveGame
+{
+	static FString QuickSaveSlot = TEXT("QuickSave");
+}
+
 /**
  * 
  */
@@ -27,5 +33,5 @@ public:
 	UPROPERTY(Config, EditAnywhere, meta = (AllowAbstract = "false"))
 	TSubclassOf<UCommonSaveGame> DefaultSaveGameClass = UCommonSaveGame::StaticClass();
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
-	FString SaveSlotName = CommonSaveGame::DefaultSaveGameSlot;
+	FString QuickSaveSlotName = CommonSaveGame::QuickSaveSlot;
 };

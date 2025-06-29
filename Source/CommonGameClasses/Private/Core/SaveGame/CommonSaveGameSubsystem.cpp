@@ -11,23 +11,27 @@
 #include "Core/SaveGame/CommonSaveGameTypes.h"
 #include "Kismet/GameplayStatics.h"
 
-void UCommonSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UCommonSaveGameSubsystem::QuickSave()
 {
-	Super::Initialize(Collection);
 	const UCommonCoreDeveloperSettings* SaveGameSettings = GetDefault<UCommonCoreDeveloperSettings>();
-	SaveGameSlot = SaveGameSettings->SaveSlotName;
-	if (UGameplayStatics::DoesSaveGameExist(SaveGameSlot, 0))
-	{
-		CurrentSaveGame = Cast<UCommonSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveGameSlot, 0));
-	}
-	else
-	{
-		CurrentSaveGame = CastChecked<UCommonSaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGameSettings->DefaultSaveGameClass));
-	}
+	WriteSaveGame(SaveGameSettings->QuickSaveSlotName, 0);
 }
 
-void UCommonSaveGameSubsystem::WriteSaveGame()
+void UCommonSaveGameSubsystem::QuickLoad()
 {
+	const UCommonCoreDeveloperSettings* SaveGameSettings = GetDefault<UCommonCoreDeveloperSettings>();
+	LoadSaveGame(SaveGameSettings->QuickSaveSlotName, 0);
+}
+
+void UCommonSaveGameSubsystem::WriteSaveGame(const FString& SlotName, const int32 UserIndex /* = 0 */)
+{
+	UCommonSaveGame* CurrentSaveGame = FindOrCreateNewSaveFile(SlotName, UserIndex);
+	if (!IsValid(CurrentSaveGame))
+	{
+		UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Failed to find/create SaveGame Data."));
+		return;
+	}
+	
 	for(TScriptInterface<ISavableActor> SavableActor : GetAllSavableActors(GetWorld()))
 	{
 		FCommonActorSaveData ActorSaveData = FCommonActorSaveData(SavableActor);
@@ -40,57 +44,47 @@ void UCommonSaveGameSubsystem::WriteSaveGame()
 			Component->PreComponentSaved();
 		}
 	}
-	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SaveGameSlot, 0);
+	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
 	
 	for(TScriptInterface<ISavableActor> SavableActor : GetAllSavableActors(GetWorld()))
 	{
-		FName ActorId = SavableActor.GetObject()->GetFName();
+		FName ActorId = FCommonActorSaveData::GetActorSaveId(SavableActor);
 		SavableActor->PostActorSaved(*CurrentSaveGame->ActorSaveData.Find(ActorId));
 		for(TScriptInterface<ISavableComponent> Component : GetAllSavableComponents(SavableActor))
 		{
 			Component->PostComponentSaved();
 		}
 	}
-	OnSaveGameLoaded().Broadcast(CurrentSaveGame);
+	OnSaveGameWritten().Broadcast(CurrentSaveGame);
 }
 
-void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName)
+void UCommonSaveGameSubsystem::LoadSaveGame(const FString& SlotName, const int32 UserIndex /* = 0 */)
 {
-	SetSaveGameSlot(SlotName);
-	if (UGameplayStatics::DoesSaveGameExist(SaveGameSlot, 0))
+	UCommonSaveGame* CurrentSaveGame = FindOrCreateNewSaveFile(SlotName, UserIndex);
+	if (!IsValid(CurrentSaveGame))
 	{
-		CurrentSaveGame = Cast<UCommonSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveGameSlot, 0));
-		if (!IsValid(CurrentSaveGame))
-		{
-			UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Failed to load SaveGame Data."));
-			return;
-		}
+		UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Failed to find/create SaveGame Data."));
+		return;
+	}
 
-		for(TScriptInterface<ISavableActor> SavableActor : GetAllSavableActors(GetWorld()))
-		{
-			FName ActorId = SavableActor.GetObject()->GetFName();
-			if(!CurrentSaveGame->ActorSaveData.Contains(ActorId))
-			{
-				UE_LOGFMT(LogCommonGameClassesCore, Warning, "Failed to find actor data for {0}", *ActorId.ToString());
-				continue;
-			}
-			const FCommonActorSaveData& FoundData = *CurrentSaveGame->ActorSaveData.Find(ActorId);
-			FMemoryReader ActorSaveDataMemoryRead = FMemoryReader(FoundData.ByteData);
-			FCommonActorSaveData::LoadSerializedData(SavableActor, ActorSaveDataMemoryRead);
-			SavableActor->PostActorLoadedFromSave(FoundData);
-			for(TScriptInterface<ISavableComponent> Component : GetAllSavableComponents(SavableActor))
-			{
-				Component->PostComponentLoadedFromSave();
-			}
-		}
-		OnSaveGameLoaded().Broadcast(CurrentSaveGame);
-	}
-	else
+	for(TScriptInterface<ISavableActor> SavableActor : GetAllSavableActors(GetWorld()))
 	{
-		const UCommonCoreDeveloperSettings* SaveGameSettings = GetDefault<UCommonCoreDeveloperSettings>();
-		CurrentSaveGame = CastChecked<UCommonSaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGameSettings->DefaultSaveGameClass));
-		UE_LOG(LogCommonGameClassesCore, Log, TEXT("Created New SaveGame Data."));
+		FName ActorId = FCommonActorSaveData::GetActorSaveId(SavableActor);
+		if(!CurrentSaveGame->ActorSaveData.Contains(ActorId))
+		{
+			UE_LOGFMT(LogCommonGameClassesCore, Warning, "Failed to find actor data for {0}", *ActorId.ToString());
+			continue;
+		}
+		const FCommonActorSaveData& FoundData = *CurrentSaveGame->ActorSaveData.Find(ActorId);
+		FMemoryReader ActorSaveDataMemoryRead = FMemoryReader(FoundData.ByteData);
+		FCommonActorSaveData::LoadSerializedData(SavableActor, ActorSaveDataMemoryRead);
+		SavableActor->PostActorLoadedFromSave(FoundData);
+		for(TScriptInterface<ISavableComponent> Component : GetAllSavableComponents(SavableActor))
+		{
+			Component->PostComponentLoadedFromSave();
+		}
 	}
+	OnSaveGameLoaded().Broadcast(CurrentSaveGame);
 }
 
 void UCommonSaveGameSubsystem::HandlePlayerStarted(ACommonPlayerController* NewPlayerController)
@@ -140,3 +134,14 @@ TArray<TScriptInterface<ISavableComponent>> UCommonSaveGameSubsystem::GetAllSava
 	}
 	return SavableComponentArray;
 }
+
+UCommonSaveGame* UCommonSaveGameSubsystem::FindOrCreateNewSaveFile(const FString& SaveGameSlot, int32 UserIdx)
+{
+	if (UGameplayStatics::DoesSaveGameExist(SaveGameSlot, UserIdx))
+	{
+		return Cast<UCommonSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveGameSlot, UserIdx));
+	}
+	const UCommonCoreDeveloperSettings* SaveGameSettings = GetDefault<UCommonCoreDeveloperSettings>();
+	return CastChecked<UCommonSaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGameSettings->DefaultSaveGameClass));
+}
+

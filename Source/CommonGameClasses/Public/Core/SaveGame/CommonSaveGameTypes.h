@@ -32,6 +32,9 @@ public:
 	static void LoadSerializedData(AActor* Actor, FMemoryReader& MemoryReader);
 	static void LoadSerializedData(const TScriptInterface<ISavableActor>& Actor, FMemoryReader& MemoryReader);
 	
+	static FName GetActorSaveId(const TScriptInterface<ISavableActor>& SavableActor);
+	static FName GetActorSaveId(const AActor* Actor);
+	
 	UPROPERTY()
 	FName ActorUniqueId;
 	UPROPERTY()

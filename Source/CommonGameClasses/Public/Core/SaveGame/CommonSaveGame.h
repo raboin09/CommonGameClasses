@@ -7,11 +7,6 @@
 #include "GameFramework/SaveGame.h"
 #include "CommonSaveGame.generated.h"
 
-namespace CommonSaveGame
-{
-	static FString DefaultSaveGameSlot = TEXT("SaveGame01");
-}
-
 UCLASS()
 class COMMONGAMECLASSES_API UCommonSaveGame : public USaveGame
 {
