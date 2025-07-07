@@ -93,7 +93,7 @@ void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& ForwardMoveDire
 			const FRotator YawRotation(0, ControlRotation.Yaw, 0);
 			RightMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			ForwardMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-			break; 
+			break;
 		case ECameraType::TopDown:
 			if(UCameraComponent* Camera = FindComponentByClass<UCameraComponent>())
 			{
@@ -103,7 +103,7 @@ void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& ForwardMoveDire
 				ForwardMoveDirection = UKismetMathLibrary::GetForwardVector(CameraRotation);
 				RightMoveDirection = UKismetMathLibrary::GetRightVector(CameraRotation);
 			}
-			break;
+			break ;
 		default: ;
 	}
 }
