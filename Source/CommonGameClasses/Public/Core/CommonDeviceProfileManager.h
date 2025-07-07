@@ -47,11 +47,25 @@ public:
 	FOnDeviceProfileChanged OnDeviceProfileChanged;
 
 private:
-	static void ApplyDeviceProfile(const FString& ProfileName);
 	static FString GetProfileName(EPlatformType Platform, EDeviceProfileQuality Quality);
 	void SaveProfileSettings();
 	void LoadProfileSettings();
     
 	EPlatformType CurrentPlatform;
 	EDeviceProfileQuality CurrentQuality;
+};
+
+class FDeviceProfileCommands
+{
+public:
+	static void Register();
+	static void SetProfile(const TArray<FString>& Args);
+	
+private:
+	static void ListProfiles();
+	static void ShowCurrentProfile();
+	static void ReloadProfiles();
+    
+	static FString GetCurrentProfileInfo();
+	static TArray<FString> GetAvailableProfiles();
 };

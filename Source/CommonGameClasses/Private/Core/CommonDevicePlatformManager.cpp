@@ -1,68 +1,12 @@
 ﻿
 #include "CommonLogTypes.h"
 #include "Core/CommonDeviceProfileManager.h"
+#include "DeviceProfiles/DeviceProfile.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "HAL/FileManager.h"
 #include "Misc/ConfigCacheIni.h"
+#include "HAL/IConsoleManager.h"
 #include "Types/CommonCoreTypes.h"
-
-// Add to your game module's StartupModule()
-static FAutoConsoleCommand DeviceProfileCmd(
-    TEXT("Common.SetDeviceQuality"),
-    TEXT("Sets the device profile quality (low/medium/high)"),
-    FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& Args)
-    {
-        if (Args.Num() == 0)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Usage: Common.SetDeviceQuality <low|medium|high>"));
-            return;
-        }
-
-        if (UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance())
-        {
-            if (UCommonDeviceProfileManager* ProfileManager = 
-                GameInstance->GetSubsystem<UCommonDeviceProfileManager>())
-            {
-                EDeviceProfileQuality Quality;
-                if (Args[0].Equals(TEXT("low"), ESearchCase::IgnoreCase))
-                    Quality = EDeviceProfileQuality::Low;
-                else if (Args[0].Equals(TEXT("medium"), ESearchCase::IgnoreCase))
-                    Quality = EDeviceProfileQuality::Medium;
-                else if (Args[0].Equals(TEXT("high"), ESearchCase::IgnoreCase))
-                    Quality = EDeviceProfileQuality::High;
-                else
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("Invalid quality level. Use: low, medium, or high"));
-                    return;
-                }
-
-                ProfileManager->SetDeviceProfile(ProfileManager->GetCurrentPlatform(), Quality);
-            }
-        }
-    })
-);
-
-static FAutoConsoleCommand ShowProfileCmd(
-    TEXT("Common.ShowDeviceQuality"),
-    TEXT("Shows current device profile settings"),
-    FConsoleCommandDelegate::CreateLambda([]()
-    {
-        if (UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance())
-        {
-            if (UCommonDeviceProfileManager* ProfileManager = 
-                GameInstance->GetSubsystem<UCommonDeviceProfileManager>())
-            {
-                EPlatformType Platform = ProfileManager->GetCurrentPlatform();
-                EDeviceProfileQuality Quality = ProfileManager->GetCurrentQuality();
-                
-                UE_LOG(LogTemp, Log, TEXT("Current Platform: %s"),
-                    *UEnum::GetValueAsString(Platform));
-                UE_LOG(LogTemp, Log, TEXT("Current Quality: %s"),
-                    *UEnum::GetValueAsString(Quality));
-            }
-        }
-    })
-);
 
 
 void UCommonDeviceProfileManager::Initialize(FSubsystemCollectionBase& Collection)
@@ -75,7 +19,15 @@ void UCommonDeviceProfileManager::Initialize(FSubsystemCollectionBase& Collectio
 
 void UCommonDeviceProfileManager::DetectAndApplyPlatform()
 {
-    CurrentPlatform = IsSteamDeck() ? EPlatformType::SteamDeck : EPlatformType::Windows;
+    if(IsSteamDeck())
+    {
+        CurrentPlatform = EPlatformType::SteamDeck;
+        COMMON_PRINT_SCREEN_GREEN(TEXT("Detected Steam Deck"), 10.f)
+    } else
+    {
+        CurrentPlatform = EPlatformType::Windows;
+        COMMON_PRINT_SCREEN_GREEN(TEXT("Detected Windows"), 10.f)
+    }
     SetDeviceProfile(CurrentPlatform, CurrentQuality);
 }
 
@@ -125,27 +77,10 @@ void UCommonDeviceProfileManager::SetDeviceProfile(EPlatformType Platform, EDevi
     CurrentQuality = Quality;
     
     FString ProfileName = GetProfileName(Platform, Quality);
-    ApplyDeviceProfile(ProfileName);
+    FDeviceProfileCommands::SetProfile({ ProfileName });
     SaveProfileSettings();
     
     OnDeviceProfileChanged.Broadcast(Platform, Quality);
-}
-
-void UCommonDeviceProfileManager::ApplyDeviceProfile(const FString& ProfileName)
-{
-    UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
-    FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *ProfileName);
-    if (UDeviceProfile* Profile = ProfileManager.FindProfile(ProfileName))
-    {
-        ProfileManager.SetOverrideDeviceProfile(Profile);
-        UE_LOG(LogCommonGameClassesCore, Log, TEXT("Applied device profile: %s"), *ProfileName);
-        COMMON_PRINT_SCREEN_GREEN(ScreenMessage, 10.f)
-    }
-    else
-    {
-        UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Failed to find device profile: %s"), *ProfileName);
-        COMMON_PRINT_SCREEN_RED(ScreenMessage, 10.f)
-    }
 }
 
 FString UCommonDeviceProfileManager::GetProfileName(EPlatformType Platform, EDeviceProfileQuality Quality)
@@ -186,4 +121,164 @@ void UCommonDeviceProfileManager::LoadProfileSettings()
     
     CurrentPlatform = static_cast<EPlatformType>(PlatformType);
     CurrentQuality = static_cast<EDeviceProfileQuality>(QualityLevel);
+}
+
+void FDeviceProfileCommands::Register()
+{
+    // List all available device profiles
+    IConsoleManager::Get().RegisterConsoleCommand(
+        TEXT("Common.Core.ListDeviceProfiles"),
+        TEXT("List all available device profiles"),
+        FConsoleCommandDelegate::CreateStatic(&FDeviceProfileCommands::ListProfiles)
+    );
+
+    // Set active device profile
+    IConsoleManager::Get().RegisterConsoleCommand(
+        TEXT("Common.Core.SetDeviceProfile"),
+        TEXT("Set active device profile (Usage: Common.Core.set ProfileName)"),
+        FConsoleCommandWithArgsDelegate::CreateStatic(&FDeviceProfileCommands::SetProfile)
+    );
+
+    // Show current device profile
+    IConsoleManager::Get().RegisterConsoleCommand(
+        TEXT("Common.Core.GetCurrentDeviceProfile"),
+        TEXT("Show current active device profile"),
+        FConsoleCommandDelegate::CreateStatic(&FDeviceProfileCommands::ShowCurrentProfile)
+    );
+
+    // Reload device profiles
+    IConsoleManager::Get().RegisterConsoleCommand(
+        TEXT("Common.Core.ReloadDeviceProfile"),
+        TEXT("Reload all device profiles from config"),
+        FConsoleCommandDelegate::CreateStatic(&FDeviceProfileCommands::ReloadProfiles)
+    );
+}
+
+void FDeviceProfileCommands::ListProfiles()
+{
+    TArray<FString> Profiles = GetAvailableProfiles();
+    
+    UE_LOG(LogCommonGameClassesCore, Log, TEXT("Available Device Profiles:"));
+    UE_LOG(LogCommonGameClassesCore, Log, TEXT("------------------------"));
+    
+    for (const FString& ProfileName : Profiles)
+    {
+        const bool bIsActive = ProfileName == UDeviceProfileManager::Get().GetActiveDeviceProfileName();
+        if (bIsActive)
+        {
+            UE_LOG(LogCommonGameClassesCore, Log, TEXT("* %s (ACTIVE)"), *ProfileName);
+        }
+        else
+        {
+            UE_LOG(LogCommonGameClassesCore, Log, TEXT("  %s"), *ProfileName);
+        }
+    }
+}
+
+void FDeviceProfileCommands::SetProfile(const TArray<FString>& Args)
+{
+    if (Args.Num() == 0)
+    {
+        UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Usage: Common.Core.SetDeviceProfile <ProfileName>"));
+        UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Available profiles:"));
+        ListProfiles();
+        return;
+    }
+
+    FString ProfileName = Args[0];
+    UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
+    
+    if (UDeviceProfile* Profile = ProfileManager.FindProfile(ProfileName))
+    {
+        FString PreviousProfile = ProfileManager.GetActiveDeviceProfileName();
+        ProfileManager.SetOverrideDeviceProfile(Profile);
+        UE_LOG(LogCommonGameClassesCore, Log, TEXT("Changed device profile from '%s' to '%s'"), *PreviousProfile, *ProfileName);
+        FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *ProfileName);
+        COMMON_PRINT_SCREEN_GREEN(ScreenMessage, 10.f)
+        UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Profile Settings:"));
+        UE_LOG(LogCommonGameClassesCore, Log, TEXT("%s"), *GetCurrentProfileInfo());
+    }
+    else
+    {
+        FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *ProfileName);
+        COMMON_PRINT_SCREEN_RED(ScreenMessage, 10.f)
+        UE_LOG(LogCommonGameClassesCore, Error, TEXT("Profile '%s' not found!"), *ProfileName);
+        UE_LOG(LogCommonGameClassesCore, Error, TEXT("Available profiles:"));
+        ListProfiles();
+    }
+}
+
+void FDeviceProfileCommands::ShowCurrentProfile()
+{
+    UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
+    FString CurrentProfile = ProfileManager.GetActiveDeviceProfileName();
+    
+    UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Device Profile: %s"), *CurrentProfile);
+    UE_LOG(LogCommonGameClassesCore, Log, TEXT("Settings:"));
+    UE_LOG(LogCommonGameClassesCore, Log, TEXT("%s"), *GetCurrentProfileInfo());
+}
+
+void FDeviceProfileCommands::ReloadProfiles()
+{
+    UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
+    FString CurrentProfile = ProfileManager.GetActiveDeviceProfileName();
+    
+    // Reload profiles
+    ProfileManager.LoadProfiles();
+    
+    // Reapply current profile
+    if (UDeviceProfile* Profile = ProfileManager.FindProfile(CurrentProfile))
+    {
+        ProfileManager.SetOverrideDeviceProfile(Profile);
+        UE_LOG(LogCommonGameClassesCore, Log, TEXT("Profiles reloaded and '%s' reapplied successfully"), *CurrentProfile);
+    }
+    else
+    {
+        UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Profiles reloaded but failed to reapply '%s'"), *CurrentProfile);
+    }
+}
+
+FString FDeviceProfileCommands::GetCurrentProfileInfo()
+{
+    UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
+    UDeviceProfile* CurrentProfile = ProfileManager.GetActiveProfile();
+    
+    if (!CurrentProfile)
+    {
+        return TEXT("No active profile!");
+    }
+
+    FString Info;
+    
+    // Basic info
+    Info += FString::Printf(TEXT("Profile: %s\n"), *CurrentProfile->GetName());
+    Info += FString::Printf(TEXT("Base Profile: %s\n"), *CurrentProfile->BaseProfileName);
+    Info += FString::Printf(TEXT("Device Type: %s\n"), *CurrentProfile->DeviceType);
+    
+    // CVars
+    Info += TEXT("\nConsole Variables:\n");
+    for (const FString& CVar : CurrentProfile->CVars)
+    {
+        Info += FString::Printf(TEXT("  %s\n"), *CVar);
+    }
+    
+    return Info;
+}
+
+TArray<FString> FDeviceProfileCommands::GetAvailableProfiles()
+{
+    TArray<FString> ProfileNames;
+    UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
+    
+    const TArray<UDeviceProfile*>& Profiles = ProfileManager.Profiles;
+    for (const UDeviceProfile* Profile : Profiles)
+    {
+        if (Profile)
+        {
+            ProfileNames.Add(Profile->GetName());
+        }
+    }
+    
+    ProfileNames.Sort();
+    return ProfileNames;
 }
