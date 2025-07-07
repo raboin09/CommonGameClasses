@@ -51,9 +51,11 @@ protected:
 	virtual void SetupTopDownCamera();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_SetupTopDownCamera();
+
+
+	UPROPERTY(BlueprintReadOnly, Category="COMMON|PlayerCharacter")
+	FVector2D LastMoveInput;
 	
 private:
 	void Internal_GetMoveDirections(FVector& ForwardMoveDirection, FVector& RightMoveDirection) const;
-	
-	FVector2D LastMoveInput;
 };
