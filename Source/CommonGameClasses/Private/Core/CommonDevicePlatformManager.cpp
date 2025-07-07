@@ -1,73 +1,117 @@
-﻿// CommonDevicePlatformManager.cpp
-#include "Core/CommonDevicePlatformManager.h"
-
+﻿
+#include "CommonLogTypes.h"
+#include "Core/CommonDeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "HAL/FileManager.h"
-#include "GenericPlatform/GenericPlatformProperties.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Types/CommonCoreTypes.h"
 
-void UCommonDevicePlatformManager::Initialize(FSubsystemCollectionBase& Collection)
+// Add to your game module's StartupModule()
+static FAutoConsoleCommand DeviceProfileCmd(
+    TEXT("Common.SetDeviceQuality"),
+    TEXT("Sets the device profile quality (low/medium/high)"),
+    FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& Args)
+    {
+        if (Args.Num() == 0)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Usage: Common.SetDeviceQuality <low|medium|high>"));
+            return;
+        }
+
+        if (UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance())
+        {
+            if (UCommonDeviceProfileManager* ProfileManager = 
+                GameInstance->GetSubsystem<UCommonDeviceProfileManager>())
+            {
+                EDeviceProfileQuality Quality;
+                if (Args[0].Equals(TEXT("low"), ESearchCase::IgnoreCase))
+                    Quality = EDeviceProfileQuality::Low;
+                else if (Args[0].Equals(TEXT("medium"), ESearchCase::IgnoreCase))
+                    Quality = EDeviceProfileQuality::Medium;
+                else if (Args[0].Equals(TEXT("high"), ESearchCase::IgnoreCase))
+                    Quality = EDeviceProfileQuality::High;
+                else
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Invalid quality level. Use: low, medium, or high"));
+                    return;
+                }
+
+                ProfileManager->SetDeviceProfile(ProfileManager->GetCurrentPlatform(), Quality);
+            }
+        }
+    })
+);
+
+static FAutoConsoleCommand ShowProfileCmd(
+    TEXT("Common.ShowDeviceQuality"),
+    TEXT("Shows current device profile settings"),
+    FConsoleCommandDelegate::CreateLambda([]()
+    {
+        if (UGameInstance* GameInstance = GEngine->GameViewport->GetGameInstance())
+        {
+            if (UCommonDeviceProfileManager* ProfileManager = 
+                GameInstance->GetSubsystem<UCommonDeviceProfileManager>())
+            {
+                EPlatformType Platform = ProfileManager->GetCurrentPlatform();
+                EDeviceProfileQuality Quality = ProfileManager->GetCurrentQuality();
+                
+                UE_LOG(LogTemp, Log, TEXT("Current Platform: %s"),
+                    *UEnum::GetValueAsString(Platform));
+                UE_LOG(LogTemp, Log, TEXT("Current Quality: %s"),
+                    *UEnum::GetValueAsString(Quality));
+            }
+        }
+    })
+);
+
+
+void UCommonDeviceProfileManager::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
     
-    // Detect platform and apply profile on initialization
-    CurrentPlatform = DetectPlatform();
-    SetupPlatformProfiles();
-    ApplyPlatformProfile();
+    LoadProfileSettings();
+    DetectAndApplyPlatform();
 }
 
-EPlatformType UCommonDevicePlatformManager::DetectPlatform()
+void UCommonDeviceProfileManager::DetectAndApplyPlatform()
 {
-    if (IsSteamDeck())
-    {
-        return EPlatformType::SteamDeck;
-    }
-    
-    if (IsPS5())
-    {
-        return EPlatformType::PS5;
-    }
-    
-    if (IsWindows())
-    {
-        return EPlatformType::Windows;
-    }
-    
-    return EPlatformType::Unknown;
+    CurrentPlatform = IsSteamDeck() ? EPlatformType::SteamDeck : EPlatformType::Windows;
+    SetDeviceProfile(CurrentPlatform, CurrentQuality);
 }
 
-bool UCommonDevicePlatformManager::IsWindows()
+bool UCommonDeviceProfileManager::IsSteamDeck()
 {
-#if PLATFORM_WINDOWS
-    // Make sure we're not on Steam Deck running through Proton
-    if (!IsSteamDeck())
-    {
-        return true;
-    }
-#endif
-    
-    return false;
-}
-
-
-bool UCommonDevicePlatformManager::IsSteamDeck()
-{
-    // Method 1: Check environment variable
     FString SteamDeckValue = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_DECK"));
     if (!SteamDeckValue.IsEmpty())
     {
         return true;
     }
 
-    // Method 2: Check Steam Deck specific hardware file
-    #if PLATFORM_LINUX
-    if (FPaths::FileExists(TEXT("/etc/hardware-info/model")))
+    FString SteamClientUI = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_GAMEPADUI"));
+    if (!SteamClientUI.IsEmpty())
     {
-        FString ModelContent;
-        if (FFileHelper::LoadFileToString(ModelContent, TEXT("/etc/hardware-info/model")))
+        return true;
+    }
+
+    #if PLATFORM_LINUX
+    // Check Steam Deck hardware file
+    static const TCHAR* HardwareInfoPaths[] = {
+        TEXT("/etc/hardware-info/model"),
+        TEXT("/sys/devices/virtual/dmi/id/product_name")
+    };
+
+    for (const TCHAR* Path : HardwareInfoPaths)
+    {
+        if (FPaths::FileExists(Path))
         {
-            return ModelContent.Contains(TEXT("Jupiter"));
+            FString Content;
+            if (FFileHelper::LoadFileToString(Content, Path))
+            {
+                if (Content.Contains(TEXT("Jupiter")) || Content.Contains(TEXT("Steam Deck")))
+                {
+                    return true;
+                }
+            }
         }
     }
     #endif
@@ -75,76 +119,71 @@ bool UCommonDevicePlatformManager::IsSteamDeck()
     return false;
 }
 
-bool UCommonDevicePlatformManager::IsPS5()
+void UCommonDeviceProfileManager::SetDeviceProfile(EPlatformType Platform, EDeviceProfileQuality Quality)
 {
-    #if PLATFORM_PS5
-        return true;
-    #else
-        return false;
-    #endif
+    CurrentPlatform = Platform;
+    CurrentQuality = Quality;
+    
+    FString ProfileName = GetProfileName(Platform, Quality);
+    ApplyDeviceProfile(ProfileName);
+    SaveProfileSettings();
+    
+    OnDeviceProfileChanged.Broadcast(Platform, Quality);
 }
 
-void UCommonDevicePlatformManager::SetupPlatformProfiles()
+void UCommonDeviceProfileManager::ApplyDeviceProfile(const FString& ProfileName)
 {
-    UDeviceProfileManager& DeviceProfileManager = UDeviceProfileManager::Get();
-    
-    // Ensure profiles exist
-    if (!DeviceProfileManager.FindProfile(TEXT("WindowsProfile")))
+    UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
+    FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *ProfileName);
+    if (UDeviceProfile* Profile = ProfileManager.FindProfile(ProfileName))
     {
-        UE_LOG(LogTemp, Warning, TEXT("Windows profile not found!"));
-    }
-    
-    if (!DeviceProfileManager.FindProfile(TEXT("PS5Profile")))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("PS5 profile not found!"));
-    }
-    
-    if (!DeviceProfileManager.FindProfile(TEXT("SteamDeck")))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Steam Deck profile not found!"));
-    }
-}
-
-void UCommonDevicePlatformManager::ApplyPlatformProfile()
-{
-    ApplyProfileForPlatform(CurrentPlatform);
-}
-
-void UCommonDevicePlatformManager::ApplyProfileForPlatform(EPlatformType Platform)
-{
-    UDeviceProfileManager& DeviceProfileManager = UDeviceProfileManager::Get();
-    FString ProfileName;
-    
-    switch (Platform)
-    {
-        case EPlatformType::Windows:
-            ProfileName = TEXT("Windows");
-            break;
-            
-        case EPlatformType::PS5:
-            ProfileName = TEXT("PS5Profile");
-            break;
-            
-        case EPlatformType::SteamDeck:
-            ProfileName = TEXT("SteamDeck");
-            break;
-            
-        default:
-            ProfileName = TEXT("DefaultProfile");
-            break;
-    }
-    
-    if (UDeviceProfile* Profile = DeviceProfileManager.FindProfile(ProfileName))
-    {
-        DeviceProfileManager.SetOverrideDeviceProfile(Profile);
-        UE_LOG(LogCommonGameClasses, Log, TEXT("Applied profile for platform %s: %s"), 
-               *UEnum::GetValueAsString(Platform), *ProfileName);
-        COMMON_PRINT_SCREEN_GREEN("Applied Profile " + ProfileName, 10.f)
+        ProfileManager.SetOverrideDeviceProfile(Profile);
+        UE_LOG(LogCommonGameClassesCore, Log, TEXT("Applied device profile: %s"), *ProfileName);
+        COMMON_PRINT_SCREEN_GREEN(ScreenMessage, 10.f)
     }
     else
     {
-        COMMON_PRINT_SCREEN_RED("Could not apply profile " + ProfileName, 10.f)
-        UE_LOG(LogCommonGameClasses, Warning, TEXT("Profile not found for platform %s: %s"), 
-               *UEnum::GetValueAsString(Platform), *ProfileName);
+        UE_LOG(LogCommonGameClassesCore, Warning, TEXT("Failed to find device profile: %s"), *ProfileName);
+        COMMON_PRINT_SCREEN_RED(ScreenMessage, 10.f)
     }
+}
+
+FString UCommonDeviceProfileManager::GetProfileName(EPlatformType Platform, EDeviceProfileQuality Quality)
+{
+    FString PlatformStr = Platform == EPlatformType::SteamDeck ? TEXT("SteamDeck") : TEXT("Windows");
+    FString QualityStr;
+    
+    switch (Quality)
+    {
+        case EDeviceProfileQuality::High:
+            QualityStr = TEXT("High");
+            break;
+        case EDeviceProfileQuality::Medium:
+            QualityStr = TEXT("Medium");
+            break;
+        case EDeviceProfileQuality::Low:
+            QualityStr = TEXT("Low");
+            break;
+    }
+    
+    return FString::Printf(TEXT("%s_%s"), *PlatformStr, *QualityStr);
+}
+
+void UCommonDeviceProfileManager::SaveProfileSettings()
+{
+    GConfig->SetInt(TEXT("DeviceProfiles"), TEXT("PlatformType"), static_cast<int32>(CurrentPlatform), GGameIni);
+    GConfig->SetInt(TEXT("DeviceProfiles"), TEXT("QualityLevel"), static_cast<int32>(CurrentQuality), GGameIni);
+    GConfig->Flush(false, GGameIni);
+}
+
+void UCommonDeviceProfileManager::LoadProfileSettings()
+{
+    int32 PlatformType = 0;
+    int32 QualityLevel = static_cast<int32>(EDeviceProfileQuality::Medium); // Default to Medium
+    
+    GConfig->GetInt(TEXT("DeviceProfiles"), TEXT("PlatformType"), PlatformType, GGameIni);
+    GConfig->GetInt(TEXT("DeviceProfiles"), TEXT("QualityLevel"), QualityLevel, GGameIni);
+    
+    CurrentPlatform = static_cast<EPlatformType>(PlatformType);
+    CurrentQuality = static_cast<EDeviceProfileQuality>(QualityLevel);
 }
