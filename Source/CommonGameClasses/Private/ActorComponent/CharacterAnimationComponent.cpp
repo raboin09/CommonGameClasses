@@ -5,10 +5,11 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Player/CommonPlayerController.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonCombatUtils.h"
+#include "Utils/CommonCoreUtils.h"
 
 
 UCharacterAnimationComponent::UCharacterAnimationComponent()
@@ -18,6 +19,9 @@ UCharacterAnimationComponent::UCharacterAnimationComponent()
 	OwnerCharacter = nullptr;
 	OwnerAnimInstance = nullptr;
 	OwningTagComponent = nullptr;
+	ControlRotation = FRotator();
+	RagdollMeshLocation = FVector();
+	CachedMeshOffset = FVector();
 }
 
 void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -49,6 +53,15 @@ void UCharacterAnimationComponent::BeginPlay()
 	{
 		HealthComponent->OnCurrentWoundHealthChanged().AddDynamic(this, &ThisClass::HandleCurrentWoundChangedEvent);
 		HealthComponent->OnActorDeath().AddDynamic(this, &ThisClass::HandleActorDeathEvent);
+	}
+}
+
+void UCharacterAnimationComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+	if(ACommonPlayerController* PlayerController = UCommonCoreUtils::GetCommonPlayerController(this))
+	{
+		PlayerController->OnCameraTypeChanged().AddUniqueDynamic(this, &ThisClass::HandleCameraTypeChanged);
 	}
 }
 
@@ -85,6 +98,21 @@ float UCharacterAnimationComponent::HandleMontageLoadedEvent(TSoftObjectPtr<UAni
 		return ForcePlayAnimMontage(AnimMontagePlayData);
 	}
 	return TryPlayAnimMontage(AnimMontagePlayData);
+}
+
+void UCharacterAnimationComponent::HandleCameraTypeChanged(const FCameraTypeChangedPayload& CameraTypeChangedPayload)
+{
+	switch(CameraTypeChangedPayload.NewCameraType)
+	{
+	case ECameraType::None:
+	case ECameraType::FirstPerson:
+	case ECameraType::TopDown:
+		Internal_ChangeRotation(ERotationMethod::NONE);
+		break;
+	case ECameraType::ThirdPerson:
+		Internal_ChangeRotation(ERotationMethod::SmoothedControlRotation);
+		break;
+	}
 }
 
 float UCharacterAnimationComponent::TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData)
@@ -135,7 +163,7 @@ void UCharacterAnimationComponent::StartRagdolling()
 	StopAnimMontage();
 	CachedMeshOffset = GetMesh()->GetRelativeLocation();
 	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-	GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", true);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(CommonGameAnimation::NAME_Pelvis, true);
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopActiveMovement();
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -152,7 +180,7 @@ void UCharacterAnimationComponent::StopRagdolling()
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	GetMesh()->SetCollisionObjectType(ECC_Pawn);
-	GetMesh()->SetAllBodiesBelowSimulatePhysics("pelvis", false);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(CommonGameAnimation::NAME_Pelvis, false);
 	SetComponentTickEnabled(false);
 }
 
@@ -270,7 +298,7 @@ void UCharacterAnimationComponent::Internal_RagdollUpdate(float DeltaTime)
 	{
 		return;
 	}
-	const FVector NewRagdollVel = OwnerMesh->GetPhysicsLinearVelocity("pelvis");
+	const FVector NewRagdollVel = OwnerMesh->GetPhysicsLinearVelocity(CommonGameAnimation::NAME_Pelvis);
 	LastRagdollVelocity = (NewRagdollVel != FVector::ZeroVector || OwnerCharacter->IsLocallyControlled()) ? NewRagdollVel : LastRagdollVelocity / 2;
 
 	RagdollMeshLocation = Internal_RagdollTraceGround();
@@ -279,7 +307,7 @@ void UCharacterAnimationComponent::Internal_RagdollUpdate(float DeltaTime)
 
 FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
 {
-	FVector TraceStart = GetMesh()->GetSocketLocation("pelvis");
+	FVector TraceStart = GetMesh()->GetSocketLocation(CommonGameAnimation::NAME_Pelvis);
 	FVector TraceEnd = TraceStart;
 	TraceEnd.Z -= 100;
 	FHitResult Hit;
@@ -291,4 +319,35 @@ FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
 		return TraceStart;
 	}
 	return Hit.Location;
+}
+
+void UCharacterAnimationComponent::Internal_ChangeRotation(ERotationMethod RotationMethod)
+{
+	switch(RotationMethod) {
+		case ERotationMethod::NONE:
+			OwnerCharacter.Get()->bUseControllerRotationYaw = false;
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+			GetCharacterMovement()->bUseControllerDesiredRotation = false;
+			break;
+		case ERotationMethod::CharacterVelocity:
+			OwnerCharacter.Get()->bUseControllerRotationYaw = false;
+			GetCharacterMovement()->bOrientRotationToMovement = true;
+			GetCharacterMovement()->bUseControllerDesiredRotation = false;
+			break;
+		case ERotationMethod::AbsoluteControlRotation:
+			OwnerCharacter.Get()->bUseControllerRotationYaw = false;
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+			GetCharacterMovement()->bUseControllerDesiredRotation = false;
+			break;
+		case ERotationMethod::SmoothedControlRotation:
+			OwnerCharacter.Get()->bUseControllerRotationYaw = false;
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+			GetCharacterMovement()->bUseControllerDesiredRotation = true;
+			break;
+		case ERotationMethod::AngleControlRotation:
+			OwnerCharacter.Get()->bUseControllerRotationYaw = true;
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+			GetCharacterMovement()->bUseControllerDesiredRotation = false;
+			break;
+	}
 }

@@ -11,13 +11,23 @@
 
 class UCommonAnimInstance;
 
+namespace CommonGameAnimation
+{
+	static FName NAME_Pelvis = TEXT("Pelvis"); 
+}
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API UCharacterAnimationComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	//~ Begin UActorComponent interface implementation
 	UCharacterAnimationComponent();
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void BeginPlay() override;
+	virtual void InitializeComponent() override;
+	//~ End UActorComponent interface implementation
 	
 	float TryPlayAnimMontage(const FAnimMontagePlayData& AnimMontageData);
 	void StopAnimMontage(UAnimMontage* Montage = nullptr);
@@ -28,10 +38,6 @@ public:
 	void StartRagdolling();
 	UFUNCTION(BlueprintCallable)
 	void StopRagdolling();
-	
-protected:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	virtual void BeginPlay() override;
 
 private:
 	USkeletalMeshComponent* GetMesh() const { return OwnerCharacter == nullptr ? nullptr : OwnerCharacter->GetMesh(); };
@@ -48,6 +54,8 @@ private:
 	void HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload);
 	UFUNCTION()
 	float HandleMontageLoadedEvent(TSoftObjectPtr<UAnimMontage> LoadedAnimMontage);
+	UFUNCTION()
+	void HandleCameraTypeChanged(const FCameraTypeChangedPayload& CameraTypeChangedPayload);
 	
 	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
 	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
@@ -57,6 +65,7 @@ private:
 	void Internal_TryCharacterKnockbackRecovery();
 	void Internal_RagdollUpdate(float DeltaTime);
 	FVector Internal_RagdollTraceGround() const;
+	void Internal_ChangeRotation(ERotationMethod RotationMethod);
 
 	UPROPERTY()
 	TWeakObjectPtr<ACommonCharacter> OwnerCharacter;

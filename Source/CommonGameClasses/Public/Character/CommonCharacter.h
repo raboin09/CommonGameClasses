@@ -20,7 +20,7 @@ class UCommonCharacterMovementComponent;
 class UEffectContainerComponent;
 class UCharacterAnimationComponent;
 class UAbilityComponent;
-class UCommonCameraComponent;
+class UThirdPersonCameraComponent;
 
 UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("CUSTOM"))
 class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggable

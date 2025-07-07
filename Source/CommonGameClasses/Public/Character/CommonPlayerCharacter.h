@@ -50,18 +50,6 @@ protected:
 	virtual void SetupTopDownCamera();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_SetupTopDownCamera();
-
-private:
-	void ApplyNewCameraSettings(ECameraType NewCameraType);
-
-protected:
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Camera")
-	TMap<ECameraType, FCameraTypeSettings> CameraTypeSettings;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "COMMON|PlayerCharacter")
-	TObjectPtr<UCameraComponent> CameraComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "COMMON|PlayerCharacter")
-	TObjectPtr<USpringArmComponent> SpringArmComponent;
 	
 private:
 	FVector2D LastMoveInput;
