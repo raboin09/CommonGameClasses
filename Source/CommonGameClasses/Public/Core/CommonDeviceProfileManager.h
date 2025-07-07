@@ -10,7 +10,8 @@ enum class EDeviceProfileQuality : uint8
 {
 	Low,
 	Medium,
-	High
+	High,
+	Epic
 };
 
 UENUM(BlueprintType)

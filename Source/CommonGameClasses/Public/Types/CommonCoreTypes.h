@@ -12,8 +12,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogCommonGameClasses, Log, All);
 #define CUR_CLASS_FUNC_LINE (CUR_CLASS_FUNC + "(" + CUR_LINE + ")")
 
 #define COMMON_LOG(LogVerbosity, Param1) UE_LOG(LogCommonGameClasses, LogVerbosity, TEXT("%s: %s"), *CUR_CLASS_FUNC_LINE, *FString(Param1))
-#define COMMON_PRINT_SCREEN_RED(Message, Duration) GEngine->AddOnScreenDebugMessage(-1, Duration, FColor::Red,  CUR_CLASS_FUNC + "(" + CUR_LINE + ")\n" + Message);
-#define COMMON_PRINT_SCREEN_GREEN(Message, Duration) GEngine->AddOnScreenDebugMessage(-1, Duration, FColor::Green,  CUR_CLASS_FUNC + "(" + CUR_LINE + ")\n" + Message);
+#define COMMON_PRINT_SCREEN_RED(Message, Duration) GEngine->AddOnScreenDebugMessage(-1, Duration, FColor::Red, Message);
+#define COMMON_PRINT_SCREEN_GREEN(Message, Duration) GEngine->AddOnScreenDebugMessage(-1, Duration, FColor::Green, Message);
 
 #define COMMON_TRACE_INTERACTION ECC_GameTraceChannel1
 #define COMMON_TRACE_ABILITY ECC_GameTraceChannel2

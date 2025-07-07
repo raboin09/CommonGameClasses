@@ -33,14 +33,7 @@ void UCommonDeviceProfileManager::DetectAndApplyPlatform()
 
 bool UCommonDeviceProfileManager::IsSteamDeck()
 {
-    FString SteamDeckValue = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_DECK"));
-    if (!SteamDeckValue.IsEmpty())
-    {
-        return true;
-    }
-
-    FString SteamClientUI = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_GAMEPADUI"));
-    if (!SteamClientUI.IsEmpty())
+    if (FPlatformMisc::GetEnvironmentVariable(TEXT("SteamDeck")).Equals(FString(TEXT("1"))))
     {
         return true;
     }
@@ -90,6 +83,9 @@ FString UCommonDeviceProfileManager::GetProfileName(EPlatformType Platform, EDev
     
     switch (Quality)
     {
+        case EDeviceProfileQuality::Epic:
+            QualityStr = TEXT("Epic");
+            break;
         case EDeviceProfileQuality::High:
             QualityStr = TEXT("High");
             break;
@@ -98,6 +94,9 @@ FString UCommonDeviceProfileManager::GetProfileName(EPlatformType Platform, EDev
             break;
         case EDeviceProfileQuality::Low:
             QualityStr = TEXT("Low");
+            break;
+        default:
+            QualityStr = TEXT("Medium");
             break;
     }
     
@@ -157,7 +156,9 @@ void FDeviceProfileCommands::Register()
 void FDeviceProfileCommands::ListProfiles()
 {
     TArray<FString> Profiles = GetAvailableProfiles();
-    
+
+    COMMON_PRINT_SCREEN_GREEN("Available Device Profiles:", 10.f)
+    COMMON_PRINT_SCREEN_GREEN("------------------------", 10.f)
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("Available Device Profiles:"));
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("------------------------"));
     
@@ -166,10 +167,12 @@ void FDeviceProfileCommands::ListProfiles()
         const bool bIsActive = ProfileName == UDeviceProfileManager::Get().GetActiveDeviceProfileName();
         if (bIsActive)
         {
+            COMMON_PRINT_SCREEN_GREEN(ProfileName, 10.f)
             UE_LOG(LogCommonGameClassesCore, Log, TEXT("* %s (ACTIVE)"), *ProfileName);
         }
         else
         {
+            COMMON_PRINT_SCREEN_RED(ProfileName, 10.f)
             UE_LOG(LogCommonGameClassesCore, Log, TEXT("  %s"), *ProfileName);
         }
     }
@@ -194,9 +197,9 @@ void FDeviceProfileCommands::SetProfile(const TArray<FString>& Args)
         ProfileManager.SetOverrideDeviceProfile(Profile);
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("Changed device profile from '%s' to '%s'"), *PreviousProfile, *ProfileName);
         FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *ProfileName);
-        COMMON_PRINT_SCREEN_GREEN(ScreenMessage, 10.f)
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Profile Settings:"));
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("%s"), *GetCurrentProfileInfo());
+        COMMON_PRINT_SCREEN_GREEN(GetCurrentProfileInfo(), 10.f)
     }
     else
     {
@@ -212,7 +215,10 @@ void FDeviceProfileCommands::ShowCurrentProfile()
 {
     UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
     FString CurrentProfile = ProfileManager.GetActiveDeviceProfileName();
-    
+
+    FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *CurrentProfile);
+    COMMON_PRINT_SCREEN_GREEN(*CurrentProfile, 10.f)
+    COMMON_PRINT_SCREEN_GREEN(*GetCurrentProfileInfo(), 10.f)
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Device Profile: %s"), *CurrentProfile);
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("Settings:"));
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("%s"), *GetCurrentProfileInfo());
