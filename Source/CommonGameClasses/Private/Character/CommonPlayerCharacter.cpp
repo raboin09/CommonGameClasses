@@ -2,6 +2,9 @@
 
 
 #include "Character/CommonPlayerCharacter.h"
+
+#include "Camera/CameraComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Player/CommonPlayerController.h"
 #include "Utils/CommonCoreUtils.h"
 
@@ -19,32 +22,18 @@ void ACommonPlayerCharacter::PossessedBy(AController* NewController)
 	}
 }
 
-void ACommonPlayerCharacter::MoveInput(float Right, float Forward)
+void ACommonPlayerCharacter::MoveInput(float AxisX, float AxisY)
 {
-	LastMoveInput.X = Right;
-	LastMoveInput.Y = Forward;
+	LastMoveInput.X = AxisX;
+	LastMoveInput.Y = AxisY;
 	
-	FRotator ControlRotation = GetControlRotation();
 	FVector ForwardMoveDirection = FVector::ZeroVector;
 	FVector RightMoveDirection = FVector::ZeroVector;
+	Internal_GetMoveDirections(ForwardMoveDirection, RightMoveDirection);
 	
-	switch(UCommonCoreUtils::GetCurrentCameraType(this))
-	{
-		case ECameraType::FirstPerson:
-		case ECameraType::ThirdPerson:
-			const FRotator YawRotation(0, ControlRotation.Yaw, 0);
-			RightMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-			ForwardMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-			break; 
-		case ECameraType::TopDown:
-			ForwardMoveDirection = ControlRotation.RotateVector(FVector::ForwardVector);
-			RightMoveDirection = ControlRotation.RotateVector(FVector::RightVector);
-			break;
-		default: ;
-	}
-	AddMovementInput(ForwardMoveDirection, Forward);
-	AddMovementInput(RightMoveDirection, Right);
-	BPI_MoveInput(Right, Forward);
+	AddMovementInput(ForwardMoveDirection, AxisX);
+	AddMovementInput(RightMoveDirection, AxisY);
+	BPI_MoveInput(AxisX, AxisY);
 }
 
 void ACommonPlayerCharacter::MouseInput(float Yaw, float Pitch)
@@ -92,4 +81,29 @@ void ACommonPlayerCharacter::SetupFirstPersonCamera()
 void ACommonPlayerCharacter::SetupTopDownCamera()
 {
 	BPI_SetupTopDownCamera();
+}
+
+void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& ForwardMoveDirection, FVector& RightMoveDirection) const
+{
+	const FRotator& ControlRotation = GetControlRotation();
+	switch(UCommonCoreUtils::GetCurrentCameraType(this))
+	{
+		case ECameraType::FirstPerson:
+		case ECameraType::ThirdPerson:
+			const FRotator YawRotation(0, ControlRotation.Yaw, 0);
+			RightMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			ForwardMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			break; 
+		case ECameraType::TopDown:
+			if(UCameraComponent* Camera = FindComponentByClass<UCameraComponent>())
+			{
+				FRotator CameraRotation = Camera->GetComponentRotation();
+				CameraRotation.Pitch = 0;
+				
+				ForwardMoveDirection = UKismetMathLibrary::GetForwardVector(CameraRotation);
+				RightMoveDirection = UKismetMathLibrary::GetRightVector(CameraRotation);
+			}
+			break;
+		default: ;
+	}
 }

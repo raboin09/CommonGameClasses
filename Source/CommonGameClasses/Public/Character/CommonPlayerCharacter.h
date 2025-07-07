@@ -23,7 +23,8 @@ protected:
 	//~ Begin ACharacter interface implementation
 	virtual void PossessedBy(AController* NewController) override;
 	//~ End ACharacter interface implementation
-	
+
+	// AxisX is 'Forward', AxisY is 'Right'
 	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerCharacter")
 	void MoveInput(float AxisX, float AxisY);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
@@ -52,5 +53,7 @@ protected:
 	void BPI_SetupTopDownCamera();
 	
 private:
+	void Internal_GetMoveDirections(FVector& ForwardMoveDirection, FVector& RightMoveDirection) const;
+	
 	FVector2D LastMoveInput;
 };
