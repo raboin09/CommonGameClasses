@@ -19,4 +19,7 @@ protected:
 	void CommonCheatQuickSave() const;
 	UFUNCTION(Exec, Category = "COMMON|Cheats")
 	void CommonCheatQuickLoad() const;
+
+	UFUNCTION(Exec, Category = "COMMON|Cheats")
+	void CommonCheatTestHealthSave() const;
 };
