@@ -24,6 +24,11 @@
 				"AIModule",
 				"PhysicsCore"
 			]
+		},
+		{
+			"Name": "CommonGameTests",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
