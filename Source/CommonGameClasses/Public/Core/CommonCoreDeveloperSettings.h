@@ -26,8 +26,7 @@ class COMMONGAMECLASSES_API UCommonCoreDeveloperSettings : public UDeveloperSett
 public:
 	UCommonCoreDeveloperSettings()
 	{
-		CategoryName = TEXT("Common Game Classes");
-		SectionName = TEXT("Core");
+		CategoryName = TEXT("Core");
 	}
 
 	UPROPERTY(Config, EditAnywhere, meta = (AllowAbstract = "false"))
