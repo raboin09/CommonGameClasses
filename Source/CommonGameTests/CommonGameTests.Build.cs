@@ -13,9 +13,6 @@ public class CommonGameTests : ModuleRules
                 "FunctionalTesting",
                 "RHI",
                 "RenderCore",
-                "Json",
-                "JsonUtilities",
-                "DeveloperSettings"
             }
         );
 
