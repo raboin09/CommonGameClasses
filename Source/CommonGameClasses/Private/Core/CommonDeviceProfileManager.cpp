@@ -1,6 +1,5 @@
-﻿
+﻿#include "Core/CommonDeviceProfileManager.h"
 #include "CommonLogTypes.h"
-#include "Core/CommonDeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfile.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "HAL/FileManager.h"
@@ -39,7 +38,6 @@ bool UCommonDeviceProfileManager::IsSteamDeck()
     }
 
     #if PLATFORM_LINUX
-    // Check Steam Deck hardware file
     static const TCHAR* HardwareInfoPaths[] = {
         TEXT("/etc/hardware-info/model"),
         TEXT("/sys/devices/virtual/dmi/id/product_name")
@@ -60,7 +58,6 @@ bool UCommonDeviceProfileManager::IsSteamDeck()
         }
     }
     #endif
-
     return false;
 }
 
@@ -100,7 +97,7 @@ FString UCommonDeviceProfileManager::GetProfileName(EPlatformType Platform, EDev
             break;
     }
     
-    return FString::Printf(TEXT("%s_%s"), *PlatformStr, *QualityStr);
+    return FString::Printf(TEXT("%sGame_%s"), *PlatformStr, *QualityStr);
 }
 
 void UCommonDeviceProfileManager::SaveProfileSettings()
@@ -134,7 +131,7 @@ void FDeviceProfileCommands::Register()
     // Set active device profile
     IConsoleManager::Get().RegisterConsoleCommand(
         TEXT("Common.Core.SetDeviceProfile"),
-        TEXT("Set active device profile (Usage: Common.Core.set ProfileName)"),
+        TEXT("Set active device profile (Usage: Common.Core.SetDeviceProfile <PlatformName_QualityLevel>)"),
         FConsoleCommandWithArgsDelegate::CreateStatic(&FDeviceProfileCommands::SetProfile)
     );
 
@@ -196,14 +193,14 @@ void FDeviceProfileCommands::SetProfile(const TArray<FString>& Args)
         FString PreviousProfile = ProfileManager.GetActiveDeviceProfileName();
         ProfileManager.SetOverrideDeviceProfile(Profile);
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("Changed device profile from '%s' to '%s'"), *PreviousProfile, *ProfileName);
-        FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *ProfileName);
+        FString ScreenMessage = FString::Printf(TEXT("Changed to device profile: %s"), *ProfileName);
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Profile Settings:"));
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("%s"), *GetCurrentProfileInfo());
         COMMON_PRINT_SCREEN_GREEN(GetCurrentProfileInfo(), 10.f)
     }
     else
     {
-        FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *ProfileName);
+        FString ScreenMessage = FString::Printf(TEXT("Device profile NOT found: %s"), *ProfileName);
         COMMON_PRINT_SCREEN_RED(ScreenMessage, 10.f)
         UE_LOG(LogCommonGameClassesCore, Error, TEXT("Profile '%s' not found!"), *ProfileName);
         UE_LOG(LogCommonGameClassesCore, Error, TEXT("Available profiles:"));
@@ -216,7 +213,7 @@ void FDeviceProfileCommands::ShowCurrentProfile()
     UDeviceProfileManager& ProfileManager = UDeviceProfileManager::Get();
     FString CurrentProfile = ProfileManager.GetActiveDeviceProfileName();
 
-    FString ScreenMessage = FString::Printf(TEXT("Device profile: %s"), *CurrentProfile);
+    FString ScreenMessage = FString::Printf(TEXT("Current device profile: %s"), *CurrentProfile);
     COMMON_PRINT_SCREEN_GREEN(*CurrentProfile, 10.f)
     COMMON_PRINT_SCREEN_GREEN(*GetCurrentProfileInfo(), 10.f)
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Device Profile: %s"), *CurrentProfile);
