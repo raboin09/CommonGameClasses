@@ -26,15 +26,15 @@ class COMMONGAMECLASSES_API UCommonCoreDeveloperSettings : public UDeveloperSett
 public:
 	UCommonCoreDeveloperSettings()
 	{
-		CategoryName = TEXT("Core");
+		CategoryName = TEXT("Project");
 	}
 
-	UPROPERTY(Config, EditAnywhere, meta = (AllowAbstract = "false"))
+	UPROPERTY(Config, EditAnywhere, Category="SaveGame", meta = (AllowAbstract = "false"))
 	TSubclassOf<UCommonSaveGame> DefaultSaveGameClass = UCommonSaveGame::StaticClass();
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="SaveGame")
 	FString QuickSaveSlotName = CommonSaveGame::QuickSaveSlot;
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Input")
 	float GamePadDeadZone = 0.1f;
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Input")
 	float GamePadSensitivity = 1.f;
 };
