@@ -59,7 +59,7 @@ private:
 	
 	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
 	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
-	void Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bShouldRecoverFromKnockback = true);
+	void Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback = false);
 	void Internal_TryPlayHitReact(const FDamageHitReactEvent& HitReactEvent);
 	FGameplayTag Internal_GetHitDirectionTag(const FVector& OriginatingLocation) const;
 	void Internal_TryCharacterKnockbackRecovery();
@@ -86,6 +86,7 @@ private:
 	FTimerHandle TimerHandle_Ragdoll;
 	FVector LastRagdollVelocity = FVector::ZeroVector;
 	FVector CachedMeshOffset;
+	FRotator CachedMeshRotation;
 	
 public:
 	FORCEINLINE TWeakObjectPtr<UCommonAnimInstance> GetAnimInstance() const { return OwnerAnimInstance; }

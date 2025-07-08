@@ -32,7 +32,7 @@ void ACommonEffect::Internal_AddAndRemoveTagsFromReceiver_Deactivation()
 void ACommonEffect::PlayEffectFX()
 {
 	BPI_PlayEffectSound(EffectContext);
-	BPI_PlayEffectVFX(EffectData->bAttachVFXToActor, EffectContext);
+	BPI_PlayEffectVFX(EffectContext);
 }
 
 bool ACommonEffect::CanActivateEffect()

@@ -25,8 +25,6 @@ public:
 	FEffectInitializationData InitializationData;
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="Conditions")
 	TObjectPtr<UConditionTreeNode> Conditions;
-	UPROPERTY(EditDefaultsOnly, Category="FX")
-	bool bAttachVFXToActor = false;
 	UPROPERTY(EditDefaultsOnly, Category="Modifiers")
 	TMap<FGameplayTag, FModifierExpression> EffectModifiers;
 };
@@ -72,7 +70,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
 	void BPI_PlayEffectSound(const FEffectContext& Context);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
-	void BPI_PlayEffectVFX(const bool bAttachVFXToActor, const FEffectContext& Context);
+	void BPI_PlayEffectVFX(const FEffectContext& Context);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "CUSTOM")
 	TObjectPtr<UEffectData> EffectData;

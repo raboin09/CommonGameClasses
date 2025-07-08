@@ -77,12 +77,12 @@ void UCharacterAnimationComponent::HandleCurrentWoundChangedEvent(const FCurrent
 	{
 		return;
 	}
-	Internal_TryStartCharacterKnockback(CurrentWoundEventPayload.DamageHitReactEvent, true);
+	Internal_TryStartCharacterKnockback(CurrentWoundEventPayload.DamageHitReactEvent, false);
 }
 
 void UCharacterAnimationComponent::HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload)
 {
-	Internal_TryStartCharacterKnockback(DeathEventPayload.HitReactEvent, false);
+	Internal_TryStartCharacterKnockback(DeathEventPayload.HitReactEvent, true);
 }
 
 float UCharacterAnimationComponent::HandleMontageLoadedEvent(TSoftObjectPtr<UAnimMontage> LoadedAnimMontage)
@@ -161,6 +161,7 @@ void UCharacterAnimationComponent::StartRagdolling()
 	UGameplayTagComponent::AddTagToActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
 	StopAnimMontage();
 	CachedMeshOffset = GetMesh()->GetRelativeLocation();
+	CachedMeshRotation = GetMesh()->GetRelativeRotation();
 	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(CommonGameAnimation::NAME_Pelvis, true);
 	GetCharacterMovement()->DisableMovement();
@@ -180,6 +181,8 @@ void UCharacterAnimationComponent::StopRagdolling()
 	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	GetMesh()->SetCollisionObjectType(ECC_Pawn);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(CommonGameAnimation::NAME_Pelvis, false);
+	GetMesh()->SetRelativeRotation(CachedMeshRotation);
+	GetMesh()->SetRelativeLocation(CachedMeshOffset);
 	SetComponentTickEnabled(false);
 }
 
@@ -224,15 +227,10 @@ void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
 	}
 }
 
-void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bShouldRecoverFromKnockback)
+void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback)
 {	
-	float ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(HitReactEvent.HitReactType);
-	if(!bShouldRecoverFromKnockback)
-	{
-		ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(EHitReactType::Knockback_VeryLight);
-	}
-	
-	else if((bShouldRecoverFromKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Immovable))
+	float ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(bIsDeathKnockback ? HitReactEvent.DeathReactType : HitReactEvent.HitReactType);
+	if((!bIsDeathKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Immovable))
 	{
 		return;
 	}
@@ -240,7 +238,7 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 	const float KnockdownDuration = UCommonCombatUtils::GetKnockbackRecoveryTime(HitReactEvent.HitReactType);
 	const FName HitBoneName = UCommonCombatUtils::GetNearestValidBoneForImpact(HitReactEvent.HitResult.BoneName);
 	Internal_ApplyCharacterKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);
-	if(bShouldRecoverFromKnockback)
+	if(!bIsDeathKnockback)
 	{
 		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
 	}
@@ -301,7 +299,7 @@ void UCharacterAnimationComponent::Internal_RagdollUpdate(float DeltaTime)
 	LastRagdollVelocity = (NewRagdollVel != FVector::ZeroVector || OwnerCharacter->IsLocallyControlled()) ? NewRagdollVel : LastRagdollVelocity / 2;
 
 	RagdollMeshLocation = Internal_RagdollTraceGround();
-	OwnerCharacter->GetCapsuleComponent()->SetWorldLocation(RagdollMeshLocation - CachedMeshOffset);
+	OwnerCharacter->SetActorLocation(RagdollMeshLocation - CachedMeshOffset);
 }
 
 FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
@@ -312,7 +310,7 @@ FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
 	FHitResult Hit;
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(OwnerCharacter.Get());
-	UKismetSystemLibrary::LineTraceSingle(this, TraceStart, TraceEnd, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoreActors, EDrawDebugTrace::None, Hit, true);
+	UKismetSystemLibrary::LineTraceSingle(this, TraceStart, TraceEnd, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors, EDrawDebugTrace::ForOneFrame, Hit, true);
 	if(!Hit.bBlockingHit)
 	{
 		return TraceStart;
