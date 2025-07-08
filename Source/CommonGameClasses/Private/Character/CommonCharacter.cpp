@@ -89,6 +89,18 @@ void ACommonCharacter::HandleDeath()
 	BPI_HandleDeath();
 }
 
+void ACommonCharacter::InitTopDownMovementDefaults() const
+{
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->GravityScale = 1.5f;
+	GetCharacterMovement()->MaxAcceleration = 1000.0f;
+	GetCharacterMovement()->BrakingFrictionFactor = 1.0f;
+	GetCharacterMovement()->bCanWalkOffLedges = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 640.0f, 0.0f);
+	GetCharacterMovement()->bConstrainToPlane = true;
+	GetCharacterMovement()->bSnapToPlaneAtStart = true;
+}
+
 void ACommonCharacter::InitCapsuleDefaults() const
 {
 	GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);

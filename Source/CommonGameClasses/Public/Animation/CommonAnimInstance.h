@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CommonAnimInstanceProxy.h"
 #include "CommonAnimInstance.generated.h"
+
+struct FGameplayTag;
+class ACommonCharacter;
+class UCommonCharacterMovementComponent;
 
 /**
  * 
@@ -15,22 +18,20 @@ class COMMONGAMECLASSES_API UCommonAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
+	//~ Begin UAnimInstance Interface
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
+	//~ End UAnimInstance Interface
+	
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Character State Data")
+	UFUNCTION(BlueprintPure, Category="COMMON|Animation")
+	bool AnimOwnerHasGameplayTag(const FGameplayTag Tag) const;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "COMMON|Character State Data")
 	float GroundDistance = -1.0f;
-	UPROPERTY(BlueprintReadOnly, Category = "Gameplay Tag Bindings")
-	bool bGameplayTag_IsReady = false;
-	UPROPERTY(BlueprintReadOnly, Category = "Gameplay Tag Bindings")
-	bool bGameplayTag_IsDashing = false;
-	UPROPERTY(BlueprintReadOnly, Category = "Gameplay Tag Bindings")
-	bool bGameplayTag_IsFiring = false;
-	UPROPERTY(BlueprintReadOnly, Category = "Gameplay Tag Bindings")
-	bool bGameplayTag_IsAiming = false;
-	UPROPERTY(BlueprintReadOnly, Category = "Gameplay Tag Bindings")
-	bool bGameplayTag_IsMelee = false;
-	UPROPERTY(BlueprintReadOnly, Category = "Gameplay Tag Bindings")
-	bool bGameplayTag_IsSprinting = false;
-	FORCEINLINE virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override { return new FCommonAnimationInstanceProxy(this); }
+
+private:
+	bool Internal_AssignRequiredVars();
+	
+	TWeakObjectPtr<UCommonCharacterMovementComponent> CommonCharacterMovementComponent;
+	TWeakObjectPtr<ACommonCharacter> CommonCharacter;
 };

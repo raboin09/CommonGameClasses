@@ -21,11 +21,11 @@ class COMMONGAMECLASSES_API ACommonPlayerController : public APlayerController
 public:
 	ACommonPlayerController();
 
-	//~ Begin APlayerController interface implementation 
+	//~ Begin APlayerController Interface 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void SetupInputComponent() override;
-	//~ End APlayerController interface implementation	
+	//~ End APlayerController Interface	
 	
 protected:
 	//////////////////////////////////////////////

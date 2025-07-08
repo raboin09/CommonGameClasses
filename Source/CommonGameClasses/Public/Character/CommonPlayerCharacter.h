@@ -57,5 +57,9 @@ protected:
 	FVector2D LastMoveInput;
 	
 private:
-	void Internal_GetMoveDirections(FVector& ForwardMoveDirection, FVector& RightMoveDirection) const;
+	void Internal_GetMoveDirections(FVector& OutForwardMoveDirection, FVector& OutRightMoveDirection) const;
+	void Internal_GetAdjustedMoveInput(float& OutAxisX, float& OutAxisY) const;
+
+	float CachedGamepadDeadZone = 0.f;
+	float CachedGamepadSensitivity = 1.f;
 };

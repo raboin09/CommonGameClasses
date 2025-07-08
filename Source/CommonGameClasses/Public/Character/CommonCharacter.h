@@ -10,6 +10,8 @@
 #include "Types/CommonTagTypes.h"
 #include "CommonCharacter.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
 class UCommonAnimInstance;
 class UMountManagerComponent;
 struct FGameplayTag;
@@ -29,6 +31,7 @@ class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggab
 
 public:
 	ACommonCharacter(const FObjectInitializer& ObjectInitializer);
+	
 	// Public for resetting mesh props after ragdoll
 	void InitCharacterMeshDefaults() const;
 	void InitCapsuleDefaults() const;
@@ -41,6 +44,8 @@ protected:
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
 	UFUNCTION(BlueprintCallable)
 	virtual void HandleDeath();
+
+	void InitTopDownMovementDefaults() const;
 	
 	////////////////////////////////
 	/// Common Events

@@ -4,6 +4,7 @@
 #include "Character/CommonPlayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Core/CommonCoreDeveloperSettings.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/CommonPlayerController.h"
 #include "Utils/CommonCoreUtils.h"
@@ -20,10 +21,18 @@ void ACommonPlayerCharacter::PossessedBy(AController* NewController)
 	{
 		PlayerController->OnCameraTypeChanged().AddUniqueDynamic(this, &ThisClass::HandleCameraTypeChanged);
 	}
+
+	if(const UCommonCoreDeveloperSettings* GameSettings = GetDefault<UCommonCoreDeveloperSettings>())
+	{
+		CachedGamepadDeadZone = GameSettings->GamePadDeadZone;
+		CachedGamepadSensitivity = GameSettings->GamePadSensitivity;	
+	}
 }
 
 void ACommonPlayerCharacter::MoveInput(float AxisX, float AxisY)
 {
+	Internal_GetAdjustedMoveInput(AxisX, AxisY);
+	
 	LastMoveInput.X = AxisX;
 	LastMoveInput.Y = AxisY;
 	
@@ -83,7 +92,7 @@ void ACommonPlayerCharacter::SetupTopDownCamera()
 	BPI_SetupTopDownCamera();
 }
 
-void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& ForwardMoveDirection, FVector& RightMoveDirection) const
+void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& OutForwardMoveDirection, FVector& OutRightMoveDirection) const
 {
 	const FRotator& ControlRotation = GetControlRotation();
 	switch(UCommonCoreUtils::GetCurrentCameraType(this))
@@ -91,8 +100,8 @@ void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& ForwardMoveDire
 		case ECameraType::FirstPerson:
 		case ECameraType::ThirdPerson:
 			const FRotator YawRotation(0, ControlRotation.Yaw, 0);
-			RightMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-			ForwardMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			OutRightMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			OutForwardMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			break;
 		case ECameraType::TopDown:
 			if(UCameraComponent* Camera = FindComponentByClass<UCameraComponent>())
@@ -100,10 +109,23 @@ void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& ForwardMoveDire
 				FRotator CameraRotation = Camera->GetComponentRotation();
 				CameraRotation.Pitch = 0;
 				
-				ForwardMoveDirection = UKismetMathLibrary::GetForwardVector(CameraRotation);
-				RightMoveDirection = UKismetMathLibrary::GetRightVector(CameraRotation);
+				OutForwardMoveDirection = UKismetMathLibrary::GetForwardVector(CameraRotation);
+				OutRightMoveDirection = UKismetMathLibrary::GetRightVector(CameraRotation);
 			}
 			break ;
 		default: ;
+	}
+}
+
+void ACommonPlayerCharacter::Internal_GetAdjustedMoveInput(float& OutAxisX, float& OutAxisY) const
+{
+	if(FMath::Abs(OutAxisX) < CachedGamepadDeadZone)
+	{
+		OutAxisX = 0;
+	}
+	
+	if(FMath::Abs(OutAxisY) < CachedGamepadDeadZone)
+	{
+		OutAxisY = 0;
 	}
 }

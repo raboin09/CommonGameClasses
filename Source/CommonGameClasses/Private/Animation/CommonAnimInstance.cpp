@@ -10,19 +10,42 @@ void UCommonAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	const ACommonCharacter* Character = Cast<ACommonCharacter>(GetOwningActor());
-	if (!Character)
+	if(!Internal_AssignRequiredVars())
 	{
 		return;
 	}
-
-	UCommonCharacterMovementComponent* CharMoveComp = CastChecked<UCommonCharacterMovementComponent>(Character->GetCharacterMovement());
-	const FCharacterGroundAnimInfo& GroundInfo = CharMoveComp->GetGroundInfo();
+	const FCharacterGroundAnimInfo& GroundInfo = CommonCharacterMovementComponent->GetGroundInfo();
 	GroundDistance = GroundInfo.GroundDistance;
-	bGameplayTag_IsReady = UGameplayTagComponent::ActorHasGameplayTag(Character, CommonGameState::Ready);
-	bGameplayTag_IsDashing = UGameplayTagComponent::ActorHasGameplayTag(Character, CommonGameState::Dashing);
-	bGameplayTag_IsFiring = UGameplayTagComponent::ActorHasGameplayTag(Character, CommonGameState::Firing);
-	bGameplayTag_IsAiming = UGameplayTagComponent::ActorHasGameplayTag(Character, CommonGameState::Aiming);
-	bGameplayTag_IsMelee = UGameplayTagComponent::ActorHasGameplayTag(Character, CommonGameState::MeleeEquipped);
-	bGameplayTag_IsSprinting = UGameplayTagComponent::ActorHasGameplayTag(Character, CommonGameState::Sprinting);
+}
+
+bool UCommonAnimInstance::Internal_AssignRequiredVars()
+{
+	if (CommonCharacter.IsValid() && CommonCharacterMovementComponent.IsValid())
+	{
+		return true;
+	}
+
+	if(!CommonCharacter.IsValid())
+	{
+		CommonCharacter = Cast<ACommonCharacter>(GetOwningActor());
+		if(!CommonCharacter.IsValid())
+		{
+			return false;
+		}
+	}
+	
+	if(!CommonCharacterMovementComponent.IsValid())
+	{
+		CommonCharacterMovementComponent = CastChecked<UCommonCharacterMovementComponent>(CommonCharacter->GetCharacterMovement());
+		if(!CommonCharacterMovementComponent.IsValid())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool UCommonAnimInstance::AnimOwnerHasGameplayTag(const FGameplayTag Tag) const
+{
+	return UGameplayTagComponent::ActorHasGameplayTag(GetOwningActor(), Tag);
 }

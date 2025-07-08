@@ -34,4 +34,8 @@ public:
 	TSubclassOf<UCommonSaveGame> DefaultSaveGameClass = UCommonSaveGame::StaticClass();
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
 	FString QuickSaveSlotName = CommonSaveGame::QuickSaveSlot;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	float GamePadDeadZone = 0.1f;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	float GamePadSensitivity = 1.f;
 };

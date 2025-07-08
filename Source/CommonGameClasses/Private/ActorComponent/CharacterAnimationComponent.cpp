@@ -149,7 +149,6 @@ void UCharacterAnimationComponent::SetAnimationOverlay(const FGameplayTag& NewOv
 	{
 		return;
 	}
-	// TODO ALS
 	// OwnerCharacter->SetOverlayMode(NewOverlay);
 }
 
