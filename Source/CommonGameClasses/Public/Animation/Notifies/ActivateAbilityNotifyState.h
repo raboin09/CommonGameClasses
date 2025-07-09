@@ -15,6 +15,6 @@ class COMMONGAMECLASSES_API UActivateAbilityNotifyState : public UActivationNoti
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
 protected:
-	UPROPERTY(EditAnywhere, Category="CUSTOM", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditAnywhere, Category="COMMON", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSoftClassPtr<AActor>> ActivationEffects;
 };

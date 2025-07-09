@@ -9,38 +9,41 @@
 class UCharacterAnimationComponent;
 struct FAnimMontagePlayData;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(BlueprintType, Blueprintable)
 class COMMONGAMECLASSES_API UMontageTrigger : public UComplexTriggerBase
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger")
+	TObjectPtr<UAnimMontage> MontageToPlay;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger")
+	bool bHasCombos = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	int32 MaxComboSections = 3;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	bool bRandomizeMontageSection = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
+	FString ComboPrefix = "Combo";
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger")
+	bool bShouldPlayerLockOnToNearestTarget = false;
 	
 protected:
-	// ITriggerMechanism overrides
+	//~ Begin ITriggerMechanism Interface
 	virtual void InitTriggerMechanism() override;
 	virtual void ResetTrigger() override;
 	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return false; }
+	//~ End ITriggerMechanism Interface
 	
-	// UBaseTrigger overrides
+	//~ Begin UAbilityTriggerBase Interface
 	virtual void HandleSuccessfulTriggerPressed() override;
 	virtual void HandleTriggerReleased() override;
+	virtual int32 BPN_GetActivationLevel_Implementation() const override;
+	//~ End UAbilityTriggerBase Interface
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
 	FName BPN_GetNextMontageSection() const;
-	virtual int32 BPN_GetActivationLevel_Implementation() const override;
-	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger")
-	TObjectPtr<UAnimMontage> MontageToPlay;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger")
-	bool bHasCombos = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
-	int32 MaxComboSections = 3;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
-	bool bRandomizeMontageSection = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger|Combo", meta=(EditCondition = "bHasCombos"))
-	FString ComboPrefix = "Combo";
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Trigger")
-	bool bShouldPlayerLockOnToNearestTarget = false;
-	
+
 private:
 	UFUNCTION()
 	void HandleMontageEnded(const FCharacterMontageEndedPayload& CharacterMontageEndedPayload);

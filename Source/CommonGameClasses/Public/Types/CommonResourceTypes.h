@@ -24,11 +24,11 @@ struct FResourcePool
 		ResourcePoolIndex = 0;
 	}
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "CUSTOM|Resources")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "COMMON|Resources")
 	float CurrentResources = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "CUSTOM|Resources")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "COMMON|Resources")
 	float MaxResourcesInPool = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "CUSTOM|Resources")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "COMMON|Resources")
 	int32 ResourcePoolIndex = 0;
 	
 	float GetResourcePoolPercent() const

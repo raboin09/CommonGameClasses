@@ -99,10 +99,10 @@ struct FEffectValidTargets
 	GENERATED_BODY()
 
 	// Tags that the receiving actor needs for the effect to be activated 
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", DisplayName="Required Target Tags (All)")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON", DisplayName="Required Target Tags (All)")
 	TArray<FGameplayTag> RequiredTags;
 	// Tags that the actors CANNOT have in order for the effect to be activated
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", DisplayName="Blocked Target Tags (Any)")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON", DisplayName="Blocked Target Tags (Any)")
 	TArray<FGameplayTag> BlockedTags;
 };
 

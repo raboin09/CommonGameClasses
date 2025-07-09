@@ -12,30 +12,34 @@
 struct FGameplayTag;
 class UGameplayTagComponent;
 
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM"), PrioritizeCategories = "CUSTOM")
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
 class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable, public ISavableActor
 {
 	GENERATED_BODY()
 
 public:
 	ACommonActor();
-	
+
+	//~ Begin AActor Interface
+	virtual void BeginPlay() override;
+	//~ End AActor Interface
+
+	//~ Begin ISavableActor Interface
+	virtual void PostActorLoadedFromSave(const FCommonActorSaveData& InActorSaveData) override;
+	//~ End ISavableActor Interface
+
+	//~ Begin ITaggable Interface
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
+	//~ End ITaggable Interface
 	
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void BPI_HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload);
+	void BPI_OnTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
-	void BPI_HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload);
-	
-protected:
-	virtual void BeginPlay() override;
-
-public:
-	virtual void PostActorLoadedFromSave(const FCommonActorSaveData& InActorSaveData) override;
+	void BPI_OnTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload);
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COMMON")
 	TArray<FGameplayTag> DefaultGameplayTags;
 
 	UPROPERTY()

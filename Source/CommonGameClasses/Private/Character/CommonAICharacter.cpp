@@ -14,6 +14,7 @@ ACommonAICharacter::ACommonAICharacter(const FObjectInitializer& ObjectInitializ
 	BotBehaviorComponent = CreateDefaultSubobject<UBotBehaviorComponent>(TEXT("BotBehaviorComponent"));
 	AIControllerClass = ACommonAIController::StaticClass();
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COMMON_TRACE_INTERACTION, ECR_Block);
+	DefaultGameplayTags.Add(CommonGameCore::AICharacter);
 }
 
 void ACommonAICharacter::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)

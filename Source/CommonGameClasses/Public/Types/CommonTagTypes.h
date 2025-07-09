@@ -5,6 +5,11 @@
 #include "CoreMinimal.h"
 #include "NativeGameplayTags.h"
 
+namespace CommonGameCore
+{
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(PlayerCharacter)
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(AICharacter)
+}
 
 namespace CommonGameSlot   
 {
@@ -12,7 +17,12 @@ namespace CommonGameSlot
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(SlotAlt)
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(SlotJump)
 }
-  
+
+namespace CommonGameTriggerEvent
+{
+	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TriggerActivationCount)
+}
+
 namespace CommonGameAbilityEvent
 {
 	// Ability is busy equipping

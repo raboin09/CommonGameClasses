@@ -30,10 +30,10 @@ void ACommonActor::PostActorLoadedFromSave(const FCommonActorSaveData& InActorSa
 
 void ACommonActor::HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload)
 {
-	BPI_HandleTagAdded(TagAddedEventPayload);
+	BPI_OnTagAdded(TagAddedEventPayload);
 }
 
 void ACommonActor::HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload)
 {
-	BPI_HandleTagRemoved(TagRemovedEventPayload);
+	BPI_OnTagRemoved(TagRemovedEventPayload);
 }

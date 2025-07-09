@@ -10,7 +10,7 @@ class USpringArmComponent;
 enum class ECameraType : uint8;
 class UCameraComponent;
 
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM", "CUSTOM|Defaults"), PrioritizeCategories = "CUSTOM")
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON", "COMMON|Defaults"), PrioritizeCategories = ("COMMON"))
 class COMMONGAMECLASSES_API ACommonPlayerCharacter : public ACommonCharacter
 {
 	GENERATED_BODY()

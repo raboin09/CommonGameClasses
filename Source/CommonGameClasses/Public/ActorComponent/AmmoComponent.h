@@ -27,16 +27,16 @@ protected:
 	// Ammo be default doesn't regenerate (unless it has a heat mechanism where overheating is reaching 0 resources)
 	FORCEINLINE virtual bool CanRegen() const override { return bAmmoRegenerates; }
 
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Resources")
 	bool bInfiniteAmmo = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Resources")
 	bool bInfiniteClip = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Resources")
 	bool bAmmoRegenerates = false;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Ammo Amount Changed")
 	FAmmoAmountChangedEvent AmmoAmountChanged;
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Out Of Ammo")
 	FOutOfAmmoEvent OutOfAmmo;
 	
 private:
@@ -45,4 +45,9 @@ private:
 public:
 	FORCEINLINE FAmmoAmountChangedEvent& OnAmmoAmountChanged() { return AmmoAmountChanged; }
 	FORCEINLINE FOutOfAmmoEvent& OnOutOfAmmo() { return OutOfAmmo; }
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Resources")
+	FORCEINLINE float GetAvailableAmmo() const { return GetAvailableResourceAmount(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Resources")
+	FORCEINLINE float GetAmmoInClip() const { return GetMaxResourceAmount(); }
 };

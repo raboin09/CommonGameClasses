@@ -4,7 +4,7 @@
 #include "Types/CommonEventDeclarations.h"
 #include "EnergyComponent.generated.h"
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class COMMONGAMECLASSES_API UEnergyComponent : public UResourceComponent
 {
 	GENERATED_BODY()
@@ -29,13 +29,13 @@ protected:
 private:
 	void BroadcastEnergyChangedEvent() const;
 	
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Energy Amount Changed")
 	FEnergyAmountChangedEvent EnergyAmountChanged;
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Resources")
 	FORCEINLINE float GetCurrentEnergy() const { return GetAvailableResourceAmount(); }
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Resources")
 	FORCEINLINE float GetMaxEnergy() const { return GetMaxResourceAmount(); }
 	FORCEINLINE virtual FEnergyAmountChangedEvent& OnEnergyChanged() { return EnergyAmountChanged; }
 };

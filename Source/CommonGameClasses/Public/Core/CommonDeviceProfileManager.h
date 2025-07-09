@@ -32,19 +32,19 @@ class COMMONGAMECLASSES_API UCommonDeviceProfileManager : public UGameInstanceSu
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     
-	UFUNCTION(BlueprintCallable, Category = "Platform Profile")
+	UFUNCTION(BlueprintCallable, Category = "COMMON|Platform Profile")
 	void DetectAndApplyPlatform();
-	UFUNCTION(BlueprintCallable, Category = "Platform Profile")
+	UFUNCTION(BlueprintCallable, Category = "COMMON|Platform Profile")
 	void SetDeviceProfile(EPlatformType Platform, EDeviceProfileQuality Quality);
     
-	UFUNCTION(BlueprintPure, Category = "Platform Profile")
+	UFUNCTION(BlueprintPure, Category = "COMMON|Platform Profile")
 	EPlatformType GetCurrentPlatform() const { return CurrentPlatform; }
-	UFUNCTION(BlueprintPure, Category = "Platform Profile")
+	UFUNCTION(BlueprintPure, Category = "COMMON|Platform Profile")
 	EDeviceProfileQuality GetCurrentQuality() const { return CurrentQuality; }
-	UFUNCTION(BlueprintPure, Category = "Platform Profile")
+	UFUNCTION(BlueprintPure, Category = "COMMON|Platform Profile")
 	static bool IsSteamDeck();
     
-	UPROPERTY(BlueprintAssignable, Category = "Platform Profile")
+	UPROPERTY(BlueprintAssignable, Category = "COMMON On Device Profile Changed")
 	FOnDeviceProfileChanged OnDeviceProfileChanged;
 
 private:

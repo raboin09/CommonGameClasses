@@ -7,6 +7,7 @@
 #include "CommonCoreTypes.h"
 #include "GameplayTagContainer.h"
 #include "CommonResourceTypes.h"
+#include "CommonTagTypes.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "CommonEventDeclarations.generated.h"
 
@@ -45,6 +46,28 @@ struct FCharacterMontageEndedPayload
 	bool bInterrupted;
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterMontageEnded, const FCharacterMontageEndedPayload&, CharacterMontageEndedPayload);
+
+///////////////////////////
+// Ragdoll Event
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FCharacterRagdollEventPayload
+{
+	GENERATED_BODY()
+	FCharacterRagdollEventPayload(): bIsRagdolling(false)
+	{
+	}
+
+	FCharacterRagdollEventPayload(bool bInIsRagdolling)
+	{
+		bIsRagdolling = bInIsRagdolling;
+	}
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsRagdolling;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterRagdollingEvent, const FCharacterRagdollEventPayload&, CharacterRagdollingEventPayload);
+
 
 ///////////////////////////
 // Camera type changed
@@ -177,15 +200,35 @@ struct FTriggerEventPayload
 
 	FTriggerEventPayload()
 	{
-		ActivationLevel = 1;
+		SetActivationCount(1);
 	}
 
 	FTriggerEventPayload(bool bRunActivation) : bStartActivationImmediately(bRunActivation)
 	{
-		ActivationLevel = 0;
+		SetActivationCount(0);
 	}
 
-	FTriggerEventPayload(bool bRunActivation, int32 ActivationLevel) : bStartActivationImmediately(bRunActivation), ActivationLevel(ActivationLevel) { }
+	FTriggerEventPayload(bool bRunActivation, int32 ActivationLevel) : bStartActivationImmediately(bRunActivation)
+	{
+		SetActivationCount(ActivationLevel);
+	}
+	
+	FTriggerEventPayload(bool bRunActivation, const FGameplayTag& ActivationTag, int32 ActivationLevel) : bStartActivationImmediately(bRunActivation)
+	{
+		AddActivationTagLevel(ActivationTag, ActivationLevel);
+	}
+
+	FTriggerEventPayload(bool bRunActivation, const TMap<FGameplayTag, int32>& ActivationTagLevels) : bStartActivationImmediately(bRunActivation), ActivationTagLevels(ActivationTagLevels) { }
+	
+	void SetActivationCount(int32 ActivationLevel)
+	{
+		AddActivationTagLevel(CommonGameTriggerEvent::TriggerActivationCount, ActivationLevel);
+	}
+
+	void AddActivationTagLevel(const FGameplayTag& ActivationTag, int32 ActivationLevel)
+	{
+		ActivationTagLevels.Add(ActivationTag, ActivationLevel);
+	}
 
 	// Should Activation run immediately after this trigger event
 	// Activation can happen after the trigger is released instead of trigger pulled (e.g. Bow), so it should be false
@@ -195,13 +238,10 @@ struct FTriggerEventPayload
 	// If a Montage handles activation instead of the Ability
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bMontageDrivesActivation = false;
-	
-	// Optional: How long has this trigger been pulled (charge/release guns and burst)
+
+	// Optional: The tags and associated levels for activation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 ActivationLevel = 0;
-	// Optional: Tag descriptor for the activation (to determine what bullet the Activation should spawn, etc)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGameplayTag ActivationDescriptorTag;
+	TMap<FGameplayTag, int32> ActivationTagLevels;
 	// Optional: Location info to provide Activation mechanism (useful for things like throwing grenades where targeting happens during Trigger) 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ActivationSourceLocation = FVector::ZeroVector;

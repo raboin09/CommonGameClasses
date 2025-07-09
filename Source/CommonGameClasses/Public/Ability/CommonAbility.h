@@ -6,12 +6,12 @@
 #include "Actors/CommonActor.h"
 #include "API/Ability/Ability.h"
 #include "Player/AbilityOutliner.h"
-#include "Trigger/BurstTrigger.h"
 #include "Trigger/ComplexTriggerBase.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonEventDeclarations.h"
 #include "CommonAbility.generated.h"
 
+class UMontageTrigger;
 class UBehaviorTree;
 class UCooldownMechanismImpl;
 class IResourceContainer;
@@ -21,7 +21,7 @@ class UBaseActivation;
 class UAbilityTriggerBase;
 enum class EResourceContainerLocation : uint8;
 
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM|Ability"))
+UCLASS(Abstract, Blueprintable)
 class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility, public IAbilityOutliner
 {
 	GENERATED_BODY()
@@ -29,6 +29,12 @@ class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbilit
 public:
 	ACommonAbility();
 
+	//~ Begin AActor Interface
+	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
+	//~ End AActor Interface
+	
 	// Begin IAbility interface
 	virtual void EquipAbility() override;
 	virtual void UnEquipAbility() override;
@@ -43,9 +49,6 @@ public:
 	//~ End IAbilityOutliner interface
 	
 protected:
-	virtual void BeginPlay() override;
-	virtual void PostInitializeComponents() override;
-
 	UFUNCTION()
 	void HandleEquipFinished();
 
@@ -59,28 +62,52 @@ protected:
 	
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
 	float PlayAnimMontage(UAnimMontage* MontageToPlay);	
+
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Cooldown")
+	bool bHasCooldown = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Cooldown", meta=(EditCondition="bHasCooldown == true", EditConditionHides))
+	float CooldownDuration = 1.f;
 	
-	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM")
-	TObjectPtr<UCooldownMechanismImpl> CooldownMechanism;
 	// If the ability only requires simple trigger logic (only needs burst timer and/or num shots), create an instance of an obj instead of requiring a child BP.
-	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM", meta=(EditCondition = "ComplexTriggerClass == nullptr"))
-	TObjectPtr<UBurstTrigger> SimpleTriggerInstance;
-	// If the ability has more complex trigger logic (playing montages, listening for events, etc), a child BP obj is required.
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM", meta=(EditCondition = "SimpleTriggerInstance == nullptr"))
-	TSubclassOf<UComplexTriggerBase> ComplexTriggerClass;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger")
+	EAbilityTriggerType TriggerType = EAbilityTriggerType::SimpleBurst;
+
+	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="NumberOfActivations", meta=(ClampMin = 0.f, EditCondition = "TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides))
+	int32 BurstTrigger_NumberOfActivations = 1;
+	// The delay (if any) before activating again (e.g. a shotgun would be 0 as all the pellets fire instantaneously, a 3-round burst rifle would be
+	// something like .1)
+	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="TimeBetweenBurstShots", meta=(EditCondition = "BurstTrigger_NumberOfActivations > 1 && TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides, ClampMin = 0.f))
+	float BurstTrigger_TimeBetweenBurstShots = .1f;
+
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="MontageToPlay", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
+	TObjectPtr<UAnimMontage> MontageTrigger_MontageToPlay;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="HasCombos", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
+	bool MontageTrigger_HasCombos = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="MaxComboSections", meta=(EditCondition = "MontageTrigger_HasCombos == true && TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
+	int32 MontageTrigger_MaxComboSections = 3;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="RandomizeMontageSection", meta=(EditCondition = "MontageTrigger_HasCombos == true  && TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
+	bool MontageTrigger_RandomizeMontageSection = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="ComboPrefix", meta=(EditCondition = "MontageTrigger_HasCombos == true  && TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
+	FString MontageTrigger_ComboPrefix = "Combo";
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="ShouldPlayerLockOnToNearestTarget", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
+	bool MontageTrigger_ShouldPlayerLockOnToNearestTarget = false;
+	
+	// If the ability has more complex trigger logic a child BP obj is required.
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", meta=(MustImplement = "/Script/CommonGameClasses.TriggerMechanism", AllowedClasses="/Script/CommonGameClasses.ComplexTriggerBase", EditCondition="TriggerType == EAbilityTriggerType::Complex", EditConditionHides))
+	TSubclassOf<UObject> ComplexTriggerClass;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	TSubclassOf<UBaseActivation> ActivationMechanismClass;
 
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Mesh")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Mesh")
 	EMeshType MeshType = EMeshType::AbilityMesh;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Mesh")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Mesh")
 	FName AttachmentSocket = "hand_r";
 
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Resource", meta = (ClampMin = "0"))
+	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Resource", meta = (ClampMin = "0"))
 	float ResourceCost = 0.f;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Resource", meta = (EditCondition = "ResourceCost > 0"))
+	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Resource", meta = (EditCondition = "ResourceCost > 0"))
 	EResourceContainerLocation ResourceContainerLocation;
-	UPROPERTY(EditDefaultsOnly, Category = "CUSTOM|Resource", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceCost > 0 && (ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
+	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Resource", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceCost > 0 && (ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
 	TSubclassOf<UActorComponent> ResourceContainerClass;
 	
 	UPROPERTY(VisibleDefaultsOnly)
@@ -118,11 +145,14 @@ private:
 	UFUNCTION()
 	void HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent);
 
+private:
 	UPROPERTY()
 	TWeakObjectPtr<UMeshComponent> MeshToUse;
 	UPROPERTY()
 	TWeakObjectPtr<UAbilityComponent> OwningAbilityComponent;
-	
+
+	UPROPERTY()
+	TScriptInterface<ICooldownMechanism> CooldownMechanism;
 	UPROPERTY()
 	TScriptInterface<IResourceContainer> ResourceContainer;
 	UPROPERTY()

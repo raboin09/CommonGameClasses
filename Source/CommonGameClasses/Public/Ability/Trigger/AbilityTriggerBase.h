@@ -21,24 +21,24 @@ public:
 	virtual void PressTrigger() override;
 	// Handles initial trigger release event and call HandleTriggerReleased
 	virtual void ReleaseTrigger() override;
-	virtual bool ShouldRetriggerAbilityAfterCooldown() const override PURE_VIRTUAL(UBaseTrigger::ShouldRetriggerAbilityAfterCooldown, return false; )
+	virtual bool ShouldRetriggerAbilityAfterCooldown() const override PURE_VIRTUAL(UAbilityTriggerBase::ShouldRetriggerAbilityAfterCooldown, return false; )
 
 protected:
-	virtual void HandleTriggerReleased() PURE_VIRTUAL(UBaseTrigger::HandleTriggerReleased, )
-	virtual void HandleSuccessfulTriggerPressed() PURE_VIRTUAL(UBaseTrigger::HandleSuccessfulTriggerPressed, )
+	virtual void HandleTriggerReleased() PURE_VIRTUAL(UAbilityTriggerBase::HandleTriggerReleased, )
+	virtual void HandleSuccessfulTriggerPressed() PURE_VIRTUAL(UAbilityTriggerBase::HandleSuccessfulTriggerPressed, )
 	
 	virtual bool CanExecuteTriggerEvent() const;
 
 	// What tags does the owning ability (e.g. a Shotgun) REQUIRE to fire successfully
-	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
+	UPROPERTY(EditAnywhere, Category = "COMMON|Trigger")
 	TArray<FGameplayTag> AbilityRequiredTags;
 	// What tags BLOCK the owning ability (e.g. a Shotgun) from firing successfully
-	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
+	UPROPERTY(EditAnywhere, Category = "COMMON|Trigger")
 	TArray<FGameplayTag> AbilityBlockedTags;
 	// What tags does the instigator (e.g. the player's ACharacter) REQUIRE to fire successfully
-	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
+	UPROPERTY(EditAnywhere, Category = "COMMON|Trigger")
 	TArray<FGameplayTag> InstigatorRequiredTags;
 	// What tags BLOCK the instigator (e.g. the player's ACharacter) from firing successfully
-	UPROPERTY(EditAnywhere, Category = "CUSTOM|Trigger")
+	UPROPERTY(EditAnywhere, Category = "COMMON|Trigger")
 	TArray<FGameplayTag> InstigatorBlockedTags;
 };

@@ -21,18 +21,17 @@ public:
 		Conditions = CreateDefaultSubobject<UConditionTreeNode>(TEXT("ConditionTree"));
 	}
 
-	UPROPERTY(EditDefaultsOnly, Category="Initialization Data", meta=(ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, meta=(ShowOnlyInnerProperties))
 	FEffectInitializationData InitializationData;
-	UPROPERTY(EditDefaultsOnly, Instanced, Category="Conditions")
+	UPROPERTY(EditDefaultsOnly, Instanced, meta=(ShowInnerProperties, FullyExpand="true"))
 	TObjectPtr<UConditionTreeNode> Conditions;
-	UPROPERTY(EditDefaultsOnly, Category="Modifiers")
+	UPROPERTY(EditDefaultsOnly, meta=(ForceInlineRow))
 	TMap<FGameplayTag, FModifierExpression> EffectModifiers;
 };
 
 class USoundCue;
 
-UCLASS(Abstract, Blueprintable, HideCategories=("ActorTick", "Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "Events",
-		"LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition", "Actor Tick"))
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
 class COMMONGAMECLASSES_API ACommonEffect : public AActor, public IEffect
 {
 	GENERATED_BODY()
@@ -53,7 +52,7 @@ public:
 
 protected:
 	virtual bool CanActivateEffect();
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Effect")
 	bool BPI_CanActivateEffect();
 	
 	//////////////////////////
@@ -61,20 +60,20 @@ protected:
 	//////////////////////////
 	
 	// BP event that fires after effect has successfully been activated
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Effect")
 	void BPI_ActivateEffect();
 	// Optionally override one of these in child classes
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Effect")
 	void BPI_DestroyEffect();
 
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Effect")
 	void BPI_PlayEffectSound(const FEffectContext& Context);
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Effect")
 	void BPI_PlayEffectVFX(const FEffectContext& Context);
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "CUSTOM")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "COMMON|Effect", meta=(ShowInnerProperties, FullyExpand="true"))
 	TObjectPtr<UEffectData> EffectData;
-	UPROPERTY(BlueprintReadOnly, Category = "CUSTOM")
+	UPROPERTY(BlueprintReadOnly, Category = "COMMON|Effect")
 	FEffectContext EffectContext;
 
 private:

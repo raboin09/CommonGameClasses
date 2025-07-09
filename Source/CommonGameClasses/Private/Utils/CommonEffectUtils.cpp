@@ -10,8 +10,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonInteractUtils.h"
 
-void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceOrigin, float TraceRadius, ETraceTypeQuery ValidationTraceType,
-                                              bool bIgnoreAffiliation, bool bValidateHit, FName HitValidationBone, bool bOverrideValidationStartLocation, FVector ValidationTraceStartOverride)
+void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<TSubclassOf<AActor>> EffectsToApply, FVector TraceOrigin, float TraceRadius, bool bIgnoreAffiliation, bool bRequiresVisibilityValidation,
+	ECollisionChannel CollisionChannel, FName TargetCharacterValidationBone, bool bOverrideValidationStartLocation, FVector VisibilityTraceStartOverride)
 {
 	if(EffectsToApply.IsEmpty() || !InstigatingActor || TraceRadius < 1.f || TraceOrigin.IsZero())
 	{
@@ -53,8 +53,8 @@ void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<T
 		}
 	}
 
-	// If bValidateHit is true, check if there's nothing between the actor and the source location of the effect (e.g. a wall between them would invalidate the effect if bValidateHit is true) 
-	if(bValidateHit)
+	// If bRequiresVisibilityValidation is true, check if there's nothing between the actor and the source location of the effect (e.g. a wall between them would invalidate the effect if bRequiresVisibilityValidation is true) 
+	if(bRequiresVisibilityValidation)
 	{
 		TArray<AActor*> UniqueHitKeys;
 		UniqueHitActors.GetKeys(HitActorArray);
@@ -66,19 +66,24 @@ void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<T
 			{
 				continue;
 			}
+
+			FVector VisibilityTraceEnd = FVector::ZeroVector;
 			
 			USkeletalMeshComponent* MeshComponent = CurrActor->FindComponentByClass<USkeletalMeshComponent>();
-			if(!MeshComponent || !MeshComponent->DoesSocketExist(HitValidationBone))
+			if(MeshComponent && MeshComponent->DoesSocketExist(TargetCharacterValidationBone))
 			{
-				continue;
+				VisibilityTraceEnd = MeshComponent->GetSocketLocation(TargetCharacterValidationBone);
+			} else
+			{
+				VisibilityTraceEnd = CurrActor->GetActorLocation();
 			}
 
 			// Remove this actor to check temporarily so the line trace to it isn't ignored
 			HitActorArray.Remove(CurrActor);
 
 			FHitResult ValidationLineTraceHit;
-			const FVector& ValidationStart = bOverrideValidationStartLocation ? ValidationTraceStartOverride : TraceOrigin;
-			UKismetSystemLibrary::LineTraceSingle(InstigatingActor, ValidationStart, MeshComponent->GetSocketLocation(HitValidationBone), ValidationTraceType, true, HitActorArray, EDrawDebugTrace::None, ValidationLineTraceHit, true, FLinearColor::Red, FLinearColor::Green, 15.f);
+			const FVector& ValidationStart = bOverrideValidationStartLocation ? VisibilityTraceStartOverride : TraceOrigin;
+			UKismetSystemLibrary::LineTraceSingle(InstigatingActor, ValidationStart, VisibilityTraceEnd, UEngineTypes::ConvertToTraceType(CollisionChannel), true, HitActorArray, EDrawDebugTrace::None, ValidationLineTraceHit, true, FLinearColor::Red, FLinearColor::Green, 15.f);
 			
 			if(ValidationLineTraceHit.bBlockingHit)
 			{

@@ -86,16 +86,11 @@ UHealthComponent* UCommonCoreUtils::GetPlayerCharacterHealthComponent(const UObj
 	return GetHealthComponentFromActor(GetCommonPlayerCharacter(WorldContextObject));
 }
 
-UHealthComponent* UCommonCoreUtils::GetHealthComponentFromActor(UObject* WorldContextObject)
+UHealthComponent* UCommonCoreUtils::GetHealthComponentFromActor(AActor* PotentialActor)
 {
-	if(!WorldContextObject || !WorldContextObject->IsA(AActor::StaticClass()))
+	if(!IsValid(PotentialActor))
 	{
 		return nullptr;
 	}
-	
-	if (const AActor* CurrChar = Cast<AActor>(WorldContextObject))
-	{
-		return CurrChar->FindComponentByClass<UHealthComponent>();
-	}
-	return nullptr;
+	return PotentialActor->FindComponentByClass<UHealthComponent>();
 }

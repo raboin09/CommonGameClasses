@@ -40,7 +40,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void BPI_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CUSTOM")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "COMMON")
 	float DeathBuffer = 5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UHealthComponent> HealthComponent;

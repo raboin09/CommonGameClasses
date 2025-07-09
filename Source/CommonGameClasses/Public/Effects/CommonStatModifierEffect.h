@@ -43,16 +43,18 @@ public:
 	ACommonStatModifierEffect();
 	
 protected:
+	//~ Begin ACommonEffect Interface
 	virtual bool TryActivateEffect() override;
 	virtual void DestroyEffect() override;
+	//~ End ACommonEffect Interface
 
 	// Optionally override one of these in child classes
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="COMMON|Effect")
 	void BPN_ApplyStatChange(float ModifiedStatValue);
 	virtual void BPN_ApplyStatChange_Implementation(float ModifiedStatValue);
 
-	UPROPERTY(EditDefaultsOnly, Instanced, Category="CUSTOM")
-	UBaseStatsModifierData* StatEffectData;
+	UPROPERTY(EditDefaultsOnly, Instanced, Category="COMMON|Effect", meta=(ShowInnerProperties))
+	TObjectPtr<UBaseStatsModifierData> StatEffectData;
 
 	TFunction<void()> ReversalFunc;
 	

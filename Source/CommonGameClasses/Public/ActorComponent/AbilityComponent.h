@@ -17,7 +17,7 @@ struct FAwaitingActivationDetails
 	FTriggerEventPayload TriggerActivationPayload;
 };
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"))
 class COMMONGAMECLASSES_API UAbilityComponent : public UActorComponent, public ISavableComponent
 {
 	GENERATED_BODY()
@@ -36,23 +36,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	void DestroyAbilities();
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
-	void SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSlot);
+	void SetCurrentEquippedSlot(const FGameplayTag NewEquippedSlot);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
-	void AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag& SlotTag);
+	void AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag SlotTag);
 
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	FORCEINLINE void TryStartEquippedAbility() { TryStartAbilityInSlot(EquippedSlot); }
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
 	FORCEINLINE void TryStopEquippedAbility() { TryStopAbilityInSlot(EquippedSlot); }
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
-	void TryStartAbilityInSlot(const FGameplayTag& SlotTag);
+	void TryStartAbilityInSlot(const FGameplayTag SlotTag);
 	UFUNCTION(BlueprintCallable, Category = "COMMON")
-	void TryStopAbilityInSlot(const FGameplayTag& SlotTag);
+	void TryStopAbilityInSlot(const FGameplayTag SlotTag);
 
 	void TryActivateAwaitingMechanism(bool bShouldActivate);
 
 protected:
-	UPROPERTY(EditDefaultsOnly, SaveGame, Category = "COMMON")
+	UPROPERTY(EditDefaultsOnly, SaveGame, Category = "COMMON", meta=(ForceInlineRow, MustImplement="/Script/CommonGameClasses.Ability"))
 	TMap<FGameplayTag, TSoftClassPtr<AActor>> AbilityClasses;
 	
 private:
@@ -67,11 +67,11 @@ private:
 	FAwaitingActivationDetails AwaitingActivationDetails;
 	UPROPERTY()
 	FGameplayTag EquippedSlot = CommonGameSlot::SlotMain;
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On New Ability Added")
 	FNewAbilityAdded NewAbilityAdded;
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Ability Removed")
 	FAbilityRemoved AbilityRemoved;
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Ability Equipped")
 	FNewAbilityEquipped AbilityEquipped;
 	
 	TMap<FGameplayTag, TWeakInterfacePtr<IAbility>> SlottedAbilities;

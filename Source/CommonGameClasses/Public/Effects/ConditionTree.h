@@ -74,9 +74,9 @@ public:
 	virtual bool AreConditionsTrue(const FEffectContext& InEffectContext) const override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Condition Tree", meta=(EditCondition = "ChildConditions.Num() > 0", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly)
 	ETreeOperator Operator;
-	UPROPERTY(EditDefaultsOnly, Category="Condition Tree", Instanced)
+	UPROPERTY(EditDefaultsOnly, Instanced)
 	TArray<TObjectPtr<UConditionExpression>> ChildConditions;
 };
 
@@ -86,7 +86,7 @@ class COMMONGAMECLASSES_API UConditionLeafNode : public UConditionExpression
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	UPROPERTY(EditDefaultsOnly)
 	EPropertyOwner PropertyOwner;
 };
 
@@ -99,11 +99,11 @@ protected:
 	virtual bool AreConditionsTrue(const FEffectContext& InEffectContext) const override;
 	float GetProperty(const FEffectContext& InEffectContext) const;
 
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	UPROPERTY(EditDefaultsOnly)
 	EMathLeafOperator Operator;
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	UPROPERTY(EditDefaultsOnly)
 	EFloatOperand FloatProperty;
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	UPROPERTY(EditDefaultsOnly)
 	float Value;
 };
 
@@ -115,10 +115,10 @@ class COMMONGAMECLASSES_API UGameplayTagConditionNode : public UConditionLeafNod
 protected:
 	virtual bool AreConditionsTrue(const FEffectContext& InEffectContext) const override;
 
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	UPROPERTY(EditDefaultsOnly)
 	ETagOperator Operator;
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	UPROPERTY(EditDefaultsOnly)
 	TArray<FGameplayTag> ConditionTags;
-	UPROPERTY(EditDefaultsOnly, Category="Condition")
+	UPROPERTY(EditDefaultsOnly)
 	bool bExactMatch = false;
 };

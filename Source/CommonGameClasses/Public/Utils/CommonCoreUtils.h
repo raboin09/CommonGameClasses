@@ -22,6 +22,7 @@ class COMMONGAMECLASSES_API UCommonCoreUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
 	static bool IsObjectPlayerControlled(const UObject* Object);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
 	static UActorTrackingSubsystem* GetActorTrackingSubsystem(const UObject* WorldContextObject);
@@ -36,9 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
 	static AActor* GetHoveredInteractionActorByPlayerController(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
-	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldWorldContextObject);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils", meta=(WorldContext="WorldContextObject"))
-	static UHealthComponent* GetHealthComponentFromActor(UObject* WorldContextObject);
+	static UHealthComponent* GetPlayerCharacterHealthComponent(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|CoreUtils")
+	static UHealthComponent* GetHealthComponentFromActor(AActor* PotentialActor);
 
 	template<typename M, typename I>
 	static FORCEINLINE TScriptInterface<I> CreateInterfaceOfType(UObject* OuterObject)

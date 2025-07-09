@@ -13,7 +13,7 @@ class UInputMappingContext;
 class ACommonPlayerCharacter;
 class UInteractionComponent;
 
-UCLASS(Abstract, Blueprintable, CollapseCategories, AutoExpandCategories=("CUSTOM"), PrioritizeCategories = "CUSTOM")
+UCLASS(Abstract, Blueprintable, CollapseCategories, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"))
 class COMMONGAMECLASSES_API ACommonPlayerController : public APlayerController
 {
 	GENERATED_BODY()
@@ -69,23 +69,23 @@ private:
 	bool IsValidInteractionComponent(const TWeakObjectPtr<UInteractionComponent> HitInteractionComponent) const;
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	UInputMappingContext* DefaultMappingContext;
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	TArray<FGameplayTag> DefaultGameplayTags;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact")
 	float InteractWithAlliesDistance = 150.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact")
 	float InteractWithEnemiesDistance = 150.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact")
 	ECameraType DefaultCameraType = ECameraType::ThirdPerson;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact")
 	float InteractTraceRadius = 15.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact|Debug")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact|Debug")
 	bool bDrawDebug = false;
 
-	UPROPERTY(BlueprintReadOnly, Category="CUSTOM|Interact|Debug")
+	UPROPERTY(BlueprintReadOnly, Category="COMMON|Interact|Debug")
 	ECameraType CurrentCameraType = ECameraType::None;
 	
 private:

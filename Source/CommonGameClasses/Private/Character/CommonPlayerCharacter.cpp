@@ -12,6 +12,7 @@
 ACommonPlayerCharacter::ACommonPlayerCharacter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
 	LastMoveInput = FVector2D::ZeroVector;
+	DefaultGameplayTags.Add(CommonGameCore::PlayerCharacter);
 }
 
 void ACommonPlayerCharacter::PossessedBy(AController* NewController)

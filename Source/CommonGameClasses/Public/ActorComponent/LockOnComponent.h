@@ -7,7 +7,7 @@
 #include "Components/TimelineComponent.h"
 #include "LockOnComponent.generated.h"
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"))
 class COMMONGAMECLASSES_API ULockOnComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -22,19 +22,19 @@ public:
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	float LockOnSlideDuration = .25f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	FVector TraceOffset = FVector(0.f, 0.f, 50.f);
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	float NumCones = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	float ConeTraceArcWidth = 55.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	float SweepRadius = 55.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	bool bUseControllerRotation = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	bool bDrawDebug = false;
 	
 private:

@@ -1,10 +1,21 @@
-  #include "Types/CommonTagTypes.h"
+#include "Types/CommonTagTypes.h"
+
+namespace CommonGameCore
+{
+	UE_DEFINE_GAMEPLAY_TAG(PlayerCharacter, FName{TEXTVIEW("Core.PlayerCharacter")})
+	UE_DEFINE_GAMEPLAY_TAG(AICharacter, FName{TEXTVIEW("Core.AICharacter")})
+}
 
 namespace CommonGameSlot
 {
 	UE_DEFINE_GAMEPLAY_TAG(SlotMain, FName{TEXTVIEW("Slot.Main")})
 	UE_DEFINE_GAMEPLAY_TAG(SlotAlt, FName{TEXTVIEW("Slot.Alt")})
 	UE_DEFINE_GAMEPLAY_TAG(SlotJump, FName{TEXTVIEW("Slot.Jump")})	
+}
+
+namespace CommonGameTriggerEvent
+{
+	UE_DEFINE_GAMEPLAY_TAG(TriggerActivationCount, FName{TEXTVIEW("TriggerTag.ActivationCount")})
 }
 
 namespace CommonGameAbilityEvent

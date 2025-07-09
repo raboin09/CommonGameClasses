@@ -23,7 +23,7 @@ void UAbilityComponent::DestroyAbilities()
 	}
 }
 
-void UAbilityComponent::SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSlot)
+void UAbilityComponent::SetCurrentEquippedSlot(const FGameplayTag NewEquippedSlot)
 {
 	const TWeakInterfacePtr<IAbility> NewEquippedAbility = Internal_FindAbility(NewEquippedSlot);
 	if(NewEquippedAbility.IsStale())
@@ -49,10 +49,6 @@ void UAbilityComponent::SetCurrentEquippedSlot(const FGameplayTag& NewEquippedSl
 void UAbilityComponent::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void UAbilityComponent::PostComponentLoadedFromSave()
-{
 	// AbilityClasses is added to during the loop, so use a copy
 	TMap<FGameplayTag, TSoftClassPtr<AActor>> CopiedMap = AbilityClasses;
 	for(auto KeyVal : CopiedMap)
@@ -61,7 +57,18 @@ void UAbilityComponent::PostComponentLoadedFromSave()
 	}
 }
 
-void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag& SlotTag)
+void UAbilityComponent::PostComponentLoadedFromSave()
+{
+	DestroyAbilities();
+	// AbilityClasses is added to during the loop, so use a copy
+	TMap<FGameplayTag, TSoftClassPtr<AActor>> CopiedMap = AbilityClasses;
+	for(auto KeyVal : CopiedMap)
+	{
+		AddAbilityFromClassInSlot(KeyVal.Value, KeyVal.Key);
+	}
+}
+
+void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityClass, const FGameplayTag SlotTag)
 {
 	const TSubclassOf<AActor> ClassToSpawn = AbilityClass.LoadSynchronous();
 	const TWeakInterfacePtr<IAbility> SpawnedAbility = Internal_SpawnAbilityFromClass(ClassToSpawn);
@@ -81,7 +88,7 @@ void UAbilityComponent::AddAbilityFromClassInSlot(TSoftClassPtr<AActor> AbilityC
 	}
 }
 
-void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag& SlotTag)
+void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag SlotTag)
 {
 	const TWeakInterfacePtr<IAbility> Ability = Internal_FindAbility(SlotTag);
 	if(!Ability.IsValid())
@@ -91,7 +98,7 @@ void UAbilityComponent::TryStartAbilityInSlot(const FGameplayTag& SlotTag)
 	Ability->TryStartAbility();
 }
 
-void UAbilityComponent::TryStopAbilityInSlot(const FGameplayTag& SlotTag)
+void UAbilityComponent::TryStopAbilityInSlot(const FGameplayTag SlotTag)
 {
 	const TWeakInterfacePtr<IAbility> Ability = Internal_FindAbility(SlotTag);
 	if(!Ability.IsValid())

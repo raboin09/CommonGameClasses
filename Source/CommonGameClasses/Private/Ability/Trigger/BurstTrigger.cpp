@@ -22,7 +22,7 @@ void UBurstTrigger::HandleTriggerReleased()
 {
 	bTriggerHeld = false;
 	FTriggerEventPayload ReleaseTriggerEventPayload;
-	ReleaseTriggerEventPayload.ActivationLevel = 0;
+	ReleaseTriggerEventPayload.SetActivationCount(0);
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
 	TriggerReleasedEvent.Broadcast(ReleaseTriggerEventPayload);
 }
@@ -39,7 +39,7 @@ void UBurstTrigger::Internal_BurstFireTick()
 		return;
 	}
 	FTriggerEventPayload PressTriggerEventPayload;
-	PressTriggerEventPayload.ActivationLevel = BurstFireCount;
+	PressTriggerEventPayload.SetActivationCount(BurstFireCount);
 	PressTriggerEventPayload.bStartActivationImmediately = true;
 	TriggerPressedEvent.Broadcast(PressTriggerEventPayload);
 }

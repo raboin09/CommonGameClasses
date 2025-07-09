@@ -12,7 +12,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"))
 class COMMONGAMECLASSES_API UGameplayTagComponent : public UActorComponent, public ISavableComponent
 {
 	GENERATED_BODY()
@@ -58,9 +58,9 @@ public:
 	void AddTag(const FGameplayTag& TagToAdd);
 
 protected:
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Gameplay Tag Added")
 	FGameplayTagAddedEvent GameplayTagAddedEvent;
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Gameplay Tag Removed")
 	FGameplayTagRemovedEvent GameplayTagRemovedEvent;
 	
 private:

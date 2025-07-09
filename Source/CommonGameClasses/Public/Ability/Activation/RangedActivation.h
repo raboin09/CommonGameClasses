@@ -35,27 +35,27 @@ protected:
 	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
 	// Socket where the muzzle or hand is
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(ClampMin = 0.f))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 0.f))
 	float TraceRange = 1000.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	float TraceRadius = 20.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	bool bHasFiringSpread = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float TraceSpread = 5.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float FiringSpreadIncrement = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float FiringSpreadMax = 10.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	bool bDrawDebugTrace = false;
 	
 private:

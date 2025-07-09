@@ -26,12 +26,9 @@ protected:
 	void BPI_HandleAfterPressedTrigger();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void BPI_HandleReleasedTrigger();
-
 	
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
 	int32 BPN_GetActivationLevel() const;
-	virtual int32 BPN_GetActivationLevel_Implementation() const;
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Trigger")
 	FGameplayTag BPN_GetActivationDescriptorTag() const;
-	virtual FGameplayTag BPN_GetActivationDescriptorTag_Implementation() const;
 };

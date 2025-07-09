@@ -81,7 +81,7 @@ FName UCommonCombatUtils::GetNearestValidBoneForImpact(FName InBone)
 		return "spine_03";
 	}
 	
-	const TArray<FName> LeftArmBones = {
+	static TArray<FName> LeftArmBones = {
 		"upperarm_l",
 		"lowerarm_l",
 		"hand_l",
@@ -102,7 +102,7 @@ FName UCommonCombatUtils::GetNearestValidBoneForImpact(FName InBone)
 		"thumb_03_l"
 	};
 
-	const TArray<FName> RightArmBones = {
+	static TArray<FName> RightArmBones = {
 		"upperarm_r",
 		"lowerarm_r",
 		"hand_r",

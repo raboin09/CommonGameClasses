@@ -25,9 +25,9 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Activation")
 	TSubclassOf<ACommonProjectile> BPN_GetProjectileClassToSpawn(const FTriggerEventPayload& TriggerEventPayload) const;
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	TSubclassOf<ACommonProjectile> DefaultProjectileClass;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(ClampMin = "1"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = "1"))
 	float ProjectileLife = 10.f;
 
 private:

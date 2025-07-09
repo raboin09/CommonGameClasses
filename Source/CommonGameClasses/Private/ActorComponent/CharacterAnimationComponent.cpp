@@ -22,6 +22,7 @@ UCharacterAnimationComponent::UCharacterAnimationComponent()
 	ControlRotation = FRotator();
 	RagdollMeshLocation = FVector();
 	CachedMeshOffset = FVector();
+	CachedMeshRotation = FRotator();
 }
 
 void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -54,6 +55,11 @@ void UCharacterAnimationComponent::BeginPlay()
 		HealthComponent->OnCurrentWoundHealthChanged().AddDynamic(this, &ThisClass::HandleCurrentWoundChangedEvent);
 		HealthComponent->OnActorDeath().AddDynamic(this, &ThisClass::HandleActorDeathEvent);
 	}
+
+	if(GetMesh())
+	{
+		CachedMeshRotation = GetMesh()->GetRelativeRotation();	
+	}
 }
 
 void UCharacterAnimationComponent::InitializeComponent()
@@ -83,21 +89,6 @@ void UCharacterAnimationComponent::HandleCurrentWoundChangedEvent(const FCurrent
 void UCharacterAnimationComponent::HandleActorDeathEvent(const FActorDeathEventPayload& DeathEventPayload)
 {
 	Internal_TryStartCharacterKnockback(DeathEventPayload.HitReactEvent, true);
-}
-
-float UCharacterAnimationComponent::HandleMontageLoadedEvent(TSoftObjectPtr<UAnimMontage> LoadedAnimMontage)
-{
-	if(!CachedMontageData.Contains(LoadedAnimMontage))
-	{
-		return -1.f;
-	}
-	const FAnimMontagePlayData& AnimMontagePlayData = CachedMontageData[LoadedAnimMontage];
-	CachedMontageData.Remove(LoadedAnimMontage);
-	if(AnimMontagePlayData.bForcePlay)
-	{
-		return ForcePlayAnimMontage(AnimMontagePlayData);
-	}
-	return TryPlayAnimMontage(AnimMontagePlayData);
 }
 
 void UCharacterAnimationComponent::HandleCameraTypeChanged(const FCameraTypeChangedPayload& CameraTypeChangedPayload)
@@ -161,13 +152,13 @@ void UCharacterAnimationComponent::StartRagdolling()
 	UGameplayTagComponent::AddTagToActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
 	StopAnimMontage();
 	CachedMeshOffset = GetMesh()->GetRelativeLocation();
-	CachedMeshRotation = GetMesh()->GetRelativeRotation();
 	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(CommonGameAnimation::NAME_Pelvis, true);
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopActiveMovement();
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetComponentTickEnabled(true);
+	OnCharacterRagdollingEvent().Broadcast(FCharacterRagdollEventPayload(true));
 }
 
 void UCharacterAnimationComponent::StopRagdolling()
@@ -184,6 +175,7 @@ void UCharacterAnimationComponent::StopRagdolling()
 	GetMesh()->SetRelativeRotation(CachedMeshRotation);
 	GetMesh()->SetRelativeLocation(CachedMeshOffset);
 	SetComponentTickEnabled(false);
+	OnCharacterRagdollingEvent().Broadcast(FCharacterRagdollEventPayload(false));
 }
 
 float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData)
@@ -310,7 +302,7 @@ FVector UCharacterAnimationComponent::Internal_RagdollTraceGround() const
 	FHitResult Hit;
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(OwnerCharacter.Get());
-	UKismetSystemLibrary::LineTraceSingle(this, TraceStart, TraceEnd, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors, EDrawDebugTrace::ForOneFrame, Hit, true);
+	UKismetSystemLibrary::LineTraceSingle(this, TraceStart, TraceEnd, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors, EDrawDebugTrace::None, Hit, true);
 	if(!Hit.bBlockingHit)
 	{
 		return TraceStart;

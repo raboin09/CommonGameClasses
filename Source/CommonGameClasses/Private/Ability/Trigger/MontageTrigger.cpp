@@ -30,8 +30,7 @@ void UMontageTrigger::HandleSuccessfulTriggerPressed()
 	Internal_StartMontage();
 	BPI_HandleAfterPressedTrigger();
 	FTriggerEventPayload PressTriggerEventPayload;
-	PressTriggerEventPayload.ActivationLevel = BPN_GetActivationLevel();
-	PressTriggerEventPayload.ActivationDescriptorTag = BPN_GetActivationDescriptorTag();
+	PressTriggerEventPayload.AddActivationTagLevel(BPN_GetActivationDescriptorTag(), BPN_GetActivationLevel());
 	// Activation waits for montage notify to start
 	PressTriggerEventPayload.bStartActivationImmediately = false;
 	PressTriggerEventPayload.bMontageDrivesActivation = true;
@@ -41,7 +40,7 @@ void UMontageTrigger::HandleSuccessfulTriggerPressed()
 void UMontageTrigger::HandleTriggerReleased()
 {
 	FTriggerEventPayload ReleaseTriggerEventPayload;
-	ReleaseTriggerEventPayload.ActivationLevel = -1;
+	ReleaseTriggerEventPayload.SetActivationCount(-1);
 	// We wait for the montage notify to active the weapon
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;
 	ReleaseTriggerEventPayload.bMontageDrivesActivation = true;

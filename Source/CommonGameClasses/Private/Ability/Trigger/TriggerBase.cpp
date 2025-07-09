@@ -9,7 +9,7 @@ void UAbilityTriggerBase::PressTrigger()
 {
 	if(!CanExecuteTriggerEvent())
 	{
-		UKismetSystemLibrary::PrintString(this, "Cant execute trigger");
+		COMMON_PRINT_SCREEN_RED("Cant execute trigger", 10.f);
 		return;
 	}
 	HandleSuccessfulTriggerPressed();

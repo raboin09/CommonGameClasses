@@ -26,16 +26,16 @@ public:
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UPROPERTY(EditAnywhere, Category="CUSTOM")
+	UPROPERTY(EditAnywhere, Category="COMMON")
 	float StartingDissolveValue = 0.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	FName DissolveParameterName = "Dissolve Amount";
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON")
 	FName ColorParameterName = "Color";
-	UPROPERTY(EditAnywhere, Category="CUSTOM")
+	UPROPERTY(EditAnywhere, Category="COMMON")
 	float DissolveDuration = 1.f;
 
-private:  
+private:
 	UFUNCTION()
 	void Internal_TimelineDissolveEnd();
 	UFUNCTION()

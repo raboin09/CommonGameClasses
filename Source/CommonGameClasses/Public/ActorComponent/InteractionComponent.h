@@ -10,7 +10,7 @@
 #include "InteractionComponent.generated.h"
 
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"))
 class COMMONGAMECLASSES_API UInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -18,21 +18,36 @@ class COMMONGAMECLASSES_API UInteractionComponent : public UActorComponent
 public:	
 	UInteractionComponent();
 	void SwitchOutlineOnAllMeshes(bool bShouldOutline);
+	/**
+	 * Initiates an interaction process with the interaction component.
+	 * This function handles the starting or stopping of the interaction depending on the provided inputs.
+	 *
+	 * @param InstigatingActor The actor initiating the interaction.
+	 * @param bStartingInteraction Whether the interaction is starting (true) or stopping (false).
+	 */
 	void InitiateInteraction(AActor* InstigatingActor, bool bStartingInteraction);
 	FORCEINLINE FVector GetOwnerLocation() const { return GetOwner() ? GetOwner()->GetActorLocation() : FVector::ZeroVector; }
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category="CUSTOM|Interact")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category="COMMON|Interact")
 	EAffiliation Affiliation = EAffiliation::Neutral;
 	
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+
+	/**
+	 * Determines whether interactions with this component should be initiated instantly.
+	 * When set to true, interactions occur without requiring any hold duration or delay.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact")
 	bool bInteractInstantly = true;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact", meta=(EditCondition="!bInteractInstantly", EditConditionHides))
+	/**
+	 * Specifies the duration required to complete an interaction with this component.
+	 * This value is ignored when interactions are set to occur instantly (bInteractInstantly is true).
+	 */
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact", meta=(EditCondition="!bInteractInstantly", EditConditionHides))
 	float InteractTime = 1.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Interact")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Interact")
 	FString InteractionText = "Placeholder";
 	
 private:

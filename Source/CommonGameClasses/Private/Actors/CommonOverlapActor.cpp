@@ -22,7 +22,7 @@ void ACommonOverlapActor::BeginPlay()
 		ShapeComponent->IgnoreComponentWhenMoving(BPN_GetMesh(), true);
 	}
 
-	if(bActivateOnStart)
+	if(bDetectOverlapsOnBeginPlay)
 	{
 		UGameplayTagComponent::AddTagToActor(this, CommonGameState::Active);
 	}
@@ -30,32 +30,44 @@ void ACommonOverlapActor::BeginPlay()
 	// Add ACTIVE tag to activate at start
 	if(!UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Active))
 	{
-		Deactivate();
+		StopDetectingOverlaps();
 	} else
 	{
-		Activate();
+		StartDetectingOverlaps();
 	}
 }
 
-void ACommonOverlapActor::BPN_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
+bool ACommonOverlapActor::BPN_CanActorTriggerOverlap_Implementation(AActor* OtherActor)
 {
+	return true; 
+}
+
+void ACommonOverlapActor::HandleValidActorBeginOverlap(AActor* OtherActor, const FHitResult& HitResult)
+{
+	BPI_OnValidActorBeginOverlap(OtherActor, HitResult);
 	if(bDiesAfterOverlap) {
 		HandleActorDeath();
 	}
 }
 
-void ACommonOverlapActor::BPN_HandleEndOverlapEvent_Implementation(AActor* ExitingActor)
+void ACommonOverlapActor::HandleValidActorEndOverlap(AActor* ExitingActor)
 {
-	
+	BPI_OnValidActorEndOverlap(ExitingActor);
 }
 
 void ACommonOverlapActor::HandleActorDeath()
 {
-	Deactivate();
-	SetLifeSpan(DeathBuffer);
+	StopDetectingOverlaps();
+	if(DeathBuffer > 0)
+	{
+		SetLifeSpan(DeathBuffer);	
+	} else
+	{
+		Destroy();
+	}
 }
 
-void ACommonOverlapActor::Activate()
+void ACommonOverlapActor::StartDetectingOverlaps()
 {
 	HitActors.Empty();
 	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Active);
@@ -64,10 +76,10 @@ void ACommonOverlapActor::Activate()
 		ShapeComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		ShapeComponent->SetGenerateOverlapEvents(true);
 	}
-	BPI_HandleActivation();
+	BPI_OnStartDetectingOverlaps();
 }
 
-void ACommonOverlapActor::Deactivate()
+void ACommonOverlapActor::StopDetectingOverlaps()
 {
 	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameState::Active);
 	if(UShapeComponent* ShapeComponent = BPN_GetCollisionComponent())
@@ -76,11 +88,16 @@ void ACommonOverlapActor::Deactivate()
 		ShapeComponent->SetGenerateOverlapEvents(false);
 	}
 	HitActors.Empty();
-	BPI_HandleDeactivation();
+	BPI_OnStopDetectingOverlaps();
 }
 
 void ACommonOverlapActor::ActorBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if(!IsDetectingOverlaps())
+	{
+		return;
+	}
+	
 	if(!OtherActor || OtherActor->IsA(StaticClass()))
 	{
 		return;
@@ -93,9 +110,19 @@ void ACommonOverlapActor::ActorBeginOverlap(UPrimitiveComponent* OverlappedComp,
 	}
 
 	const bool bValidRequiredTags = RequiredOverlapTags.Num() > 0 ? UGameplayTagComponent::ActorHasAnyGameplayTags(OtherActor, RequiredOverlapTags) : true;
-	if (IsActive() && !HitActors.Contains(OtherActor) && bValidRequiredTags) {
+	if(!bValidRequiredTags)
+	{
+		return;
+	}
+
+	if(!BPN_CanActorTriggerOverlap(OtherActor))
+	{
+		return;
+	}
+	
+	if (!HitActors.Contains(OtherActor)) {
 		HitActors.Add(OtherActor);
-		BPN_HandleOverlapEvent(OtherActor, SweepResult);
+		HandleValidActorBeginOverlap(OtherActor, SweepResult);
 	}
 }
 
@@ -104,6 +131,6 @@ void ACommonOverlapActor::ActorEndOverlap(UPrimitiveComponent* OverlappedComp, A
 	if(OtherActor && !OtherActor->IsA(StaticClass()) && HitActors.Contains(OtherActor))
 	{
 		HitActors.Remove(OtherActor);
-		BPN_HandleEndOverlapEvent(OtherActor);
+		HandleValidActorEndOverlap(OtherActor);
 	}
 }

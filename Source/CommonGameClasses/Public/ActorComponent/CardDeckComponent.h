@@ -58,7 +58,7 @@ public:
 private:
 	UPROPERTY(BlueprintGetter="GetCardHand")
 	TArray<UCardBase*> CardHand;
-	UPROPERTY(BlueprintGetter="GetDrawPile", EditDefaultsOnly, Category="CUSTOM|Cards")
+	UPROPERTY(BlueprintGetter="GetDrawPile", EditDefaultsOnly, Category="COMMON|Cards")
 	TArray<UCardBase*> DrawPile;
 	UPROPERTY(BlueprintGetter="GetDiscardPile")
 	TArray<UCardBase*> DiscardPile;

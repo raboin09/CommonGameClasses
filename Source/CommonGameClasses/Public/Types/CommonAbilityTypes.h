@@ -11,13 +11,12 @@
 #define EFFECT_TICK_CONVERSION (1/EFFECT_TICK_RATE)
 #define EFFECT_TICKS_PER_CYCLE (EFFECT_TICK_CONVERSION*EFFECT_TICK_CYCLE_SECONDS)
 
-USTRUCT(BlueprintType)
-struct FResourceCostData : public FTableRowBase
+UENUM(BlueprintType)
+enum class EAbilityTriggerType : uint8
 {
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly)
-	float ResourceCost = 0.f;
+	SimpleBurst,
+	SimpleMontage,
+	Complex
 };
 
 UENUM(BlueprintType)

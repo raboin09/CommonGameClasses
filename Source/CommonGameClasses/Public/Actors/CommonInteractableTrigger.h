@@ -18,8 +18,8 @@ public:
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
-	void BPI_ConsumePickup(ACharacter* ConsumingChar);
+	void BPI_StartTrigger(AActor* RequestingActor);
 	
-	virtual bool BPN_CanPickup_Implementation(ACharacter* PotentialChar) override;
-	virtual void ConsumePickup(ACharacter* ConsumingChar) override;
+	virtual bool BPN_CanActorTriggerOverlap_Implementation(AActor* RequestingActor) override;
+	virtual void StartInteraction(AActor* RequestingActor) override;
 };

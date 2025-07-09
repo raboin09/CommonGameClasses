@@ -2,6 +2,7 @@
 
 #include "Ability/CooldownMechanismImpl.h"
 #include "Ability/Activation/BaseActivation.h"
+#include "Ability/Trigger/BurstTrigger.h"
 #include "ActorComponent/AbilityComponent.h"
 #include "ActorComponent/CharacterAnimationComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
@@ -10,7 +11,7 @@
 #include "Components/SphereComponent.h"
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
-#include "Ability/Trigger/ComplexTriggerBase.h"
+#include "Ability/Trigger/MontageTrigger.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
@@ -34,8 +35,11 @@ void ACommonAbility::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(CooldownMechanism)
+	if(bHasCooldown)
 	{
+		UCooldownMechanismImpl* TempCooldownObj = NewObject<UCooldownMechanismImpl>(this);
+		TempCooldownObj->CooldownDuration = CooldownDuration;
+		CooldownMechanism = TempCooldownObj;
 		CooldownMechanism->SetInstigator(GetInstigator());
 		CooldownMechanism->SetOwner(this);
 	}
@@ -55,6 +59,12 @@ void ACommonAbility::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	Internal_SetMeshToUse();
+}
+
+void ACommonAbility::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	
 }
 
 void ACommonAbility::InitWeaponMesh(UMeshComponent* InMeshComp) const
@@ -256,9 +266,22 @@ void ACommonAbility::Internal_HideMesh(bool bShouldHide) const
 
 void ACommonAbility::SetTriggerMechanism()
 {
-	if (SimpleTriggerInstance)
+	if (TriggerType == EAbilityTriggerType::SimpleBurst)
 	{
-		TriggerMechanism = SimpleTriggerInstance;
+		UBurstTrigger* BurstTriggerInstance = NewObject<UBurstTrigger>(this);
+		BurstTriggerInstance->NumberOfActivations = BurstTrigger_NumberOfActivations;
+		BurstTriggerInstance->TimeBetweenBurstShots = BurstTrigger_TimeBetweenBurstShots;
+		TriggerMechanism = BurstTriggerInstance;
+	} else if(TriggerType == EAbilityTriggerType::SimpleMontage)
+	{
+		UMontageTrigger* MontageTriggerInstance = NewObject<UMontageTrigger>(this);
+		MontageTriggerInstance->MontageToPlay = MontageTrigger_MontageToPlay;
+		MontageTriggerInstance->bHasCombos = MontageTrigger_HasCombos;
+		MontageTriggerInstance->bRandomizeMontageSection = MontageTrigger_RandomizeMontageSection;
+		MontageTriggerInstance->bShouldPlayerLockOnToNearestTarget = MontageTrigger_ShouldPlayerLockOnToNearestTarget;
+		MontageTriggerInstance->ComboPrefix = MontageTrigger_ComboPrefix;
+		MontageTriggerInstance->MaxComboSections = MontageTrigger_MaxComboSections;
+		TriggerMechanism = MontageTriggerInstance;
 	}
 	else
 	{
@@ -396,7 +419,7 @@ TObjectPtr<UObject> ACommonAbility::Internal_CreateNewMechanism(const TSubclassO
 
 void ACommonAbility::Internal_BindMechanismEventsToAbility()
 {
-	if (CooldownMechanism)
+	if (bHasCooldown && CooldownMechanism)
 	{
 		CooldownMechanism->OnCooldownTimerStarted().AddUObject(this, &ThisClass::HandleCooldownStarted);
 		CooldownMechanism->OnCooldownTimerEnded().AddUObject(this, &ThisClass::HandleCooldownEnded);
@@ -430,7 +453,7 @@ void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventP
 {
 	UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Activated);
 	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
-	if (AbilityActivationEventPayload.bShouldStartCooldown && CooldownMechanism)
+	if (AbilityActivationEventPayload.bShouldStartCooldown && CooldownMechanism && bHasCooldown)
 	{
 		CooldownMechanism->StartCooldownTimer();
 	}
@@ -441,7 +464,7 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 	// If there's a Trigger with no Activation (e.g. Jump just plays a montage) then start the cooldown immediately
 	if (!ActivationMechanism)
 	{
-		if (CooldownMechanism)
+		if (CooldownMechanism && bHasCooldown)
 		{
 			CooldownMechanism->StartCooldownTimer();
 		}

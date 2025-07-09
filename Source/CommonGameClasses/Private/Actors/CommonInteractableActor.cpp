@@ -1,6 +1,5 @@
 ﻿#include "Actors/CommonInteractableActor.h"
 #include "ActorComponent/InteractionComponent.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "Types/CommonCoreTypes.h"
 
@@ -39,43 +38,32 @@ ACommonInteractableActor::ACommonInteractableActor()
 
 void ACommonInteractableActor::HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload)
 {
-	BPI_HandleInteractionStarted(InteractionEventPayload);
+	BPI_OnInteractionStarted(InteractionEventPayload);
 }
 
 void ACommonInteractableActor::HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload)
 {
-	BPI_HandleInteractionInitiated(InteractionEventPayload);
+	BPI_OnInteractionInitiated(InteractionEventPayload);
 }
 
 void ACommonInteractableActor::HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload)
 {
-	BPI_HandleMeshOutlining(InteractionOutlineEventPayload);
+	BPI_OnMeshOutlined(InteractionOutlineEventPayload);
 }
 
-void ACommonInteractableActor::BPN_HandleOverlapEvent_Implementation(AActor* OtherActor, const FHitResult& HitResult)
+void ACommonInteractableActor::HandleValidActorBeginOverlap(AActor* RequestingActor, const FHitResult& HitResult)
 {
-	if(ACharacter* CastedChar = Cast<ACharacter>(OtherActor))
+	StartInteraction(RequestingActor);
+	if(bDiesAfterOverlap)
 	{
-		if(BPN_CanPickup(CastedChar))
-		{
-			ConsumePickup(CastedChar);
-			if(bDiesAfterOverlap)
-			{
-				PickupBase->SetVisibility(false);
-			}
-			Super::BPN_HandleOverlapEvent_Implementation(OtherActor, HitResult);
-		}
+		PickupBase->SetVisibility(false);
 	}
+	Super::HandleValidActorBeginOverlap(RequestingActor, HitResult);
 }
 
-bool ACommonInteractableActor::BPN_CanPickup_Implementation(ACharacter* PotentialChar)
+void ACommonInteractableActor::StartInteraction(AActor* RequestingActor)
 {
-	return true;
-}
-
-void ACommonInteractableActor::ConsumePickup(ACharacter* ConsumingChar)
-{
-	BPI_HandleConsumePickup(ConsumingChar);
+	BPI_OnInteractionSucceeded(RequestingActor);
 }
 
 void ACommonInteractableActor::PostInitializeComponents()

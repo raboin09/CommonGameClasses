@@ -7,7 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "BotBehaviorComponent.generated.h"
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"))
 class COMMONGAMECLASSES_API UBotBehaviorComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -30,7 +30,7 @@ public:
 	/// Common Variables
 	////////////////////////////////
 protected:
-	UPROPERTY(EditAnywhere, Category="CUSTOM|Defaults")
+	UPROPERTY(EditAnywhere, Category="COMMON|Defaults")
 	TSoftObjectPtr<UBehaviorTree> DefaultBehaviorTree;
 
 	/////////////////////////////////

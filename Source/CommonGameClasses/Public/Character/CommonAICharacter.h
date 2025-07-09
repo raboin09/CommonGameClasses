@@ -13,7 +13,7 @@ class UBotBehaviorComponent;
 /**
  * 
  */
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("CUSTOM"), PrioritizeCategories = "CUSTOM")
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"))
 class COMMONGAMECLASSES_API ACommonAICharacter : public ACommonCharacter, public IInteractable
 {
 	GENERATED_BODY()
@@ -44,8 +44,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void BPI_HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CUSTOM|AI")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="COMMON|AI")
 	TObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CUSTOM|AI")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="COMMON|AI")
 	TObjectPtr<UInteractionComponent> InteractionComponent;
 };

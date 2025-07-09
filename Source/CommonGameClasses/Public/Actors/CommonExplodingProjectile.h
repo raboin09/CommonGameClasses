@@ -24,10 +24,12 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
 	void BPI_HandleExplosion();
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Explosion")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Explosion")
 	float ExplosionRadius = 512.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Explosion")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Explosion")
 	bool bCanFriendlyFire = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Explosion")
+	bool bExplosionRequiresVisibilityValidation = true;
 
 private:
 	void Internal_Explode();

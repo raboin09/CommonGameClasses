@@ -24,7 +24,7 @@ class UCharacterAnimationComponent;
 class UAbilityComponent;
 class UThirdPersonCameraComponent;
 
-UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("CUSTOM"))
+UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "HLOD", "Physics", "WorldPartition", "Events", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
 class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggable
 {
 	GENERATED_BODY()
@@ -61,16 +61,16 @@ protected:
 	////////////////////////////////
 	/// Common Variables
 	////////////////////////////////
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM|Defaults")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COMMON|Defaults")
 	TArray<FGameplayTag> DefaultGameplayTags;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ShowInnerProperties))
 	TObjectPtr<UAbilityComponent> AbilityComponent;
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ShowInnerProperties))
 	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UEffectContainerComponent> EffectContainerComponent;
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ShowInnerProperties))
 	TObjectPtr<UGameplayTagComponent> GameplayTagComponent;
 
 	////////////////////////////////

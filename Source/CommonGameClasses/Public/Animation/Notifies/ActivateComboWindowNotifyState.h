@@ -18,6 +18,6 @@ class COMMONGAMECLASSES_API UActivateComboWindowNotifyState : public UActivation
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CUSTOM")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COMMON")
 	FGameplayTag AbilitySlotTag = CommonGameSlot::SlotMain;
 };

@@ -31,21 +31,21 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BPI_HandleWeaponTraceEnd();
 	
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	float TraceRadius = 10.f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	bool bCanHitMultipleEnemies = true;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	bool bFriendlyFire = false;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName Socket_TraceStart = "TraceStart";
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName Socket_TraceEnd = "TraceEnd";
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	float TraceTickRate = .01f;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
-	UPROPERTY(EditDefaultsOnly, Category="CUSTOM|Activation|Debug")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Debug")
 	bool bDrawDebug = false;
 	
 private:

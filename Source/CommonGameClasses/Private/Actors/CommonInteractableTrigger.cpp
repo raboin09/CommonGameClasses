@@ -2,23 +2,23 @@
 
 
 #include "Actors/CommonInteractableTrigger.h"
-#include "GameFramework/Character.h"
+#include "Utils/CommonCoreUtils.h"
 
 ACommonInteractableTrigger::ACommonInteractableTrigger()
 {
 	bDiesAfterOverlap = true;
 }
 
-bool ACommonInteractableTrigger::BPN_CanPickup_Implementation(ACharacter* PotentialChar)
+bool ACommonInteractableTrigger::BPN_CanActorTriggerOverlap_Implementation(AActor* RequestingActor)
 {
-	if(PotentialChar && PotentialChar->IsPlayerControlled())
+	if(RequestingActor && UCommonCoreUtils::IsObjectPlayerControlled(RequestingActor))
 	{
-		return true;
+		return Super::BPN_CanActorTriggerOverlap_Implementation(RequestingActor);
 	}
 	return false;
 }
 
-void ACommonInteractableTrigger::ConsumePickup(ACharacter* ConsumingChar)
+void ACommonInteractableTrigger::StartInteraction(AActor* RequestingActor)
 {
-	BPI_ConsumePickup(ConsumingChar);
+	BPI_StartTrigger(RequestingActor);
 }
