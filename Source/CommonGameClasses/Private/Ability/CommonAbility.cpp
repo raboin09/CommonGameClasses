@@ -12,11 +12,12 @@
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
 #include "Ability/Trigger/MontageTrigger.h"
-#include "ActorComponent/TopDownAimingComponent.h"
+#include "ActorComponent/TopDownInputComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
+#include "Utils/CommonEffectUtils.h"
 
 ACommonAbility::ACommonAbility()
 {
@@ -107,13 +108,8 @@ void ACommonAbility::HandleEquipFinished()
 		TryStartAbility();
 	}
 	BPI_HandleEquipFinished();
-	if(bEnableTwinStickAiming)
-	{
-		if(UTopDownAimingComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownAimingComponent>())
-		{
-			TopDownAimingComponent->ToggleShouldRotateCharacterToAiming(true);
-		}
-	}
+	Internal_TryUpdateAimingState(true);
+
 }
 
 float ACommonAbility::PlayAnimMontage(UAnimMontage* MontageToPlay)
@@ -135,13 +131,7 @@ void ACommonAbility::UnEquipAbility()
 	TryEndAbility();
 	Internal_HideMesh(true);
 	BPI_HandleUnEquip();
-	if(bEnableTwinStickAiming)
-	{
-		if(UTopDownAimingComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownAimingComponent>())
-		{
-			TopDownAimingComponent->ToggleShouldRotateCharacterToAiming(false);
-		}
-	}
+	Internal_TryUpdateAimingState(false);
 }
 
 bool ACommonAbility::TryStartAbility()
@@ -187,16 +177,20 @@ bool ACommonAbility::TryStartAbility()
 
 		// Activate instantly, no trigger exists
 		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
+		UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityStart, GetOwner());
 		ActivationMechanism->Activate(FTriggerEventPayload());
 		return true;
 	}
 	
-	if(ResourceContainer && bHasResourceCost)
-	{
-		ResourceContainer->TryTogglePauseResourceRegen(true);
-	}
 	// It's an ability with a Trigger (Activation and Cooldown mechanism may be present), so proceed to press the trigger
-	return Internal_StartNormalAbility();
+	const bool bSuccessfulStart = Internal_StartNormalAbility();
+	if(bSuccessfulStart)
+	{
+		Internal_TryTogglePauseResourceRegeneration(true);
+		Internal_TryUpdateMovementOrientationState(true);
+		UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityStart, GetOwner());
+	}
+	return bSuccessfulStart;
 }
 
 bool ACommonAbility::TryEndAbility()
@@ -206,10 +200,9 @@ bool ACommonAbility::TryEndAbility()
 		return true;
 	}
 	TriggerMechanism->ReleaseTrigger();
-	if(ResourceContainer && bHasResourceCost)
-	{
-		ResourceContainer->TryTogglePauseResourceRegen(false);
-	}
+	Internal_TryTogglePauseResourceRegeneration(false);
+	Internal_TryUpdateMovementOrientationState(false);
+	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityEnd, GetOwner());
 	return true;
 }
 
@@ -458,6 +451,36 @@ void ACommonAbility::Internal_BindMechanismEventsToAbility()
 	{
 		ActivationMechanism->OnActivation().AddUObject(this, &ThisClass::HandleAbilityActivationEvent);
 		ActivationMechanism->OnDeactivation().AddUObject(this, &ThisClass::HandleAbilityDeactivationEvent);
+	}
+}
+
+void ACommonAbility::Internal_TryTogglePauseResourceRegeneration(bool bShouldPause) const
+{
+	if (ResourceContainer && bHasResourceCost)
+	{
+		ResourceContainer->TryTogglePauseResourceRegen(bShouldPause);
+	}
+}
+
+void ACommonAbility::Internal_TryUpdateAimingState(bool bStartingAbility) const
+{
+	if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+	{
+		if(bEnableTwinStickAiming)
+		{
+			TopDownAimingComponent->ToggleUseTwinStickAiming(bStartingAbility);
+		}
+	}
+}
+
+void ACommonAbility::Internal_TryUpdateMovementOrientationState(bool bStartingAbility) const
+{
+	if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+	{
+		if(bDisableMovementRotationOrientationOnAbilityStart)
+		{
+			TopDownAimingComponent->ToggleMovementOrientRotation(!bStartingAbility);
+		}
 	}
 }
 

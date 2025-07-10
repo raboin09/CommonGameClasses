@@ -38,15 +38,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> AbilityEffects;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
-	ELineTraceDirection LineTraceDirection = ELineTraceDirection::Camera;
+	ELineTraceDirection DefaultLineTraceDirection = ELineTraceDirection::Camera;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
+	ELineTraceDirection GamepadLineTraceDirection = ELineTraceDirection::InstigatorForwardVector;
+	
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
+	bool bRotateCharacterToMouse = false;
 	// Socket where the muzzle or hand is
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 0.f))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f))
 	float TraceRange = 1000.f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f))
 	float TraceRadius = 20.f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(InlineEditConditionToggle))
 	bool bHasFiringSpread = false;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float TraceSpread = 5.f;
@@ -65,7 +70,7 @@ private:
 
 	FVector Internal_GetStartTraceLocation(const FVector AimDirection) const;
 	FVector Internal_GetCameraStartLocation(const FVector AimDirection) const;
-	FVector Internal_GetAimDirection() const;
+	FVector Internal_GetAimDirection(ELineTraceDirection LineTraceDirection) const;
 	FVector Internal_GetFiringSpreadDirection(const FVector AimDirection);
 	FVector Internal_GetMouseAim() const;
 

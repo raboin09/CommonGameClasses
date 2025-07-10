@@ -2,8 +2,10 @@
 #include "GameFramework/PlayerController.h"
 #include "AIController.h"
 #include "ActorComponent/MountManagerComponent.h"
+#include "ActorComponent/TopDownInputComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCoreTypes.h"
+#include "Utils/CommonInputUtils.h"
 
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
@@ -12,6 +14,13 @@ void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload
 	BPI_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
 	BPI_OnActivation();
+	if(bRotateCharacterToMouse)
+	{
+		if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownAimingComponent->TryRotateActorToMouse();
+		}
+	}
 }
 
 void URangedActivation::Deactivate()
@@ -45,7 +54,7 @@ void URangedActivation::Internal_AssignOwningController()
 
 void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
 {
-	const FVector AimDirection = Internal_GetAimDirection();
+	const FVector AimDirection = Internal_GetAimDirection(DefaultLineTraceDirection);
 	StartTrace = Internal_GetStartTraceLocation(AimDirection);
 	if(bHasFiringSpread)
 	{
@@ -58,7 +67,7 @@ void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 
 FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const
 {
-	switch (LineTraceDirection) {
+	switch (DefaultLineTraceDirection) {
 		case ELineTraceDirection::Camera:
 			return Internal_GetCameraStartLocation(AimDirection);
 		default:
@@ -78,7 +87,7 @@ FVector URangedActivation::Internal_GetCameraStartLocation(const FVector AimDire
 	return OutStartTrace + AimDirection * ((GetInstigator()->GetActorLocation() - OutStartTrace) | AimDirection);
 }
 
-FVector URangedActivation::Internal_GetAimDirection() const
+FVector URangedActivation::Internal_GetAimDirection(ELineTraceDirection LineTraceDirection) const
 {
 	switch (LineTraceDirection)
 	{
@@ -89,7 +98,11 @@ FVector URangedActivation::Internal_GetAimDirection() const
 		// Use the socket rotation
 		return GetRaycastOriginRotation();
 	case ELineTraceDirection::Mouse:
-		return Internal_GetMouseAim();
+		if(UCommonInputUtils::IsUsingGamepad(this))
+		{
+			return Internal_GetAimDirection(GamepadLineTraceDirection);
+		}
+		return Internal_GetMouseAim();	
 	case ELineTraceDirection::AbilityMeshForwardVector:
 		return GetOwner()->GetActorForwardVector();
 	case ELineTraceDirection::InstigatorForwardVector:
@@ -119,7 +132,9 @@ FVector URangedActivation::Internal_GetMouseAim() const
 	OwningPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, TempResult);
 	const FVector TempAimDir = TempResult.ImpactPoint - GetRaycastOriginLocation();
 	const FVector SocketRot = GetRaycastOriginRotation();
-	return FVector(TempAimDir.X, TempAimDir.Y, SocketRot.Z);
+	FVector AimDir = FVector(TempAimDir.X, TempAimDir.Y, SocketRot.Z);
+	AimDir.Normalize();
+	return AimDir;
 }
 
 FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact)

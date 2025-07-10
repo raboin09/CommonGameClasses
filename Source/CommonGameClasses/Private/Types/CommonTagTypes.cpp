@@ -35,18 +35,13 @@ namespace CommonGameAbilityEvent
 namespace CommonGameState
 {
 	UE_DEFINE_GAMEPLAY_TAG(Active, FName{TEXTVIEW("State.Active")})
-	UE_DEFINE_GAMEPLAY_TAG(Aiming, FName{TEXTVIEW("State.Aiming")})
-	UE_DEFINE_GAMEPLAY_TAG(Stunned, FName{TEXTVIEW("State.Stunned")})
+	UE_DEFINE_GAMEPLAY_TAG(CannotMove, FName{TEXTVIEW("State.CannotMove")})
 	UE_DEFINE_GAMEPLAY_TAG(Immovable, FName{TEXTVIEW("State.Immovable")})
-	UE_DEFINE_GAMEPLAY_TAG(Loading, FName{TEXTVIEW("State.Loading")})
-	UE_DEFINE_GAMEPLAY_TAG(Dashing, FName{TEXTVIEW("State.Dashing")})
-	UE_DEFINE_GAMEPLAY_TAG(Dead, FName{TEXTVIEW("State.Dead")})
-	UE_DEFINE_GAMEPLAY_TAG(Firing, FName{TEXTVIEW("State.Firing")})
-	UE_DEFINE_GAMEPLAY_TAG(Sprinting, FName{TEXTVIEW("State.Sprinting")})
-	UE_DEFINE_GAMEPLAY_TAG(Ready, FName{TEXTVIEW("State.Ready")})
-	UE_DEFINE_GAMEPLAY_TAG(Ragdoll, FName{TEXTVIEW("State.Ragdoll")})
+
 	UE_DEFINE_GAMEPLAY_TAG(CannotMount, FName{TEXTVIEW("State.CannotMount")})
-	UE_DEFINE_GAMEPLAY_TAG(MeleeEquipped, FName{TEXTVIEW("State.MeleeEquipped")})
+	
+	UE_DEFINE_GAMEPLAY_TAG(Ragdoll, FName{TEXTVIEW("State.Ragdoll")})
+	UE_DEFINE_GAMEPLAY_TAG(Dead, FName{TEXTVIEW("State.Dead")})
 }
 
 namespace CommonGameAnimation

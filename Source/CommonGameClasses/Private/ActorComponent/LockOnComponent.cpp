@@ -60,7 +60,7 @@ void ULockOnComponent::InterpToBestTargetForMeleeAttack()
 		}
 	}
 	
-	UGameplayTagComponent::AddTagToActor(SelectedTarget.Get(), CommonGameState::Stunned);
+	UGameplayTagComponent::AddTagToActor(SelectedTarget.Get(), CommonGameState::CannotMove);
 	InterpToActor(SelectedTarget);	
 }
 
@@ -121,7 +121,7 @@ void ULockOnComponent::Internal_InterpTransitionUpdate()
 
 void ULockOnComponent::Internal_InterpTransitionFinished()
 {
-	UGameplayTagComponent::RemoveTagFromActor(SelectedActor.Get(), CommonGameState::Stunned);
+	UGameplayTagComponent::RemoveTagFromActor(SelectedActor.Get(), CommonGameState::CannotMove);
 	SelectedActor.Reset();
 	SetComponentTickEnabled(false);
 }

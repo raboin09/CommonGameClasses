@@ -125,7 +125,7 @@ struct FEffectInitializationData
 	FEffectValidTargets ValidTargets;
 
 	// How long the effect ticks (and tries to activate)
-	UPROPERTY(EditDefaultsOnly, meta=(ClampMin="1.0", EditCondition = "DurationType != EEffectDurationType::Instant && DurationType != EEffectDurationType::Infinite"))
+	UPROPERTY(EditDefaultsOnly, meta=(ClampMin="0.0", EditCondition = "DurationType != EEffectDurationType::Instant && DurationType != EEffectDurationType::Infinite"))
 	double EffectDuration = 1.0;	
 	// How often the effect ticks in the effect container
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "DurationType != EEffectDurationType::Instant"))

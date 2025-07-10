@@ -85,6 +85,21 @@ struct FCameraTypeChangedPayload
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCameraTypeChanged, const FCameraTypeChangedPayload&, CameraTypeChangedPayload);
 
 ///////////////////////////
+// Mouse/Gamepad Input Changed
+///////////////////////////
+USTRUCT(BlueprintType)
+struct FGamepadInputChangedPayload
+{
+	GENERATED_BODY()
+	FGamepadInputChangedPayload(){ bIsNowUsingGamepad = true; }
+	FGamepadInputChangedPayload(const bool bInIsNowUsingGamepad) : bIsNowUsingGamepad(bInIsNowUsingGamepad)	{ }
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsNowUsingGamepad;
+};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGamepadInputChanged, const FGamepadInputChangedPayload&, GamepadInputChangedPayload);
+
+///////////////////////////
 // Ability equipped
 ///////////////////////////
 USTRUCT(BlueprintType)

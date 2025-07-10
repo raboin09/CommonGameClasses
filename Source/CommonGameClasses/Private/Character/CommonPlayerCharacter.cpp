@@ -11,7 +11,6 @@
 
 ACommonPlayerCharacter::ACommonPlayerCharacter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
-	LastMoveInput = FVector2D::ZeroVector;
 	DefaultGameplayTags.Add(CommonGameCore::PlayerCharacter);
 }
 
@@ -22,20 +21,14 @@ void ACommonPlayerCharacter::PossessedBy(AController* NewController)
 	{
 		PlayerController->OnCameraTypeChanged().AddUniqueDynamic(this, &ThisClass::HandleCameraTypeChanged);
 	}
-
-	if(const UCommonCoreDeveloperSettings* GameSettings = GetDefault<UCommonCoreDeveloperSettings>())
-	{
-		CachedGamepadDeadZone = GameSettings->GamePadDeadZone;
-		CachedGamepadSensitivity = GameSettings->GamePadSensitivity;	
-	}
 }
 
 void ACommonPlayerCharacter::MoveInput(float AxisX, float AxisY)
 {
-	Internal_GetAdjustedMoveInput(AxisX, AxisY);
-	
-	LastMoveInput.X = AxisX;
-	LastMoveInput.Y = AxisY;
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::CannotMove))
+	{
+		return;
+	}
 	
 	FVector ForwardMoveDirection = FVector::ZeroVector;
 	FVector RightMoveDirection = FVector::ZeroVector;
@@ -115,18 +108,5 @@ void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& OutForwardMoveD
 			}
 			break ;
 		default: ;
-	}
-}
-
-void ACommonPlayerCharacter::Internal_GetAdjustedMoveInput(float& OutAxisX, float& OutAxisY) const
-{
-	if(FMath::Abs(OutAxisX) < CachedGamepadDeadZone)
-	{
-		OutAxisX = 0;
-	}
-	
-	if(FMath::Abs(OutAxisY) < CachedGamepadDeadZone)
-	{
-		OutAxisY = 0;
 	}
 }

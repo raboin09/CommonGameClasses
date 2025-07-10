@@ -21,7 +21,7 @@ class UBaseActivation;
 class UAbilityTriggerBase;
 enum class EResourceContainerLocation : uint8;
 
-UCLASS(Abstract, Blueprintable)
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
 class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility, public IAbilityOutliner
 {
 	GENERATED_BODY()
@@ -136,9 +136,16 @@ protected:
 	
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
 	float PlayAnimMontage(UAnimMontage* MontageToPlay);	
+
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityStart;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityEnd;
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown")
 	bool bEnableTwinStickAiming = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown")
+	bool bDisableMovementRotationOrientationOnAbilityStart = false;
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Cooldown", meta=(InlineEditConditionToggle))
 	bool bHasCooldown = false;
@@ -170,11 +177,10 @@ protected:
 	bool MontageTrigger_ShouldPlayerLockOnToNearestTarget = false;
 	
 	// If the ability has more complex trigger logic a child BP obj is required.
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", meta=(MustImplement = "/Script/CommonGameClasses.TriggerMechanism", AllowedClasses="/Script/CommonGameClasses.ComplexTriggerBase", EditCondition="TriggerType == EAbilityTriggerType::Complex", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", meta=(MustImplement = "/Script/CommonGameClasses.TriggerMechanism", EditCondition="TriggerType == EAbilityTriggerType::Complex", EditConditionHides))
 	TSubclassOf<UObject> ComplexTriggerClass;
-	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
-	TSubclassOf<UBaseActivation> ActivationMechanismClass;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement = "/Script/CommonGameClasses.ActivationMechanism"))
+	TSubclassOf<UObject> ActivationMechanismClass;
 
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Mesh")
 	EMeshType MeshType = EMeshType::AbilityMesh;
@@ -211,6 +217,9 @@ private:
 	bool Internal_StartNormalAbility();
 	TObjectPtr<UObject> Internal_CreateNewMechanism(const TSubclassOf<UObject> InMechanismClass, const UClass* InterfaceClass);
 	void Internal_BindMechanismEventsToAbility();
+	void Internal_TryTogglePauseResourceRegeneration(bool bShouldPause) const;
+	void Internal_TryUpdateAimingState(bool bStartingAbility) const;
+	void Internal_TryUpdateMovementOrientationState(bool bStartingAbility) const;
 
 	UFUNCTION()
 	void HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload);

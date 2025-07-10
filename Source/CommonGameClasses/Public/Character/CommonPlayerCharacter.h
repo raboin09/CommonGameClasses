@@ -18,20 +18,20 @@ class COMMONGAMECLASSES_API ACommonPlayerCharacter : public ACommonCharacter
 public:
 	ACommonPlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
-protected:
+	// AxisX is 'Forward', AxisY is 'Right'
+	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerCharacter")
+	void MoveInput(float AxisX, float AxisY);
+	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerCharacter")
+	void MouseInput(float Yaw, float Pitch);
 	
+protected:	
 	//~ Begin ACharacter interface implementation
 	virtual void PossessedBy(AController* NewController) override;
 	//~ End ACharacter interface implementation
 
 	// AxisX is 'Forward', AxisY is 'Right'
-	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerCharacter")
-	void MoveInput(float AxisX, float AxisY);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_MoveInput(float AxisX, float AxisY);
-	
-	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerCharacter")
-	void MouseInput(float Yaw, float Pitch);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_MouseInput(float Yaw, float Pitch);
 
@@ -51,14 +51,9 @@ protected:
 	virtual void SetupTopDownCamera();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_SetupTopDownCamera();
-
-
-	UPROPERTY(BlueprintReadOnly, Category="COMMON|PlayerCharacter")
-	FVector2D LastMoveInput;
 	
 private:
 	void Internal_GetMoveDirections(FVector& OutForwardMoveDirection, FVector& OutRightMoveDirection) const;
-	void Internal_GetAdjustedMoveInput(float& OutAxisX, float& OutAxisY) const;
 
 	float CachedGamepadDeadZone = 0.f;
 	float CachedGamepadSensitivity = 1.f;
