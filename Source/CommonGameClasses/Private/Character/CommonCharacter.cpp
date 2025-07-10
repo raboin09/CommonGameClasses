@@ -87,6 +87,7 @@ void ACommonCharacter::HandleDeath()
 	DetachFromControllerPendingDestroy();
 	AbilityComponent->DestroyAbilities();
 	BPI_HandleDeath();
+	SetLifeSpan(1.f);
 }
 
 void ACommonCharacter::InitTopDownMovementDefaults() const

@@ -17,13 +17,18 @@ class COMMONGAMECLASSES_API URangedActivation : public UBaseActivation
 	GENERATED_BODY()
 
 public:
+	//~ Begin IActivationMechanism Interface
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
 	FORCEINLINE virtual float GetOutlineRange() const override { return TraceRange; }
+	//~ End IActivationMechanism Interface
+
+	//~ Begin UObject Interface
+	virtual void PostInitProperties() override;
+	//~ End UObject Interface
 
 protected:
-	// Ranged Activation 
 	virtual void Fire(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(URangedActivation::Fire,)
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
@@ -49,8 +54,10 @@ protected:
 	FName MeshSocketName;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f))
 	float TraceRange = 1000.f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f))
-	float TraceRadius = 20.f;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f, InlineEditConditionToggle))
+	bool bShouldLineTrace = true;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f, EditCondition="!bShouldLineTrace"))
+	float SphereTraceRadius = 20.f;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(InlineEditConditionToggle))
 	bool bHasFiringSpread = false;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
@@ -62,10 +69,27 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	bool bDrawDebugTrace = false;
-	
+
+	// Aim assist settings
+	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (InlineEditConditionToggle))
+	bool bEnableAimAssist = true;
+	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	float AimAssistRange = 1000.f;
+	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	float AimAssistAngle = 15.0f;
+	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	float AimAssistStrength = 0.5f;
+	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	EAffiliation AimAssistAffiliation = EAffiliation::Enemies;
+	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	TArray<TEnumAsByte<EObjectTypeQuery>> AimAssistObjectTypes;
+
 private:
-	void Internal_AssignOwningController();
+	FVector TryGetAimAssistDirection(const FVector& OriginalAimDirection) const;
+	AActor* FindBestAimAssistTarget(const FVector& StartLocation, const FVector& AimDirection) const;
+	bool IsValidAimAssistTarget(AActor* Target) const;
 	
+	void Internal_AssignOwningController();
 	void Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace);
 
 	FVector Internal_GetStartTraceLocation(const FVector AimDirection) const;
@@ -83,5 +107,4 @@ private:
 
 public:
 	FORCEINLINE bool IsPlayerControlled() const { return OwningPlayerController != nullptr; };
-	FORCEINLINE bool ShouldLineTrace() const { return OwningAIController != nullptr; }
 };

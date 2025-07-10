@@ -5,7 +5,10 @@
 #include "ActorComponent/TopDownInputComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCoreTypes.h"
+#include "Utils/CommonCombatUtils.h"
+#include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInputUtils.h"
+#include "Utils/CommonInteractUtils.h"
 
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
@@ -33,6 +36,16 @@ void URangedActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> O
 {
 	Super::InitActivationMechanism(OwnerMeshComponent);
 	Internal_AssignOwningController();
+}
+
+void URangedActivation::PostInitProperties()
+{
+	Super::PostInitProperties();
+	if (AimAssistObjectTypes.Num() == 0)
+	{
+		AimAssistObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	}
+
 }
 
 void URangedActivation::Internal_AssignOwningController()
@@ -89,27 +102,168 @@ FVector URangedActivation::Internal_GetCameraStartLocation(const FVector AimDire
 
 FVector URangedActivation::Internal_GetAimDirection(ELineTraceDirection LineTraceDirection) const
 {
+	FVector BaseAimDirection;
 	switch (LineTraceDirection)
 	{
-	case ELineTraceDirection::Camera:
-		// By default this is Camera for PlayerControllers, Controller rotation for AI
-		return GetInstigator()->GetBaseAimRotation().Vector();
-	case ELineTraceDirection::MeshSocket:
-		// Use the socket rotation
-		return GetRaycastOriginRotation();
-	case ELineTraceDirection::Mouse:
-		if(UCommonInputUtils::IsUsingGamepad(this))
-		{
-			return Internal_GetAimDirection(GamepadLineTraceDirection);
-		}
-		return Internal_GetMouseAim();	
-	case ELineTraceDirection::AbilityMeshForwardVector:
-		return GetOwner()->GetActorForwardVector();
-	case ELineTraceDirection::InstigatorForwardVector:
-		return GetInstigator()->GetActorForwardVector();
-	default:
-		return FVector::ZeroVector;
+		case ELineTraceDirection::Camera:
+			// By default this is Camera for PlayerControllers, Controller rotation for AI
+			BaseAimDirection = GetInstigator()->GetBaseAimRotation().Vector();
+			break;
+		case ELineTraceDirection::MeshSocket:
+			// Use the socket rotation
+			BaseAimDirection = GetRaycastOriginRotation();
+			break;
+		case ELineTraceDirection::Mouse:
+			if(UCommonInputUtils::IsUsingGamepad(this))
+			{
+				BaseAimDirection = Internal_GetAimDirection(GamepadLineTraceDirection);
+			} else
+			{
+				BaseAimDirection = Internal_GetMouseAim();	
+			}
+			break;
+		case ELineTraceDirection::AbilityMeshForwardVector:
+			BaseAimDirection = GetOwner()->GetActorForwardVector();
+			break;
+		case ELineTraceDirection::InstigatorForwardVector:
+			BaseAimDirection = GetInstigator()->GetActorForwardVector();
+			break;
+		default:
+			BaseAimDirection = FVector::ZeroVector;
+			break;
 	}
+
+	if (bEnableAimAssist)
+	{
+		return TryGetAimAssistDirection(BaseAimDirection);
+	}
+	return BaseAimDirection;
+}
+
+FVector URangedActivation::TryGetAimAssistDirection(const FVector& OriginalAimDirection) const
+{
+	const FVector StartLocation = GetRaycastOriginLocation();
+    
+	// Find the best target for aim assist
+	if (AActor* TargetActor = FindBestAimAssistTarget(StartLocation, OriginalAimDirection))
+	{
+		// Get target center location
+		FVector TargetLocation = TargetActor->GetActorLocation();
+        
+		// If the target has a mesh, aim at its center
+		if (USkeletalMeshComponent* TargetMesh = TargetActor->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			TargetLocation = TargetMesh->GetComponentLocation() + 
+				FVector(0, 0, TargetMesh->Bounds.BoxExtent.Z * 0.5f);
+		}
+
+		// Calculate directions
+		FVector DirectionToTarget = (TargetLocation - StartLocation).GetSafeNormal();
+        return FVector(DirectionToTarget.X, DirectionToTarget.Y, OriginalAimDirection.Z).GetSafeNormal();
+	}
+
+	return OriginalAimDirection;
+}
+
+AActor* URangedActivation::FindBestAimAssistTarget(const FVector& StartLocation, const FVector& AimDirection) const
+{
+    if (!GetInstigator())
+    {
+        return nullptr;
+    }
+
+    // Setup for overlap sphere
+    TArray<AActor*> OverlappingActors;
+    TArray<AActor*> ActorsToIgnore = GetActorsToIgnoreCollision();
+
+    // Find all potential targets within range
+    UKismetSystemLibrary::SphereOverlapActors(
+        GetWorld(),
+        StartLocation,
+        AimAssistRange,
+        AimAssistObjectTypes,
+        nullptr,
+        ActorsToIgnore,
+        OverlappingActors
+    );
+
+    // Find the best target based on angle and distance
+    AActor* BestTarget = nullptr;
+    float BestScore = FLT_MAX;
+    const float MaxCosAngle = FMath::Cos(FMath::DegreesToRadians(AimAssistAngle));
+
+    for (AActor* PotentialTarget : OverlappingActors)
+    {
+        if (!IsValidAimAssistTarget(PotentialTarget))
+        {
+            continue;
+        }
+
+        FVector DirectionToTarget = (PotentialTarget->GetActorLocation() - StartLocation).GetSafeNormal();
+        float CosAngle = FVector::DotProduct(AimDirection, DirectionToTarget);
+
+        // Check if target is within aim assist angle
+        if (CosAngle < MaxCosAngle)
+        {
+            continue;
+        }
+
+        // Check line of sight
+        FHitResult HitResult;
+        FCollisionQueryParams QueryParams;
+        QueryParams.AddIgnoredActors(ActorsToIgnore);
+
+        if (GetWorld()->LineTraceSingleByChannel(
+            HitResult,
+            StartLocation,
+            PotentialTarget->GetActorLocation(),
+            ECC_Visibility,
+            QueryParams))
+        {
+            if (HitResult.GetActor() != PotentialTarget)
+            {
+                continue;
+            }
+        }
+
+        // Calculate score (lower is better)
+        float Distance = FVector::Distance(StartLocation, PotentialTarget->GetActorLocation());
+        float AngleScore = (1.0f - CosAngle) * 1000.0f; // Prioritize targets closer to aim direction
+        float Score = Distance + AngleScore;
+
+        if (Score < BestScore)
+        {
+            BestScore = Score;
+            BestTarget = PotentialTarget;
+        }
+    }
+
+    return BestTarget;
+}
+
+bool URangedActivation::IsValidAimAssistTarget(AActor* Target) const
+{
+	if (!Target)
+	{
+		return false;
+	}
+
+	if(Target == GetInstigator())
+	{
+		return false;
+	}
+
+	EAffiliation Affiliation = UCommonInteractUtils::GetAffiliationRelatedToPlayerCharacter(Target);
+	if(Affiliation != AimAssistAffiliation)
+	{
+		return false;
+	}
+
+	if(UGameplayTagComponent::ActorHasGameplayTag(Target, CommonStateTags::Dead))
+	{
+		return false;
+	}
+	return true;
 }
 
 FVector URangedActivation::Internal_GetFiringSpreadDirection(const FVector AimDirection)
@@ -146,7 +300,7 @@ FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 		{
 			const FVector StartTrace = Impact.ImpactPoint + Impact.ImpactNormal * 10.0f;
 			const FVector EndTrace = Impact.ImpactPoint - Impact.ImpactNormal * 10.0f;
-			FHitResult Hit = WeaponTrace(ShouldLineTrace(), 5.f, StartTrace, EndTrace);
+			FHitResult Hit = WeaponTrace(bShouldLineTrace, 5.f, StartTrace, EndTrace);
 			UseImpact = Hit;
 			return UseImpact;
 		}

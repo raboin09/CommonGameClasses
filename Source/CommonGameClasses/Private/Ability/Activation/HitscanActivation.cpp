@@ -10,7 +10,7 @@ void UHitscanActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 
 void UHitscanActivation::Internal_FireShot()
 {
-	const FHitResult& Impact = WeaponTrace(ShouldLineTrace(), TraceRadius);
+	const FHitResult& Impact = WeaponTrace(bShouldLineTrace, SphereTraceRadius);
 	BPN_ProcessInstantHit(Impact);
 }
 
