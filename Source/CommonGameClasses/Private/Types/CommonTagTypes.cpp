@@ -1,24 +1,24 @@
 #include "Types/CommonTagTypes.h"
 
-namespace CommonGameCore
+namespace CommonCoreTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(PlayerCharacter, FName{TEXTVIEW("Core.PlayerCharacter")})
 	UE_DEFINE_GAMEPLAY_TAG(AICharacter, FName{TEXTVIEW("Core.AICharacter")})
 }
 
-namespace CommonGameSlot
+namespace CommonSlotTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(SlotMain, FName{TEXTVIEW("Slot.Main")})
 	UE_DEFINE_GAMEPLAY_TAG(SlotAlt, FName{TEXTVIEW("Slot.Alt")})
 	UE_DEFINE_GAMEPLAY_TAG(SlotJump, FName{TEXTVIEW("Slot.Jump")})	
 }
 
-namespace CommonGameTriggerEvent
+namespace CommonTriggerTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(TriggerActivationCount, FName{TEXTVIEW("TriggerTag.ActivationCount")})
 }
 
-namespace CommonGameAbilityEvent
+namespace CommonAbilityStateTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(StartAbilityAfterEquip, FName{TEXTVIEW("AbilityEvent.StartAbilityAfterEquip")})
 	UE_DEFINE_GAMEPLAY_TAG(Equipping, FName{TEXTVIEW("AbilityEvent.Equipping")})
@@ -32,7 +32,7 @@ namespace CommonGameAbilityEvent
 	UE_DEFINE_GAMEPLAY_TAG(AutoStartAbility, FName{TEXTVIEW("AbilityEvent.AutoRestartAbility")})
 }
 
-namespace CommonGameState
+namespace CommonStateTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Active, FName{TEXTVIEW("State.Active")})
 	UE_DEFINE_GAMEPLAY_TAG(CannotMove, FName{TEXTVIEW("State.CannotMove")})
@@ -44,7 +44,7 @@ namespace CommonGameState
 	UE_DEFINE_GAMEPLAY_TAG(Dead, FName{TEXTVIEW("State.Dead")})
 }
 
-namespace CommonGameAnimation
+namespace CommonAnimationTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Unarmed, FName{TEXTVIEW("Animation.Overlay.Unarmed")})
 	

@@ -32,7 +32,7 @@ ACommonInteractableActor::ACommonInteractableActor()
 	InteractionComponent->Affiliation = EAffiliation::InteractionActor;
 	
 	bDiesAfterOverlap = true;
-	DefaultGameplayTags.Add(CommonGameState::Active);
+	DefaultGameplayTags.Add(CommonStateTags::Active);
 	DeathBuffer = 2.f;
 }
 

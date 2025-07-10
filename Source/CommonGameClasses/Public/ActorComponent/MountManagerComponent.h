@@ -26,5 +26,5 @@ public:
 	FORCEINLINE void AssignNewMountable(UObject* InMountableObject, const FHitResult& InHitResult);
 	FORCEINLINE TScriptInterface<IMountable> GetCurrentMount() const { return CurrentMount; }
 	FORCEINLINE bool IsMounted() const { return CurrentMount != nullptr; }
-	FORCEINLINE bool CanGetInCover() const { return !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::CannotMount); }
+	FORCEINLINE bool CanGetInCover() const { return !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonStateTags::CannotMount); }
 };

@@ -18,7 +18,7 @@ void UMontageTrigger::HandleSuccessfulTriggerPressed()
 {
 	if(bHasCombos)
 	{
-		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::ComboActivated))
+		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonAbilityStateTags::ComboActivated))
 		{
 			Internal_IncrementComboCounter();
 		} else
@@ -56,11 +56,11 @@ int32 UMontageTrigger::BPN_GetActivationLevel_Implementation() const
 void UMontageTrigger::ResetTrigger()
 {
 	TArray<FGameplayTag> StateTagsToRemove;
-	StateTagsToRemove.Add(CommonGameAbilityEvent::Active);
-	StateTagsToRemove.Add(CommonGameAbilityEvent::Activated);
+	StateTagsToRemove.Add(CommonAbilityStateTags::Active);
+	StateTagsToRemove.Add(CommonAbilityStateTags::Activated);
 	if(bHasCombos)
 	{
-		StateTagsToRemove.Add(CommonGameAbilityEvent::ComboActivated);
+		StateTagsToRemove.Add(CommonAbilityStateTags::ComboActivated);
 		Internal_ResetComboCounter();
 	}
 	UGameplayTagComponent::RemoveTagsFromActor(GetOwner(), StateTagsToRemove);

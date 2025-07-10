@@ -16,8 +16,8 @@ void UActivateComboWindowNotifyState::NotifyBegin(USkeletalMeshComponent* MeshCo
 	{
 		return;
 	}
-	UGameplayTagComponent::RemoveTagFromActor(CastedAbility, CommonGameAbilityEvent::ComboActivated);
-	UGameplayTagComponent::AddTagToActor(CastedAbility, CommonGameAbilityEvent::ComboWindowEnabled);
+	UGameplayTagComponent::RemoveTagFromActor(CastedAbility, CommonAbilityStateTags::ComboActivated);
+	UGameplayTagComponent::AddTagToActor(CastedAbility, CommonAbilityStateTags::ComboWindowEnabled);
 }
 
 void UActivateComboWindowNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -33,5 +33,5 @@ void UActivateComboWindowNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp
 	{
 		return;
 	}
-	UGameplayTagComponent::RemoveTagFromActor(CastedAbility, CommonGameAbilityEvent::ComboWindowEnabled);
+	UGameplayTagComponent::RemoveTagFromActor(CastedAbility, CommonAbilityStateTags::ComboWindowEnabled);
 }

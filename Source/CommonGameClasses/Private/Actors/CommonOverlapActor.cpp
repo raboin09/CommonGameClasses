@@ -24,11 +24,11 @@ void ACommonOverlapActor::BeginPlay()
 
 	if(bDetectOverlapsOnBeginPlay)
 	{
-		UGameplayTagComponent::AddTagToActor(this, CommonGameState::Active);
+		UGameplayTagComponent::AddTagToActor(this, CommonStateTags::Active);
 	}
 
 	// Add ACTIVE tag to activate at start
-	if(!UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Active))
+	if(!UGameplayTagComponent::ActorHasGameplayTag(this, CommonStateTags::Active))
 	{
 		StopDetectingOverlaps();
 	} else
@@ -70,7 +70,7 @@ void ACommonOverlapActor::HandleActorDeath()
 void ACommonOverlapActor::StartDetectingOverlaps()
 {
 	HitActors.Empty();
-	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Active);
+	UGameplayTagComponent::AddTagToActor(this, CommonStateTags::Active);
 	if(UShapeComponent* ShapeComponent = BPN_GetCollisionComponent())
 	{
 		ShapeComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -81,7 +81,7 @@ void ACommonOverlapActor::StartDetectingOverlaps()
 
 void ACommonOverlapActor::StopDetectingOverlaps()
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameState::Active);
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonStateTags::Active);
 	if(UShapeComponent* ShapeComponent = BPN_GetCollisionComponent())
 	{
 		ShapeComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);

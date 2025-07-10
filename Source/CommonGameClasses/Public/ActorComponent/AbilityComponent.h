@@ -66,7 +66,7 @@ private:
 	UPROPERTY()
 	FAwaitingActivationDetails AwaitingActivationDetails;
 	UPROPERTY()
-	FGameplayTag EquippedSlot = CommonGameSlot::SlotMain;
+	FGameplayTag EquippedSlot = CommonSlotTags::SlotMain;
 	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On New Ability Added")
 	FNewAbilityAdded NewAbilityAdded;
 	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Ability Removed")

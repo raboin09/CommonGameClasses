@@ -37,7 +37,7 @@ bool UResourceComponent::TryConsumeResourceAmount(const float RequestedAmount)
 	}
 	const float Delta = CalculateConsumptionAmount(RequestedAmount);
 	const float ActualResourcesTaken = ResourcePoolContainer.ConsumeResources(Delta);
-	if(!bIsRegenTicking && !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Dead))
+	if(!bIsRegenTicking && !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonStateTags::Dead))
 	{
 		Internal_StartRegenTimer();	
 	}

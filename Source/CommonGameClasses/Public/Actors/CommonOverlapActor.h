@@ -143,5 +143,5 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON")
-	FORCEINLINE bool IsDetectingOverlaps() { return UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::Active); }
+	FORCEINLINE bool IsDetectingOverlaps() { return UGameplayTagComponent::ActorHasGameplayTag(this, CommonStateTags::Active); }
 };

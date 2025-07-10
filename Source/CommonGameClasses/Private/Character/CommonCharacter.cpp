@@ -83,7 +83,7 @@ void ACommonCharacter::HandleDeath()
 	{
 		return;
 	}
-	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Dead);
+	UGameplayTagComponent::AddTagToActor(this, CommonStateTags::Dead);
 	DetachFromControllerPendingDestroy();
 	AbilityComponent->DestroyAbilities();
 	BPI_HandleDeath();

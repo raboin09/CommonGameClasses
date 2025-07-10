@@ -28,7 +28,7 @@ UCharacterAnimationComponent::UCharacterAnimationComponent()
 void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter.Get(), CommonGameState::Ragdoll))
+	if(UGameplayTagComponent::ActorHasGameplayTag(OwnerCharacter.Get(), CommonStateTags::Ragdoll))
 	{
 		Internal_RagdollUpdate(DeltaTime);
 	}
@@ -149,7 +149,7 @@ void UCharacterAnimationComponent::StartRagdolling()
 	{
 		return;
 	}
-	UGameplayTagComponent::AddTagToActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
+	UGameplayTagComponent::AddTagToActor(OwnerCharacter.Get(), CommonStateTags::Ragdoll);
 	StopAnimMontage();
 	CachedMeshOffset = GetMesh()->GetRelativeLocation();
 	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
@@ -167,7 +167,7 @@ void UCharacterAnimationComponent::StopRagdolling()
 	{
 		return;
 	}
-	UGameplayTagComponent::RemoveTagFromActor(OwnerCharacter.Get(), CommonGameState::Ragdoll);
+	UGameplayTagComponent::RemoveTagFromActor(OwnerCharacter.Get(), CommonStateTags::Ragdoll);
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	GetMesh()->SetCollisionObjectType(ECC_Pawn);
@@ -222,7 +222,7 @@ void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
 void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback)
 {	
 	float ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(bIsDeathKnockback ? HitReactEvent.DeathReactType : HitReactEvent.HitReactType);
-	if((!bIsDeathKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameState::Immovable))
+	if((!bIsDeathKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonStateTags::Immovable))
 	{
 		return;
 	}
@@ -250,7 +250,7 @@ void UCharacterAnimationComponent::Internal_TryPlayHitReact(const FDamageHitReac
 	
 	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Special1 || HitReactEvent.DeathReactType == EHitReactType::HitReact_Special1)
 	{
-		PlayData.MontageToPlay = OwnerCharacter->BPI_GetHitReactAnimation(CommonGameAnimation::HitReactSpecial1).Get();
+		PlayData.MontageToPlay = OwnerCharacter->BPI_GetHitReactAnimation(CommonAnimationTags::HitReactSpecial1).Get();
 	} else
 	{
 		PlayData.MontageToPlay = OwnerCharacter->BPI_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();
@@ -269,15 +269,15 @@ FGameplayTag UCharacterAnimationComponent::Internal_GetHitDirectionTag(const FVe
 	{
 		if (DistanceToRightLeftPlane >= 0)
 		{
-			return CommonGameAnimation::HitReactFront;
+			return CommonAnimationTags::HitReactFront;
 		}
-		return CommonGameAnimation::HitReactBack;
+		return CommonAnimationTags::HitReactBack;
 	}
 	if (DistanceToFrontBackPlane >= 0)
 	{
-		return CommonGameAnimation::HitReactRight;
+		return CommonAnimationTags::HitReactRight;
 	}
-	return CommonGameAnimation::HitReactLeft;
+	return CommonAnimationTags::HitReactLeft;
 }
 
 void UCharacterAnimationComponent::Internal_RagdollUpdate(float DeltaTime)

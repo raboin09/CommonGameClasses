@@ -87,7 +87,7 @@ void ACommonAbility::InitWeaponMesh(UMeshComponent* InMeshComp) const
 void ACommonAbility::EquipAbility()
 {
 	Internal_HideMesh(false);
-	UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Equipping);
+	UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::Equipping);
 	const float Duration = BPI_HandleEquip();
 	if (Duration > 0.0f)
 	{
@@ -101,10 +101,10 @@ void ACommonAbility::EquipAbility()
 
 void ACommonAbility::HandleEquipFinished()
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::Equipping);
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::AutoStartAbility))
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::Equipping);
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonAbilityStateTags::AutoStartAbility))
 	{
-		UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::AutoStartAbility);
+		UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::AutoStartAbility);
 		TryStartAbility();
 	}
 	BPI_HandleEquipFinished();
@@ -136,32 +136,32 @@ void ACommonAbility::UnEquipAbility()
 
 bool ACommonAbility::TryStartAbility()
 {
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this,{CommonGameAbilityEvent::RequestingStart, CommonGameAbilityEvent::AutoStartAbility}))
+	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this,{CommonAbilityStateTags::RequestingStart, CommonAbilityStateTags::AutoStartAbility}))
 	{
 		return false;
 	}
 
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::Equipping))
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonAbilityStateTags::Equipping))
 	{
-		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::AutoStartAbility);
+		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::AutoStartAbility);
 		return true;
 	}
 
-	if (UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::ComboWindowEnabled))
+	if (UGameplayTagComponent::ActorHasGameplayTag(this, CommonAbilityStateTags::ComboWindowEnabled))
 	{
 		if (TriggerMechanism && ActivationMechanism)
 		{
-			UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::ComboActivated);
-			UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::ComboWindowEnabled);
-			if (UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::Active))
+			UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::ComboActivated);
+			UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::ComboWindowEnabled);
+			if (UGameplayTagComponent::ActorHasGameplayTag(this, CommonAbilityStateTags::Active))
 			{
-				UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::AutoStartAbility);
+				UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::AutoStartAbility);
 				return true;
 			}
 		}
 		return false;
 	}
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this, {CommonGameAbilityEvent::OnCooldown, CommonGameAbilityEvent::Active}))
+	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this, {CommonAbilityStateTags::OnCooldown, CommonAbilityStateTags::Active}))
 	{
 		return false;
 	}
@@ -176,7 +176,7 @@ bool ACommonAbility::TryStartAbility()
 		}
 
 		// Activate instantly, no trigger exists
-		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
+		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::RequestingStart);
 		UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityStart, GetOwner());
 		ActivationMechanism->Activate(FTriggerEventPayload());
 		return true;
@@ -410,8 +410,8 @@ bool ACommonAbility::Internal_StartNormalAbility()
 	// If no costs are required or has required resource cost, fire ability off
 	if (!ResourceContainer || !bHasResourceCost || ResourceContainer->TryConsumeResourceAmount(ResourceCost))
 	{
-		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
-		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Active);
+		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::RequestingStart);
+		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::Active);
 		TriggerMechanism->PressTrigger();
 		return true;
 	}
@@ -486,18 +486,18 @@ void ACommonAbility::Internal_TryUpdateMovementOrientationState(bool bStartingAb
 
 void ACommonAbility::HandleAbilityDeactivationEvent( const FAbilityDeactivationEventPayload& AbilityDeactivationEventPayload)
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::Activated);
-	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::Active);
-	if (UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::AutoStartAbility))
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::Activated);
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::Active);
+	if (UGameplayTagComponent::ActorHasGameplayTag(this, CommonAbilityStateTags::AutoStartAbility))
 	{
-		UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::AutoStartAbility);
+		UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::AutoStartAbility);
 		TryStartAbility();
 	}
 }
 
 void ACommonAbility::HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload)
 {
-	UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Activated);
+	UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::Activated);
 	// Some activation events don't start cooldowns until an external event happens (e.g. montage notifies)
 	if (AbilityActivationEventPayload.bShouldStartCooldown && CooldownMechanism && bHasCooldown)
 	{
@@ -541,12 +541,12 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 
 void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& TriggeredEventPayload)
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::RequestingStart);
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::RequestingStart);
 
 	// If there's a Trigger with no Activation (e.g. Jump just plays a montage) then reset the ability
 	if(!ActivationMechanism)
 	{
-		UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::Active);
+		UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::Active);
 		return;
 	}
 	
@@ -568,17 +568,17 @@ void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& Trig
 
 void ACommonAbility::HandleCooldownStarted(const FCooldownStartedEventPayload& AbilityCooldownStartedEvent)
 {
-	UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::OnCooldown);
+	UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::OnCooldown);
 }
 
 void ACommonAbility::HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent)
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, CommonGameAbilityEvent::OnCooldown);
+	UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::OnCooldown);
 
 	// If it's a burst trigger (3-round burst machine gun), try to activate it immediately after it's cooldown
 	// BurstTrigger shoots 1-2-3 fast Activation ticks, cools down, then fires again. This is what triggers the refiring after the cooldown.
 	if (TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown() &&
-		UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameAbilityEvent::RequestingStart))
+		UGameplayTagComponent::ActorHasGameplayTag(this, CommonAbilityStateTags::RequestingStart))
 	{
 		Internal_StartNormalAbility();
 	}

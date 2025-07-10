@@ -60,7 +60,7 @@ void ULockOnComponent::InterpToBestTargetForMeleeAttack()
 		}
 	}
 	
-	UGameplayTagComponent::AddTagToActor(SelectedTarget.Get(), CommonGameState::CannotMove);
+	UGameplayTagComponent::AddTagToActor(SelectedTarget.Get(), CommonStateTags::CannotMove);
 	InterpToActor(SelectedTarget);	
 }
 
@@ -121,7 +121,7 @@ void ULockOnComponent::Internal_InterpTransitionUpdate()
 
 void ULockOnComponent::Internal_InterpTransitionFinished()
 {
-	UGameplayTagComponent::RemoveTagFromActor(SelectedActor.Get(), CommonGameState::CannotMove);
+	UGameplayTagComponent::RemoveTagFromActor(SelectedActor.Get(), CommonStateTags::CannotMove);
 	SelectedActor.Reset();
 	SetComponentTickEnabled(false);
 }
@@ -181,7 +181,7 @@ TWeakObjectPtr<AActor> ULockOnComponent::Internal_FindBestTargetFromActors(TArra
 	TArray<AActor*> HitActors;
 	for(FHitResult TempHit : PotentialHitResults)
 	{
-		if(!UGameplayTagComponent::ActorHasGameplayTag(TempHit.GetActor(), CommonGameState::Dead))
+		if(!UGameplayTagComponent::ActorHasGameplayTag(TempHit.GetActor(), CommonStateTags::Dead))
 		{
 			HitActors.Add(TempHit.GetActor());
 		}

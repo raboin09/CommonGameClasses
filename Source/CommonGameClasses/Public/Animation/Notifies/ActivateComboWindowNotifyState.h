@@ -19,5 +19,5 @@ class COMMONGAMECLASSES_API UActivateComboWindowNotifyState : public UActivation
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COMMON")
-	FGameplayTag AbilitySlotTag = CommonGameSlot::SlotMain;
+	FGameplayTag AbilitySlotTag = CommonSlotTags::SlotMain;
 };

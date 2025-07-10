@@ -168,9 +168,9 @@ void UAbilityComponent::Internal_AddAbilityInSlot(const FGameplayTag& SlotTag, T
 	{
 		SlottedAbilities.Add(SlotTag, AbilityToAdd);
 		AbilityClasses.Add(SlotTag, TSoftClassPtr<AActor>(AbilityClass));
-		if(SlotTag == CommonGameSlot::SlotMain)
+		if(SlotTag == CommonSlotTags::SlotMain)
 		{
-			SetCurrentEquippedSlot(CommonGameSlot::SlotMain);
+			SetCurrentEquippedSlot(CommonSlotTags::SlotMain);
 		}
 	}	
 }

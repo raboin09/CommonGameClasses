@@ -53,7 +53,7 @@ void UMeleeOverlapActivation::Internal_StopCollisionRaycastingTick()
 
 void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 {
-	if(!MeshComponentRef.IsValid() || !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonGameAbilityEvent::Activated))
+	if(!MeshComponentRef.IsValid() || !UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonAbilityStateTags::Activated))
 	{
 		Internal_StopCollisionRaycastingTick();
 		return;
@@ -81,7 +81,7 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 	AActor* HitActor = Hit.GetActor();		
 	if(HitActor && !HitActors.Contains(HitActor) && HitActor->FindComponentByClass<UEffectContainerComponent>())
 	{		
-		if(UGameplayTagComponent::ActorHasGameplayTag(HitActor, CommonGameState::Dead))
+		if(UGameplayTagComponent::ActorHasGameplayTag(HitActor, CommonStateTags::Dead))
 		{
 			return;
 		}

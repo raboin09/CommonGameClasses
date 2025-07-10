@@ -237,7 +237,7 @@ struct FTriggerEventPayload
 	
 	void SetActivationCount(int32 ActivationLevel)
 	{
-		AddActivationTagLevel(CommonGameTriggerEvent::TriggerActivationCount, ActivationLevel);
+		AddActivationTagLevel(CommonTriggerTags::TriggerActivationCount, ActivationLevel);
 	}
 
 	void AddActivationTagLevel(const FGameplayTag& ActivationTag, int32 ActivationLevel)

@@ -5,25 +5,25 @@
 #include "CoreMinimal.h"
 #include "NativeGameplayTags.h"
 
-namespace CommonGameCore
+namespace CommonCoreTags
 {
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(PlayerCharacter)
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(AICharacter)
 }
 
-namespace CommonGameSlot   
+namespace CommonSlotTags   
 {
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(SlotMain)
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(SlotAlt)
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(SlotJump)
 }
 
-namespace CommonGameTriggerEvent
+namespace CommonTriggerTags
 {
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TriggerActivationCount)
 }
 
-namespace CommonGameAbilityEvent
+namespace CommonAbilityStateTags
 {
 	// Ability is busy equipping
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Equipping)
@@ -45,7 +45,7 @@ namespace CommonGameAbilityEvent
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Active)
 }
 
-namespace CommonGameState
+namespace CommonStateTags
 {
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Active)
 
@@ -58,7 +58,7 @@ namespace CommonGameState
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dead)
 }
 
-namespace CommonGameAnimation
+namespace CommonAnimationTags
 {
 	COMMONGAMECLASSES_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Unarmed)
 	

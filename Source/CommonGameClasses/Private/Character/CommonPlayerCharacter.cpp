@@ -11,7 +11,7 @@
 
 ACommonPlayerCharacter::ACommonPlayerCharacter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
-	DefaultGameplayTags.Add(CommonGameCore::PlayerCharacter);
+	DefaultGameplayTags.Add(CommonCoreTags::PlayerCharacter);
 }
 
 void ACommonPlayerCharacter::PossessedBy(AController* NewController)
@@ -25,7 +25,7 @@ void ACommonPlayerCharacter::PossessedBy(AController* NewController)
 
 void ACommonPlayerCharacter::MoveInput(float AxisX, float AxisY)
 {
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonGameState::CannotMove))
+	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonStateTags::CannotMove))
 	{
 		return;
 	}

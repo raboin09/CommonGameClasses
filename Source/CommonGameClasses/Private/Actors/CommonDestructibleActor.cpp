@@ -52,7 +52,7 @@ void ACommonDestructibleActor::HandleMeshOutlining(const FInteractionOutlinedEve
 
 void ACommonDestructibleActor::HandleDeathEvent(const FActorDeathEventPayload& EventPayload)
 {
-	UGameplayTagComponent::AddTagToActor(this, CommonGameState::Dead);
+	UGameplayTagComponent::AddTagToActor(this, CommonStateTags::Dead);
 	if(InteractionComponent)
 	{
 		InteractionComponent->SwitchOutlineOnAllMeshes(false);	
