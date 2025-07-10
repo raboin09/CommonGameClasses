@@ -32,6 +32,14 @@ DECLARE_LOG_CATEGORY_EXTERN(LogCommonGameClasses, Log, All);
 #define COMMON_SURFACE_Sand		SurfaceType13
 #define COMMON_SURFACE_Ice		SurfaceType14
 
+/**
+ * Enum representing different types of camera perspectives.
+ *
+ * - None: Default or uninitialized camera type.
+ * - FirstPerson: Camera perspective from the viewpoint of the character.
+ * - ThirdPerson: Over-the-shoulder camera perspective.
+ * - TopDown: Bird's-eye camera view from above.
+ */
 UENUM(BlueprintType)
 enum class ECameraType : uint8
 {

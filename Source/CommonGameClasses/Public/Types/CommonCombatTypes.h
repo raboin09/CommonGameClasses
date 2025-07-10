@@ -9,6 +9,22 @@
 class UNiagaraSystem;
 class USoundCue;
 
+/**
+ * Defines various types of hit reactions and knockback effects in response to impacts.
+ *
+ * This enumeration is used to classify the intensity and type of reactions triggered by
+ * an entity when it is hit or subjected to a force. It enables the implementation of
+ * different responses, such as knockback or specific hit animations, based on the
+ * gameplay context.
+ *
+ * Available reaction types:
+ * - None: No reaction is applied.
+ * - Knockback_Tiny, Knockback_VeryLight, Knockback_Light, Knockback_Medium, etc.:
+ *   Represent varying levels of knockback intensity, ranging from slight displacements
+ *   to severe impacts.
+ * - HitReact_Light: Specifies a light hit reaction usually tied to animations or minor effects.
+ * - HitReact_Special1: Denotes a custom or specialized hit reaction distinct from standard reactions.
+ */
 UENUM(BlueprintType)
 enum class EHitReactType : uint8
 {
@@ -88,6 +104,23 @@ struct FDamageHitReactEvent
 };
 
 
+/**
+ * Represents the types of statistical effects that can be applied to an entity.
+ *
+ * This enumeration specifies different categories of effects that modify key attributes
+ * such as health, shields, movement speed, or other gameplay-related stats.
+ * It serves as a foundation for implementing gameplay mechanics like damage, healing,
+ * or alterations to movement dynamics.
+ *
+ * Available effect types:
+ * - None: No effect is applied.
+ * - Damage_All: Applies damage that affects both health and shields.
+ * - Damage_Health: Applies damage that exclusively affects health.
+ * - Damage_Shield: Applies damage that exclusively affects shields.
+ * - HealHealth: Heals health exclusively.
+ * - HealShield: Heals shields exclusively.
+ * - MoveSpeed: Alters the movement speed of the affected entity.
+ */
 UENUM(BlueprintType)
 enum class EEffectStatType : uint8
 {
@@ -100,6 +133,28 @@ enum class EEffectStatType : uint8
 	MoveSpeed UMETA(DisplayName = "Move Speed"),
 };
 
+/**
+ * Represents a collection of visual effects that are triggered upon impact with various surface types.
+ *
+ * This structure is utilized for defining particle effects or visual responses generated during interactions
+ * such as collisions, combat, or environmental events. Each field corresponds to a specific material type
+ * and is associated with an optional Niagara System asset to provide the appropriate effect for that surface.
+ *
+ * Fields:
+ * - DefaultFX: The default visual effect applied when no specific surface type matches.
+ * - ConcreteFX: Effect triggered when interacting with concrete surfaces.
+ * - DirtFX: Effect triggered when interacting with dirt surfaces.
+ * - WaterFX: Effect triggered when interacting with water surfaces.
+ * - MetalFX: Effect triggered when interacting with metal surfaces.
+ * - WoodFX: Effect triggered when interacting with wood surfaces.
+ * - GlassFX: Effect triggered when interacting with glass surfaces.
+ * - GrassFX: Effect triggered when interacting with grass surfaces.
+ * - FleshFX: Effect triggered when interacting with generic flesh surfaces.
+ * - SandFX: Effect triggered when interacting with sand surfaces.
+ * - PlasticFX: Effect triggered when interacting with plastic surfaces.
+ * - IceFX: Effect triggered when interacting with ice surfaces.
+ * - FleshHeadshotFX: Special effect triggered when interacting with flesh during a headshot event.
+ */
 USTRUCT(BlueprintType)
 struct FEffectImpactVFX : public FTableRowBase
 {

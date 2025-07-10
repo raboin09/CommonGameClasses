@@ -135,34 +135,93 @@ protected:
 	void BPI_HandleUnEquip();
 	
 	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
-	float PlayAnimMontage(UAnimMontage* MontageToPlay);	
+	float PlayAnimMontage(UAnimMontage* MontageToPlay);
 
+	/**
+	 * Defines a collection of effects to be applied by the owning actor at the start of the ability.
+	 *
+	 * This property is a list of actor classes that implement the specified effect interface.
+	 * When the ability is initiated, the listed effects will be applied by the owner to execute
+	 * predefined gameplay logic in conjunction with the ability's activation.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityStart;
+	/**
+	 * Determines whether the owner of the ability applies specific effects upon the ability's end.
+	 *
+	 * This variable serves as a flag to control whether any predefined gameplay effects or logic
+	 * are triggered when the ability completes its lifecycle. If set to true, the owning actor
+	 * will execute the applicable effects or behaviors as defined in its gameplay framework.
+	 *
+	 * Use cases for this variable typically include cleaning up temporary gameplay modifications,
+	 * restoring modified attributes, or triggering end-of-ability effects, ensuring a smooth transition
+	 * after the ability concludes.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityEnd;
-	
+
+	/**
+	 * Specifies whether twin-stick aiming is enabled for top-down gameplay.
+	 *
+	 * When enabled, this setting allows the player to use dual-stick controls for aiming, which is commonly used in top-down shooter-style games.
+	 * This property can be configured only in the editor and is not intended to change dynamically during gameplay.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown")
 	bool bEnableTwinStickAiming = false;
+	/**
+	 * Determines whether the character's movement rotation orientation is disabled at the start of an ability.
+	 *
+	 * When set to true, the character's movement-based rotation orientation will stop updating as soon as the ability begins.
+	 * This can be useful for abilities that require the character to maintain a fixed orientation or use a different rotation logic.
+	 *
+	 * The behavior is configurable and primarily used in cases where aiming or directional control needs to override default movement-based rotation during ability execution.
+	 *
+	 * Default value is false, meaning movement rotation orientation remains enabled by default at the start of an ability.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown")
 	bool bDisableMovementRotationOrientationOnAbilityStart = false;
-	
+
+	/**
+	 * Indicates whether the associated ability or functionality has a cooldown period.
+	 *
+	 * This variable determines if cooldown settings and logic should be applied. When set to true, additional configurations
+	 * related to cooldown, such as duration and timers, may need to be defined to control the ability's usage frequency.
+	 *
+	 * Can be edited in the editor as a toggle and serves as a conditional flag for displaying relevant cooldown properties.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Cooldown", meta=(InlineEditConditionToggle))
 	bool bHasCooldown = false;
+	/**
+	 * Specifies the duration of the cooldown period for an ability. This value determines how long the ability
+	 * remains unavailable after it has been activated.
+	 *
+	 * The cooldown duration is:
+	 *   - Configurable in the editor when the related condition (bHasCooldown == true) is met.
+	 *   - Clamped to a minimum value of zero to prevent invalid or negative cooldown durations.
+	 *
+	 * Typically used to manage ability usage frequency and enforce a delay between consecutive activations.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Cooldown", meta=(EditCondition="bHasCooldown == true", ClampMin=0))
 	float CooldownDuration = 1.f;
-	
-	// If the ability only requires simple trigger logic (only needs burst timer and/or num shots), create an instance of an obj instead of requiring a child BP.
+
+	/**
+	 * Specifies the type of trigger behavior used to activate this ability.
+	 *
+	 * This variable determines how the ability is triggered during gameplay, influencing
+	 * its activation mechanics and usage. The available options for the trigger type are
+	 * defined in the EAbilityTriggerType enumeration, allowing for diverse functionality such as:
+	 *   - Instant, single-action activation.
+	 *   - Persistent, sustained activation over time.
+	 *   - Other custom activation logic tied to the specific ability functionality.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger")
 	EAbilityTriggerType TriggerType = EAbilityTriggerType::SimpleBurst;
 
 	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="NumberOfActivations", meta=(ClampMin = 0.f, EditCondition = "TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides))
 	int32 BurstTrigger_NumberOfActivations = 1;
-	// The delay (if any) before activating again (e.g. a shotgun would be 0 as all the pellets fire instantaneously, a 3-round burst rifle would be
-	// something like .1)
 	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="TimeBetweenBurstShots", meta=(EditCondition = "BurstTrigger_NumberOfActivations > 1 && TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides, ClampMin = 0.f))
 	float BurstTrigger_TimeBetweenBurstShots = .1f;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="MontageToPlay", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
 	TObjectPtr<UAnimMontage> MontageTrigger_MontageToPlay;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="HasCombos", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
@@ -175,24 +234,88 @@ protected:
 	FString MontageTrigger_ComboPrefix = "Combo";
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="ShouldPlayerLockOnToNearestTarget", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
 	bool MontageTrigger_ShouldPlayerLockOnToNearestTarget = false;
-	
-	// If the ability has more complex trigger logic a child BP obj is required.
+
+	/**
+	 * Designed to encapsulate logic for customizable and advanced trigger mechanisms within the context of ability systems.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", meta=(MustImplement = "/Script/CommonGameClasses.TriggerMechanism", EditCondition="TriggerType == EAbilityTriggerType::Complex", EditConditionHides))
 	TSubclassOf<UObject> ComplexTriggerClass;
+
+	/**
+	 * Represents the class type for the activation mechanism associated with this component or gameplay feature.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement = "/Script/CommonGameClasses.ActivationMechanism"))
 	TSubclassOf<UObject> ActivationMechanismClass;
 
+	/**
+	 * Represents the type of mesh associated with this ability, defining its visual and functional characteristics.
+	 *
+	 * This property determines the specific mesh to be used for the ability. It categorizes meshes into types, enabling
+	 * the system to adopt the appropriate appearance and behavior during gameplay.
+	 *
+	 * The default value is EMeshType::AbilityMesh, which typically corresponds to a mesh intended for standard ability visuals.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Mesh")
 	EMeshType MeshType = EMeshType::AbilityMesh;
+	/**
+	 * Specifies the name of the socket to which the mesh should be attached during activation.
+	 *
+	 * This property is used to determine the attachment point for meshes associated with this ability.
+	 * The socket name must correspond to a valid socket defined in the skeletal mesh asset.
+	 *
+	 * Only editable if the MeshType is set to a value other than EMeshType::None.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Mesh", meta=(EditCondition="MeshType != EMeshType::None"))
 	FName AttachmentSocket = "hand_r";
 
+	/**
+	 * Determines whether this ability or action has an associated resource cost.
+	 *
+	 * This property is used to toggle logic or behavior related to resource consumption. When set to true,
+	 * the system should perform additional checks and processes to handle resource deduction. If false,
+	 * resource-related operations will be skipped.
+	 *
+	 * This value can be edited within the editor but is not modifiable during runtime.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Resource", meta=(InlineEditConditionToggle))
 	bool bHasResourceCost = false;
+	/**
+	 * Represents the cost in resources required to activate a specific ability or action.
+	 *
+	 * This value is used to determine the amount of a resource consumed during the ability's execution.
+	 * It is clamped to a minimum value of 0 to prevent invalid resource deductions.
+	 *
+	 * The ability to edit this value in the editor is conditional based on the `bHasResourceCost` flag,
+	 * meaning the property's visibility and modification depend on whether resource cost is enabled for the ability.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Resource", meta = (ClampMin = "0", EditCondition = "bHasResourceCost"))
 	float ResourceCost = 0.f;
+	/**
+	 * Determines the location of the resource container to manage the allocation, consumption, or storage of resources.
+	 *
+	 * This property is configurable only in the default asset editor and is used in scenarios where the resource cost is greater than zero.
+	 * It allows specifying the type of resource container based on predefined options in the EResourceContainerLocation enumeration.
+	 *
+	 * The selected location is integral to defining how resources are sourced or stored during gameplay interactions,
+	 * enabling flexible resource management tied to gameplay systems.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Resource", meta = (EditCondition = "ResourceCost > 0"))
 	EResourceContainerLocation ResourceContainerLocation;
+	/**
+	 * Defines the class of a resource container component required to manage resource costs for this ability.
+	 *
+	 * It is used to locate or create the appropriate resource container for handling resource-related operations during ability execution.
+	 *
+	 * The class is only editable when the following conditions are met:
+	 *   - `ResourceCost` is greater than 0.
+	 *   - `ResourceContainerLocation` is one of the valid locations:
+	 *     - `InstigatorComponent`
+	 *     - `PlayerControllerComponent`
+	 *     - `AbilityComponent`
+	 *     - `PlayerStateComponent`
+	 *
+	 * These constraints ensure that resource management is appropriately configured based on the ability's requirements.
+	 */
 	UPROPERTY(EditDefaultsOnly, Category = "COMMON|Resource", meta = (MustImplement = "/Script/CommonGameClasses.ResourceContainer", EditCondition = "ResourceCost > 0 && (ResourceContainerLocation == EResourceContainerLocation::InstigatorComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerControllerComponent || ResourceContainerLocation == EResourceContainerLocation::AbilityComponent || ResourceContainerLocation == EResourceContainerLocation::PlayerStateComponent)"))
 	TSubclassOf<UActorComponent> ResourceContainerClass;
 	

@@ -7,6 +7,11 @@
 #include "UObject/Object.h"
 #include "ConditionTree.generated.h"
 
+/**
+ * An enumeration that defines various gameplay tag operation types, which
+ * are used to evaluate actor or gameplay-related tag conditions in the
+ * context of a condition or rule system.
+ */
 UENUM(BlueprintType)
 enum class ETagOperator : uint8
 {
@@ -16,6 +21,12 @@ enum class ETagOperator : uint8
 	HasTagsAll UMETA(DisplayName = "Has Gameplay Tags (ALL)"),
 };
 
+/**
+ * An enumeration representing possible mathematical comparison operators
+ * that can be used to evaluate conditions involving numerical types.
+ * These operators allow for comparisons such as equality, inequality,
+ * or relational evaluations between two values.
+ */
 UENUM(BlueprintType)
 enum class EMathLeafOperator : uint8
 {
@@ -28,6 +39,11 @@ enum class EMathLeafOperator : uint8
 	LessThanOrEqual UMETA(DisplayName = "<="),
 };
 
+/**
+ * An enumeration defining logical operators used for evaluating conditions
+ * in a condition tree structure. These operators determine how child conditions
+ * are combined or modified when evaluating the overall condition's truth value.
+ */
 UENUM(BlueprintType)
 enum class ETreeOperator : uint8
 {
@@ -37,6 +53,12 @@ enum class ETreeOperator : uint8
 	Not UMETA(DisplayName = "NOT"),
 };
 
+/**
+ * An enumeration that specifies ownership contexts for accessing property values
+ * within a gameplay system. This helps determine the actor or context for which
+ * a property operation is executed, such as the instigator of an action or the
+ * receiving actor affected by the action.
+ */
 UENUM(BlueprintType)
 enum class EPropertyOwner : uint8
 {
@@ -45,6 +67,11 @@ enum class EPropertyOwner : uint8
 	ReceivingActor
 };
 
+/**
+ * An enumeration that represents types of float-derived operands that can be
+ * evaluated in conditional logic. These operands are used to retrieve specific
+ * property values from actors, such as health or shield status, during gameplay.
+ */
 UENUM(BlueprintType)
 enum class EFloatOperand : uint8
 {
