@@ -183,11 +183,16 @@ bool ACommonAbility::TryStartAbility()
 	}
 	
 	// It's an ability with a Trigger (Activation and Cooldown mechanism may be present), so proceed to press the trigger
-	const bool bSuccessfulStart = Internal_StartNormalAbility();
-	if(bSuccessfulStart)
+	if(Internal_CanStartNormalAbility())
 	{
 		Internal_TryTogglePauseResourceRegeneration(true);
 		Internal_TryUpdateMovementOrientationState(true);
+		Internal_TryToggleMovementOnCharacter(true);
+	}
+	
+	const bool bSuccessfulStart = Internal_StartNormalAbility();
+	if(bSuccessfulStart)
+	{
 		UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityStart, GetOwner());
 	}
 	return bSuccessfulStart;
@@ -202,6 +207,7 @@ bool ACommonAbility::TryEndAbility()
 	TriggerMechanism->ReleaseTrigger();
 	Internal_TryTogglePauseResourceRegeneration(false);
 	Internal_TryUpdateMovementOrientationState(false);
+	Internal_TryToggleMovementOnCharacter(false);
 	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityEnd, GetOwner());
 	return true;
 }
@@ -280,6 +286,11 @@ void ACommonAbility::Internal_HideMesh(bool bShouldHide) const
 	}
 }
 
+bool ACommonAbility::Internal_CanStartNormalAbility() const
+{
+	return !ResourceContainer || !bHasResourceCost || ResourceContainer->CanConsumeResourceAmount(ResourceCost); 
+}
+
 void ACommonAbility::SetTriggerMechanism()
 {
 	if (TriggerType == EAbilityTriggerType::SimpleBurst)
@@ -287,6 +298,7 @@ void ACommonAbility::SetTriggerMechanism()
 		UBurstTrigger* BurstTriggerInstance = NewObject<UBurstTrigger>(this);
 		BurstTriggerInstance->NumberOfActivations = BurstTrigger_NumberOfActivations;
 		BurstTriggerInstance->TimeBetweenBurstShots = BurstTrigger_TimeBetweenBurstShots;
+		BurstTriggerInstance->bShouldRetriggerAbilityAfterCooldown = BurstTrigger_ShouldRetriggerAbilityAfterCooldown;
 		TriggerMechanism = BurstTriggerInstance;
 	} else if(TriggerType == EAbilityTriggerType::SimpleMontage)
 	{
@@ -408,8 +420,9 @@ void ACommonAbility::SetActivationMechanism()
 bool ACommonAbility::Internal_StartNormalAbility()
 {
 	// If no costs are required or has required resource cost, fire ability off
-	if (!ResourceContainer || !bHasResourceCost || ResourceContainer->TryConsumeResourceAmount(ResourceCost))
+	if (Internal_CanStartNormalAbility())
 	{
+		ResourceContainer->TryConsumeResourceAmount(ResourceCost);
 		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::RequestingStart);
 		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::Active);
 		TriggerMechanism->PressTrigger();
@@ -480,6 +493,20 @@ void ACommonAbility::Internal_TryUpdateMovementOrientationState(bool bStartingAb
 		if(bDisableMovementRotationOrientationOnAbilityStart)
 		{
 			TopDownAimingComponent->ToggleMovementOrientRotation(!bStartingAbility);
+		}
+	}
+}
+
+void ACommonAbility::Internal_TryToggleMovementOnCharacter(bool bStartingAbility) const
+{
+	if(bStopCharacterMovementWhenAbilityActive)
+	{
+		if(bStartingAbility)
+		{
+			UGameplayTagComponent::AddTagToActor(GetInstigator(), CommonStateTags::CannotMove);
+		} else
+		{
+			UGameplayTagComponent::RemoveTagFromActor(GetInstigator(), CommonStateTags::CannotMove);
 		}
 	}
 }

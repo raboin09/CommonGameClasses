@@ -196,7 +196,6 @@ void FDeviceProfileCommands::SetProfile(const TArray<FString>& Args)
         FString ScreenMessage = FString::Printf(TEXT("Changed to device profile: %s"), *ProfileName);
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Profile Settings:"));
         UE_LOG(LogCommonGameClassesCore, Log, TEXT("%s"), *GetCurrentProfileInfo());
-        COMMON_PRINT_SCREEN_GREEN(GetCurrentProfileInfo(), 10.f)
     }
     else
     {
@@ -215,7 +214,6 @@ void FDeviceProfileCommands::ShowCurrentProfile()
 
     FString ScreenMessage = FString::Printf(TEXT("Current device profile: %s"), *CurrentProfile);
     COMMON_PRINT_SCREEN_GREEN(*CurrentProfile, 10.f)
-    COMMON_PRINT_SCREEN_GREEN(*GetCurrentProfileInfo(), 10.f)
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("Current Device Profile: %s"), *CurrentProfile);
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("Settings:"));
     UE_LOG(LogCommonGameClassesCore, Log, TEXT("%s"), *GetCurrentProfileInfo());

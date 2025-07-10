@@ -16,6 +16,13 @@ float UCommonCombatUtils::GetHitImpulseValue(EHitReactType InHit)
 	case EHitReactType::Knockback_Heavy: return 3.f * Multiplier;
 	case EHitReactType::Knockback_VeryHeavy: return 4.f * Multiplier;
 	case EHitReactType::Knockback_Huge: return 5.f * Multiplier;
+	case EHitReactType::LaunchBack_Tiny: return 100;
+	case EHitReactType::LaunchBack_VeryLight: return 250;
+	case EHitReactType::LaunchBack_Light: return 500;
+	case EHitReactType::LaunchBack_Medium: return 750;
+	case EHitReactType::LaunchBack_Heavy: return 1000;
+	case EHitReactType::LaunchBack_VeryHeavy: return 2000;
+	case EHitReactType::LaunchBack_Huge: return 5000;
 	default: return 0.f;
 	}
 }
@@ -32,8 +39,6 @@ bool UCommonCombatUtils::ShouldHitKnockback(EHitReactType InHit)
 	case EHitReactType::Knockback_VeryHeavy:
 	case EHitReactType::Knockback_Huge:
 		return true;
-	case EHitReactType::HitReact_Light:
-	case EHitReactType::HitReact_Special1:
 	case EHitReactType::None:
 	default:
 		return false;
@@ -58,7 +63,6 @@ float UCommonCombatUtils::GetKnockbackRecoveryTime(EHitReactType InHit)
 		return 1.75f;
 	case EHitReactType::Knockback_Huge:
 		return 2.f;
-	case EHitReactType::HitReact_Light:
 	default:
 		return 0.f;
 	}

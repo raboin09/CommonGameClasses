@@ -144,7 +144,7 @@ protected:
 	 * When the ability is initiated, the listed effects will be applied by the owner to execute
 	 * predefined gameplay logic in conjunction with the ability's activation.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityStart;
 	/**
 	 * Determines whether the owner of the ability applies specific effects upon the ability's end.
@@ -157,9 +157,22 @@ protected:
 	 * restoring modified attributes, or triggering end-of-ability effects, ensuring a smooth transition
 	 * after the ability concludes.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityEnd;
 
+	/**
+	 * Determines whether the character's movement is halted while this ability is active.
+	 *
+	 * When set to true, the character will be prevented from any movement, ensuring that
+	 * the ability's execution is not disrupted by player or AI movement input. This is particularly
+	 * useful for abilities that require the character to remain stationary or focused during activation.
+	 *
+	 * When set to false, the character retains the ability to move freely even while the ability is active,
+	 * allowing for dynamic gameplay scenarios.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	bool bStopCharacterMovementWhenAbilityActive = true;
+	
 	/**
 	 * Specifies whether twin-stick aiming is enabled for top-down gameplay.
 	 *
@@ -221,6 +234,8 @@ protected:
 	int32 BurstTrigger_NumberOfActivations = 1;
 	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="TimeBetweenBurstShots", meta=(EditCondition = "BurstTrigger_NumberOfActivations > 1 && TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides, ClampMin = 0.f))
 	float BurstTrigger_TimeBetweenBurstShots = .1f;
+	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="ShouldRetriggerAbilityAfterCooldown", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides))
+	bool BurstTrigger_ShouldRetriggerAbilityAfterCooldown = false;
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="MontageToPlay", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
 	TObjectPtr<UAnimMontage> MontageTrigger_MontageToPlay;
@@ -334,15 +349,19 @@ private:
 	void SetTriggerMechanism();
 	void SetResourceContainerObject();
 	void SetActivationMechanism();
-
-	void Internal_SetResourceContainerToObject(TWeakObjectPtr<UObject> ContainerObject);
-	void Internal_SetResourceContainerToComponent(TWeakObjectPtr<const AActor> PotentialActor);
-	bool Internal_StartNormalAbility();
 	TObjectPtr<UObject> Internal_CreateNewMechanism(const TSubclassOf<UObject> InMechanismClass, const UClass* InterfaceClass);
 	void Internal_BindMechanismEventsToAbility();
+	
+	bool Internal_CanStartNormalAbility() const;
+	bool Internal_StartNormalAbility();
+	
+	void Internal_SetResourceContainerToObject(TWeakObjectPtr<UObject> ContainerObject);
+	void Internal_SetResourceContainerToComponent(TWeakObjectPtr<const AActor> PotentialActor);
+	
 	void Internal_TryTogglePauseResourceRegeneration(bool bShouldPause) const;
 	void Internal_TryUpdateAimingState(bool bStartingAbility) const;
 	void Internal_TryUpdateMovementOrientationState(bool bStartingAbility) const;
+	void Internal_TryToggleMovementOnCharacter(bool bStartingAbility) const;
 
 	UFUNCTION()
 	void HandleAbilityActivationEvent(const FAbilityActivationEventPayload& AbilityActivationEventPayload);

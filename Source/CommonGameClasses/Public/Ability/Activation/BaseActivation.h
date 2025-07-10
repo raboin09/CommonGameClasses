@@ -13,14 +13,19 @@ class COMMONGAMECLASSES_API UBaseActivation : public UObject, public IActivation
 
 public:
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;
-	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override PURE_VIRTUAL(UBaseActivation::Activate, )
-	virtual void Deactivate() override PURE_VIRTUAL(UBaseActivation::Deactivate, )
+	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
+	virtual void Deactivate() override;
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void BPI_OnActivation();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void BPI_OnDeactivation();
+
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnActivation;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnDeactivation;
 	
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<UMeshComponent> MeshComponentRef = nullptr; 

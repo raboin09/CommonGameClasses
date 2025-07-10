@@ -33,25 +33,18 @@ public:
 	void ToggleUseTwinStickAiming(bool bShouldUseTwinStickAiming);
 
 	/**
-	 * Attempts to rotate the owning actor towards the current mouse position in the game world.
+	 * Snaps the actor's rotation to align with the current aiming direction without interpolation.
 	 *
-	 * This method is intended to handle actor rotation when using mouse input for aiming.
-	 * It calculates the rotation needed to face the current mouse cursor position projected onto
-	 * the game world, and updates the actor's rotation accordingly.
+	 * Behavior:
+	 * - If a gamepad is being used, calculates the aim angle based on the last gamepad input
+	 *   and rotates the character to align with the gamepad aim direction.
+	 * - If a mouse is being used, rotates the character to align with the mouse aim direction.
 	 *
-	 * Rotation will be performed immediately without interpolation.
-	 * The method uses the internal helper method `Internal_RotateCharacterToMouse` with interpolation disabled (`bInterpRotation` set to false).
-	 *
-	 * Preconditions:
-	 * - The mouse input feature must be active (`bUsingMouse` set to true).
-	 * - `PlayerController` must be valid.
-	 *
-	 * Postconditions:
-	 * - If the mouse cursor hits a valid traceable location and a certain distance threshold is met, the actor's rotation
-	 *   will be updated to face that location.
-	 * - If conditions are not met, the actor will retain its current rotation.
+	 * This method is typically used to immediately adjust the actor's orientation
+	 * to match the current aiming direction, often in response to specific player actions
+	 * or ability activations.
 	 */
-	void TryRotateActorToMouse();
+	void SnapRotateActorToAim();
 	void ToggleMovementOrientRotation(bool bOrientRotationToMovement);
 	
 protected:
@@ -65,9 +58,11 @@ protected:
 	float MaxRotationRate = 720.0f;
 	UPROPERTY(BlueprintReadOnly, Category="COMMON|Input")
 	FVector2D LastMoveInput;
+	UPROPERTY(BlueprintReadOnly, Category="COMMON|Input")
+	FVector2D LastAimInput;
 	
 private:
-	void DoAim(float AxisX, float AxisY);
+	void CalculateAimAngle(float AxisX, float AxisY);
 
 	void Internal_MoveInput(const FVector2D& InputVector);
 	bool Internal_AdjustGamepadInputs(float& OutAxisX, float& OutAxisY) const;
@@ -76,6 +71,7 @@ private:
 	FRotator GetMouseRotation() const;
 	static bool AreInputsValid(const float AxisX, const float AxisY);
 	void Internal_RotateCharacterToMouse(bool bInterpRotation);
+	void Internal_RotateCharacterToGamepad(bool bInterpRotation);
 	void TryToggleUsingGamepad(bool bInUsingGamepad);
 
 	UPROPERTY(BlueprintAssignable, DisplayName="COMMON On Gamepad Input Changed")
@@ -92,7 +88,5 @@ private:
 	TWeakObjectPtr<ACommonPlayerCharacter> PlayerCharacter;
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|Aiming")
-	FORCEINLINE bool IsUsingMouse(){ return bUsingGamepad; }
 	FORCEINLINE FGamepadInputChanged& OnMouseGamepadInputChanged() { return GamepadInputChanged; }
 };

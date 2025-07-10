@@ -29,6 +29,9 @@ public:
 	 * @return true if the requested resource amount could be partially or fully consumed, false otherwise.
 	 */
 	virtual bool TryConsumeResourceAmount(const float RequestedAmount) override;
+
+	virtual bool CanConsumeResourceAmount(const float RequestedAmount) const override;
+	
 	/**
 	 * Attempts to add the specified amount of resources to the resource container.
 	 * This method modifies the resource pool by adding the given amount and performs
@@ -67,9 +70,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
 	virtual bool CanRegen() const;
-	virtual bool CanConsumeResourceAmount(const float RequestedAmount);
 
 	/**
 	 * Calculates the amount of resource that can actually be consumed based on the requested amount.

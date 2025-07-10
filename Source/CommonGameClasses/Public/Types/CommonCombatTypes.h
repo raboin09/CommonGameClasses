@@ -36,8 +36,13 @@ enum class EHitReactType : uint8
 	Knockback_Heavy,
 	Knockback_VeryHeavy,
 	Knockback_Huge,
-	HitReact_Light,
-	HitReact_Special1
+	LaunchBack_Tiny,
+	LaunchBack_VeryLight,
+	LaunchBack_Light,
+	LaunchBack_Medium,
+	LaunchBack_Heavy,
+	LaunchBack_VeryHeavy,
+	LaunchBack_Huge,
 };
 
 /**

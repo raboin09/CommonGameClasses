@@ -36,38 +36,42 @@ protected:
 	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
-	FHitResult WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector);
+	TArray<FHitResult> WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector);
 	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
-	TArray<TSubclassOf<AActor>> AbilityEffects;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
-	ELineTraceDirection DefaultLineTraceDirection = ELineTraceDirection::Camera;
+	TArray<TSubclassOf<AActor>> ActivationEffectsToApply;	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
-	ELineTraceDirection GamepadLineTraceDirection = ELineTraceDirection::InstigatorForwardVector;
-	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
-	bool bRotateCharacterToMouse = false;
+	bool bSnapCharacterRotationToEndTrace = false;
 	// Socket where the muzzle or hand is
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName MeshSocketName;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f))
-	float TraceRange = 1000.f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f, InlineEditConditionToggle))
-	bool bShouldLineTrace = true;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(ClampMin = 1.f, EditCondition="!bShouldLineTrace"))
-	float SphereTraceRadius = 20.f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(InlineEditConditionToggle))
-	bool bHasFiringSpread = false;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
-	float TraceSpread = 5.f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
-	float FiringSpreadIncrement = 1.0f;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
-	float FiringSpreadMax = 10.f;
 
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
+	TArray<TEnumAsByte<EObjectTypeQuery>> TraceForObjectTypes;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace")
+	ELineTraceDirection DefaultLineTraceDirection = ELineTraceDirection::Camera;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
+	ELineTraceDirection GamepadLineTraceDirection = ELineTraceDirection::InstigatorForwardVector;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f))
+	float TraceRange = 1000.f;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f, InlineEditConditionToggle))
+	bool bShouldLineTrace = true;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace")
+	bool bShouldStopTraceAfterFirstSuccessfulHit = true;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f, EditCondition="!bShouldLineTrace"))
+	float SphereTraceRadius = 20.f;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(InlineEditConditionToggle))
+	bool bHasFiringSpread = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
+	float TraceSpread = 5.f;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
+	float FiringSpreadIncrement = 1.0f;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
+	float FiringSpreadMax = 10.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Debug")
 	bool bDrawDebugTrace = false;
 
 	// Aim assist settings
@@ -81,8 +85,6 @@ protected:
 	float AimAssistStrength = 0.5f;
 	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
 	EAffiliation AimAssistAffiliation = EAffiliation::Enemies;
-	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
-	TArray<TEnumAsByte<EObjectTypeQuery>> AimAssistObjectTypes;
 
 private:
 	FVector TryGetAimAssistDirection(const FVector& OriginalAimDirection) const;
@@ -97,6 +99,7 @@ private:
 	FVector Internal_GetAimDirection(ELineTraceDirection LineTraceDirection) const;
 	FVector Internal_GetFiringSpreadDirection(const FVector AimDirection);
 	FVector Internal_GetMouseAim() const;
+	static TArray<FHitResult> RemoveDuplicateHitResults(const TArray<FHitResult>& HitResults);
 
 	UPROPERTY(Transient)
 	float CurrentFiringSpread;

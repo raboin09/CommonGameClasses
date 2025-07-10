@@ -5,6 +5,7 @@
 ACommonEffect::ACommonEffect()
 {
  	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 	SetAutoDestroyWhenFinished(false);
 	EffectData = CreateDefaultSubobject<UEffectData>(TEXT("EffectData"));
 }

@@ -6,28 +6,22 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/CommonCoreTypes.h"
 #include "Utils/CommonCombatUtils.h"
-#include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInputUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
-{
+{	
+	Super::Activate(TriggerEventPayload);
 	Fire(TriggerEventPayload);
 	BPI_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
 	BPI_OnActivation();
-	if(bRotateCharacterToMouse)
-	{
-		if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-		{
-			TopDownAimingComponent->TryRotateActorToMouse();
-		}
-	}
 }
 
 void URangedActivation::Deactivate()
 {
+	Super::Deactivate();
 	AbilityDeactivationEvent.Broadcast({});
 	BPI_OnDeactivation();
 }
@@ -41,11 +35,10 @@ void URangedActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> O
 void URangedActivation::PostInitProperties()
 {
 	Super::PostInitProperties();
-	if (AimAssistObjectTypes.Num() == 0)
+	if (TraceForObjectTypes.Num() == 0)
 	{
-		AimAssistObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	}
-
 }
 
 void URangedActivation::Internal_AssignOwningController()
@@ -75,6 +68,13 @@ void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 	} else
 	{
 		EndTrace = StartTrace + AimDirection * TraceRange;
+	}
+
+	if(bSnapCharacterRotationToEndTrace)
+	{
+		FVector DirectionToTarget = (EndTrace - GetInstigator()->GetActorLocation()).GetSafeNormal2D();
+		FRotator NewRotation = DirectionToTarget.Rotation();
+		GetInstigator()->SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));
 	}
 }
 
@@ -181,7 +181,7 @@ AActor* URangedActivation::FindBestAimAssistTarget(const FVector& StartLocation,
         GetWorld(),
         StartLocation,
         AimAssistRange,
-        AimAssistObjectTypes,
+        TraceForObjectTypes,
         nullptr,
         ActorsToIgnore,
         OverlappingActors
@@ -300,8 +300,11 @@ FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 		{
 			const FVector StartTrace = Impact.ImpactPoint + Impact.ImpactNormal * 10.0f;
 			const FVector EndTrace = Impact.ImpactPoint - Impact.ImpactNormal * 10.0f;
-			FHitResult Hit = WeaponTrace(bShouldLineTrace, 5.f, StartTrace, EndTrace);
-			UseImpact = Hit;
+			TArray<FHitResult> Hits = WeaponTrace(bShouldLineTrace, 5.f, StartTrace, EndTrace);
+			for(auto Hit : Hits)
+			{
+				UseImpact = Hit;	
+			}
 			return UseImpact;
 		}
 	}
@@ -326,7 +329,33 @@ FVector URangedActivation::GetRaycastOriginLocation() const
 	return MeshComponentRef->GetSocketLocation(MeshSocketName);
 }
 
-FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)
+TArray<FHitResult> URangedActivation::RemoveDuplicateHitResults(const TArray<FHitResult>& HitResults)
+{
+	TArray<FHitResult> UniqueHits;
+	TSet<AActor*> ProcessedActors;
+    
+	for (const FHitResult& Hit : HitResults)
+	{
+		if (AActor* HitActor = Hit.GetActor())
+		{
+			// If we haven't processed this actor yet
+			if (!ProcessedActors.Contains(HitActor))
+			{
+				ProcessedActors.Add(HitActor);
+				UniqueHits.Add(Hit);
+			}
+		}
+		else
+		{
+			// Always keep hits that don't have an actor (like landscape)
+			UniqueHits.Add(Hit);
+		}
+	}
+	return UniqueHits;
+}
+
+
+TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)
 {
 	FVector StartTrace, EndTrace;
 	Internal_GetTraceLocations(StartTrace, EndTrace);
@@ -334,19 +363,32 @@ FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, F
 	EndTrace = EndOverride != FVector::ZeroVector ? EndOverride : EndTrace;
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, GetInstigator());
 	TraceParams.bReturnPhysicalMaterial = true;
-	FHitResult Hit(ForceInit);
 	TArray<AActor*> IgnoreActors; 
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
-	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(COMMON_TRACE_ABILITY);
 	auto DrawDebugTrace = bDrawDebugTrace ? EDrawDebugTrace::None : EDrawDebugTrace::ForDuration;
-	if(bLineTrace)
+	TArray<FHitResult> Hits;
+	if(bShouldStopTraceAfterFirstSuccessfulHit)
 	{
-		UKismetSystemLibrary::LineTraceSingle(this, StartTrace, EndTrace, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+		FHitResult Hit(ForceInit);
+		if(bLineTrace)
+		{
+			UKismetSystemLibrary::LineTraceSingleForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+		} else
+		{
+			UKismetSystemLibrary::SphereTraceSingleForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);	
+		}
+		Hits.Add(Hit);
 	} else
 	{
-		UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, CircleRadius, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);	
+		if(bLineTrace)
+		{
+			UKismetSystemLibrary::LineTraceMultiForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+		} else
+		{
+			UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+		}
 	}
-	return Hit;
+	return RemoveDuplicateHitResults(Hits);
 }
 
 TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision() const

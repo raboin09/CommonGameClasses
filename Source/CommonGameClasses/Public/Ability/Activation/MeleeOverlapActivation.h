@@ -14,6 +14,10 @@ class COMMONGAMECLASSES_API UMeleeOverlapActivation : public UBaseActivation
 	GENERATED_BODY()
 
 public:
+	//~ Begin UObject Interface
+	virtual void PostInitProperties() override;
+	//~ End UObject Interface
+	
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) override;	
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override;
 	virtual void Deactivate() override;
@@ -30,7 +34,9 @@ protected:
 	void BPI_HandleWeaponTraceStart();
 	UFUNCTION(BlueprintImplementableEvent)
 	void BPI_HandleWeaponTraceEnd();
-	
+
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
+	TArray<TEnumAsByte<EObjectTypeQuery>> TraceForObjectTypes;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	float TraceRadius = 10.f;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")

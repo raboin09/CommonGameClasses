@@ -107,7 +107,6 @@ void ACommonCharacter::InitCapsuleDefaults() const
 	GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Ignore);
 }
 
@@ -117,6 +116,5 @@ void ACommonCharacter::InitCharacterMeshDefaults() const
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetCollisionResponseToChannels(ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY, ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Block);
 }

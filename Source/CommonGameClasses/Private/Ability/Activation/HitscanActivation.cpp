@@ -10,8 +10,10 @@ void UHitscanActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 
 void UHitscanActivation::Internal_FireShot()
 {
-	const FHitResult& Impact = WeaponTrace(bShouldLineTrace, SphereTraceRadius);
-	BPN_ProcessInstantHit(Impact);
+	for(FHitResult& Impact : WeaponTrace(bShouldLineTrace, SphereTraceRadius))
+	{
+		BPN_ProcessInstantHit(Impact);
+	}
 }
 
 void UHitscanActivation::BPN_ProcessInstantHit_Implementation(const FHitResult& Impact)
@@ -29,13 +31,13 @@ void UHitscanActivation::BPN_ProcessInstantHit_Implementation(const FHitResult& 
 	} else
 	{
 		BPI_OnSuccessfulHit(Impact);
-		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
+		UCommonEffectUtils::ApplyEffectsToHitResult(ActivationEffectsToApply, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
 	}
 }
 
 void UHitscanActivation::Internal_PlayWeaponMissEffectFX(const FHitResult& Impact)
 {
-	for(const TSubclassOf<AActor> CurrEffectClass : AbilityEffects)
+	for(const TSubclassOf<AActor> CurrEffectClass : ActivationEffectsToApply)
 	{
 		if(const TScriptInterface<IEffect> TempEffect = UEffectContainerComponent::CreateEffectInstanceFromHitResult(this, CurrEffectClass, Impact, GetInstigator()))
 		{

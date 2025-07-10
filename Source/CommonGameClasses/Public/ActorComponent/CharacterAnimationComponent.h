@@ -104,7 +104,7 @@ private:
 	float Internal_PlayMontage(const FAnimMontagePlayData& AnimMontagePlayData);
 	void Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange);
 	void Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback = false);
-	void Internal_TryPlayHitReact(const FDamageHitReactEvent& HitReactEvent);
+	void Internal_TryStartLaunchBack(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback = false);
 	FGameplayTag Internal_GetHitDirectionTag(const FVector& OriginatingLocation) const;
 	void Internal_TryCharacterKnockbackRecovery();
 	void Internal_RagdollUpdate(float DeltaTime);

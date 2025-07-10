@@ -44,10 +44,7 @@ void UTopDownInputComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	if (bUsingGamepad)
 	{
-		const FRotator OldRotation = GetOwner()->GetActorRotation();
-		const FRotator TargetRot = FRotator(OldRotation.Pitch, -AimAngle, OldRotation.Roll);
-		const FRotator NewRotation = FMath::RInterpTo(OldRotation, TargetRot, DeltaTime, 5.f);
-		GetOwner()->SetActorRotation(NewRotation);
+		Internal_RotateCharacterToGamepad(true);
 	} else {
 		Internal_RotateCharacterToMouse(true);
 	}
@@ -58,13 +55,12 @@ void UTopDownInputComponent::MoveInput(const FVector2D& InputVector)
 	Internal_MoveInput(InputVector);
 }
 
-void UTopDownInputComponent::DoAim(float AxisX, float AxisY)
+void UTopDownInputComponent::CalculateAimAngle(float AxisX, float AxisY)
 {
 	if(!bShouldRotateCharacterToAiming)
 	{
 		return;
 	}
-	
 	AimAngle = FMath::RadiansToDegrees(FMath::Atan2(AxisY, -AxisX));
 }
 
@@ -104,6 +100,11 @@ void UTopDownInputComponent::Internal_RotateCharacterToMouse(bool bInterpRotatio
 	{
 		return;
 	}
+
+	if(bUsingGamepad)
+	{
+		return;
+	}
 	
 	FRotator TargetRotation = GetMouseRotation();
 	if (bInterpRotation)
@@ -130,6 +131,18 @@ void UTopDownInputComponent::Internal_RotateCharacterToMouse(bool bInterpRotatio
 		PlayerCharacter->SetActorRotation(TargetRotation);
 	}
 
+}
+
+void UTopDownInputComponent::Internal_RotateCharacterToGamepad(bool bInterpRotation)
+{
+	const FRotator OldRotation = PlayerCharacter->GetActorRotation();
+	const FRotator TargetRot = FRotator(OldRotation.Pitch, -AimAngle, OldRotation.Roll);
+	FRotator NewRotation = TargetRot;
+	if(bInterpRotation)
+	{
+		NewRotation = FMath::RInterpTo(OldRotation, TargetRot, UGameplayStatics::GetWorldDeltaSeconds(this), 5.f);	
+	}
+	PlayerCharacter->SetActorRotation(NewRotation);
 }
 
 void UTopDownInputComponent::TryToggleUsingGamepad(bool bInUsingGamepad)
@@ -164,7 +177,8 @@ void UTopDownInputComponent::GamepadAimInput(const FVector2D& InputVector)
 	{
 		return;
 	}
-	DoAim(AxisX, AxisY);
+	LastAimInput = FVector2D(AxisX, AxisY);
+	CalculateAimAngle(AxisX, AxisY);
 }
 
 void UTopDownInputComponent::MouseAimInput(const FVector2D& InputVector)
@@ -174,6 +188,7 @@ void UTopDownInputComponent::MouseAimInput(const FVector2D& InputVector)
 	{
 		return;
 	}
+	LastAimInput = InputVector;
 	PlayerCharacter->MouseInput(InputVector.X, InputVector.Y);
 }
 
@@ -233,13 +248,15 @@ void UTopDownInputComponent::ToggleUseTwinStickAiming(bool bShouldUseTwinStickAi
 	}
 }
 
-void UTopDownInputComponent::TryRotateActorToMouse()
+void UTopDownInputComponent::SnapRotateActorToAim()
 {
 	if(bUsingGamepad)
 	{
-		return;
+
+	} else
+	{
+		Internal_RotateCharacterToMouse(false);
 	}
-	Internal_RotateCharacterToMouse(false);
 }
 
 void UTopDownInputComponent::ToggleMovementOrientRotation(bool bOrientRotationToMovement)

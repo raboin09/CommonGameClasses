@@ -226,37 +226,52 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 	{
 		return;
 	}
-	
+
 	const float KnockdownDuration = UCommonCombatUtils::GetKnockbackRecoveryTime(HitReactEvent.HitReactType);
 	const FName HitBoneName = UCommonCombatUtils::GetNearestValidBoneForImpact(HitReactEvent.HitResult.BoneName);
-	Internal_ApplyCharacterKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);
-	if(!bIsDeathKnockback)
-	{
-		OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
+	switch(HitReactEvent.HitReactType) {
+		case EHitReactType::Knockback_Tiny:
+		case EHitReactType::Knockback_VeryLight:
+		case EHitReactType::Knockback_Light:
+		case EHitReactType::Knockback_Medium:
+		case EHitReactType::Knockback_Heavy:
+		case EHitReactType::Knockback_VeryHeavy:
+		case EHitReactType::Knockback_Huge:
+			Internal_ApplyCharacterKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);
+			if(!bIsDeathKnockback)
+			{
+				OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
+			}
+			break;
+		case EHitReactType::LaunchBack_Light:
+		case EHitReactType::LaunchBack_Medium:
+		case EHitReactType::LaunchBack_Heavy:
+			Internal_TryStartLaunchBack(HitReactEvent, bIsDeathKnockback);
+			break;
+		default:
+		case EHitReactType::None:
+			break;
 	}
 }
 
-void UCharacterAnimationComponent::Internal_TryPlayHitReact(const FDamageHitReactEvent& HitReactEvent)
+void UCharacterAnimationComponent::Internal_TryStartLaunchBack(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback)
 {
-	if(!OwnerCharacter->IsAlive())
+	ACharacter* HitCharacter = Cast<ACharacter>(HitReactEvent.HitResult.GetActor());
+	if(!HitCharacter)
 	{
 		return;
 	}
-
-	StopAnimMontage();
-	FAnimMontagePlayData PlayData;
-	PlayData.MontageSection = FName();
-	PlayData.PlayRate = 1.f;
-	
-	if(HitReactEvent.HitReactType == EHitReactType::HitReact_Special1 || HitReactEvent.DeathReactType == EHitReactType::HitReact_Special1)
+	if(UGameplayTagComponent::ActorHasGameplayTag(HitCharacter, CommonStateTags::Immovable))
 	{
-		PlayData.MontageToPlay = OwnerCharacter->BPI_GetHitReactAnimation(CommonAnimationTags::HitReactSpecial1).Get();
-	} else
-	{
-		PlayData.MontageToPlay = OwnerCharacter->BPI_GetHitReactAnimation(Internal_GetHitDirectionTag(HitReactEvent.HitDirection)).Get();
+		return;
 	}
-	
-	ForcePlayAnimMontage(PlayData);
+	if(UGameplayTagComponent::ActorHasGameplayTag(HitCharacter, CommonStateTags::Ragdoll))
+	{
+		return;
+	}
+	FVector LaunchDirection = FVector(HitReactEvent.HitDirection.X, HitReactEvent.HitDirection.Y, 0.f);
+	LaunchDirection *= UCommonCombatUtils::GetHitImpulseValue(HitReactEvent.HitReactType);
+	HitCharacter->LaunchCharacter(LaunchDirection, true, true);
 }
 
 FGameplayTag UCharacterAnimationComponent::Internal_GetHitDirectionTag(const FVector& OriginatingLocation) const

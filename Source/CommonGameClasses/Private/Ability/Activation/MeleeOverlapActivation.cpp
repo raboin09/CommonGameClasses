@@ -4,10 +4,18 @@
 #include "ActorComponent/EffectContainerComponent.h"
 #include "ActorComponent/GameplayTagComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonCoreTypes.h"
 #include "Types/CommonTagTypes.h"
 #include "Utils/CommonEffectUtils.h"
 #include "Utils/CommonInteractUtils.h"
+
+void UMeleeOverlapActivation::PostInitProperties()
+{
+	Super::PostInitProperties();
+	if (TraceForObjectTypes.Num() == 0)
+	{
+		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	}
+}
 
 void UMeleeOverlapActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent)
 {
@@ -20,6 +28,7 @@ void UMeleeOverlapActivation::InitActivationMechanism(TWeakObjectPtr<UMeshCompon
 
 void UMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
+	Super::Activate(TriggerEventPayload);
 	Internal_StartAttack();
 	FAbilityActivationEventPayload ActivationEventPayload;
 	ActivationEventPayload.bShouldStartCooldown = false;
@@ -29,6 +38,7 @@ void UMeleeOverlapActivation::Activate(const FTriggerEventPayload& TriggerEventP
 
 void UMeleeOverlapActivation::Deactivate()
 {
+	Super::Deactivate();
 	Internal_StopAttack();
 	FAbilityDeactivationEventPayload DeactivationEventPayload;
 	AbilityDeactivationEvent.Broadcast(DeactivationEventPayload);
@@ -72,7 +82,7 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 	const FVector StartTrace = MeshComponentRef->GetSocketLocation(Socket_TraceStart);
 	const FVector EndTrace = MeshComponentRef->GetSocketLocation(Socket_TraceEnd);
 	EDrawDebugTrace::Type DebugTrace = bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
-	UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, TraceRadius, UEngineTypes::ConvertToTraceType(COMMON_TRACE_ABILITY), false, IgnoreActors, DebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+	UKismetSystemLibrary::SphereTraceSingleForObjects(this, StartTrace, EndTrace, TraceRadius, TraceForObjectTypes, false, IgnoreActors, DebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
 	if(!Hit.bBlockingHit)
 	{
 		return;

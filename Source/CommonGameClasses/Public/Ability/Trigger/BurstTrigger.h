@@ -19,10 +19,12 @@ public:
 	// something like .1)
 	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", meta=(EditCondition = "NumberOfActivations > 1", ClampMin = 0.f))
 	float TimeBetweenBurstShots = .1f;
+	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", meta=(ClampMin = 0.f))
+	bool bShouldRetriggerAbilityAfterCooldown = false;
 
 protected:
 	//~ Begin ITriggerMechanism Interface
-	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return bTriggerHeld; }
+	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return (bShouldRetriggerAbilityAfterCooldown && bTriggerHeld); }
 	//~ End ITriggerMechanism Interface
 	
 	//~ Begin UAbilityTriggerBase Interface

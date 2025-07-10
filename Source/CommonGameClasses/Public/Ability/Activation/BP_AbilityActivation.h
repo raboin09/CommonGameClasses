@@ -19,7 +19,7 @@ protected:
 	void BPN_Deactivate();
 	
 public:
-	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { BPN_Activate(TriggerEventPayload); }	
-	FORCEINLINE virtual void Deactivate() override { BPN_Deactivate(); }
+	FORCEINLINE virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) override { Super::Activate(TriggerEventPayload); BPN_Activate(TriggerEventPayload); }	
+	FORCEINLINE virtual void Deactivate() override { Super::Deactivate(); BPN_Deactivate(); }
 	FORCEINLINE virtual float GetOutlineRange() const override { return DEFAULT_OUTLINE_DISTANCE; }
 };
