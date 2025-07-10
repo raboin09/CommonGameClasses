@@ -12,6 +12,7 @@
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
 #include "Ability/Trigger/MontageTrigger.h"
+#include "ActorComponent/TopDownAimingComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
@@ -106,6 +107,13 @@ void ACommonAbility::HandleEquipFinished()
 		TryStartAbility();
 	}
 	BPI_HandleEquipFinished();
+	if(bEnableTwinStickAiming)
+	{
+		if(UTopDownAimingComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownAimingComponent>())
+		{
+			TopDownAimingComponent->ToggleShouldRotateCharacterToAiming(true);
+		}
+	}
 }
 
 float ACommonAbility::PlayAnimMontage(UAnimMontage* MontageToPlay)
@@ -127,6 +135,13 @@ void ACommonAbility::UnEquipAbility()
 	TryEndAbility();
 	Internal_HideMesh(true);
 	BPI_HandleUnEquip();
+	if(bEnableTwinStickAiming)
+	{
+		if(UTopDownAimingComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownAimingComponent>())
+		{
+			TopDownAimingComponent->ToggleShouldRotateCharacterToAiming(false);
+		}
+	}
 }
 
 bool ACommonAbility::TryStartAbility()
@@ -175,7 +190,11 @@ bool ACommonAbility::TryStartAbility()
 		ActivationMechanism->Activate(FTriggerEventPayload());
 		return true;
 	}
-
+	
+	if(ResourceContainer && bHasResourceCost)
+	{
+		ResourceContainer->TryTogglePauseResourceRegen(true);
+	}
 	// It's an ability with a Trigger (Activation and Cooldown mechanism may be present), so proceed to press the trigger
 	return Internal_StartNormalAbility();
 }
@@ -187,6 +206,10 @@ bool ACommonAbility::TryEndAbility()
 		return true;
 	}
 	TriggerMechanism->ReleaseTrigger();
+	if(ResourceContainer && bHasResourceCost)
+	{
+		ResourceContainer->TryTogglePauseResourceRegen(false);
+	}
 	return true;
 }
 
@@ -392,7 +415,7 @@ void ACommonAbility::SetActivationMechanism()
 bool ACommonAbility::Internal_StartNormalAbility()
 {
 	// If no costs are required or has required resource cost, fire ability off
-	if (!ResourceContainer || ResourceContainer->TryConsumeResourceAmount(ResourceCost))
+	if (!ResourceContainer || !bHasResourceCost || ResourceContainer->TryConsumeResourceAmount(ResourceCost))
 	{
 		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::RequestingStart);
 		UGameplayTagComponent::AddTagToActor(this, CommonGameAbilityEvent::Active);

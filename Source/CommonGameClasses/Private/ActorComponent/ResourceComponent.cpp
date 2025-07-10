@@ -54,6 +54,17 @@ void UResourceComponent::TryGiveResourceAmount(const float AmountToGive)
 	}
 }
 
+void UResourceComponent::TryTogglePauseResourceRegen(bool bShouldPause)
+{
+	if(bShouldPause)
+	{
+		Internal_StopRegenTimer();
+	} else
+	{
+		Internal_StartRegenTimer();
+	}
+}
+
 bool UResourceComponent::CanConsumeResourceAmount(const float RequestedAmount)
 {
 	return ResourcePoolContainer.HasResources() && ResourcePoolContainer.GetSumOfAllResourcePools() >= RequestedAmount;

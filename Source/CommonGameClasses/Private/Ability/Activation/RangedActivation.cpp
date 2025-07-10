@@ -61,8 +61,6 @@ FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirec
 	switch (LineTraceDirection) {
 		case ELineTraceDirection::Camera:
 			return Internal_GetCameraStartLocation(AimDirection);
-		case ELineTraceDirection::Mesh:
-		case ELineTraceDirection::Mouse:
 		default:
 			return GetRaycastOriginLocation();
 	}
@@ -87,11 +85,15 @@ FVector URangedActivation::Internal_GetAimDirection() const
 	case ELineTraceDirection::Camera:
 		// By default this is Camera for PlayerControllers, Controller rotation for AI
 		return GetInstigator()->GetBaseAimRotation().Vector();
-	case ELineTraceDirection::Mesh:
+	case ELineTraceDirection::MeshSocket:
 		// Use the socket rotation
 		return GetRaycastOriginRotation();
 	case ELineTraceDirection::Mouse:
 		return Internal_GetMouseAim();
+	case ELineTraceDirection::AbilityMeshForwardVector:
+		return GetOwner()->GetActorForwardVector();
+	case ELineTraceDirection::InstigatorForwardVector:
+		return GetInstigator()->GetActorForwardVector();
 	default:
 		return FVector::ZeroVector;
 	}
@@ -167,13 +169,13 @@ FHitResult URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, F
 	TArray<AActor*> IgnoreActors; 
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
 	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(COMMON_TRACE_ABILITY);
-	auto DrawDebugTrace = EDrawDebugTrace::None;
+	auto DrawDebugTrace = bDrawDebugTrace ? EDrawDebugTrace::None : EDrawDebugTrace::ForDuration;
 	if(bLineTrace)
 	{
-		UKismetSystemLibrary::LineTraceSingle(this, StartTrace, EndTrace, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 10.f);
+		UKismetSystemLibrary::LineTraceSingle(this, StartTrace, EndTrace, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
 	} else
 	{
-		UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, CircleRadius, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 10.f);	
+		UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, CircleRadius, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);	
 	}
 	return Hit;
 }

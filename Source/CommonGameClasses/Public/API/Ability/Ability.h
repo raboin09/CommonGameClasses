@@ -3,11 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/CommonEventDeclarations.h"
 #include "UObject/Interface.h"
 #include "Ability.generated.h"
 
-class UCooldownMechanismImpl;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UAbility : public UInterface

@@ -20,26 +20,14 @@ void UHitscanActivation::BPN_ProcessInstantHit_Implementation(const FHitResult& 
 	BPI_PlayTrailFX(Impact.TraceStart, HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
 	if(!HitActor || UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
 	{
-		if(bDrawDebugTrace)
-		{
-			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Red, false, .5f, 0, 1.f);
-		}
 		return;
 	}
 
 	if(!HitActor->FindComponentByClass<UEffectContainerComponent>())
 	{
-		if(bDrawDebugTrace)
-		{
-			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Red, false, .5f, 0, 1.f);
-		}
 		Internal_PlayWeaponMissEffectFX(Impact);
 	} else
 	{
-		if(bDrawDebugTrace)
-		{
-			DrawDebugLine(GetInstigator()->GetWorld(), Impact.TraceStart, Impact.TraceEnd, FColor::Green, false, .5f, 0, 1.f);	
-		}
 		BPI_OnSuccessfulHit(Impact);
 		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
 	}

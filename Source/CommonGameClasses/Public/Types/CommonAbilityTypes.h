@@ -45,8 +45,12 @@ enum class ELineTraceDirection : uint8
 {
 	// From player's camera (FPS/TPS standard gun)
 	Camera,
-	// From weapon mesh (FPS/TPS laser gun)
-	Mesh,
+	// From weapon mesh socket (FPS/TPS laser gun)
+	MeshSocket,
+	// From instigator's forward vector
+	InstigatorForwardVector,
+	// From instigator's forward vector
+	AbilityMeshForwardVector,
 	// Towards mouse direction on screen (ARPG)
 	Mouse
 };

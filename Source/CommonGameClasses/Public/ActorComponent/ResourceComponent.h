@@ -19,15 +19,49 @@ class COMMONGAMECLASSES_API UResourceComponent : public UActorComponent, public 
 
 public:
 	UResourceComponent();
-	
-	///////////////////////////////////
-	/// IResourceContainer overrides
-	////////////////////////////////////
-	virtual bool TryConsumeResourceAmount(const float RequestedAmount) override;
-	virtual void TryGiveResourceAmount(const float AmountToGive) override;
 
+	/**
+	 * Tries to consume the requested amount of resource from the resource pool.
+	 * The method ensures that the requested amount can be consumed first, accounts for applicable modifiers,
+	 * invokes internal consumption mechanics, and may trigger regeneration if necessary.
+	 *
+	 * @param RequestedAmount The amount of resource requested for consumption.
+	 * @return true if the requested resource amount could be partially or fully consumed, false otherwise.
+	 */
+	virtual bool TryConsumeResourceAmount(const float RequestedAmount) override;
+	/**
+	 * Attempts to add the specified amount of resources to the resource container.
+	 * This method modifies the resource pool by adding the given amount and performs
+	 * additional logic, such as stopping regeneration if all resource pools are full.
+	 *
+	 * @param AmountToGive The amount of resources to attempt to add to the resource pools.
+	 */
+	virtual void TryGiveResourceAmount(const float AmountToGive) override;
+	/**
+	 * Toggles the pause state of the resource regeneration system.
+	 * When paused, resource regeneration stops. When unpaused, regeneration resumes
+	 * based on the component's internal mechanics.
+	 *
+	 * @param bShouldPause Indicates whether resource regeneration should be paused (true) or resumed (false).
+	 */
+	virtual void TryTogglePauseResourceRegen(bool bShouldPause) override;
+	/**
+	 * Retrieves the total amount of available resources from all resource pools within the resource container.
+	 * This method calculates the sum of resources across all pools managed by the component.
+	 *
+	 * @return The total amount of resources currently available.
+	 */
 	FORCEINLINE virtual float GetAvailableResourceAmount() const override { return ResourcePoolContainer.GetSumOfAllResourcePools(); }
+	/**
+	 * Retrieves the maximum amount of resource available across all resource pools in the resource container.
+	 * This method calculates the total maximum capacity by aggregating the maximum values
+	 * of all individual resource pools managed by the component.
+	 *
+	 * @return The maximum total amount of resources across all resource pools.
+	 */
 	FORCEINLINE virtual float GetMaxResourceAmount() const override { return ResourcePoolContainer.GetMaxSumOfAllResourcePools(); }
+	//~ End IResourceContainer Interface
+	
 	UFUNCTION(BlueprintCallable, Category = "COMMON|Resources")
 	void InitResourceContainer(const float InStartingResourcePerPool, const int32 InNumResourcePools);
 

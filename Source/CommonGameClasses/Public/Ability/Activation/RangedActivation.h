@@ -24,7 +24,7 @@ public:
 
 protected:
 	// Ranged Activation 
-	virtual void Fire(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(ARangedActivation::Fire,)
+	virtual void Fire(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(URangedActivation::Fire,)
 
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void BPI_PlayFireFX(const FVector& SpawnPoint);

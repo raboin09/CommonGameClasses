@@ -23,6 +23,8 @@ class COMMONGAMECLASSES_API IResourceContainer
 public:
 	virtual bool TryConsumeResourceAmount(const float RequestedAmount) PURE_VIRTUAL(IResourceContainer::TryConsumeResourceAmount, return false; )
 	virtual void TryGiveResourceAmount(const float AmountToGive) PURE_VIRTUAL(IResourceContainer::TryGiveResourceAmount, )
+	virtual void TryTogglePauseResourceRegen(bool bShouldPause) PURE_VIRTUAL(IResourceContainer::TryTogglePauseResourceRegen, )
+	
 	virtual float GetAvailableResourceAmount() const PURE_VIRTUAL(IResourceContainer::GiveResource, return -1.f; )
 	virtual float GetMaxResourceAmount() const PURE_VIRTUAL(IResourceContainer::GetMaxResourceAmount, return -1.f; )
 };
