@@ -4,8 +4,6 @@
 #include "ActorComponent/MountManagerComponent.h"
 #include "ActorComponent/TopDownInputComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Types/CommonCoreTypes.h"
-#include "Utils/CommonCombatUtils.h"
 #include "Utils/CommonInputUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
@@ -38,6 +36,8 @@ void URangedActivation::PostInitProperties()
 	if (TraceForObjectTypes.Num() == 0)
 	{
 		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 	}
 }
 
@@ -387,6 +387,19 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 		{
 			UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, 1.f);
 		}
+
+		TArray<FHitResult> TempHits = Hits;
+		Hits.Empty();
+		bShouldStopTraceAfterFirstSuccessfulHit = true;
+		for(const FHitResult& Hit : TempHits)
+		{
+			FHitResult TempHit = WeaponTrace(true)[0];
+			if(TempHit.bBlockingHit && TempHit.GetActor() == Hit.GetActor())
+			{
+				Hits.Add(Hit);
+			}
+		}
+		bShouldStopTraceAfterFirstSuccessfulHit = false;
 	}
 	return RemoveDuplicateHitResults(Hits);
 }

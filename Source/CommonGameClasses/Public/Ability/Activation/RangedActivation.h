@@ -99,7 +99,7 @@ private:
 	FVector Internal_GetAimDirection(ELineTraceDirection LineTraceDirection) const;
 	FVector Internal_GetFiringSpreadDirection(const FVector AimDirection);
 	FVector Internal_GetMouseAim() const;
-	static TArray<FHitResult> RemoveDuplicateHitResults(const TArray<FHitResult>& HitResults);
+	TArray<FHitResult> RemoveDuplicateHitResults(const TArray<FHitResult>& HitResults);
 
 	UPROPERTY(Transient)
 	float CurrentFiringSpread;

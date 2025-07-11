@@ -14,6 +14,8 @@ void UMeleeOverlapActivation::PostInitProperties()
 	if (TraceForObjectTypes.Num() == 0)
 	{
 		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 	}
 }
 
