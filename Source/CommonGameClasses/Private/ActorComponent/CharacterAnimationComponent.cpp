@@ -220,16 +220,17 @@ void UCharacterAnimationComponent::Internal_TryCharacterKnockbackRecovery()
 }
 
 void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback)
-{	
-	float ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(bIsDeathKnockback ? HitReactEvent.DeathReactType : HitReactEvent.HitReactType);
+{
+	EHitReactType HitReactType = bIsDeathKnockback ? HitReactEvent.DeathReactType : HitReactEvent.HitReactType;
+	float ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(HitReactType);
 	if((!bIsDeathKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonStateTags::Immovable))
 	{
 		return;
 	}
 
-	const float KnockdownDuration = UCommonCombatUtils::GetKnockbackRecoveryTime(HitReactEvent.HitReactType);
+	const float KnockdownDuration = UCommonCombatUtils::GetKnockbackRecoveryTime(HitReactType);
 	const FName HitBoneName = UCommonCombatUtils::GetNearestValidBoneForImpact(HitReactEvent.HitResult.BoneName);
-	switch(HitReactEvent.HitReactType) {
+	switch(HitReactType) {
 		case EHitReactType::Knockback_Tiny:
 		case EHitReactType::Knockback_VeryLight:
 		case EHitReactType::Knockback_Light:
@@ -243,9 +244,13 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 				OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
 			}
 			break;
+		case EHitReactType::LaunchBack_Tiny:
+		case EHitReactType::LaunchBack_VeryLight:
 		case EHitReactType::LaunchBack_Light:
 		case EHitReactType::LaunchBack_Medium:
 		case EHitReactType::LaunchBack_Heavy:
+		case EHitReactType::LaunchBack_VeryHeavy:
+		case EHitReactType::LaunchBack_Huge:
 			Internal_TryStartLaunchBack(HitReactEvent, bIsDeathKnockback);
 			break;
 		default:

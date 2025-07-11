@@ -42,18 +42,18 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(MustImplement="/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> ActivationEffectsToApply;	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
-	bool bSnapCharacterRotationToEndTrace = false;
 	// Socket where the muzzle or hand is
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName MeshSocketName;
-
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
+	
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace")
 	TArray<TEnumAsByte<EObjectTypeQuery>> TraceForObjectTypes;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace")
 	ELineTraceDirection DefaultLineTraceDirection = ELineTraceDirection::Camera;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
 	ELineTraceDirection GamepadLineTraceDirection = ELineTraceDirection::InstigatorForwardVector;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
+	bool bSnapCharacterRotationToEndTrace = false;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f))
 	float TraceRange = 1000.f;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f, InlineEditConditionToggle))
@@ -71,8 +71,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace|Spread", meta = (ClampMin="0", EditCondition = "bHasFiringSpread"))
 	float FiringSpreadMax = 10.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Debug")
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Debug", meta=(InlineEditConditionToggle))
 	bool bDrawDebugTrace = false;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Debug", meta=(ClampMin = 0.f, EditCondition="bDrawDebugTrace"))
+	float DebugTraceDuration = 1.f;
 
 	// Aim assist settings
 	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (InlineEditConditionToggle))

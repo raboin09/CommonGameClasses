@@ -365,27 +365,27 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 	TraceParams.bReturnPhysicalMaterial = true;
 	TArray<AActor*> IgnoreActors; 
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
-	auto DrawDebugTrace = bDrawDebugTrace ? EDrawDebugTrace::None : EDrawDebugTrace::ForDuration;
+	auto DrawDebugTrace = bDrawDebugTrace ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	TArray<FHitResult> Hits;
 	if(bShouldStopTraceAfterFirstSuccessfulHit)
 	{
 		FHitResult Hit(ForceInit);
 		if(bLineTrace)
 		{
-			UKismetSystemLibrary::LineTraceSingleForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+			UKismetSystemLibrary::LineTraceSingleForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
 		} else
 		{
-			UKismetSystemLibrary::SphereTraceSingleForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, 1.f);	
+			UKismetSystemLibrary::SphereTraceSingleForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);	
 		}
 		Hits.Add(Hit);
 	} else
 	{
 		if(bLineTrace)
 		{
-			UKismetSystemLibrary::LineTraceMultiForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+			UKismetSystemLibrary::LineTraceMultiForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
 		} else
 		{
-			UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, 1.f);
+			UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
 		}
 
 		TArray<FHitResult> TempHits = Hits;

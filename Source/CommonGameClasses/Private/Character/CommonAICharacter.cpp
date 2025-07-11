@@ -32,8 +32,8 @@ void ACommonAICharacter::HandleMeshOutlining(const FInteractionOutlinedEventPayl
 	BPI_HandleMeshOutlining(InteractionOutlineEventPayload);
 }
 
-void ACommonAICharacter::HandleDeath()
+void ACommonAICharacter::HandleDeath(const FActorDeathEventPayload& EventPayload)
 {
-	Super::HandleDeath();
+	Super::HandleDeath(EventPayload);
 	InteractionComponent->SwitchOutlineOnAllMeshes(false);
 }

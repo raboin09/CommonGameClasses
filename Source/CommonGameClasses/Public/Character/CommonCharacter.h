@@ -37,25 +37,26 @@ public:
 	void InitCapsuleDefaults() const;
 	
 protected:
+	//~ Begin AActor Interface
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+	//~ End AActor Interface
 	
+	//~ Begin ITaggable Interface
 	virtual void HandleTagAdded(const FGameplayTagAddedEventPayload& TagAddedEventPayload) override;
 	virtual void HandleTagRemoved(const FGameplayTagRemovedEventPayload& TagRemovedEventPayload) override;
-	UFUNCTION(BlueprintCallable)
-	virtual void HandleDeath();
+	//~ End ITaggable Interface
+	
+	UFUNCTION()
+	virtual void HandleDeath(const FActorDeathEventPayload& EventPayload);
 
 	void InitTopDownMovementDefaults() const;
 	
-	////////////////////////////////
-	/// Common Events
-	////////////////////////////////
-protected:
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Character")
 	void BPI_HandleDeath();
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Character")
 	void BPI_HandleTagAdded(const FGameplayTagAddedEventPayload TagAddedEventPayload);
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Character")
 	void BPI_HandleTagRemoved(const FGameplayTagRemovedEventPayload TagRemovedEventPayload);
 	
 	////////////////////////////////
@@ -63,6 +64,8 @@ protected:
 	////////////////////////////////
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COMMON|Defaults")
 	TArray<FGameplayTag> DefaultGameplayTags;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Defaults")
+	float DeathBuffer = 1.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ShowInnerProperties))
 	TObjectPtr<UAbilityComponent> AbilityComponent;

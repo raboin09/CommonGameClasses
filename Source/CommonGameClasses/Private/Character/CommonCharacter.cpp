@@ -12,6 +12,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Core/ActorSystems/ActorTrackingSubsystem.h"
 #include "Types/CommonCoreTypes.h"
+#include "Utils/CommonCombatUtils.h"
 #include "Utils/CommonCoreUtils.h"
 
 
@@ -77,7 +78,7 @@ void ACommonCharacter::HandleTagRemoved(const FGameplayTagRemovedEventPayload& T
 	BPI_HandleTagRemoved(TagRemovedEventPayload);
 }
 
-void ACommonCharacter::HandleDeath()
+void ACommonCharacter::HandleDeath(const FActorDeathEventPayload& EventPayload)
 {
 	if (!IsAlive())
 	{
@@ -87,7 +88,8 @@ void ACommonCharacter::HandleDeath()
 	DetachFromControllerPendingDestroy();
 	AbilityComponent->DestroyAbilities();
 	BPI_HandleDeath();
-	SetLifeSpan(1.f);
+	float DeathLifeSpan = DeathBuffer + UCommonCombatUtils::GetKnockbackRecoveryTime(EventPayload.HitReactEvent.DeathReactType);	
+	SetLifeSpan(DeathLifeSpan + DeathBuffer);
 }
 
 void ACommonCharacter::InitTopDownMovementDefaults() const

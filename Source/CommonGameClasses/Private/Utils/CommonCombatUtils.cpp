@@ -4,18 +4,22 @@
 #include "Utils/CommonCombatUtils.h"
 #include "ActorComponent/ShieldEnergyComponent.h"
 
+namespace CommonCombatData
+{
+	static float KnockbackImpulseMultiplier = 40000.f;
+}
+
 float UCommonCombatUtils::GetHitImpulseValue(EHitReactType InHit)
 {
-	constexpr float Multiplier = 40000.f;
 	switch (InHit)
 	{
-	case EHitReactType::Knockback_Tiny: return .5f * Multiplier;
-	case EHitReactType::Knockback_VeryLight: return 1.f * Multiplier;
-	case EHitReactType::Knockback_Light: return 1.5f * Multiplier;
-	case EHitReactType::Knockback_Medium: return 2.f * Multiplier;
-	case EHitReactType::Knockback_Heavy: return 3.f * Multiplier;
-	case EHitReactType::Knockback_VeryHeavy: return 4.f * Multiplier;
-	case EHitReactType::Knockback_Huge: return 5.f * Multiplier;
+	case EHitReactType::Knockback_Tiny: return .5f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Knockback_VeryLight: return 1.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Knockback_Light: return 1.5f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Knockback_Medium: return 2.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Knockback_Heavy: return 3.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Knockback_VeryHeavy: return 4.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Knockback_Huge: return 5.f * CommonCombatData::KnockbackImpulseMultiplier;
 	case EHitReactType::LaunchBack_Tiny: return 100;
 	case EHitReactType::LaunchBack_VeryLight: return 250;
 	case EHitReactType::LaunchBack_Light: return 500;
@@ -50,19 +54,22 @@ float UCommonCombatUtils::GetKnockbackRecoveryTime(EHitReactType InHit)
 	switch (InHit)
 	{
 	case EHitReactType::Knockback_Tiny:
-		return .5f;
 	case EHitReactType::Knockback_VeryLight:
-		return 1.f;
 	case EHitReactType::Knockback_Light:
-		return 1.15f;
 	case EHitReactType::Knockback_Medium:
-		return 1.3f;
 	case EHitReactType::Knockback_Heavy:
-		return 1.5f;
 	case EHitReactType::Knockback_VeryHeavy:
-		return 1.75f;
 	case EHitReactType::Knockback_Huge:
-		return 2.f;
+		return CommonCombatData::KnockbackImpulseMultiplier / GetHitImpulseValue(InHit);
+	case EHitReactType::LaunchBack_Tiny:
+	case EHitReactType::LaunchBack_VeryLight:
+	case EHitReactType::LaunchBack_Light:
+	case EHitReactType::LaunchBack_Medium:
+	case EHitReactType::LaunchBack_Heavy:
+	case EHitReactType::LaunchBack_VeryHeavy:
+	case EHitReactType::LaunchBack_Huge:
+		return GetHitImpulseValue(InHit) / 1000.f;
+	case EHitReactType::None:
 	default:
 		return 0.f;
 	}

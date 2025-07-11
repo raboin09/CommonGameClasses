@@ -20,21 +20,15 @@ class COMMONGAMECLASSES_API ACommonAICharacter : public ACommonCharacter, public
 public:
 	ACommonAICharacter(const FObjectInitializer& ObjectInitializer);
 	
-	//////////////////////////////////////
-	// Interactable Overrides
-	//////////////////////////////////////
+	//~ Begin IInteractable Interface
 	virtual void HandleInteractionStarted(const FInteractionStartedEventPayload InteractionEventPayload) override;
 	virtual void HandleInteractionInitiated(const FInteractionInitiatedEventPayload InteractionEventPayload) override;
 	virtual void HandleMeshOutlining(const FInteractionOutlinedEventPayload InteractionOutlineEventPayload) override;
-
-	//////////////////////////////////////
-	// ACommonCharacter Overrides
-	//////////////////////////////////////
-	virtual void HandleDeath() override;
-
-	//////////////////////////////////////
-	// ACommonAICharacter
-	//////////////////////////////////////
+	//~ End IInteractable Interface
+	
+	//~ Begin ACommonCharacter Interface
+	virtual void HandleDeath(const FActorDeathEventPayload& EventPayload) override;
+	//~ End ACommonCharacter Interface
 	
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Events")
