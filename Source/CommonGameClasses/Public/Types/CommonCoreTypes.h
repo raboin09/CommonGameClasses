@@ -16,7 +16,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogCommonGameClasses, Log, All);
 #define COMMON_PRINT_SCREEN_GREEN(Message, Duration) GEngine->AddOnScreenDebugMessage(-1, Duration, FColor::Green, FString(Message));
 
 #define COMMON_TRACE_INTERACTION ECC_GameTraceChannel1
-#define COMMON_TRACE_ABILITY ECC_GameTraceChannel2
+#define COMMON_TRACE_ABILITY_BLOCK ECC_GameTraceChannel2
+#define COMMON_TRACE_ABILITY_OVERLAP ECC_GameTraceChannel4
 #define COMMON_OBJECT_TYPE_PROJECTILE ECC_GameTraceChannel3
 
 #define COMMON_SURFACE_Default		SurfaceType_Default

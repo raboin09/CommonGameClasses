@@ -32,6 +32,8 @@ public:
 	
 	void ToggleGamepadRootedAimingMode(bool bInGamepadRootedAimingMode);
 	void ToggleMovementOrientRotation(bool bOrientRotationToMovement);
+	void RotateCharacterToMouse(bool bInterpRotation);
+	FVector GetMouseIntersectionPoint() const;
 	
 protected:
 	UPROPERTY(EditAnywhere, Category="COMMON")
@@ -40,6 +42,28 @@ protected:
 	float MinRotationRate = 0.0f;
 	UPROPERTY(EditAnywhere, Category="COMMON")
 	float MaxRotationRate = 720.0f;
+
+	// Minimum distance required between actor and mouse cursor to trigger rotation
+	UPROPERTY(EditAnywhere, Category="COMMON|MouseRotation")
+	float MinRotationDistance = 1.0f;
+
+	// Height offset for the mouse intersection plane
+	UPROPERTY(EditAnywhere, Category="COMMON|MouseRotation")
+	float MousePlaneHeightOffset = 0.0f;
+
+	// Whether to preserve current pitch and roll values
+	UPROPERTY(EditAnywhere, Category="COMMON|MouseRotation")
+	bool bPreservePitchRoll = true;
+
+	// Whether to limit rotation speed
+	UPROPERTY(EditAnywhere, Category="COMMON|MouseRotation")
+	bool bLimitRotationSpeed = true;
+
+	// Whether to show debug visualization
+	UPROPERTY(EditAnywhere, Category="COMMON|Debug")
+	bool bShowDebugVisualization = false;
+
+
 	
 private:
 	void Internal_MoveInput(const FVector2D& InputVector);
@@ -59,7 +83,7 @@ private:
 	float CachedGamepadDeadZone = .1f;
 	float CachedGamepadSensitivity = 1.f;
 	bool bGamepadRootedAimingMode = false;
-	
+
 	bool bWasUsingGamepad = true;
 
 	TWeakObjectPtr<APlayerController> PlayerController;

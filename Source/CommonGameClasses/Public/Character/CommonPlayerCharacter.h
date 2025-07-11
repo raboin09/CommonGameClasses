@@ -60,8 +60,6 @@ protected:
 	virtual void SetupTopDownCamera();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_SetupTopDownCamera();
-
-	virtual UCameraComponent* GetCurrentCameraComponent() const; 
 	
 private:
 	void Internal_GetMoveDirections(FVector& OutForwardMoveDirection, FVector& OutRightMoveDirection) const;

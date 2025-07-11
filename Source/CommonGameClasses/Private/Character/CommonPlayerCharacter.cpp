@@ -86,11 +86,6 @@ void ACommonPlayerCharacter::SetupTopDownCamera()
 	BPI_SetupTopDownCamera();
 }
 
-UCameraComponent* ACommonPlayerCharacter::GetCurrentCameraComponent() const
-{
-	return FindComponentByClass<UCameraComponent>();
-}
-
 void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& OutForwardMoveDirection, FVector& OutRightMoveDirection) const
 {
 	const FRotator& ControlRotation = GetControlRotation();
@@ -103,13 +98,14 @@ void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& OutForwardMoveD
 			OutForwardMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			break;
 		case ECameraType::TopDown:
-			if(UCameraComponent* Camera = GetCurrentCameraComponent())
+			if(APlayerController* TempController = Cast<APlayerController>(GetController()))
 			{
-				FRotator CameraRotation = Camera->GetComponentRotation();
-				CameraRotation.Pitch = 0;
-				
+				FRotator CameraRotation;
+				FVector UnusedLocation;
+				TempController->GetPlayerViewPoint(UnusedLocation, CameraRotation);
+				CameraRotation.Pitch = 0;					
 				OutForwardMoveDirection = UKismetMathLibrary::GetForwardVector(CameraRotation);
-				OutRightMoveDirection = UKismetMathLibrary::GetRightVector(CameraRotation);
+				OutRightMoveDirection = UKismetMathLibrary::GetRightVector(CameraRotation);	
 			}
 			break ;
 		default: ;

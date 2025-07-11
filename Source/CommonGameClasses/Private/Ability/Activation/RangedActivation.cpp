@@ -8,11 +8,20 @@
 #include "Utils/CommonInputUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
+void URangedActivation::PostInitProperties()
+{
+	Super::PostInitProperties();
+	if (AimAssistTraceForObjectTypes.Num() == 0)
+	{
+		AimAssistTraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+		AimAssistTraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	}
+}
 
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {	
 	Super::Activate(TriggerEventPayload);
-	if(bSnapCharacterRotationToAimingDirection && UCommonInputUtils::IsUsingGamepad(this))
+	if(bSnapCharacterRotationToAimingDirection)
 	{
 		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
 		{
@@ -28,7 +37,7 @@ void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload
 void URangedActivation::Deactivate()
 {
 	Super::Deactivate();
-	if(bSnapCharacterRotationToAimingDirection && UCommonInputUtils::IsUsingGamepad(this))
+	if(bSnapCharacterRotationToAimingDirection)
 	{
 		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
 		{
@@ -43,17 +52,6 @@ void URangedActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> O
 {
 	Super::InitActivationMechanism(OwnerMeshComponent);
 	Internal_AssignOwningController();
-}
-
-void URangedActivation::PostInitProperties()
-{
-	Super::PostInitProperties();
-	if (TraceForObjectTypes.Num() == 0)
-	{
-		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
-		TraceForObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-	}
 }
 
 void URangedActivation::Internal_AssignOwningController()
@@ -75,7 +73,7 @@ void URangedActivation::Internal_AssignOwningController()
 
 void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
 {
-	const FVector AimDirection = Internal_GetAimDirection(ActivationLineTraceDirection);
+	const FVector AimDirection = Internal_GetAimDirection(ActivationTraceDirection);
 	StartTrace = Internal_GetStartTraceLocation(AimDirection);
 	if(bHasFiringSpread)
 	{
@@ -84,18 +82,11 @@ void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 	{
 		EndTrace = StartTrace + AimDirection * TraceRange;
 	}
-	
-	if(bSnapCharacterRotationToAimingDirection && !UCommonInputUtils::IsUsingGamepad(this))
-	{
-		FVector DirectionToTarget = (EndTrace - GetInstigator()->GetActorLocation()).GetSafeNormal2D();
-		FRotator NewRotation = DirectionToTarget.Rotation();
-		GetInstigator()->SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));	
-	}
 }
 
 FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const
 {
-	switch (ActivationLineTraceDirection) {
+	switch (ActivationTraceDirection) {
 		case ELineTraceDirection::Camera:
 			return Internal_GetCameraStartLocation(AimDirection);
 		default:
@@ -153,7 +144,6 @@ FVector URangedActivation::Internal_GetAimDirection(ELineTraceDirection LineTrac
 				{
 					BaseAimDirection.Normalize();
 				}
-				COMMON_PRINT_SCREEN_GREEN(BaseAimDirection.ToString(), .1f)
 			} else
 			{
 				BaseAimDirection = Internal_GetMouseAim();
@@ -218,7 +208,7 @@ AActor* URangedActivation::FindBestAimAssistTarget(const FVector& StartLocation,
         GetWorld(),
         StartLocation,
         AimAssistRange,
-        TraceForObjectTypes,
+        AimAssistTraceForObjectTypes,
         nullptr,
         ActorsToIgnore,
         OverlappingActors
@@ -319,9 +309,12 @@ FVector URangedActivation::Internal_GetMouseAim() const
 	{
 		return FVector::ZeroVector;
 	}
-	FHitResult TempResult;
-	OwningPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, TempResult);
-	const FVector TempAimDir = TempResult.ImpactPoint - GetRaycastOriginLocation();
+	FVector IntersectionPoint = FVector::ZeroVector;
+	if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+	{
+		IntersectionPoint = TopDownInputComponent->GetMouseIntersectionPoint();
+	}
+	const FVector TempAimDir = IntersectionPoint - GetRaycastOriginLocation();
 	const FVector SocketRot = GetRaycastOriginRotation();
 	FVector AimDir = FVector(TempAimDir.X, TempAimDir.Y, SocketRot.Z);
 	AimDir.Normalize();
@@ -337,7 +330,7 @@ FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 		{
 			const FVector StartTrace = Impact.ImpactPoint + Impact.ImpactNormal * 10.0f;
 			const FVector EndTrace = Impact.ImpactPoint - Impact.ImpactNormal * 10.0f;
-			TArray<FHitResult> Hits = WeaponTrace(bShouldLineTrace, 5.f, StartTrace, EndTrace);
+			TArray<FHitResult> Hits = WeaponTrace(bShouldLineTrace, false, 5.f, StartTrace, EndTrace);
 			for(auto Hit : Hits)
 			{
 				UseImpact = Hit;	
@@ -391,7 +384,7 @@ TArray<FHitResult> URangedActivation::RemoveDuplicateHitResults(const TArray<FHi
 	return UniqueHits;
 }
 
-TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride, bool bVisibilityTrace/* = false */, const TArray<AActor*>& AddIgnoreActors /* = {} */)
+TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, bool bTrySnapRotation, float CircleRadius, FVector StartOverride, FVector EndOverride, bool bVisibilityTrace/* = false */, const TArray<AActor*>& AddIgnoreActors /* = {} */)
 {
 	FVector StartTrace, EndTrace;
 	Internal_GetTraceLocations(StartTrace, EndTrace);
@@ -401,7 +394,7 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 	TraceParams.bReturnPhysicalMaterial = true;
 	TArray<AActor*> IgnoreActors = AddIgnoreActors;
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
-	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(COMMON_TRACE_ABILITY);
+	ETraceTypeQuery WeaponTraceType = UEngineTypes::ConvertToTraceType(bShouldStopTraceAfterFirstSuccessfulHit ? COMMON_TRACE_ABILITY_BLOCK : COMMON_TRACE_ABILITY_OVERLAP);
 	if(bVisibilityTrace)
 	{
 		WeaponTraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
@@ -442,7 +435,7 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 		for(const FHitResult& InitialHit : InitialHits)
 		{
 			TempIgnoredActors.Remove(InitialHit.GetActor());
-			FHitResult TempHit = WeaponTrace(bLineTrace, CircleRadius, StartOverride, EndOverride, true, TempIgnoredActors.Array())[0];
+			FHitResult TempHit = WeaponTrace(bLineTrace, false, CircleRadius, StartOverride, EndOverride, true, TempIgnoredActors.Array())[0];
 			if(TempHit.bBlockingHit && TempHit.GetActor() == InitialHit.GetActor())
 			{
 				Hits.Add(InitialHit);
@@ -452,7 +445,16 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 		}
 		bShouldStopTraceAfterFirstSuccessfulHit = false;
 	}
-	return RemoveDuplicateHitResults(Hits);
+
+	TArray<FHitResult> UniqueHits = RemoveDuplicateHitResults(Hits);
+	if(bSnapCharacterRotationToAimingDirection && bTrySnapRotation && !UCommonInputUtils::IsUsingGamepad(this))
+	{
+		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownInputComponent->RotateCharacterToMouse(true);
+		}
+	}
+	return UniqueHits;
 }
 
 TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision() const

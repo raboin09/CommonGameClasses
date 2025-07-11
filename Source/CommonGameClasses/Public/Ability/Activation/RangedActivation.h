@@ -36,7 +36,7 @@ protected:
 	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
-	TArray<FHitResult> WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector, bool bVisibilityTrace = false, const TArray<AActor*>& AddIgnoreActors = TArray<AActor*>());
+	TArray<FHitResult> WeaponTrace(bool bLineTrace, bool bTrySnapRotation, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector, bool bVisibilityTrace = false, const TArray<AActor*>& AddIgnoreActors = TArray<AActor*>());
 	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
@@ -46,9 +46,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName MeshSocketName;
 	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", DisplayName="Line Trace Direction")
-	ELineTraceDirection ActivationLineTraceDirection = ELineTraceDirection::Camera;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="ActivationLineTraceDirection == ELineTraceDirection::InputDirection", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", DisplayName="Trace Direction")
+	ELineTraceDirection ActivationTraceDirection = ELineTraceDirection::Camera;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="ActivationTraceDirection == ELineTraceDirection::InputDirection", EditConditionHides))
 	bool bSnapCharacterRotationToAimingDirection = false;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f))
 	float TraceRange = 1000.f;
@@ -73,15 +73,17 @@ protected:
 	float DebugTraceDuration = 1.f;
 
 	// Aim assist settings
-	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|AimAssist", meta = (InlineEditConditionToggle))
 	bool bEnableAimAssist = true;
-	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
-	float AimAssistRange = 1000.f;
-	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	TArray<TEnumAsByte<EObjectTypeQuery>> AimAssistTraceForObjectTypes;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	float AimAssistRange = TraceRange;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
 	float AimAssistAngle = 15.0f;
-	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
 	float AimAssistStrength = 0.5f;
-	UPROPERTY(EditAnywhere, Category = "COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|AimAssist", meta = (EditCondition = "bEnableAimAssist"))
 	EAffiliation AimAssistAffiliation = EAffiliation::Enemies;
 
 private:
