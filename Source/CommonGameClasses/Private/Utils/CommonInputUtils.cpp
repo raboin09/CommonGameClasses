@@ -7,6 +7,8 @@
 #include "Player/CommonPlayerController.h"
 #include "Utils/CommonCoreUtils.h"
 
+FVector2D UCommonInputUtils::LastMovementInput = FVector2D();
+
 bool UCommonInputUtils::IsUsingGamepad(const UObject* WorldContextObject)
 {
 	if (const UInputDeviceSubsystem* SubSystem = UInputDeviceSubsystem::Get())
@@ -25,4 +27,9 @@ bool UCommonInputUtils::IsUsingGamepad(const UObject* WorldContextObject)
 		}
 	}
 	return false;
+}
+
+FVector2D UCommonInputUtils::GetLastMovementInput()
+{
+	return LastMovementInput;
 }

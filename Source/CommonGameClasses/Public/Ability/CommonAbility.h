@@ -172,19 +172,7 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	bool bStopCharacterMovementWhenAbilityActive = true;
-	/**
-	 * Determines whether the character's movement rotation orientation is disabled at the start of an ability.
-	 *
-	 * When set to true, the character's movement-based rotation orientation will stop updating as soon as the ability begins.
-	 * This can be useful for abilities that require the character to maintain a fixed orientation or use a different rotation logic.
-	 *
-	 * The behavior is configurable and primarily used in cases where aiming or directional control needs to override default movement-based rotation during ability execution.
-	 *
-	 * Default value is false, meaning movement rotation orientation remains enabled by default at the start of an ability.
-	 */
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown")
-	bool bDisableMovementRotationOrientationOnAbilityStart = false;
-
+	
 	/**
 	 * Indicates whether the associated ability or functionality has a cooldown period.
 	 *
@@ -350,7 +338,6 @@ private:
 	void Internal_SetResourceContainerToComponent(TWeakObjectPtr<const AActor> PotentialActor);
 	
 	void Internal_TryTogglePauseResourceRegeneration(bool bShouldPause) const;
-	void Internal_TryUpdateMovementOrientationState(bool bStartingAbility) const;
 	void Internal_TryToggleMovementOnCharacter(bool bStartingAbility) const;
 
 	UFUNCTION()

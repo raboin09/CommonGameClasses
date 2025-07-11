@@ -20,6 +20,29 @@ ACommonStatModifierEffect::ACommonStatModifierEffect()
 	StatEffectData = CreateDefaultSubobject<UBaseStatsModifierData>(TEXT("StatEffectData"));
 }
 
+void ACommonStatModifierEffect::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+#if WITH_EDITOR
+	if(StatEffectData)
+	{
+		switch(StatEffectData->DeathImpulse) {
+			case EHitReactType::Launch_Tiny:
+			case EHitReactType::Launch_VeryLight:
+			case EHitReactType::Launch_Light:
+			case EHitReactType::Launch_Medium:
+			case EHitReactType::Launch_Heavy:
+			case EHitReactType::Launch_VeryHeavy:
+			case EHitReactType::Launch_Huge:
+				StatEffectData->DeathImpulse = EHitReactType::None;
+				break;
+			default:
+				break;
+		}
+	}
+#endif
+}
+
 bool ACommonStatModifierEffect::TryActivateEffect()
 {
 	if(CanActivateEffect())

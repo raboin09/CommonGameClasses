@@ -3,6 +3,7 @@
 #include "AIController.h"
 #include "ActorComponent/MountManagerComponent.h"
 #include "ActorComponent/TopDownInputComponent.h"
+#include "Character/CommonPlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Utils/CommonInputUtils.h"
 #include "Utils/CommonInteractUtils.h"
@@ -15,7 +16,7 @@ void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload
 	{
 		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
 		{
-			TopDownInputComponent->ToggleGamepadLeftStickAimingOnly(true);
+			TopDownInputComponent->ToggleGamepadRootedAimingMode(true);
 		}
 	}
 	Fire(TriggerEventPayload);
@@ -31,7 +32,7 @@ void URangedActivation::Deactivate()
 	{
 		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
 		{
-			TopDownInputComponent->ToggleGamepadLeftStickAimingOnly(false);
+			TopDownInputComponent->ToggleGamepadRootedAimingMode(false);
 		}
 	}
 	AbilityDeactivationEvent.Broadcast({});
@@ -74,7 +75,7 @@ void URangedActivation::Internal_AssignOwningController()
 
 void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
 {
-	const FVector AimDirection = Internal_GetAimDirection(DefaultLineTraceDirection);
+	const FVector AimDirection = Internal_GetAimDirection(ActivationLineTraceDirection);
 	StartTrace = Internal_GetStartTraceLocation(AimDirection);
 	if(bHasFiringSpread)
 	{
@@ -94,7 +95,7 @@ void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 
 FVector URangedActivation::Internal_GetStartTraceLocation(const FVector AimDirection) const
 {
-	switch (DefaultLineTraceDirection) {
+	switch (ActivationLineTraceDirection) {
 		case ELineTraceDirection::Camera:
 			return Internal_GetCameraStartLocation(AimDirection);
 		default:
@@ -116,6 +117,15 @@ FVector URangedActivation::Internal_GetCameraStartLocation(const FVector AimDire
 
 FVector URangedActivation::Internal_GetAimDirection(ELineTraceDirection LineTraceDirection) const
 {
+	// AI Can only shoot forward, dont account for gamepad
+	if(OwningAIController.IsValid())
+	{
+		if(LineTraceDirection == ELineTraceDirection::InputDirection || LineTraceDirection == ELineTraceDirection::Camera)
+		{
+			LineTraceDirection = ELineTraceDirection::AbilityMeshForwardVector;	
+		}
+	}
+
 	FVector BaseAimDirection;
 	switch (LineTraceDirection)
 	{
@@ -127,13 +137,26 @@ FVector URangedActivation::Internal_GetAimDirection(ELineTraceDirection LineTrac
 			// Use the socket rotation
 			BaseAimDirection = GetRaycastOriginRotation();
 			break;
-		case ELineTraceDirection::Mouse:
+		case ELineTraceDirection::InputDirection:
 			if(UCommonInputUtils::IsUsingGamepad(this))
 			{
-				BaseAimDirection = Internal_GetAimDirection(GamepadLineTraceDirection);
+				FVector2D LastMovementInput = UCommonInputUtils::GetLastMovementInput();
+				FVector CardinalForward;
+				FVector CardinalRight;
+				if(ACommonPlayerCharacter* PlayerCharacter = Cast<ACommonPlayerCharacter>(GetInstigator()))
+				{
+					PlayerCharacter->GetCardinalDirections(CardinalForward, CardinalRight);
+				}
+				
+				BaseAimDirection = (CardinalForward * LastMovementInput.X + CardinalRight * LastMovementInput.Y);
+				if (!BaseAimDirection.IsNearlyZero())
+				{
+					BaseAimDirection.Normalize();
+				}
+				COMMON_PRINT_SCREEN_GREEN(BaseAimDirection.ToString(), .1f)
 			} else
 			{
-				BaseAimDirection = Internal_GetMouseAim();	
+				BaseAimDirection = Internal_GetMouseAim();
 			}
 			break;
 		case ELineTraceDirection::AbilityMeshForwardVector:
@@ -368,7 +391,7 @@ TArray<FHitResult> URangedActivation::RemoveDuplicateHitResults(const TArray<FHi
 	return UniqueHits;
 }
 
-TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)
+TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride, bool bVisibilityTrace/* = false */, const TArray<AActor*>& AddIgnoreActors /* = {} */)
 {
 	FVector StartTrace, EndTrace;
 	Internal_GetTraceLocations(StartTrace, EndTrace);
@@ -376,8 +399,13 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 	EndTrace = EndOverride != FVector::ZeroVector ? EndOverride : EndTrace;
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, GetInstigator());
 	TraceParams.bReturnPhysicalMaterial = true;
-	TArray<AActor*> IgnoreActors; 
+	TArray<AActor*> IgnoreActors = AddIgnoreActors;
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
+	auto WeaponTraceType = UEngineTypes::ConvertToTraceType(COMMON_TRACE_ABILITY);
+	if(bVisibilityTrace)
+	{
+		WeaponTraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
+	}
 	auto DrawDebugTrace = bDrawDebugTrace ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	TArray<FHitResult> Hits;
 	if(bShouldStopTraceAfterFirstSuccessfulHit)
@@ -385,32 +413,42 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 		FHitResult Hit(ForceInit);
 		if(bLineTrace)
 		{
-			UKismetSystemLibrary::LineTraceSingleForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
+			UKismetSystemLibrary::LineTraceSingle(this, StartTrace, EndTrace, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
 		} else
 		{
-			UKismetSystemLibrary::SphereTraceSingleForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);	
+			UKismetSystemLibrary::SphereTraceSingle(this, StartTrace, EndTrace, CircleRadius, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hit, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);	
 		}
 		Hits.Add(Hit);
 	} else
 	{
 		if(bLineTrace)
 		{
-			UKismetSystemLibrary::LineTraceMultiForObjects(this, StartTrace, EndTrace, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
+			UKismetSystemLibrary::LineTraceMulti(this, StartTrace, EndTrace, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
 		} else
 		{
-			UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartTrace, EndTrace, CircleRadius, TraceForObjectTypes, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
+			UKismetSystemLibrary::SphereTraceMulti(this, StartTrace, EndTrace, CircleRadius, WeaponTraceType, false, IgnoreActors, DrawDebugTrace, Hits, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
+		}
+		
+		// TODO move multi-hit validation to separate function
+		TArray<FHitResult> InitialHits = Hits;
+		Hits.Empty();
+		TSet<AActor*> TempIgnoredActors;
+		for(const FHitResult& InitialHit : InitialHits)
+		{
+			TempIgnoredActors.Add(InitialHit.GetActor());
 		}
 
-		TArray<FHitResult> TempHits = Hits;
-		Hits.Empty();
 		bShouldStopTraceAfterFirstSuccessfulHit = true;
-		for(const FHitResult& Hit : TempHits)
+		for(const FHitResult& InitialHit : InitialHits)
 		{
-			FHitResult TempHit = WeaponTrace(true)[0];
-			if(TempHit.bBlockingHit && TempHit.GetActor() == Hit.GetActor())
+			TempIgnoredActors.Remove(InitialHit.GetActor());
+			FHitResult TempHit = WeaponTrace(bLineTrace, CircleRadius, StartOverride, EndOverride, true, TempIgnoredActors.Array())[0];
+			if(TempHit.bBlockingHit && TempHit.GetActor() == InitialHit.GetActor())
 			{
-				Hits.Add(Hit);
+				Hits.Add(InitialHit);
+				TempIgnoredActors.Add(InitialHit.GetActor());
 			}
+			TempIgnoredActors.Add(InitialHit.GetActor());
 		}
 		bShouldStopTraceAfterFirstSuccessfulHit = false;
 	}

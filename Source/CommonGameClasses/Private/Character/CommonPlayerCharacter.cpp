@@ -24,12 +24,7 @@ void ACommonPlayerCharacter::PossessedBy(AController* NewController)
 }
 
 void ACommonPlayerCharacter::MoveInput(float AxisX, float AxisY)
-{
-	if(UGameplayTagComponent::ActorHasGameplayTag(this, CommonStateTags::CannotMove))
-	{
-		return;
-	}
-	
+{	
 	FVector ForwardMoveDirection = FVector::ZeroVector;
 	FVector RightMoveDirection = FVector::ZeroVector;
 	Internal_GetMoveDirections(ForwardMoveDirection, RightMoveDirection);
@@ -52,6 +47,11 @@ void ACommonPlayerCharacter::MouseInput(float Yaw, float Pitch)
 		default: ;
 	}
 	BPI_MouseInput(Yaw, Pitch);
+}
+
+void ACommonPlayerCharacter::GetCardinalDirections(FVector& OutForwardDirection, FVector& OutRightDirection) const
+{
+	Internal_GetMoveDirections(OutForwardDirection, OutRightDirection);
 }
 
 void ACommonPlayerCharacter::HandleCameraTypeChanged(const FCameraTypeChangedPayload& CameraTypeChangedPayload)
@@ -86,6 +86,11 @@ void ACommonPlayerCharacter::SetupTopDownCamera()
 	BPI_SetupTopDownCamera();
 }
 
+UCameraComponent* ACommonPlayerCharacter::GetCurrentCameraComponent() const
+{
+	return FindComponentByClass<UCameraComponent>();
+}
+
 void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& OutForwardMoveDirection, FVector& OutRightMoveDirection) const
 {
 	const FRotator& ControlRotation = GetControlRotation();
@@ -98,7 +103,7 @@ void ACommonPlayerCharacter::Internal_GetMoveDirections(FVector& OutForwardMoveD
 			OutForwardMoveDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			break;
 		case ECameraType::TopDown:
-			if(UCameraComponent* Camera = FindComponentByClass<UCameraComponent>())
+			if(UCameraComponent* Camera = GetCurrentCameraComponent())
 			{
 				FRotator CameraRotation = Camera->GetComponentRotation();
 				CameraRotation.Pitch = 0;

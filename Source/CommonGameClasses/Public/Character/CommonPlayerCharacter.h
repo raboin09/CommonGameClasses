@@ -23,11 +23,20 @@ public:
 	void MoveInput(float AxisX, float AxisY);
 	UFUNCTION(BlueprintCallable, Category="COMMON|PlayerCharacter")
 	void MouseInput(float Yaw, float Pitch);
+	/**
+	 * Retrieves the forward direction vector of the character based on the current camera type.
+	 * The forward direction varies depending on whether the character is in first-person,
+	 * third-person, or top-down camera mode.
+	 *
+	 * @return A FVector representing the forward direction of the character. It returns a zero vector
+	 * if the camera type is not recognized or no valid camera component is found.
+	 */
+	void GetCardinalDirections(FVector& OutForwardDirection, FVector& OutRightDirection) const;
 	
 protected:	
-	//~ Begin ACharacter interface implementation
+	//~ Begin APawn Interface
 	virtual void PossessedBy(AController* NewController) override;
-	//~ End ACharacter interface implementation
+	//~ End APawn Interface
 
 	// AxisX is 'Forward', AxisY is 'Right'
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
@@ -51,6 +60,8 @@ protected:
 	virtual void SetupTopDownCamera();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|PlayerCharacter")
 	void BPI_SetupTopDownCamera();
+
+	virtual UCameraComponent* GetCurrentCameraComponent() const; 
 	
 private:
 	void Internal_GetMoveDirections(FVector& OutForwardMoveDirection, FVector& OutRightMoveDirection) const;

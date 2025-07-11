@@ -30,7 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|Aiming")
 	void MouseAimInput(const FVector2D& InputVector);
 	
-	void ToggleGamepadLeftStickAimingOnly(bool bGamepadLeftStickAimingOnly);
+	void ToggleGamepadRootedAimingMode(bool bInGamepadRootedAimingMode);
 	void ToggleMovementOrientRotation(bool bOrientRotationToMovement);
 	
 protected:
@@ -40,10 +40,6 @@ protected:
 	float MinRotationRate = 0.0f;
 	UPROPERTY(EditAnywhere, Category="COMMON")
 	float MaxRotationRate = 720.0f;
-	UPROPERTY(BlueprintReadOnly, Category="COMMON|Input")
-	FVector2D LastMoveInput;
-	UPROPERTY(BlueprintReadOnly, Category="COMMON|Input")
-	FVector2D LastAimInput;
 	
 private:
 	void Internal_MoveInput(const FVector2D& InputVector);
@@ -62,7 +58,7 @@ private:
 
 	float CachedGamepadDeadZone = .1f;
 	float CachedGamepadSensitivity = 1.f;
-	bool bGamepadShouldRotateCharacterToAiming = false;
+	bool bGamepadRootedAimingMode = false;
 	
 	bool bWasUsingGamepad = true;
 

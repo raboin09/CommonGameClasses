@@ -51,6 +51,6 @@ enum class ELineTraceDirection : uint8
 	InstigatorForwardVector,
 	// From instigator's forward vector
 	AbilityMeshForwardVector,
-	// Towards mouse direction on screen (ARPG)
-	Mouse
+	// Towards mouse on screen or gamepad direction (ARPG)
+	InputDirection
 };

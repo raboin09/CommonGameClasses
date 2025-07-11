@@ -38,10 +38,8 @@ class COMMONGAMECLASSES_API ACommonEffect : public AActor, public IEffect
 	
 public:	
 	ACommonEffect();
-	
-	//////////////////////////
-	/// IEffect overrides
-	//////////////////////////
+
+	//~ Begin IEffect Interface
 	FORCEINLINE virtual const FEffectInitializationData& GetEffectInitializationData() override { return EffectData->InitializationData; };
 	FORCEINLINE virtual const TArray<FGameplayTag>& GetEffectTags() const override { return EffectData->InitializationData.EffectTags; }
 	FORCEINLINE virtual const TArray<FGameplayTag>& GetRemoveEffectTags() const override { return EffectData->InitializationData.RemoveEffectsWithTags; }
@@ -49,7 +47,8 @@ public:
 	virtual void PlayEffectFX() override;
 	virtual bool TryActivateEffect() override;
 	virtual void DestroyEffect() override;
-
+	//~ Begin IEffect Interface
+	
 protected:
 	virtual bool CanActivateEffect();
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Effect")

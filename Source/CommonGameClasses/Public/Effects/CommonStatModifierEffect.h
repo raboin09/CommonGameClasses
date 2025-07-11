@@ -43,6 +43,10 @@ public:
 	ACommonStatModifierEffect();
 	
 protected:
+	//~ Begin AActor Interface
+	virtual void OnConstruction(const FTransform& Transform) override;
+	//~ End AActor Interface
+	
 	//~ Begin ACommonEffect Interface
 	virtual bool TryActivateEffect() override;
 	virtual void DestroyEffect() override;

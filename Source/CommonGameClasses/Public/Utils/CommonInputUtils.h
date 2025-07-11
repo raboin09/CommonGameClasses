@@ -17,4 +17,11 @@ class COMMONGAMECLASSES_API UCommonInputUtils : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|InputUtils", meta=(WorldContext="WorldContextObject"))
 	static bool IsUsingGamepad(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|InputUtils")
+	static FVector2D GetLastMovementInput();
+	static void SetLastMovementInput(const FVector2D& NewInput) { LastMovementInput = NewInput; }
+
+private:
+	// WASD or Left Thumbstick
+	static FVector2D LastMovementInput;
 };

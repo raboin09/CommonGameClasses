@@ -25,20 +25,9 @@ class COMMONGAMECLASSES_API IActivationMechanism
 public:
 	// Activation level is for things like charge-up weapons, combos, etc. Optional AbilityOutlineRange to adjust outline range based on weapon.
 	virtual void InitActivationMechanism(TWeakObjectPtr<UMeshComponent> OwnerMeshComponent) PURE_VIRTUAL(IActivationMechanism::InitActivationMechanism,)
+	
 	virtual void Activate(const FTriggerEventPayload& TriggerEventPayload) PURE_VIRTUAL(IActivationMechanism::Activate,)
 	virtual void Deactivate() PURE_VIRTUAL(IActivationMechanism::Deactivate,)
-	FORCEINLINE virtual float GetOutlineRange() const { return INTERACT_OUTLINE_DISTANCE; }
-	
-	FORCEINLINE FAbilityActivationEvent& OnActivation() { return AbilityActivationEvent; }
-	FORCEINLINE FAbilityDeactivationEvent& OnDeactivation() { return AbilityDeactivationEvent; }
-	
-	FORCEINLINE virtual void SetInstigator(TWeakObjectPtr<APawn> InPawn) { PawnInstigator = InPawn; }
-	FORCEINLINE virtual void SetOwner(TWeakObjectPtr<AActor> InActor) { AbilityOwner = InActor; }
-
-	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
-	virtual APawn* GetInstigator() const { return PawnInstigator.Get(); }
-	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
-	virtual AActor* GetOwner() const { return AbilityOwner.Get(); }
 	
 protected:
 	TWeakObjectPtr<AActor> AbilityOwner = nullptr;
@@ -46,4 +35,15 @@ protected:
 
 	FAbilityActivationEvent AbilityActivationEvent;
 	FAbilityDeactivationEvent AbilityDeactivationEvent;
+
+public:
+	FORCEINLINE virtual float GetOutlineRange() const { return INTERACT_OUTLINE_DISTANCE; }
+	FORCEINLINE FAbilityActivationEvent& OnActivation() { return AbilityActivationEvent; }
+	FORCEINLINE FAbilityDeactivationEvent& OnDeactivation() { return AbilityDeactivationEvent; }
+	FORCEINLINE virtual void SetInstigator(TWeakObjectPtr<APawn> InPawn) { PawnInstigator = InPawn; }
+	FORCEINLINE virtual void SetOwner(TWeakObjectPtr<AActor> InActor) { AbilityOwner = InActor; }
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual APawn* GetInstigator() const { return PawnInstigator.Get(); }
+	UFUNCTION(BlueprintCallable, Category="COMMON|Ability")
+	virtual AActor* GetOwner() const { return AbilityOwner.Get(); }
 };

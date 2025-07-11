@@ -13,20 +13,20 @@ float UCommonCombatUtils::GetHitImpulseValue(EHitReactType InHit)
 {
 	switch (InHit)
 	{
-	case EHitReactType::Knockback_Tiny: return .5f * CommonCombatData::KnockbackImpulseMultiplier;
-	case EHitReactType::Knockback_VeryLight: return 1.f * CommonCombatData::KnockbackImpulseMultiplier;
-	case EHitReactType::Knockback_Light: return 1.5f * CommonCombatData::KnockbackImpulseMultiplier;
-	case EHitReactType::Knockback_Medium: return 2.f * CommonCombatData::KnockbackImpulseMultiplier;
-	case EHitReactType::Knockback_Heavy: return 3.f * CommonCombatData::KnockbackImpulseMultiplier;
-	case EHitReactType::Knockback_VeryHeavy: return 4.f * CommonCombatData::KnockbackImpulseMultiplier;
-	case EHitReactType::Knockback_Huge: return 5.f * CommonCombatData::KnockbackImpulseMultiplier;
-	case EHitReactType::LaunchBack_Tiny: return 100;
-	case EHitReactType::LaunchBack_VeryLight: return 250;
-	case EHitReactType::LaunchBack_Light: return 500;
-	case EHitReactType::LaunchBack_Medium: return 750;
-	case EHitReactType::LaunchBack_Heavy: return 1000;
-	case EHitReactType::LaunchBack_VeryHeavy: return 2000;
-	case EHitReactType::LaunchBack_Huge: return 5000;
+	case EHitReactType::Ragdoll_Tiny: return .5f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Ragdoll_VeryLight: return 1.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Ragdoll_Light: return 1.5f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Ragdoll_Medium: return 2.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Ragdoll_Heavy: return 3.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Ragdoll_VeryHeavy: return 4.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Ragdoll_Huge: return 5.f * CommonCombatData::KnockbackImpulseMultiplier;
+	case EHitReactType::Launch_Tiny: return 100;
+	case EHitReactType::Launch_VeryLight: return 500;
+	case EHitReactType::Launch_Light: return 1000;
+	case EHitReactType::Launch_Medium: return 2000;
+	case EHitReactType::Launch_Heavy: return 4000;
+	case EHitReactType::Launch_VeryHeavy: return 7500;
+	case EHitReactType::Launch_Huge: return 10000;
 	default: return 0.f;
 	}
 }
@@ -35,13 +35,13 @@ bool UCommonCombatUtils::ShouldHitKnockback(EHitReactType InHit)
 {
 	switch (InHit)
 	{
-	case EHitReactType::Knockback_Tiny:
-	case EHitReactType::Knockback_VeryLight:
-	case EHitReactType::Knockback_Light:
-	case EHitReactType::Knockback_Medium:
-	case EHitReactType::Knockback_Heavy:
-	case EHitReactType::Knockback_VeryHeavy:
-	case EHitReactType::Knockback_Huge:
+	case EHitReactType::Ragdoll_Tiny:
+	case EHitReactType::Ragdoll_VeryLight:
+	case EHitReactType::Ragdoll_Light:
+	case EHitReactType::Ragdoll_Medium:
+	case EHitReactType::Ragdoll_Heavy:
+	case EHitReactType::Ragdoll_VeryHeavy:
+	case EHitReactType::Ragdoll_Huge:
 		return true;
 	case EHitReactType::None:
 	default:
@@ -53,21 +53,21 @@ float UCommonCombatUtils::GetKnockbackRecoveryTime(EHitReactType InHit)
 {
 	switch (InHit)
 	{
-	case EHitReactType::Knockback_Tiny:
-	case EHitReactType::Knockback_VeryLight:
-	case EHitReactType::Knockback_Light:
-	case EHitReactType::Knockback_Medium:
-	case EHitReactType::Knockback_Heavy:
-	case EHitReactType::Knockback_VeryHeavy:
-	case EHitReactType::Knockback_Huge:
+	case EHitReactType::Ragdoll_Tiny:
+	case EHitReactType::Ragdoll_VeryLight:
+	case EHitReactType::Ragdoll_Light:
+	case EHitReactType::Ragdoll_Medium:
+	case EHitReactType::Ragdoll_Heavy:
+	case EHitReactType::Ragdoll_VeryHeavy:
+	case EHitReactType::Ragdoll_Huge:
 		return CommonCombatData::KnockbackImpulseMultiplier / GetHitImpulseValue(InHit);
-	case EHitReactType::LaunchBack_Tiny:
-	case EHitReactType::LaunchBack_VeryLight:
-	case EHitReactType::LaunchBack_Light:
-	case EHitReactType::LaunchBack_Medium:
-	case EHitReactType::LaunchBack_Heavy:
-	case EHitReactType::LaunchBack_VeryHeavy:
-	case EHitReactType::LaunchBack_Huge:
+	case EHitReactType::Launch_Tiny:
+	case EHitReactType::Launch_VeryLight:
+	case EHitReactType::Launch_Light:
+	case EHitReactType::Launch_Medium:
+	case EHitReactType::Launch_Heavy:
+	case EHitReactType::Launch_VeryHeavy:
+	case EHitReactType::Launch_Huge:
 		return GetHitImpulseValue(InHit) / 1000.f;
 	case EHitReactType::None:
 	default:

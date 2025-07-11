@@ -12,7 +12,6 @@
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
 #include "Ability/Trigger/MontageTrigger.h"
-#include "ActorComponent/TopDownInputComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
@@ -184,7 +183,6 @@ bool ACommonAbility::TryStartAbility()
 	if(Internal_CanStartNormalAbility())
 	{
 		Internal_TryTogglePauseResourceRegeneration(true);
-		Internal_TryUpdateMovementOrientationState(true);
 		Internal_TryToggleMovementOnCharacter(true);
 	}
 	
@@ -204,7 +202,6 @@ bool ACommonAbility::TryEndAbility()
 	}
 	TriggerMechanism->ReleaseTrigger();
 	Internal_TryTogglePauseResourceRegeneration(false);
-	Internal_TryUpdateMovementOrientationState(false);
 	Internal_TryToggleMovementOnCharacter(false);
 	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityEnd, GetOwner());
 	return true;
@@ -473,17 +470,6 @@ void ACommonAbility::Internal_TryTogglePauseResourceRegeneration(bool bShouldPau
 	}
 }
 
-void ACommonAbility::Internal_TryUpdateMovementOrientationState(bool bStartingAbility) const
-{
-	if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-	{
-		if(bDisableMovementRotationOrientationOnAbilityStart)
-		{
-			TopDownAimingComponent->ToggleMovementOrientRotation(!bStartingAbility);
-		}
-	}
-}
-
 void ACommonAbility::Internal_TryToggleMovementOnCharacter(bool bStartingAbility) const
 {
 	if(bStopCharacterMovementWhenAbilityActive)
@@ -494,11 +480,6 @@ void ACommonAbility::Internal_TryToggleMovementOnCharacter(bool bStartingAbility
 		} else
 		{
 			UGameplayTagComponent::RemoveTagFromActor(GetInstigator(), CommonStateTags::CannotMove);
-		}
-
-		if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-		{
-			TopDownAimingComponent->ToggleMovementOrientRotation(!bStartingAbility);
 		}
 	}
 }

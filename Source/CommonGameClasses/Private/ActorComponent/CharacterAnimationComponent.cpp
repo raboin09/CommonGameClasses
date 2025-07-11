@@ -187,7 +187,7 @@ float UCharacterAnimationComponent::Internal_PlayMontage(const FAnimMontagePlayD
 	return 0.f;
 }
 
-void UCharacterAnimationComponent::Internal_ApplyCharacterKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange)
+void UCharacterAnimationComponent::Internal_ApplyRagdollKnockback(const FVector& Impulse, const float ImpulseScale, const FName BoneName, bool bVelocityChange)
 {
 	// TODO Add condition for knocking character off of mount on hit reactions
 	if(const UMountManagerComponent* MountManager = GetOwner()->FindComponentByClass<UMountManagerComponent>())
@@ -231,27 +231,27 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 	const float KnockdownDuration = UCommonCombatUtils::GetKnockbackRecoveryTime(HitReactType);
 	const FName HitBoneName = UCommonCombatUtils::GetNearestValidBoneForImpact(HitReactEvent.HitResult.BoneName);
 	switch(HitReactType) {
-		case EHitReactType::Knockback_Tiny:
-		case EHitReactType::Knockback_VeryLight:
-		case EHitReactType::Knockback_Light:
-		case EHitReactType::Knockback_Medium:
-		case EHitReactType::Knockback_Heavy:
-		case EHitReactType::Knockback_VeryHeavy:
-		case EHitReactType::Knockback_Huge:
-			Internal_ApplyCharacterKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);
+		case EHitReactType::Ragdoll_Tiny:
+		case EHitReactType::Ragdoll_VeryLight:
+		case EHitReactType::Ragdoll_Light:
+		case EHitReactType::Ragdoll_Medium:
+		case EHitReactType::Ragdoll_Heavy:
+		case EHitReactType::Ragdoll_VeryHeavy:
+		case EHitReactType::Ragdoll_Huge:
+			Internal_ApplyRagdollKnockback(HitReactEvent.HitDirection, ImpulseValue, HitBoneName, false);
 			if(!bIsDeathKnockback)
 			{
 				OwnerCharacter->GetWorldTimerManager().SetTimer(TimerHandle_Ragdoll, this, &ThisClass::Internal_TryCharacterKnockbackRecovery, KnockdownDuration, false);	
 			}
 			break;
-		case EHitReactType::LaunchBack_Tiny:
-		case EHitReactType::LaunchBack_VeryLight:
-		case EHitReactType::LaunchBack_Light:
-		case EHitReactType::LaunchBack_Medium:
-		case EHitReactType::LaunchBack_Heavy:
-		case EHitReactType::LaunchBack_VeryHeavy:
-		case EHitReactType::LaunchBack_Huge:
-			Internal_TryStartLaunchBack(HitReactEvent, bIsDeathKnockback);
+		case EHitReactType::Launch_Tiny:
+		case EHitReactType::Launch_VeryLight:
+		case EHitReactType::Launch_Light:
+		case EHitReactType::Launch_Medium:
+		case EHitReactType::Launch_Heavy:
+		case EHitReactType::Launch_VeryHeavy:
+		case EHitReactType::Launch_Huge:
+			Internal_TryStartLaunchKnockback(HitReactEvent, bIsDeathKnockback);
 			break;
 		default:
 		case EHitReactType::None:
@@ -259,7 +259,7 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 	}
 }
 
-void UCharacterAnimationComponent::Internal_TryStartLaunchBack(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback)
+void UCharacterAnimationComponent::Internal_TryStartLaunchKnockback(const FDamageHitReactEvent& HitReactEvent, bool bIsDeathKnockback)
 {
 	ACharacter* HitCharacter = Cast<ACharacter>(HitReactEvent.HitResult.GetActor());
 	if(!HitCharacter)

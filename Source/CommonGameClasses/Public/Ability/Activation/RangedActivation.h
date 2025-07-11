@@ -36,7 +36,7 @@ protected:
 	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
-	TArray<FHitResult> WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector);
+	TArray<FHitResult> WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector, bool bVisibilityTrace = false, const TArray<AActor*>& AddIgnoreActors = TArray<AActor*>());
 	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
@@ -46,13 +46,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName MeshSocketName;
 	
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace")
-	TArray<TEnumAsByte<EObjectTypeQuery>> TraceForObjectTypes;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace")
-	ELineTraceDirection DefaultLineTraceDirection = ELineTraceDirection::Camera;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
-	ELineTraceDirection GamepadLineTraceDirection = ELineTraceDirection::InstigatorForwardVector;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="DefaultLineTraceDirection == ELineTraceDirection::Mouse", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", DisplayName="Line Trace Direction")
+	ELineTraceDirection ActivationLineTraceDirection = ELineTraceDirection::Camera;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="ActivationLineTraceDirection == ELineTraceDirection::InputDirection", EditConditionHides))
 	bool bSnapCharacterRotationToAimingDirection = false;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f))
 	float TraceRange = 1000.f;
