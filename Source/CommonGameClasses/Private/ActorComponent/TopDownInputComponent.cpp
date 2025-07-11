@@ -185,13 +185,6 @@ void UTopDownInputComponent::MouseAimInput(const FVector2D& InputVector)
 	}
 	UCommonInputUtils::SetLastMovementInput(InputVector);
 	PlayerCharacter->MouseInput(InputVector.X, InputVector.Y);
-	if(bSnapRotationToAimingMode)
-	{
-		if(!UCommonInputUtils::IsUsingGamepad(this))
-		{
-			Internal_RotateCharacterToMouse(true);	
-		}
-	}
 }
 
 void UTopDownInputComponent::Internal_MoveInput(const FVector2D& InputVector)
@@ -226,9 +219,13 @@ void UTopDownInputComponent::Internal_MoveInput(const FVector2D& InputVector)
 	PlayerCharacter->MoveInput(AxisX, AxisY);
 }
 
-void UTopDownInputComponent::ToggleSnapRotationToAimingMode(bool bInSnapRotationToAimingMode)
+void UTopDownInputComponent::ToggleSnapRotation(bool bInSnapRotationToAimingMode)
 {
 	bSnapRotationToAimingMode = bInSnapRotationToAimingMode;
+	if(bSnapRotationToAimingMode)
+	{
+		TryRotateCharacterToMouse(true);	
+	}
 }
 
 void UTopDownInputComponent::ToggleMovementOrientRotation(bool bOrientRotationToMovement)
@@ -271,6 +268,14 @@ FVector UTopDownInputComponent::GetMouseIntersectionPoint() const
 		WorldDirection,
 		Plane);
 	return IntersectionPoint;
+}
+
+void UTopDownInputComponent::TryRotateCharacterToMouse(bool bInterpRotation) const
+{
+	if(!UCommonInputUtils::IsUsingGamepad(this))
+	{
+		Internal_RotateCharacterToMouse(bInterpRotation);	
+	}
 }
 
 bool UTopDownInputComponent::Internal_AdjustGamepadInputs(float& OutAxisX, float& OutAxisY) const

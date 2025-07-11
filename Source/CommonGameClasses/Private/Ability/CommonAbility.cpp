@@ -18,6 +18,7 @@
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonEffectUtils.h"
+#include "Utils/CommonInputUtils.h"
 
 ACommonAbility::ACommonAbility()
 {
@@ -134,6 +135,14 @@ void ACommonAbility::UnEquipAbility()
 
 bool ACommonAbility::TryStartAbility()
 {
+	if(bSnapCharacterRotationToAimingDirection)
+	{
+		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownInputComponent->ToggleSnapRotation(true);
+		}
+	}
+	
 	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this,{CommonAbilityStateTags::RequestingStart, CommonAbilityStateTags::AutoStartAbility}))
 	{
 		return false;
@@ -185,13 +194,6 @@ bool ACommonAbility::TryStartAbility()
 	{
 		Internal_TryTogglePauseResourceRegeneration(true);
 		Internal_TryToggleMovementOnCharacter(true);
-		if(bSnapCharacterRotationToAimingDirection)
-		{
-			if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-			{
-				TopDownInputComponent->ToggleSnapRotationToAimingMode(true);
-			}
-		}
 	}
 	
 	const bool bSuccessfulStart = Internal_StartNormalAbility();
@@ -204,6 +206,13 @@ bool ACommonAbility::TryStartAbility()
 
 bool ACommonAbility::TryEndAbility()
 {
+	if(bSnapCharacterRotationToAimingDirection)
+	{
+		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownInputComponent->ToggleSnapRotation(false);
+		}
+	}
 	if (!TriggerMechanism)
 	{
 		return true;
@@ -211,13 +220,6 @@ bool ACommonAbility::TryEndAbility()
 	TriggerMechanism->ReleaseTrigger();
 	Internal_TryTogglePauseResourceRegeneration(false);
 	Internal_TryToggleMovementOnCharacter(false);
-	if(bSnapCharacterRotationToAimingDirection)
-	{
-		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-		{
-			TopDownInputComponent->ToggleSnapRotationToAimingMode(false);
-		}
-	}
 	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityEnd, GetOwner());
 	return true;
 }

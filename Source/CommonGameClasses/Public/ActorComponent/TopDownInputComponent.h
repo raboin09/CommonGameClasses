@@ -30,9 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|Aiming")
 	void MouseAimInput(const FVector2D& InputVector);
 	
-	void ToggleSnapRotationToAimingMode(bool bInSnapRotationToAimingMode);
+	void ToggleSnapRotation(bool bInSnapRotationToAimingMode);
 	void ToggleMovementOrientRotation(bool bOrientRotationToMovement);
 	FVector GetMouseIntersectionPoint() const;
+	void TryRotateCharacterToMouse(bool bInterpRotation) const;
 	
 protected:
 	UPROPERTY(EditAnywhere, Category="COMMON")
