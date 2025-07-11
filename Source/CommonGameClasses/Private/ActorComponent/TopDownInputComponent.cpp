@@ -57,9 +57,12 @@ void UTopDownInputComponent::MoveInput(const FVector2D& InputVector)
 		}
 	}
 	
-	if(bGamepadRootedAimingMode && UCommonInputUtils::IsUsingGamepad(this))
+	if(bSnapRotationToAimingMode)
 	{
-		GamepadAimInput(InputVector);
+		if(UCommonInputUtils::IsUsingGamepad(this))
+		{
+			GamepadAimInput(InputVector);	
+		}
 	} else
 	{
 		if(UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonStateTags::CannotMove))
@@ -167,7 +170,7 @@ void UTopDownInputComponent::GamepadAimInput(const FVector2D& InputVector)
 		return;
 	}
 	
-	if(!bGamepadRootedAimingMode)
+	if(!bSnapRotationToAimingMode)
 	{
 		return;
 	}
@@ -182,6 +185,13 @@ void UTopDownInputComponent::MouseAimInput(const FVector2D& InputVector)
 	}
 	UCommonInputUtils::SetLastMovementInput(InputVector);
 	PlayerCharacter->MouseInput(InputVector.X, InputVector.Y);
+	if(bSnapRotationToAimingMode)
+	{
+		if(!UCommonInputUtils::IsUsingGamepad(this))
+		{
+			Internal_RotateCharacterToMouse(true);	
+		}
+	}
 }
 
 void UTopDownInputComponent::Internal_MoveInput(const FVector2D& InputVector)
@@ -216,9 +226,9 @@ void UTopDownInputComponent::Internal_MoveInput(const FVector2D& InputVector)
 	PlayerCharacter->MoveInput(AxisX, AxisY);
 }
 
-void UTopDownInputComponent::ToggleGamepadRootedAimingMode(bool bInGamepadRootedAimingMode)
+void UTopDownInputComponent::ToggleSnapRotationToAimingMode(bool bInSnapRotationToAimingMode)
 {
-	bGamepadRootedAimingMode = bInGamepadRootedAimingMode;
+	bSnapRotationToAimingMode = bInSnapRotationToAimingMode;
 }
 
 void UTopDownInputComponent::ToggleMovementOrientRotation(bool bOrientRotationToMovement)
@@ -227,108 +237,6 @@ void UTopDownInputComponent::ToggleMovementOrientRotation(bool bOrientRotationTo
 	{
 		CharacterMovementComponent->bOrientRotationToMovement = bOrientRotationToMovement;
 	}
-}
-
-void UTopDownInputComponent::RotateCharacterToMouse(bool bInterpRotation)
-{
-    if (!PlayerCharacter.IsValid() || !PlayerController.IsValid())
-    {
-        return;
-    }
-	const FVector ActorLocation = PlayerCharacter->GetActorLocation();
-	const FVector IntersectionPoint = GetMouseIntersectionPoint();
-	
-    // Calculate direction and distance
-    const FVector DirectionToMouse = IntersectionPoint - ActorLocation;
-    const float DistanceToMouse = DirectionToMouse.Size2D();
-
-    // Optional minimum distance check to prevent jittering
-    if (DistanceToMouse < MinRotationDistance)
-    {
-        return;
-    }
-
-    // Get normalized direction and convert to rotation
-    const FVector NormalizedDirection = DirectionToMouse.GetSafeNormal2D();
-    FRotator TargetRotation = NormalizedDirection.Rotation();
-
-    // Maintain current pitch and roll if desired
-    if (bPreservePitchRoll)
-    {
-        const FRotator CurrentRotation = PlayerCharacter->GetActorRotation();
-        TargetRotation.Pitch = CurrentRotation.Pitch;
-        TargetRotation.Roll = CurrentRotation.Roll;
-    }
-
-    // Apply rotation speed limits if enabled
-    if (bLimitRotationSpeed && bInterpRotation)
-    {
-        const FRotator CurrentRotation = PlayerCharacter->GetActorRotation();
-        const float DeltaYaw = FMath::FindDeltaAngleDegrees(CurrentRotation.Yaw, TargetRotation.Yaw);
-        const float MaxDeltaYaw = MaxRotationRate * GetWorld()->GetDeltaSeconds();
-        
-        if (FMath::Abs(DeltaYaw) > MaxDeltaYaw)
-        {
-            const float ClampedDeltaYaw = FMath::ClampAngle(DeltaYaw, -MaxDeltaYaw, MaxDeltaYaw);
-            TargetRotation.Yaw = CurrentRotation.Yaw + ClampedDeltaYaw;
-        }
-    }
-
-    // Debug visualization
-    if (bShowDebugVisualization)
-    {
-        DrawDebugLine(
-            GetWorld(),
-            ActorLocation,
-            IntersectionPoint,
-            FColor::Yellow,
-            false,
-            -1.0f,
-            0,
-            2.0f
-        );
-        
-        DrawDebugSphere(
-            GetWorld(),
-            IntersectionPoint,
-            10.0f,
-            12,
-            FColor::Red,
-            false,
-            -1.0f,
-            0,
-            2.0f
-        );
-
-        const FVector ForwardVector = NormalizedDirection * 100.0f;
-        DrawDebugDirectionalArrow(
-            GetWorld(),
-            ActorLocation,
-            ActorLocation + ForwardVector,
-            20.0f,
-            FColor::Blue,
-            false,
-            -1.0f,
-            0,
-            2.0f
-        );
-    }
-
-    if (bInterpRotation)
-    {
-        const FRotator CurrentRotation = PlayerCharacter->GetActorRotation();
-        const FRotator NewActorRotation = FMath::RInterpTo(
-            CurrentRotation,
-            TargetRotation,
-            GetWorld()->GetDeltaSeconds(),
-            RotationInterpSpeed
-        );
-        PlayerCharacter->SetActorRotation(NewActorRotation);
-    }
-    else
-    {
-        PlayerCharacter->SetActorRotation(TargetRotation);
-    }
 }
 
 FVector UTopDownInputComponent::GetMouseIntersectionPoint() const

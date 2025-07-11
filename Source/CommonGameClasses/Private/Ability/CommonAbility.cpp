@@ -12,6 +12,7 @@
 #include "Types/CommonTagTypes.h"
 #include "API/Ability/ResourceContainer.h"
 #include "Ability/Trigger/MontageTrigger.h"
+#include "ActorComponent/TopDownInputComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "Types/CommonAbilityTypes.h"
@@ -184,6 +185,13 @@ bool ACommonAbility::TryStartAbility()
 	{
 		Internal_TryTogglePauseResourceRegeneration(true);
 		Internal_TryToggleMovementOnCharacter(true);
+		if(bSnapCharacterRotationToAimingDirection)
+		{
+			if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+			{
+				TopDownInputComponent->ToggleSnapRotationToAimingMode(true);
+			}
+		}
 	}
 	
 	const bool bSuccessfulStart = Internal_StartNormalAbility();
@@ -203,6 +211,13 @@ bool ACommonAbility::TryEndAbility()
 	TriggerMechanism->ReleaseTrigger();
 	Internal_TryTogglePauseResourceRegeneration(false);
 	Internal_TryToggleMovementOnCharacter(false);
+	if(bSnapCharacterRotationToAimingDirection)
+	{
+		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownInputComponent->ToggleSnapRotationToAimingMode(false);
+		}
+	}
 	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityEnd, GetOwner());
 	return true;
 }

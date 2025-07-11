@@ -172,6 +172,8 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	bool bStopCharacterMovementWhenAbilityActive = true;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
+	bool bSnapCharacterRotationToAimingDirection = false;
 	
 	/**
 	 * Indicates whether the associated ability or functionality has a cooldown period.

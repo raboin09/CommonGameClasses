@@ -21,13 +21,6 @@ void URangedActivation::PostInitProperties()
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {	
 	Super::Activate(TriggerEventPayload);
-	if(bSnapCharacterRotationToAimingDirection)
-	{
-		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-		{
-			TopDownInputComponent->ToggleGamepadRootedAimingMode(true);
-		}
-	}
 	Fire(TriggerEventPayload);
 	BPI_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
@@ -37,13 +30,6 @@ void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload
 void URangedActivation::Deactivate()
 {
 	Super::Deactivate();
-	if(bSnapCharacterRotationToAimingDirection)
-	{
-		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-		{
-			TopDownInputComponent->ToggleGamepadRootedAimingMode(false);
-		}
-	}
 	AbilityDeactivationEvent.Broadcast({});
 	BPI_OnDeactivation();
 }
@@ -330,7 +316,7 @@ FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 		{
 			const FVector StartTrace = Impact.ImpactPoint + Impact.ImpactNormal * 10.0f;
 			const FVector EndTrace = Impact.ImpactPoint - Impact.ImpactNormal * 10.0f;
-			TArray<FHitResult> Hits = WeaponTrace(bShouldLineTrace, false, 5.f, StartTrace, EndTrace);
+			TArray<FHitResult> Hits = WeaponTrace(bShouldLineTrace, 5.f, StartTrace, EndTrace);
 			for(auto Hit : Hits)
 			{
 				UseImpact = Hit;	
@@ -384,7 +370,7 @@ TArray<FHitResult> URangedActivation::RemoveDuplicateHitResults(const TArray<FHi
 	return UniqueHits;
 }
 
-TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, bool bTrySnapRotation, float CircleRadius, FVector StartOverride, FVector EndOverride, bool bVisibilityTrace/* = false */, const TArray<AActor*>& AddIgnoreActors /* = {} */)
+TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride, const TArray<AActor*>& AddIgnoreActors /* = {} */)
 {
 	FVector StartTrace, EndTrace;
 	Internal_GetTraceLocations(StartTrace, EndTrace);
@@ -394,11 +380,7 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, bool bTrySnap
 	TraceParams.bReturnPhysicalMaterial = true;
 	TArray<AActor*> IgnoreActors = AddIgnoreActors;
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
-	ETraceTypeQuery WeaponTraceType = UEngineTypes::ConvertToTraceType(bShouldStopTraceAfterFirstSuccessfulHit ? COMMON_TRACE_ABILITY_BLOCK : COMMON_TRACE_ABILITY_OVERLAP);
-	if(bVisibilityTrace)
-	{
-		WeaponTraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
-	}
+	ETraceTypeQuery WeaponTraceType = UEngineTypes::ConvertToTraceType(bShouldStopTraceAfterFirstSuccessfulHit ? ECC_Visibility : COMMON_TRACE_ABILITY_OVERLAP);
 	auto DrawDebugTrace = bDrawDebugTrace ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	TArray<FHitResult> Hits;
 	if(bShouldStopTraceAfterFirstSuccessfulHit)
@@ -435,7 +417,7 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, bool bTrySnap
 		for(const FHitResult& InitialHit : InitialHits)
 		{
 			TempIgnoredActors.Remove(InitialHit.GetActor());
-			FHitResult TempHit = WeaponTrace(bLineTrace, false, CircleRadius, StartOverride, EndOverride, true, TempIgnoredActors.Array())[0];
+			FHitResult TempHit = WeaponTrace(bLineTrace, CircleRadius, StartOverride, EndOverride, TempIgnoredActors.Array())[0];
 			if(TempHit.bBlockingHit && TempHit.GetActor() == InitialHit.GetActor())
 			{
 				Hits.Add(InitialHit);
@@ -445,15 +427,7 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, bool bTrySnap
 		}
 		bShouldStopTraceAfterFirstSuccessfulHit = false;
 	}
-
 	TArray<FHitResult> UniqueHits = RemoveDuplicateHitResults(Hits);
-	if(bSnapCharacterRotationToAimingDirection && bTrySnapRotation && !UCommonInputUtils::IsUsingGamepad(this))
-	{
-		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-		{
-			TopDownInputComponent->RotateCharacterToMouse(true);
-		}
-	}
 	return UniqueHits;
 }
 

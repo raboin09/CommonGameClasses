@@ -36,7 +36,7 @@ protected:
 	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
-	TArray<FHitResult> WeaponTrace(bool bLineTrace, bool bTrySnapRotation, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector, bool bVisibilityTrace = false, const TArray<AActor*>& AddIgnoreActors = TArray<AActor*>());
+	TArray<FHitResult> WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector, const TArray<AActor*>& AddIgnoreActors = TArray<AActor*>());
 	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
@@ -48,8 +48,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", DisplayName="Trace Direction")
 	ELineTraceDirection ActivationTraceDirection = ELineTraceDirection::Camera;
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(EditCondition="ActivationTraceDirection == ELineTraceDirection::InputDirection", EditConditionHides))
-	bool bSnapCharacterRotationToAimingDirection = false;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f))
 	float TraceRange = 1000.f;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f, InlineEditConditionToggle))

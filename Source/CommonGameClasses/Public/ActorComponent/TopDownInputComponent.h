@@ -30,9 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="COMMON|Aiming")
 	void MouseAimInput(const FVector2D& InputVector);
 	
-	void ToggleGamepadRootedAimingMode(bool bInGamepadRootedAimingMode);
+	void ToggleSnapRotationToAimingMode(bool bInSnapRotationToAimingMode);
 	void ToggleMovementOrientRotation(bool bOrientRotationToMovement);
-	void RotateCharacterToMouse(bool bInterpRotation);
 	FVector GetMouseIntersectionPoint() const;
 	
 protected:
@@ -82,7 +81,7 @@ private:
 
 	float CachedGamepadDeadZone = .1f;
 	float CachedGamepadSensitivity = 1.f;
-	bool bGamepadRootedAimingMode = false;
+	bool bSnapRotationToAimingMode = false;
 
 	bool bWasUsingGamepad = true;
 
