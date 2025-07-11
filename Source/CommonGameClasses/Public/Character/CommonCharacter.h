@@ -65,7 +65,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="COMMON|Defaults")
 	TArray<FGameplayTag> DefaultGameplayTags;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Defaults")
-	float DeathBuffer = 1.f;
+	float DeathBuffer = 5.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ShowInnerProperties))
 	TObjectPtr<UAbilityComponent> AbilityComponent;
