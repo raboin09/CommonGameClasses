@@ -11,6 +11,13 @@
 void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {	
 	Super::Activate(TriggerEventPayload);
+	if(bSnapCharacterRotationToAimingDirection && UCommonInputUtils::IsUsingGamepad(this))
+	{
+		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownInputComponent->ToggleGamepadLeftStickAimingOnly(true);
+		}
+	}
 	Fire(TriggerEventPayload);
 	BPI_PlayFireFX(GetRaycastOriginLocation());
 	AbilityActivationEvent.Broadcast({});
@@ -20,6 +27,13 @@ void URangedActivation::Activate(const FTriggerEventPayload& TriggerEventPayload
 void URangedActivation::Deactivate()
 {
 	Super::Deactivate();
+	if(bSnapCharacterRotationToAimingDirection && UCommonInputUtils::IsUsingGamepad(this))
+	{
+		if(UTopDownInputComponent* TopDownInputComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownInputComponent->ToggleGamepadLeftStickAimingOnly(false);
+		}
+	}
 	AbilityDeactivationEvent.Broadcast({});
 	BPI_OnDeactivation();
 }
@@ -69,12 +83,12 @@ void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector&
 	{
 		EndTrace = StartTrace + AimDirection * TraceRange;
 	}
-
-	if(bSnapCharacterRotationToEndTrace)
+	
+	if(bSnapCharacterRotationToAimingDirection && !UCommonInputUtils::IsUsingGamepad(this))
 	{
 		FVector DirectionToTarget = (EndTrace - GetInstigator()->GetActorLocation()).GetSafeNormal2D();
 		FRotator NewRotation = DirectionToTarget.Rotation();
-		GetInstigator()->SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));
+		GetInstigator()->SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));	
 	}
 }
 
@@ -353,7 +367,6 @@ TArray<FHitResult> URangedActivation::RemoveDuplicateHitResults(const TArray<FHi
 	}
 	return UniqueHits;
 }
-
 
 TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride)
 {

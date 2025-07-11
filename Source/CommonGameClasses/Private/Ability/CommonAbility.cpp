@@ -108,7 +108,6 @@ void ACommonAbility::HandleEquipFinished()
 		TryStartAbility();
 	}
 	BPI_HandleEquipFinished();
-	Internal_TryUpdateAimingState(true);
 
 }
 
@@ -131,7 +130,6 @@ void ACommonAbility::UnEquipAbility()
 	TryEndAbility();
 	Internal_HideMesh(true);
 	BPI_HandleUnEquip();
-	Internal_TryUpdateAimingState(false);
 }
 
 bool ACommonAbility::TryStartAbility()
@@ -475,17 +473,6 @@ void ACommonAbility::Internal_TryTogglePauseResourceRegeneration(bool bShouldPau
 	}
 }
 
-void ACommonAbility::Internal_TryUpdateAimingState(bool bStartingAbility) const
-{
-	if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
-	{
-		if(bEnableTwinStickAiming)
-		{
-			TopDownAimingComponent->ToggleUseTwinStickAiming(bStartingAbility);
-		}
-	}
-}
-
 void ACommonAbility::Internal_TryUpdateMovementOrientationState(bool bStartingAbility) const
 {
 	if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
@@ -507,6 +494,11 @@ void ACommonAbility::Internal_TryToggleMovementOnCharacter(bool bStartingAbility
 		} else
 		{
 			UGameplayTagComponent::RemoveTagFromActor(GetInstigator(), CommonStateTags::CannotMove);
+		}
+
+		if(UTopDownInputComponent* TopDownAimingComponent = GetInstigator()->FindComponentByClass<UTopDownInputComponent>())
+		{
+			TopDownAimingComponent->ToggleMovementOrientRotation(!bStartingAbility);
 		}
 	}
 }

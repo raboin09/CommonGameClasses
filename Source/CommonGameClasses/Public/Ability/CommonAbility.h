@@ -172,15 +172,6 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability")
 	bool bStopCharacterMovementWhenAbilityActive = true;
-	
-	/**
-	 * Specifies whether twin-stick aiming is enabled for top-down gameplay.
-	 *
-	 * When enabled, this setting allows the player to use dual-stick controls for aiming, which is commonly used in top-down shooter-style games.
-	 * This property can be configured only in the editor and is not intended to change dynamically during gameplay.
-	 */
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Aiming|TopDown")
-	bool bEnableTwinStickAiming = false;
 	/**
 	 * Determines whether the character's movement rotation orientation is disabled at the start of an ability.
 	 *
@@ -359,7 +350,6 @@ private:
 	void Internal_SetResourceContainerToComponent(TWeakObjectPtr<const AActor> PotentialActor);
 	
 	void Internal_TryTogglePauseResourceRegeneration(bool bShouldPause) const;
-	void Internal_TryUpdateAimingState(bool bStartingAbility) const;
 	void Internal_TryUpdateMovementOrientationState(bool bStartingAbility) const;
 	void Internal_TryToggleMovementOnCharacter(bool bStartingAbility) const;
 

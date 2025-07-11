@@ -6,11 +6,7 @@
 #include "Character/CommonPlayerCharacter.h"
 #include "Core/CommonCoreDeveloperSettings.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/InputDeviceSubsystem.h"
-#include "GameFramework/InputSettings.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Utils/CommonCoreUtils.h"
 #include "Utils/CommonInputUtils.h"
 
@@ -18,6 +14,8 @@ UTopDownInputComponent::UTopDownInputComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
+	LastMoveInput = FVector2D::ZeroVector;
+	LastAimInput = FVector2D::ZeroVector;
 }
 
 void UTopDownInputComponent::BeginPlay()
@@ -33,44 +31,29 @@ void UTopDownInputComponent::BeginPlay()
 	PlayerCharacter = UCommonCoreUtils::GetCommonPlayerCharacter(GetOwner());
 }
 
-void UTopDownInputComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UTopDownInputComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if(!bShouldRotateCharacterToAiming)
+	if(UCommonInputUtils::IsUsingGamepad(this) != bWasUsingGamepad)
 	{
-		return;
-	}
-
-	if (bUsingGamepad)
-	{
-		Internal_RotateCharacterToGamepad(true);
-	} else {
-		Internal_RotateCharacterToMouse(true);
-	}
+		bWasUsingGamepad = UCommonInputUtils::IsUsingGamepad(this);
+		GamepadInputChanged.Broadcast(bWasUsingGamepad);
+	}	
 }
 
 void UTopDownInputComponent::MoveInput(const FVector2D& InputVector)
 {
-	Internal_MoveInput(InputVector);
-}
-
-void UTopDownInputComponent::CalculateAimAngle(float AxisX, float AxisY)
-{
-	if(!bShouldRotateCharacterToAiming)
+	if(bGamepadShouldRotateCharacterToAiming && UCommonInputUtils::IsUsingGamepad(this))
 	{
-		return;
+		GamepadAimInput(InputVector);
+	} else
+	{
+		Internal_MoveInput(InputVector);
 	}
-	AimAngle = FMath::RadiansToDegrees(FMath::Atan2(AxisY, -AxisX));
 }
 
 FRotator UTopDownInputComponent::GetMouseRotation() const
 {
-	if (!PlayerController.IsValid() || !PlayerCharacter.IsValid())
-	{
-		return FRotator::ZeroRotator;
-	}
-
 	float MouseX, MouseY;
 	if (!PlayerController->GetMousePosition(MouseX, MouseY))
 	{
@@ -93,72 +76,52 @@ FRotator UTopDownInputComponent::GetMouseRotation() const
 	return FRotator::ZeroRotator;
 }
 
-
-void UTopDownInputComponent::Internal_RotateCharacterToMouse(bool bInterpRotation)
+void UTopDownInputComponent::Internal_RotateCharacterToMouse(bool bInterpRotation) const
 {
-	if(!PlayerController.IsValid() || !PlayerCharacter.IsValid())
+	if(UCommonInputUtils::IsUsingGamepad(this))
 	{
 		return;
 	}
+	Internal_RotateCharacter(GetMouseRotation(), bInterpRotation);
+}
 
-	if(bUsingGamepad)
+void UTopDownInputComponent::Internal_RotateCharacterToGamepad(bool bInterpRotation) const
+{
+	if(!UCommonInputUtils::IsUsingGamepad(this))
+	{
+		return;
+	}
+	// TODO Need to rotate to camera forward, not character forward
+	FRotator CurrentRotation = PlayerCharacter->GetActorRotation();
+	float AimAngle = FMath::RadiansToDegrees(FMath::Atan2(LastAimInput.Y, LastAimInput.X));
+	const FRotator TargetRotation = FRotator(CurrentRotation.Pitch, AimAngle, CurrentRotation.Roll);
+	Internal_RotateCharacter(TargetRotation, bInterpRotation);
+}
+
+void UTopDownInputComponent::Internal_RotateCharacter(const FRotator& TargetRotation, bool bShouldInterpRotation) const
+{
+	if(!PlayerCharacter.IsValid())
 	{
 		return;
 	}
 	
-	FRotator TargetRotation = GetMouseRotation();
-	if (bInterpRotation)
+	if(bShouldInterpRotation)
 	{
 		FRotator CurrentRotation = PlayerCharacter->GetActorRotation();
 		FRotator NewRotation = CurrentRotation;
-        
-		// Calculate rotation delta
 		float DeltaYaw = FMath::FindDeltaAngleDegrees(CurrentRotation.Yaw, TargetRotation.Yaw);
-        
-		// Clamp rotation rate
 		float DesiredRotationRate = DeltaYaw * RotationInterpSpeed;
 		float ClampedRate = FMath::Clamp(DesiredRotationRate, -MaxRotationRate, MaxRotationRate);
-        
-		// Apply rotation
+		
 		if (FMath::Abs(DeltaYaw) > MinRotationRate)
 		{
 			NewRotation.Yaw += ClampedRate * UGameplayStatics::GetWorldDeltaSeconds(this);
 			PlayerCharacter->SetActorRotation(NewRotation);
 		}
-	}
-	else
+	} else
 	{
 		PlayerCharacter->SetActorRotation(TargetRotation);
 	}
-
-}
-
-void UTopDownInputComponent::Internal_RotateCharacterToGamepad(bool bInterpRotation)
-{
-	const FRotator OldRotation = PlayerCharacter->GetActorRotation();
-	const FRotator TargetRot = FRotator(OldRotation.Pitch, -AimAngle, OldRotation.Roll);
-	FRotator NewRotation = TargetRot;
-	if(bInterpRotation)
-	{
-		NewRotation = FMath::RInterpTo(OldRotation, TargetRot, UGameplayStatics::GetWorldDeltaSeconds(this), 5.f);	
-	}
-	PlayerCharacter->SetActorRotation(NewRotation);
-}
-
-void UTopDownInputComponent::TryToggleUsingGamepad(bool bInUsingGamepad)
-{
-	if(bUsingGamepad == bInUsingGamepad)
-	{
-		return;
-	}
-	
-	bUsingGamepad = bInUsingGamepad;
-	if (!PlayerController.IsValid())
-	{
-		return;
-	}
-	PlayerController->SetShowMouseCursor(!bUsingGamepad);
-	GamepadInputChanged.Broadcast(bUsingGamepad);
 }
 
 void UTopDownInputComponent::GamepadAimInput(const FVector2D& InputVector)
@@ -172,18 +135,16 @@ void UTopDownInputComponent::GamepadAimInput(const FVector2D& InputVector)
 		return;
 	}
 
-	TryToggleUsingGamepad(true);
-	if(!bShouldRotateCharacterToAiming)
+	if(!bGamepadShouldRotateCharacterToAiming)
 	{
 		return;
 	}
 	LastAimInput = FVector2D(AxisX, AxisY);
-	CalculateAimAngle(AxisX, AxisY);
+	Internal_RotateCharacterToGamepad(true);
 }
 
 void UTopDownInputComponent::MouseAimInput(const FVector2D& InputVector)
 {
-	TryToggleUsingGamepad(false);
 	if(!PlayerController.IsValid())
 	{
 		return;
@@ -220,52 +181,17 @@ void UTopDownInputComponent::Internal_MoveInput(const FVector2D& InputVector)
 	{
 		return;
 	}
-	TryToggleUsingGamepad(bIsUsingGamepad);
 	LastMoveInput = FVector2D(AxisX, AxisY);
 	PlayerCharacter->MoveInput(AxisX, AxisY);
 }
 
-void UTopDownInputComponent::ToggleUseTwinStickAiming(bool bShouldUseTwinStickAiming)
+void UTopDownInputComponent::ToggleGamepadLeftStickAimingOnly(bool bGamepadLeftStickAimingOnly)
 {
-	bShouldRotateCharacterToAiming = bShouldUseTwinStickAiming;
-    
-	if (UCharacterMovementComponent* CharacterMovementComponent = 
-		GetOwner()->FindComponentByClass<UCharacterMovementComponent>())
-	{
-		CharacterMovementComponent->bOrientRotationToMovement = false;
-	}
-    
-	if (APawn* Pawn = Cast<APawn>(GetOwner()))
-	{
-		Pawn->bUseControllerRotationYaw = false;
-	}
-    
-	if (USpringArmComponent* SpringArm = GetOwner()->FindComponentByClass<USpringArmComponent>())
-	{
-		SpringArm->bInheritPitch = false;
-		SpringArm->bInheritYaw = false;
-		SpringArm->bInheritRoll = false;
-	}
-}
-
-void UTopDownInputComponent::SnapRotateActorToAim()
-{
-	if(bUsingGamepad)
-	{
-
-	} else
-	{
-		Internal_RotateCharacterToMouse(false);
-	}
+	bGamepadShouldRotateCharacterToAiming = bGamepadLeftStickAimingOnly;
 }
 
 void UTopDownInputComponent::ToggleMovementOrientRotation(bool bOrientRotationToMovement)
 {
-	if(bUsingGamepad)
-	{
-		return;
-	}
-	
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetOwner()->FindComponentByClass<UCharacterMovementComponent>())
 	{
 		CharacterMovementComponent->bOrientRotationToMovement = bOrientRotationToMovement;
