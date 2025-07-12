@@ -12,7 +12,7 @@
 
 struct FResourceContainerDefaults;
 
-UCLASS(Abstract, ClassGroup=(Custom), HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"), meta=(BlueprintSpawnableComponent))
+UCLASS(Abstract, ClassGroup=(Custom), HideCategories=(COMMON_IGNORE_CATEGORIES), meta=(BlueprintSpawnableComponent))
 class COMMONGAMECLASSES_API UResourceComponent : public UActorComponent, public IResourceContainer, public ISavableComponent
 {
 	GENERATED_BODY()

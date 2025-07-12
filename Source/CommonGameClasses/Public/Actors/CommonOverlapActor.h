@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CommonActor.h"
 #include "ActorComponent/GameplayTagComponent.h"
+#include "Components/ShapeComponent.h"
 #include "Types/CommonTagTypes.h"
 #include "CommonOverlapActor.generated.h"
 
@@ -28,13 +29,29 @@ public:
 	void BPI_OnStopDetectingOverlaps();
 	UFUNCTION(BlueprintCallable, Category="COMMON")
 	void StopDetectingOverlaps();
-	
+
+	/**
+	 * Retrieves the mesh component associated with this actor.
+	 *
+	 * This function provides access to the mesh component, allowing for
+	 * interaction or customization of the mesh associated with the actor.
+	 *
+	 * @return A pointer to the mesh component of this actor.
+	 */
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
 	UMeshComponent* BPN_GetMesh() const;
-	virtual UMeshComponent* BPN_GetMesh_Implementation() const PURE_VIRTUAL(ACommonOverlapActor::BPN_GetMesh_Implementation, return nullptr;);
+	virtual UMeshComponent* BPN_GetMesh_Implementation() const { return FindComponentByClass<UMeshComponent>(); }
+	/**
+	 * Retrieves the collision component associated with this actor.
+	 *
+	 * This function provides access to the collision component, enabling
+	 * interaction with or manipulation of the actor's collision properties.
+	 *
+	 * @return A pointer to the collision component of this actor.
+	 */
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON")
 	UShapeComponent* BPN_GetCollisionComponent() const;
-	virtual UShapeComponent* BPN_GetCollisionComponent_Implementation() const  PURE_VIRTUAL(ACommonOverlapActor::BPN_GetCollisionComponent_Implementation, return nullptr;);
+	virtual UShapeComponent* BPN_GetCollisionComponent_Implementation() const { return FindComponentByClass<UShapeComponent>(); }
 	
 protected:
 	//~ Begin AActor Interface

@@ -15,7 +15,11 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
 	void BPI_PlayTrailFX(const FVector& StartPoint, const FVector& EndPoint);
 	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	void BPI_OnSuccessfulHit(const FHitResult& Impact);
+	void BPI_OnEmptyHitscan();
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void BPI_OnHitscanMiss(const FHitResult& Impact);
+	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
+	void BPI_OnHitscanSuccessfulHit(const FHitResult& Impact);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void BPN_ProcessInstantHit(const FHitResult& Impact);
 	
@@ -23,5 +27,5 @@ protected:
 	
 private:
 	void Internal_FireShot();
-	void Internal_PlayWeaponMissEffectFX(const FHitResult& Impact);
+	void Internal_PlayHitscanMissEffectFX(const FHitResult& Impact);
 };

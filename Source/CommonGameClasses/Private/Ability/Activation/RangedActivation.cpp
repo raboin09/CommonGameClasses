@@ -59,7 +59,7 @@ void URangedActivation::Internal_AssignOwningController()
 	}
 }
 
-void URangedActivation::Internal_GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
+void URangedActivation::GetTraceLocations(FVector& StartTrace, FVector& EndTrace)
 {
 	const FVector AimDirection = Internal_GetAimDirection(ActivationTraceDirection);
 	StartTrace = Internal_GetStartTraceLocation(AimDirection);
@@ -378,7 +378,7 @@ TArray<FHitResult> URangedActivation::RemoveDuplicateHitResults(const TArray<FHi
 TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, bool bVisibilityTrace, FVector StartOverride, FVector EndOverride, const TArray<AActor*>& AddIgnoreActors /* = {} */)
 {
 	FVector StartTrace, EndTrace;
-	Internal_GetTraceLocations(StartTrace, EndTrace);
+	GetTraceLocations(StartTrace, EndTrace);
 	StartTrace = StartOverride != FVector::ZeroVector ? StartOverride : StartTrace;
 	EndTrace = EndOverride != FVector::ZeroVector ? EndOverride : EndTrace;
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, GetInstigator());

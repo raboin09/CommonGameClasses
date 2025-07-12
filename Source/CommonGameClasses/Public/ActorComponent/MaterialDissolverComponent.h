@@ -8,7 +8,7 @@
 #include "MaterialDissolverComponent.generated.h"
 
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=(COMMON_IGNORE_CATEGORIES))
 class COMMONGAMECLASSES_API UMaterialDissolverComponent : public UActorComponent
 {
 	GENERATED_BODY()

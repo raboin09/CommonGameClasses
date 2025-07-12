@@ -109,7 +109,7 @@ void UMeleeOverlapActivation::Internal_CheckForCollisionHit()
 		}
 		
 		HitActors.Add(HitActor);
-		UCommonEffectUtils::ApplyEffectsToHitResult(AbilityEffects, Hit, GetInstigator());
+		UCommonEffectUtils::ApplyEffectsToHitResult(Hit, AbilityEffects, GetInstigator());
 		BPI_HandleValidHit(Hit);
 	}
 }

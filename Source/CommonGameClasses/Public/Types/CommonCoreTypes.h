@@ -7,6 +7,10 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogCommonGameClasses, Log, All);
 
+#if WITH_EDITOR
+#define COMMON_IGNORE_CATEGORIES "AssetUserData", "Asset User Data", "Navigation", "ComponentReplication", "Component Replication", "Variable", "Sockets", "Tags", "Replication", "Collision", "HLOD", "Physics", "WorldPartition", "Events", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"
+#endif
+
 #define CUR_CLASS_FUNC (FString(__FUNCTION__))
 #define CUR_LINE  (FString::FromInt(__LINE__))
 #define CUR_CLASS_FUNC_LINE (CUR_CLASS_FUNC + "(" + CUR_LINE + ")")

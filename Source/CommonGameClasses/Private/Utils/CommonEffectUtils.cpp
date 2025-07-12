@@ -87,7 +87,7 @@ void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<T
 			
 			if(ValidationLineTraceHit.bBlockingHit)
 			{
-				ApplyEffectsToHitResult(EffectsToApply, ValidationLineTraceHit, InstigatingActor);
+				ApplyEffectsToHitResult(ValidationLineTraceHit, EffectsToApply, InstigatingActor);
 			}
 			
 			// Re-add this actor to the line trace to it is ignored for future validations
@@ -97,12 +97,12 @@ void UCommonEffectUtils::ApplyEffectsInRadius(AActor* InstigatingActor, TArray<T
 	{
 		for(TTuple<AActor*, FHitResult> CurrHit: UniqueHitActors)
 		{
-			ApplyEffectsToHitResult(EffectsToApply, CurrHit.Value, InstigatingActor);
+			ApplyEffectsToHitResult(CurrHit.Value, EffectsToApply, InstigatingActor);
 		}
 	}
 }
 
-void UCommonEffectUtils::ApplyEffectAtLocation(AActor* InstigatingActor, TSubclassOf<AActor> EffectToApply, FVector Location, bool bActivateImmediately)
+void UCommonEffectUtils::ApplyEffectAtLocation(FVector Location, TSubclassOf<AActor> EffectToApply, AActor* InstigatingActor, bool bActivateImmediately)
 {
 	check(InstigatingActor)
 	FTransform SpawnTransform = FTransform();
@@ -141,7 +141,15 @@ void UCommonEffectUtils::RemoveTaggedEffectsFromActor(AActor* ReceivingActor, co
 	EffectContainerComponent->TryRemoveAllTaggedEffects(RemoveEffectsWithTag);
 }
 
-void UCommonEffectUtils::RemoveEffectsWithClassFromActor(AActor* ReceivingActor, TSubclassOf<AActor> EffectClassToRemove)
+void UCommonEffectUtils::RemoveEffectsFromActor(AActor* ReceivingActor, TArray<TSubclassOf<AActor>> EffectClassesToRemove)
+{
+	for(TSubclassOf<AActor> EffectClassToRemove : EffectClassesToRemove)
+	{
+		RemoveEffectFromActor(ReceivingActor, EffectClassToRemove);
+	}
+}
+
+void UCommonEffectUtils::RemoveEffectFromActor(AActor* ReceivingActor, TSubclassOf<AActor> EffectClassToRemove)
 {
 	UEffectContainerComponent* EffectContainerComponent = ReceivingActor->FindComponentByClass<UEffectContainerComponent>();
 	if (!EffectContainerComponent)
@@ -151,7 +159,7 @@ void UCommonEffectUtils::RemoveEffectsWithClassFromActor(AActor* ReceivingActor,
 	EffectContainerComponent->TryRemoveAllEffectsOfClass(EffectClassToRemove);
 }
 
-void UCommonEffectUtils::ApplyEffectsToActor(TArray<TSubclassOf<AActor>> EffectsToApply, AActor* ReceivingActor)
+void UCommonEffectUtils::ApplyEffectsToActor(AActor* ReceivingActor, TArray<TSubclassOf<AActor>> EffectsToApply)
 {
 	for (const TSubclassOf<AActor> EffectClass : EffectsToApply)
 	{
@@ -159,15 +167,15 @@ void UCommonEffectUtils::ApplyEffectsToActor(TArray<TSubclassOf<AActor>> Effects
 	}
 }
 
-void UCommonEffectUtils::ApplyEffectsToHitResult(TArray<TSubclassOf<AActor>> EffectsToApply, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
+void UCommonEffectUtils::ApplyEffectsToHitResult(const FHitResult& Impact, TArray<TSubclassOf<AActor>> EffectsToApply, AActor* InstigatingActor, bool bShouldRotateHitResult)
 {
 	for(const TSubclassOf<AActor> EffectClass : EffectsToApply)
 	{
-		ApplyEffectToHitResult(EffectClass, Impact, InstigatingActor, bShouldRotateHitResult);
+		ApplyEffectToHitResult(Impact, EffectClass, InstigatingActor, bShouldRotateHitResult);
 	}
 }
 
-void UCommonEffectUtils::ApplyEffectToHitResult(TSubclassOf<AActor> BaseEffectClass, const FHitResult& Impact, AActor* InstigatingActor, bool bShouldRotateHitResult)
+void UCommonEffectUtils::ApplyEffectToHitResult(const FHitResult& Impact, TSubclassOf<AActor> BaseEffectClass, AActor* InstigatingActor, bool bShouldRotateHitResult)
 {
 	if (!InstigatingActor)
 	{

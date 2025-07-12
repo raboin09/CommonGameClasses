@@ -21,11 +21,9 @@ void UCommonDeviceProfileManager::DetectAndApplyPlatform()
     if(IsSteamDeck())
     {
         CurrentPlatform = EPlatformType::SteamDeck;
-        COMMON_PRINT_SCREEN_GREEN(TEXT("Detected Steam Deck"), 10.f)
     } else
     {
         CurrentPlatform = EPlatformType::Windows;
-        COMMON_PRINT_SCREEN_GREEN(TEXT("Detected Windows"), 10.f)
     }
     SetDeviceProfile(CurrentPlatform, CurrentQuality);
 }

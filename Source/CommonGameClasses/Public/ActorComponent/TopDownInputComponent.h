@@ -10,7 +10,7 @@ class ACommonPlayerCharacter;
 /**
  * 
  */
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), HideCategories=(COMMON_IGNORE_CATEGORIES))
 class COMMONGAMECLASSES_API UTopDownInputComponent : public UActorComponent
 {
 	GENERATED_BODY()

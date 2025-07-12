@@ -12,7 +12,7 @@
 struct FGameplayTag;
 class UGameplayTagComponent;
 
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=(COMMON_IGNORE_CATEGORIES))
 class COMMONGAMECLASSES_API ACommonActor : public AActor, public ITaggable, public ISavableActor
 {
 	GENERATED_BODY()

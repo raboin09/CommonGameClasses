@@ -31,7 +31,7 @@ public:
 
 class USoundCue;
 
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=(COMMON_IGNORE_CATEGORIES))
 class COMMONGAMECLASSES_API ACommonEffect : public AActor, public IEffect
 {
 	GENERATED_BODY()

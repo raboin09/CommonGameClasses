@@ -21,7 +21,7 @@ class UBaseActivation;
 class UAbilityTriggerBase;
 enum class EResourceContainerLocation : uint8;
 
-UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "Input", "HLOD", "Physics", "WorldPartition", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
+UCLASS(Abstract, Blueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=(COMMON_IGNORE_CATEGORIES))
 class COMMONGAMECLASSES_API ACommonAbility : public ACommonActor, public IAbility, public IAbilityOutliner
 {
 	GENERATED_BODY()
@@ -144,8 +144,9 @@ protected:
 	 * When the ability is initiated, the listed effects will be applied by the owner to execute
 	 * predefined gameplay logic in conjunction with the ability's activation.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability|Effects", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityStart;
+
 	/**
 	 * Determines whether the owner of the ability applies specific effects upon the ability's end.
 	 *
@@ -157,9 +158,42 @@ protected:
 	 * restoring modified attributes, or triggering end-of-ability effects, ensuring a smooth transition
 	 * after the ability concludes.
 	 */
-	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability|Effects", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
 	TArray<TSubclassOf<AActor>> OwnerApplyEffectsOnAbilityEnd;
 
+	/**
+	 * Array of effect classes to be removed from the owner when the ability starts.
+	 *
+	 * This property specifies a list of effect classes that are immediately removed from the owning actor
+	 * at the start of an ability's execution. The classes listed must implement the required interface
+	 * defined by "/Script/CommonGameClasses.Effect".
+	 *
+	 * The purpose of this property is to allow the blueprint designer or developer to ensure that certain
+	 * effects on the owning actor are cleaned up when the ability is activated, facilitating a proper
+	 * reset or state change.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability|Effects", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	TArray<TSubclassOf<AActor>> OwnerRemoveEffectsOnAbilityStart;
+	/**
+	 * Specifies a list of effects to be removed from the owner when the ability ends.
+	 *
+	 * This property holds an array of actor subclasses that implement the specified "Effect" interface.
+	 * When the associated ability completes or is terminated, any active effects from this array
+	 * applied to the owner will be automatically removed.
+	 *
+	 * Key details:
+	 *   - Configurable via the editor as it is marked with "EditDefaultsOnly".
+	 *   - The "COMMON|Ability" category in the editor helps organize related properties.
+	 *   - Each class within the array must implement the interface '/Script/CommonGameClasses.Effect'.
+	 *
+	 * The purpose of this property is to ensure that specific gameplay effects are cleanly
+	 * deactivated or removed from the owner, maintaining proper state and avoiding unintended
+	 * lingering impacts after the ability ends.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Ability|Effects", meta=(MustImplement = "/Script/CommonGameClasses.Effect"))
+	TArray<TSubclassOf<AActor>> OwnerRemoveEffectsOnAbilityEnd;
+
+	
 	/**
 	 * Determines whether the character's movement is halted while this ability is active.
 	 *

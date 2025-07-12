@@ -173,7 +173,6 @@ bool ACommonAbility::TryStartAbility()
 		return false;
 	}
 
-
 	if (!TriggerMechanism)
 	{
 		// If there's no trigger or activation, is this really an ability?
@@ -183,7 +182,8 @@ bool ACommonAbility::TryStartAbility()
 		}
 
 		// Activate instantly, no trigger exists
-		UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityStart, GetOwner());
+		UCommonEffectUtils::ApplyEffectsToActor(GetOwner(), OwnerApplyEffectsOnAbilityStart);
+		UCommonEffectUtils::RemoveEffectsFromActor(GetOwner(), OwnerRemoveEffectsOnAbilityStart);
 		ActivationMechanism->Activate(FTriggerEventPayload());
 		return true;
 	}
@@ -198,7 +198,8 @@ bool ACommonAbility::TryStartAbility()
 	const bool bSuccessfulStart = Internal_StartNormalAbility();
 	if(bSuccessfulStart)
 	{
-		UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityStart, GetOwner());
+		UCommonEffectUtils::ApplyEffectsToActor(GetOwner(), OwnerApplyEffectsOnAbilityStart);
+		UCommonEffectUtils::RemoveEffectsFromActor(GetOwner(), OwnerRemoveEffectsOnAbilityStart);
 	}
 	return bSuccessfulStart;
 }
@@ -219,7 +220,8 @@ bool ACommonAbility::TryEndAbility()
 	TriggerMechanism->ReleaseTrigger();
 	Internal_TryTogglePauseResourceRegeneration(false);
 	Internal_TryToggleMovementOnCharacter(false);
-	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityEnd, GetOwner());
+	UCommonEffectUtils::ApplyEffectsToActor(GetOwner(), OwnerApplyEffectsOnAbilityEnd);
+	UCommonEffectUtils::RemoveEffectsFromActor(GetOwner(), OwnerRemoveEffectsOnAbilityEnd);
 	return true;
 }
 

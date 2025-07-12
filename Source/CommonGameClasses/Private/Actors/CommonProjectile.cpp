@@ -76,7 +76,7 @@ void ACommonProjectile::InitVelocity(const FVector& ShootDirection) const
 
 void ACommonProjectile::BPN_HandleImpact_Implementation(const FHitResult& HitResult)
 {
-	UCommonEffectUtils::ApplyEffectsToHitResult(ProjectileEffectsToApply, HitResult, GetInstigator());
+	UCommonEffectUtils::ApplyEffectsToHitResult(HitResult, ProjectileEffectsToApply, GetInstigator());
 }
 
 void ACommonProjectile::OnImpact(const FHitResult& HitResult)

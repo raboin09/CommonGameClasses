@@ -9,10 +9,10 @@ void UBaseActivation::InitActivationMechanism(TWeakObjectPtr<UMeshComponent> Own
 
 void UBaseActivation::Activate(const FTriggerEventPayload& TriggerEventPayload)
 {
-	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnActivation, GetInstigator());
+	UCommonEffectUtils::ApplyEffectsToActor(GetInstigator(), OwnerApplyEffectsOnActivation);
 }
 
 void UBaseActivation::Deactivate()
 {
-	UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnDeactivation, GetInstigator());
+	UCommonEffectUtils::ApplyEffectsToActor(GetInstigator(), OwnerApplyEffectsOnDeactivation);
 }

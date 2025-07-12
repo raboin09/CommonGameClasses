@@ -10,7 +10,14 @@ void UHitscanActivation::Fire(const FTriggerEventPayload& TriggerEventPayload)
 
 void UHitscanActivation::Internal_FireShot()
 {
-	for(FHitResult& Impact : WeaponTrace(bShouldLineTrace, SphereTraceRadius))
+	TArray<FHitResult> Impacts = WeaponTrace(bShouldLineTrace, SphereTraceRadius);
+	if(Impacts.Num() == 0)
+	{
+		BPI_OnEmptyHitscan();
+		return;
+	}
+	
+	for(FHitResult& Impact : Impacts)
 	{
 		BPN_ProcessInstantHit(Impact);
 	}
@@ -25,17 +32,21 @@ void UHitscanActivation::BPN_ProcessInstantHit_Implementation(const FHitResult& 
 		return;
 	}
 
-	if(!HitActor->FindComponentByClass<UEffectContainerComponent>())
+	if(ActivationEffectsToApply.Num() > 0 && !HitActor->FindComponentByClass<UEffectContainerComponent>())
 	{
-		Internal_PlayWeaponMissEffectFX(Impact);
+		BPI_OnHitscanMiss(Impact);
+		Internal_PlayHitscanMissEffectFX(Impact);
 	} else
 	{
-		BPI_OnSuccessfulHit(Impact);
-		UCommonEffectUtils::ApplyEffectsToHitResult(ActivationEffectsToApply, AdjustHitResultIfNoValidHitComponent(Impact), GetInstigator());
+		BPI_OnHitscanSuccessfulHit(Impact);
+		if(ActivationEffectsToApply.Num() > 0)
+		{
+			UCommonEffectUtils::ApplyEffectsToHitResult(AdjustHitResultIfNoValidHitComponent(Impact), ActivationEffectsToApply, GetInstigator());	
+		}
 	}
 }
 
-void UHitscanActivation::Internal_PlayWeaponMissEffectFX(const FHitResult& Impact)
+void UHitscanActivation::Internal_PlayHitscanMissEffectFX(const FHitResult& Impact)
 {
 	for(const TSubclassOf<AActor> CurrEffectClass : ActivationEffectsToApply)
 	{

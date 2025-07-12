@@ -12,7 +12,7 @@
 /**
  * 
  */
-UCLASS(HideCategories=("Variable", "Sockets", "Tags", "ComponentReplication", "Component Replication", "Cooking", "Replication", "AssetUserData", "Asset User Data", "Navigation"))
+UCLASS(HideCategories=(COMMON_IGNORE_CATEGORIES))
 class COMMONGAMECLASSES_API UGameplayTagComponent : public UActorComponent, public ISavableComponent
 {
 	GENERATED_BODY()

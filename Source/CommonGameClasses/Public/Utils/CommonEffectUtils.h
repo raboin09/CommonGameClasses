@@ -34,7 +34,8 @@ public:
 	 * @param VisibilityTraceStartOverride The location to start visibility tracing from, if override is enabled.
 	 */
 	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils", meta=(AdvancedDisplay="TargetCharacterValidationBone,bOverrideValidationStartLocation,VisibilityTraceStartOverride,CollisionChannel"))
-	static void ApplyEffectsInRadius(AActor* InstigatingActor,
+	static void ApplyEffectsInRadius(
+		AActor* InstigatingActor,
 		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect")) TArray<TSubclassOf<AActor>> EffectsToApply,
 		FVector TraceOrigin,
 		float TraceRadius,
@@ -45,6 +46,7 @@ public:
 		bool bOverrideValidationStartLocation = false,
 		FVector VisibilityTraceStartOverride = FVector::ZeroVector
 		);
+	
 	/**
 	 * Applies a specified effect at a given location in the world using the instigating actor as the context.
 	 * Optionally activates the effect immediately upon application.
@@ -56,11 +58,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void ApplyEffectAtLocation(
-		AActor* InstigatingActor,
-		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TSubclassOf<AActor> EffectToApply,
 		FVector Location,
+		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TSubclassOf<AActor> EffectToApply,
+		AActor* InstigatingActor,
 		bool bActivateImmediately = true
 		);
+	
 	/**
 	 * Applies the specified effect to the given actor, if the actor has a valid effect container component.
 	 *
@@ -75,6 +78,7 @@ public:
 		AActor* ReceivingActor,
 		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TSubclassOf<AActor> EffectToApply
 		);
+	
 	/**
 	 * Removes all gameplay effects from the specified actor that are associated with a given gameplay tag.
 	 *
@@ -83,6 +87,13 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void RemoveTaggedEffectsFromActor(AActor* ReceivingActor, const FGameplayTag& RemoveEffectsWithTag);
+
+	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
+	static void RemoveEffectsFromActor(
+		AActor* ReceivingActor,
+		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TArray<TSubclassOf<AActor>> EffectClassesToRemove
+		);
+	
 	/**
 	 * Removes all effects of the specified class from the provided actor if the actor has an associated effect container component.
 	 *
@@ -90,10 +101,11 @@ public:
 	 * @param EffectClassToRemove The class of effects to be removed from the actor.
 	 */
 	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
-	static void RemoveEffectsWithClassFromActor(
+	static void RemoveEffectFromActor(
 		AActor* ReceivingActor,
 		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TSubclassOf<AActor> EffectClassToRemove
 		);
+	
 	/**
 	 * Applies multiple effects to a specified actor.
 	 * Iterates through the provided list of effect classes and applies each effect to the receiving actor.
@@ -103,9 +115,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="COMMON|EffectUtils")
 	static void ApplyEffectsToActor(
-		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TArray<TSubclassOf<AActor>> EffectsToApply,
-		AActor* ReceivingActor
+		AActor* ReceivingActor,
+		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TArray<TSubclassOf<AActor>> EffectsToApply
 		);
+	
 	/**
 	 * Applies a series of effects to the specified impact point described by a hit result.
 	 * Each effect from the provided array of effect classes will be applied to the hit location.
@@ -116,11 +129,12 @@ public:
 	 * @param bShouldRotateHitResult Whether the hit result should be rotated to align with the actor's orientation.
 	 */
 	static void ApplyEffectsToHitResult(
-		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TArray<TSubclassOf<AActor>> EffectsToApply,
 		const FHitResult& Impact,
+		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TArray<TSubclassOf<AActor>> EffectsToApply,
 		AActor* InstigatingActor,
 		bool bShouldRotateHitResult = true
 		);
+	
 	/**
 	 * Applies a specified effect to a target based on a hit result.
 	 *
@@ -134,8 +148,8 @@ public:
 	 * @param bShouldRotateHitResult A boolean flag indicating whether the hit result should be rotated for applying the effect.
 	 */
 	static void ApplyEffectToHitResult(
-		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TSubclassOf<AActor> BaseEffectClass,
 		const FHitResult& Impact,
+		UPARAM(meta=(MustImplement="/Script/CommonGameClasses.Effect", AllowAbstract = false)) TSubclassOf<AActor> BaseEffectClass,
 		AActor* InstigatingActor,
 		bool bShouldRotateHitResult = true
 		);

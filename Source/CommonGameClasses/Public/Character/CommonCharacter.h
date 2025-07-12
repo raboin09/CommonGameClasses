@@ -24,7 +24,7 @@ class UCharacterAnimationComponent;
 class UAbilityComponent;
 class UThirdPersonCameraComponent;
 
-UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=("Replication", "Rendering", "Collision", "Actor", "HLOD", "Physics", "WorldPartition", "Events", "LevelInstance", "Cooking", "DataLayers", "Level Instance", "World Partition"))
+UCLASS(Abstract, NotBlueprintable, AutoExpandCategories=("COMMON"), PrioritizeCategories = ("COMMON"), HideCategories=(COMMON_IGNORE_CATEGORIES))
 class COMMONGAMECLASSES_API ACommonCharacter : public ACharacter, public ITaggable
 {
 	GENERATED_BODY()
