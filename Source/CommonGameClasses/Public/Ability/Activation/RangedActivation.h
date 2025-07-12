@@ -36,7 +36,7 @@ protected:
 	
 	FVector GetRaycastOriginRotation() const;
 	FVector GetRaycastOriginLocation() const;
-	TArray<FHitResult> WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector, const TArray<AActor*>& AddIgnoreActors = TArray<AActor*>());
+	TArray<FHitResult> WeaponTrace(bool bLineTrace, float CircleRadius = 5.f, bool bVisibilityTrace = false, FVector StartOverride = FVector::ZeroVector, FVector EndOverride = FVector::ZeroVector, const TArray<AActor*>& AddIgnoreActors = TArray<AActor*>());
 	TArray<AActor*> GetActorsToIgnoreCollision() const;
 	FHitResult AdjustHitResultIfNoValidHitComponent(const FHitResult& Impact);
 	
@@ -45,9 +45,13 @@ protected:
 	// Socket where the muzzle or hand is
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation")
 	FName MeshSocketName;
+	UPROPERTY(EditDefaultsOnly, DisplayName="Ignore Targets", Category="COMMON|Activation")
+	TArray<EAffiliation> IgnoreSpecificAffiliations = { EAffiliation::Allies };
 	
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", DisplayName="Trace Direction")
 	ELineTraceDirection ActivationTraceDirection = ELineTraceDirection::Camera;
+	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", DisplayName="AI Trace Direction", meta=(EditCondition= "ActivationTraceDirection == ELineTraceDirection::InputDirection || ActivationTraceDirection == ELineTraceDirection::Camera", EditConditionHides))
+	ELineTraceDirection AIActivationTraceDirectionOverride = ELineTraceDirection::AbilityMeshForwardVector;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f))
 	float TraceRange = 1000.f;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Activation|Trace", meta=(ClampMin = 1.f, InlineEditConditionToggle))

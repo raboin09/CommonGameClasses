@@ -2,8 +2,7 @@
 
 void UBurstTrigger::HandleSuccessfulTriggerPressed()
 {
-	bTriggerHeld = true;
-	if(TimeBetweenBurstShots <= 0.f)
+	if(!bHasBurstDelayBetweenShots)
 	{
 		for(int ActivationCount = 0; ActivationCount < NumberOfActivations; ++ActivationCount)
 		{
@@ -20,7 +19,6 @@ void UBurstTrigger::HandleSuccessfulTriggerPressed()
 
 void UBurstTrigger::HandleTriggerReleased()
 {
-	bTriggerHeld = false;
 	FTriggerEventPayload ReleaseTriggerEventPayload;
 	ReleaseTriggerEventPayload.SetActivationCount(0);
 	ReleaseTriggerEventPayload.bStartActivationImmediately = false;

@@ -35,15 +35,13 @@ void ACommonAIController::OnPossess(APawn* InPawn)
 	{
 		return;
 	}
-	
+
 	if(!BotBehaviorComponent->GetDefaultBehavior().IsValid())
 	{
-		// FLoadedBehaviorTreeEvent LoadedBehaviorTreeEvent = FLoadedBehaviorTreeEvent();
-		// LoadedBehaviorTreeEvent.BindDynamic(this, &ThisClass::HandleBehaviorTreeLoaded);
-		// ActorAssetManagerComponent->BPI_Async_LoadBehaviorTreeObject(BotBehaviorComponent->GetDefaultBehavior(), false, LoadedBehaviorTreeEvent);
+		
 	} else
 	{
-		HandleBehaviorTreeLoaded(BotBehaviorComponent->GetDefaultBehavior());
+		HandleBehaviorTreeLoaded(BotBehaviorComponent->GetDefaultBehavior().Get());
 	}
 }
 
@@ -88,8 +86,8 @@ void ACommonAIController::InitPerceptionComponents()
 	}
 }
 
-void ACommonAIController::HandleBehaviorTreeLoaded(TSoftObjectPtr<UBehaviorTree> LoadedTree)
+void ACommonAIController::HandleBehaviorTreeLoaded(UBehaviorTree* LoadedTree)
 {
 	InitPerceptionComponents();
-	InitAIBehavior(LoadedTree.Get());
+	InitAIBehavior(LoadedTree);
 }

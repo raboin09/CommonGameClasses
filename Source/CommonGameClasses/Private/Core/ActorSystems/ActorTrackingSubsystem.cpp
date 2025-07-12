@@ -24,11 +24,6 @@ UActorTrackingSubsystem* UActorTrackingSubsystem::GetSubsystemFromActor(const TW
 	return nullptr;
 }
 
-void UActorTrackingSubsystem::EmptyQuestRelevantArray()
-{
-	QuestRelevantActors.Empty();
-}
-
 void UActorTrackingSubsystem::TryAddActorToTrackedArrays(AActor* InActor)
 {
 	if(!InActor)
@@ -92,6 +87,24 @@ TArray<AActor*> UActorTrackingSubsystem::GetAllActorsOfClass_TrackedOnly(TSubcla
 			}
 			OutActors.Add(WeakActor.Get());
 		}
+	}
+	return OutActors;
+}
+
+TArray<AActor*> UActorTrackingSubsystem::GetAllActorsOfAffiliation_TrackedOnly(EAffiliation Affiliation)
+{
+	if(!ActorsOfAffiliation.Contains(Affiliation))
+	{
+		return {};
+	}
+	TArray<AActor*> OutActors;
+	for(TWeakObjectPtr<AActor> WeakActor : ActorsOfAffiliation.Find(Affiliation)->Actors)
+	{
+		if(WeakActor.IsStale() || !WeakActor.IsValid())
+		{
+			continue;
+		}
+		OutActors.Add(WeakActor.Get());
 	}
 	return OutActors;
 }

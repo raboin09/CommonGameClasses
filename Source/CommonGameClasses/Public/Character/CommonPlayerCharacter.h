@@ -36,6 +36,7 @@ public:
 protected:	
 	//~ Begin APawn Interface
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void UnPossessed() override;
 	//~ End APawn Interface
 
 	// AxisX is 'Forward', AxisY is 'Right'

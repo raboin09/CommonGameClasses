@@ -25,13 +25,9 @@ protected:
 	{
 		FTriggerEventPayload TriggerEventPayload;
 		BPN_ReleaseTrigger(TriggerEventPayload);
-	}	
-	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return BPI_ShouldRetriggerAbilityAfterCooldown(); }
-	
+	}		
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void BPN_PressTrigger(FTriggerEventPayload& TriggerEventPayload);
 	UFUNCTION(BlueprintNativeEvent, Category="COMMON|Ability")
 	void BPN_ReleaseTrigger(FTriggerEventPayload& TriggerEventPayload);
-	UFUNCTION(BlueprintImplementableEvent, Category="COMMON|Ability")
-	bool BPI_ShouldRetriggerAbilityAfterCooldown() const;
 };

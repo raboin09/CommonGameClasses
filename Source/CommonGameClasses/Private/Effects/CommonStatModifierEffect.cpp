@@ -8,13 +8,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Utils/CommonCombatUtils.h"
 
-UBaseStatsModifierData::UBaseStatsModifierData()
-{
-	BaseModifierValue = 0;
-	HitImpulse = EHitReactType::None;
-	DeathImpulse = EHitReactType::None;
-}
-
 ACommonStatModifierEffect::ACommonStatModifierEffect()
 {
 	StatEffectData = CreateDefaultSubobject<UBaseStatsModifierData>(TEXT("StatEffectData"));
@@ -208,7 +201,9 @@ FDamageHitReactEvent ACommonStatModifierEffect::Internal_GenerateHitReactEvent(f
 	const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(EffectContext.SurfaceHit.TraceStart, EffectContext.ReceivingActor->GetActorLocation());
 	HitReactEvent.HitDirection = LookAt.Vector().GetSafeNormal();
 	HitReactEvent.HitResult = EffectContext.SurfaceHit;
+	HitReactEvent.IgnoreDeathImpulseIfTargetHasTags = StatEffectData->IgnoreDeathImpulseIfTargetHasTags;
 	HitReactEvent.DeathReactType = StatEffectData->DeathImpulse;
+	HitReactEvent.IgnoreHitImpulseIfTargetHasTags = StatEffectData->IgnoreHitImpulseIfTargetHasTags;
 	HitReactEvent.HitReactType = StatEffectData->HitImpulse;
 	return HitReactEvent;
 }

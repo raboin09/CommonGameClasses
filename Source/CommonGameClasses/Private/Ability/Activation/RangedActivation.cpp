@@ -4,7 +4,9 @@
 #include "ActorComponent/MountManagerComponent.h"
 #include "ActorComponent/TopDownInputComponent.h"
 #include "Character/CommonPlayerCharacter.h"
+#include "Core/ActorSystems/ActorTrackingSubsystem.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Utils/CommonCoreUtils.h"
 #include "Utils/CommonInputUtils.h"
 #include "Utils/CommonInteractUtils.h"
 
@@ -99,7 +101,7 @@ FVector URangedActivation::Internal_GetAimDirection(ELineTraceDirection LineTrac
 	{
 		if(LineTraceDirection == ELineTraceDirection::InputDirection || LineTraceDirection == ELineTraceDirection::Camera)
 		{
-			LineTraceDirection = ELineTraceDirection::AbilityMeshForwardVector;	
+			LineTraceDirection = AIActivationTraceDirectionOverride;
 		}
 	}
 
@@ -266,27 +268,30 @@ bool URangedActivation::IsValidAimAssistTarget(AActor* Target) const
 		return false;
 	}
 
-	EAffiliation Affiliation = UCommonInteractUtils::GetAffiliationRelatedToPlayerCharacter(Target);
-	if(Affiliation != AimAssistAffiliation)
-	{
-		return false;
-	}
-
 	if(UGameplayTagComponent::ActorHasGameplayTag(Target, CommonStateTags::Dead))
 	{
 		return false;
 	}
-	return true;
+
+	const EAffiliation AffiliationRelationship = UCommonInteractUtils::GetAffiliationRelatedToActor(GetInstigator(), Target);
+	return AffiliationRelationship == AimAssistAffiliation;
 }
 
 FVector URangedActivation::Internal_GetFiringSpreadDirection(const FVector AimDirection)
 {
+	const float CurrentSpread = TraceSpread + CurrentFiringSpread;
+	CurrentFiringSpread = FMath::Min(FiringSpreadMax, CurrentSpread + CurrentSpread);
+	if(UCommonCoreUtils::GetCurrentCameraType(GetInstigator()) == ECameraType::TopDown)
+	{
+		const float RandomSpread = FMath::RandRange(-CurrentSpread, CurrentSpread);
+		FRotator SpreadRotation = AimDirection.Rotation();
+		SpreadRotation.Yaw += RandomSpread;
+		return SpreadRotation.Vector();
+	}
+	const float ConeHalfAngle = FMath::DegreesToRadians(CurrentSpread * 0.5f);
 	const int32 RandomSeed = FMath::Rand();
 	const FRandomStream WeaponRandomStream(RandomSeed);
-	const float CurrentSpread = TraceSpread + CurrentFiringSpread;
-	const float ConeHalfAngle = FMath::DegreesToRadians(CurrentSpread * 0.5f);
-	CurrentFiringSpread = FMath::Min(FiringSpreadMax, CurrentFiringSpread + FiringSpreadIncrement);
-	return WeaponRandomStream.VRandCone(AimDirection, ConeHalfAngle, ConeHalfAngle);
+	return WeaponRandomStream.VRandCone(AimDirection, ConeHalfAngle, ConeHalfAngle);	
 }
 
 FVector URangedActivation::Internal_GetMouseAim() const
@@ -316,7 +321,7 @@ FHitResult URangedActivation::AdjustHitResultIfNoValidHitComponent(const FHitRes
 		{
 			const FVector StartTrace = Impact.ImpactPoint + Impact.ImpactNormal * 10.0f;
 			const FVector EndTrace = Impact.ImpactPoint - Impact.ImpactNormal * 10.0f;
-			TArray<FHitResult> Hits = WeaponTrace(bShouldLineTrace, 5.f, StartTrace, EndTrace);
+			TArray<FHitResult> Hits = WeaponTrace(bShouldLineTrace, 5.f, false, StartTrace, EndTrace);
 			for(auto Hit : Hits)
 			{
 				UseImpact = Hit;	
@@ -370,7 +375,7 @@ TArray<FHitResult> URangedActivation::RemoveDuplicateHitResults(const TArray<FHi
 	return UniqueHits;
 }
 
-TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, FVector StartOverride, FVector EndOverride, const TArray<AActor*>& AddIgnoreActors /* = {} */)
+TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleRadius, bool bVisibilityTrace, FVector StartOverride, FVector EndOverride, const TArray<AActor*>& AddIgnoreActors /* = {} */)
 {
 	FVector StartTrace, EndTrace;
 	Internal_GetTraceLocations(StartTrace, EndTrace);
@@ -380,7 +385,12 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 	TraceParams.bReturnPhysicalMaterial = true;
 	TArray<AActor*> IgnoreActors = AddIgnoreActors;
 	IgnoreActors.Append(GetActorsToIgnoreCollision());
-	ETraceTypeQuery WeaponTraceType = UEngineTypes::ConvertToTraceType(bShouldStopTraceAfterFirstSuccessfulHit ? ECC_Visibility : COMMON_TRACE_ABILITY_OVERLAP);
+	
+	ETraceTypeQuery WeaponTraceType = UEngineTypes::ConvertToTraceType(bShouldStopTraceAfterFirstSuccessfulHit ? COMMON_TRACE_ABILITY_BLOCK : COMMON_TRACE_ABILITY_OVERLAP);
+	if(bVisibilityTrace)
+	{
+		WeaponTraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
+	}
 	auto DrawDebugTrace = bDrawDebugTrace ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	TArray<FHitResult> Hits;
 	if(bShouldStopTraceAfterFirstSuccessfulHit)
@@ -417,7 +427,7 @@ TArray<FHitResult> URangedActivation::WeaponTrace(bool bLineTrace, float CircleR
 		for(const FHitResult& InitialHit : InitialHits)
 		{
 			TempIgnoredActors.Remove(InitialHit.GetActor());
-			FHitResult TempHit = WeaponTrace(bLineTrace, CircleRadius, StartOverride, EndOverride, TempIgnoredActors.Array())[0];
+			FHitResult TempHit = WeaponTrace(bLineTrace, CircleRadius, true, StartOverride, EndOverride, TempIgnoredActors.Array())[0];
 			if(TempHit.bBlockingHit && TempHit.GetActor() == InitialHit.GetActor())
 			{
 				Hits.Add(InitialHit);
@@ -445,5 +455,30 @@ TArray<AActor*> URangedActivation::GetActorsToIgnoreCollision() const
 			IgnoredActors.AddUnique(CastedMount);
 		}
 	}
+	EAffiliation OwnerAffiliation = UCommonInteractUtils::GetAffiliationOfActor(GetInstigator());
+	if(UActorTrackingSubsystem* ActorTrackingSubsystem = UActorTrackingSubsystem::GetSubsystemFromActor(GetInstigator()))
+	{
+		for(EAffiliation IgnoreAffiliation : IgnoreSpecificAffiliations)
+		{
+			EAffiliation EnemyAffiliation = OwnerAffiliation == EAffiliation::Allies ? EAffiliation::Enemies : EAffiliation::Allies;
+			TArray<AActor*> AffiliationIgnoreActors;
+			switch(IgnoreAffiliation) {
+				case EAffiliation::Allies:
+					AffiliationIgnoreActors = ActorTrackingSubsystem->GetAllActorsOfAffiliation_TrackedOnly(OwnerAffiliation);
+					break;
+				case EAffiliation::Enemies:
+					AffiliationIgnoreActors = ActorTrackingSubsystem->GetAllActorsOfAffiliation_TrackedOnly(EnemyAffiliation);
+					break;
+				case EAffiliation::Destructible:
+				case EAffiliation::InteractionActor:
+				case EAffiliation::Neutral:
+					AffiliationIgnoreActors = ActorTrackingSubsystem->GetAllActorsOfAffiliation_TrackedOnly(IgnoreAffiliation);
+					break;
+				case EAffiliation::None:
+					break;
+			}
+			IgnoredActors.Append(AffiliationIgnoreActors);
+		}
+	}	
 	return IgnoredActors;
 }

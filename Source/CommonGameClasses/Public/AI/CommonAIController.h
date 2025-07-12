@@ -37,7 +37,7 @@ private:
 	// Link the bot behavior component to the perception updates
 	void InitPerceptionComponents();
 	UFUNCTION()
-	void HandleBehaviorTreeLoaded(TSoftObjectPtr<UBehaviorTree> LoadedTree);
+	void HandleBehaviorTreeLoaded(UBehaviorTree* LoadedTree);
 
 	////////////////////////////////
 	/// Common Variables
@@ -45,9 +45,9 @@ private:
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<UBotBehaviorComponent> BotBehaviorComponent;
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="COMMON")
 	TObjectPtr<UAISenseConfig_Sight> Sight;
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="COMMON")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent;
 	UPROPERTY(Transient)
 	TObjectPtr<UBlackboardComponent> BlackboardComponent;

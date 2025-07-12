@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CommonEffect.h"
 #include "Types/CommonCombatTypes.h"
+#include "Types/CommonTagTypes.h"
 #include "CommonStatModifierEffect.generated.h"
 
 UCLASS(Blueprintable, BlueprintType, EditInlineNew, DefaultToInstanced)
@@ -13,12 +14,10 @@ class UBaseStatsModifierData : public UObject
 	GENERATED_BODY()
 	
 public:
-	UBaseStatsModifierData();
-
 	UPROPERTY(EditDefaultsOnly)
 	EEffectStatType StatToModify = EEffectStatType::Damage_All;
 	UPROPERTY(EditDefaultsOnly)
-	float BaseModifierValue;
+	float BaseModifierValue = 0.f;
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::MoveSpeed"))
 	float ClampedMin = 200.f;
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::MoveSpeed"))
@@ -28,9 +27,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "(StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield) && bAddDamageForHeadshots", EditConditionHides))
 	float HeadshotModifier = 1.f;
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield", EditConditionHides))
-	EHitReactType HitImpulse;
+	TArray<FGameplayTag> IgnoreHitImpulseIfTargetHasTags = {CommonStateTags::Immovable, CommonCoreTags::PlayerCharacter };
 	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield", EditConditionHides))
-	EHitReactType DeathImpulse;
+	EHitReactType HitImpulse = EHitReactType::None;
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield", EditConditionHides))
+	TArray<FGameplayTag> IgnoreDeathImpulseIfTargetHasTags = {CommonStateTags::Immovable, CommonCoreTags::PlayerCharacter };
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition = "StatToModify == EEffectStatType::Damage_All || StatToModify == EEffectStatType::Damage_Health || StatToModify == EEffectStatType::Damage_Shield", EditConditionHides))
+	EHitReactType DeathImpulse = EHitReactType::None;
 };
 
 UCLASS(Abstract, Blueprintable)

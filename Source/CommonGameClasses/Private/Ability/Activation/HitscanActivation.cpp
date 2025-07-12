@@ -20,7 +20,7 @@ void UHitscanActivation::BPN_ProcessInstantHit_Implementation(const FHitResult& 
 {
 	const AActor* HitActor = Impact.GetActor();
 	BPI_PlayTrailFX(Impact.TraceStart, HitActor ? Impact.ImpactPoint : Impact.TraceEnd);
-	if(!HitActor || UCommonInteractUtils::AreActorsAllies(HitActor, GetInstigator()))
+	if(!HitActor)
 	{
 		return;
 	}

@@ -32,7 +32,6 @@ protected:
 	//~ Begin ITriggerMechanism Interface
 	virtual void InitTriggerMechanism() override;
 	virtual void ResetTrigger() override;
-	FORCEINLINE virtual bool ShouldRetriggerAbilityAfterCooldown() const override { return false; }
 	//~ End ITriggerMechanism Interface
 	
 	//~ Begin UAbilityTriggerBase Interface

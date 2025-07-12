@@ -42,7 +42,7 @@ void UProjectileActivation::Internal_AimAndShootProjectile(FVector& OutSpawnOrig
 		{
 			const FVector MuzzleStartTrace = OutSpawnOrigin - GetRaycastOriginRotation() * 25.0f;
 			const FVector MuzzleEndTrace = OutSpawnOrigin;
-			if (const FHitResult MuzzleImpact = WeaponTrace(bShouldLineTrace,  SphereTraceRadius, MuzzleStartTrace, MuzzleEndTrace)[0]; MuzzleImpact.bBlockingHit)
+			if (const FHitResult MuzzleImpact = WeaponTrace(bShouldLineTrace, SphereTraceRadius, false, MuzzleStartTrace, MuzzleEndTrace)[0]; MuzzleImpact.bBlockingHit)
 			{
 				bWeaponPenetration = true;
 			}

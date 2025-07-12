@@ -21,7 +21,6 @@ public:
 	virtual void PressTrigger() override;
 	// Handles initial trigger release event and call HandleTriggerReleased
 	virtual void ReleaseTrigger() override;
-	virtual bool ShouldRetriggerAbilityAfterCooldown() const override PURE_VIRTUAL(UAbilityTriggerBase::ShouldRetriggerAbilityAfterCooldown, return false; )
 
 protected:
 	virtual void HandleTriggerReleased() PURE_VIRTUAL(UAbilityTriggerBase::HandleTriggerReleased, )

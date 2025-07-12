@@ -17,7 +17,9 @@ class COMMONGAMECLASSES_API UCommonInteractUtils : public UBlueprintFunctionLibr
 	
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Interact")
-	static EAffiliation GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor);
+	static EAffiliation GetAffiliationRelatedToPlayerCharacter(AActor* TargetActor);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Interact")
+	static EAffiliation GetAffiliationRelatedToActor(AActor* SourceActor, AActor* TargetActor);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Interact")
 	static EAffiliation GetAffiliationOfActor(const AActor* InActor);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "COMMON|Interact")

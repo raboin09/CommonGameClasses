@@ -39,6 +39,18 @@ void ACommonPlayerController::OnPossess(APawn* InPawn)
 	SetNewCameraType(DefaultCameraType);
 }
 
+void ACommonPlayerController::OnUnPossess()
+{
+	if(GetPawn())
+	{
+		if(UAbilityComponent* AbilityComponent = GetPawn()->FindComponentByClass<UAbilityComponent>())
+		{
+			AbilityComponent->OnNewAbilityEquipped().RemoveDynamic(this, &ThisClass::HandleNewAbilityEquipped);
+		}	
+	}
+	Super::OnUnPossess();
+}
+
 void ACommonPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();

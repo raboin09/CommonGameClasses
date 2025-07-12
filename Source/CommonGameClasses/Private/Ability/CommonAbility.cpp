@@ -18,7 +18,6 @@
 #include "Types/CommonAbilityTypes.h"
 #include "Types/CommonCharacterAnimTypes.h"
 #include "Utils/CommonEffectUtils.h"
-#include "Utils/CommonInputUtils.h"
 
 ACommonAbility::ACommonAbility()
 {
@@ -143,7 +142,7 @@ bool ACommonAbility::TryStartAbility()
 		}
 	}
 	
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this,{CommonAbilityStateTags::RequestingStart, CommonAbilityStateTags::AutoStartAbility}))
+	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this,{CommonAbilityStateTags::AutoStartAbility}))
 	{
 		return false;
 	}
@@ -168,7 +167,8 @@ bool ACommonAbility::TryStartAbility()
 		}
 		return false;
 	}
-	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this, {CommonAbilityStateTags::OnCooldown, CommonAbilityStateTags::Active}))
+	
+	if (UGameplayTagComponent::ActorHasAnyGameplayTags(this, {CommonAbilityStateTags::OnCooldown}))
 	{
 		return false;
 	}
@@ -183,7 +183,6 @@ bool ACommonAbility::TryStartAbility()
 		}
 
 		// Activate instantly, no trigger exists
-		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::RequestingStart);
 		UCommonEffectUtils::ApplyEffectsToActor(OwnerApplyEffectsOnAbilityStart, GetOwner());
 		ActivationMechanism->Activate(FTriggerEventPayload());
 		return true;
@@ -308,9 +307,9 @@ void ACommonAbility::SetTriggerMechanism()
 	if (TriggerType == EAbilityTriggerType::SimpleBurst)
 	{
 		UBurstTrigger* BurstTriggerInstance = NewObject<UBurstTrigger>(this);
+		BurstTriggerInstance->bHasBurstDelayBetweenShots = BurstTrigger_HasDelayBetweenShots;
 		BurstTriggerInstance->NumberOfActivations = BurstTrigger_NumberOfActivations;
 		BurstTriggerInstance->TimeBetweenBurstShots = BurstTrigger_TimeBetweenBurstShots;
-		BurstTriggerInstance->bShouldRetriggerAbilityAfterCooldown = BurstTrigger_ShouldRetriggerAbilityAfterCooldown;
 		TriggerMechanism = BurstTriggerInstance;
 	} else if(TriggerType == EAbilityTriggerType::SimpleMontage)
 	{
@@ -434,8 +433,10 @@ bool ACommonAbility::Internal_StartNormalAbility()
 	// If no costs are required or has required resource cost, fire ability off
 	if (Internal_CanStartNormalAbility())
 	{
-		ResourceContainer->TryConsumeResourceAmount(ResourceCost);
-		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::RequestingStart);
+		if(ResourceContainer)
+		{
+			ResourceContainer->TryConsumeResourceAmount(ResourceCost);	
+		}
 		UGameplayTagComponent::AddTagToActor(this, CommonAbilityStateTags::Active);
 		TriggerMechanism->PressTrigger();
 		return true;
@@ -558,8 +559,6 @@ void ACommonAbility::HandleTriggerPressedEvent(const FTriggerEventPayload& Trigg
 
 void ACommonAbility::HandleTriggerReleasedEvent(const FTriggerEventPayload& TriggeredEventPayload)
 {
-	UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::RequestingStart);
-
 	// If there's a Trigger with no Activation (e.g. Jump just plays a montage) then reset the ability
 	if(!ActivationMechanism)
 	{
@@ -591,12 +590,4 @@ void ACommonAbility::HandleCooldownStarted(const FCooldownStartedEventPayload& A
 void ACommonAbility::HandleCooldownEnded(const FCooldownEndedEventPayload& AbilityCooldownEndedEvent)
 {
 	UGameplayTagComponent::RemoveTagFromActor(this, CommonAbilityStateTags::OnCooldown);
-
-	// If it's a burst trigger (3-round burst machine gun), try to activate it immediately after it's cooldown
-	// BurstTrigger shoots 1-2-3 fast Activation ticks, cools down, then fires again. This is what triggers the refiring after the cooldown.
-	if (TriggerMechanism && TriggerMechanism->ShouldRetriggerAbilityAfterCooldown() &&
-		UGameplayTagComponent::ActorHasGameplayTag(this, CommonAbilityStateTags::RequestingStart))
-	{
-		Internal_StartNormalAbility();
-	}
 }

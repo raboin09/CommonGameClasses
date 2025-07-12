@@ -66,25 +66,31 @@ EAffiliation UCommonInteractUtils::GetAffiliationOfActor(const AActor* InActor)
 	
 	return EAffiliation::None;
 }
-EAffiliation UCommonInteractUtils::GetAffiliationRelatedToPlayerCharacter(AActor* ContextActor)
+EAffiliation UCommonInteractUtils::GetAffiliationRelatedToPlayerCharacter(AActor* TargetActor)
 {
-	if(IsActorNeutral(ContextActor))
+	AActor* PlayerCharacter = UCommonCoreUtils::GetCommonPlayerCharacter(TargetActor);
+	return GetAffiliationRelatedToActor(PlayerCharacter, TargetActor);
+}
+
+EAffiliation UCommonInteractUtils::GetAffiliationRelatedToActor(AActor* SourceActor, AActor* TargetActor)
+{
+	if(IsActorNeutral(TargetActor))
 	{
 		return EAffiliation::Neutral;
 	}
 
-	if(IsActorDestructible(ContextActor))
+	if(IsActorDestructible(TargetActor))
 	{
 		return EAffiliation::Enemies;
 	}
 
-	AActor* PlayerCharacter = UCommonCoreUtils::GetCommonPlayerCharacter(ContextActor);
-	if(AreActorsAllies(PlayerCharacter, ContextActor))
+
+	if(AreActorsAllies(SourceActor, TargetActor))
 	{
 		return EAffiliation::Allies;
 	}
 
-	if(AreActorsEnemies(PlayerCharacter, ContextActor))
+	if(AreActorsEnemies(SourceActor, TargetActor))
 	{
 		return EAffiliation::Enemies;
 	}

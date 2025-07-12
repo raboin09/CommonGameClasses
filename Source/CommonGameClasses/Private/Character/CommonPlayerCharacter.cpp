@@ -2,9 +2,6 @@
 
 
 #include "Character/CommonPlayerCharacter.h"
-
-#include "Camera/CameraComponent.h"
-#include "Core/CommonCoreDeveloperSettings.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/CommonPlayerController.h"
 #include "Utils/CommonCoreUtils.h"
@@ -21,6 +18,15 @@ void ACommonPlayerCharacter::PossessedBy(AController* NewController)
 	{
 		PlayerController->OnCameraTypeChanged().AddUniqueDynamic(this, &ThisClass::HandleCameraTypeChanged);
 	}
+}
+
+void ACommonPlayerCharacter::UnPossessed()
+{
+	if(ACommonPlayerController* PlayerController = UCommonCoreUtils::GetCommonPlayerController(this))
+	{
+		PlayerController->OnCameraTypeChanged().RemoveDynamic(this, &ThisClass::HandleCameraTypeChanged);
+	}
+	Super::UnPossessed();
 }
 
 void ACommonPlayerCharacter::MoveInput(float AxisX, float AxisY)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "GameplayTagContainer.h"
 #include "CommonCombatTypes.generated.h"
 
 class UNiagaraSystem;
@@ -95,6 +96,21 @@ struct FDamageHitReactEvent
 	 */
 	EHitReactType HitReactType = EHitReactType::None;
 	/**
+	 * Contains a list of tags used to determine if hit impulses should be ignored for a target entity.
+	 *
+	 * This array is populated with gameplay tags that, when present on a target, prevent the application of
+	 * hit impulses during interactions such as combat or physics calculations. It acts as a filter to allow
+	 * fine-grained control over which entities are immune or resistant to knockback or hit reactions under
+	 * specific conditions.
+	 *
+	 * Gameplay Context:
+	 * - Typically used in combat systems, where certain states or attributes of a character (e.g., invincibility,
+	 *   stability) are represented by gameplay tags and prevent them from being affected by incoming hit impulses.
+	 * - Allows for custom behaviors based on tag configurations on the targeted entity.
+	 */
+	TArray<FGameplayTag> IgnoreHitImpulseIfTargetHasTags;
+	
+	/**
 	 * Specifies the reaction type to be used when the character's death occurs.
 	 *
 	 * The value is of type EHitReactType and represents the intensity or type of
@@ -106,6 +122,24 @@ struct FDamageHitReactEvent
 	 * - EHitReactType::None (indicating no reaction should occur by default).
 	 */
 	EHitReactType DeathReactType = EHitReactType::None;
+	/**
+	 * Contains a list of gameplay tags used to determine if death impulses should be ignored for a target.
+	 *
+	 * This array stores tags that, when present on a target entity, prevent the application of death-related impulses,
+	 * such as knockback or other physical reactions, during specific game events or interactions like combat or scripted sequences.
+	 * It serves as a filtering mechanism that enables fine-grained control over entities' responses to death-related impacts.
+	 *
+	 * Gameplay Context:
+	 * - Typically used in combat and animation systems to define conditions where entities are immune or resistant
+	 *   to death impulses based on their gameplay tags.
+	 * - Allows specialized behaviors for certain states or attributes, such as invulnerability or environmental stability.
+	 *
+	 * Examples of use cases:
+	 * - Characters or entities with specific tags (e.g., "Invincible", "Rooted") might avoid death-induced knockback
+	 *   effects while being affected by other mechanics.
+	 * - Ensures that death-related reactions are bypassed in scenarios where tags indicate exceptions or special rules.
+	 */
+	TArray<FGameplayTag> IgnoreDeathImpulseIfTargetHasTags;
 };
 
 

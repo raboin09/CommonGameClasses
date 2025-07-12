@@ -119,5 +119,6 @@ void ACommonCharacter::InitCharacterMeshDefaults() const
 	GetMesh()->SetCollisionResponseToChannels(ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY_OVERLAP, ECR_Overlap);
+	GetMesh()->SetCollisionResponseToChannel(COMMON_TRACE_ABILITY_BLOCK, ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(COMMON_OBJECT_TYPE_PROJECTILE, ECR_Block);
 }

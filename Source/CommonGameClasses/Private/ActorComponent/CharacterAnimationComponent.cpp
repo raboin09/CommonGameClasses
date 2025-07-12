@@ -223,7 +223,8 @@ void UCharacterAnimationComponent::Internal_TryStartCharacterKnockback(const FDa
 {
 	EHitReactType HitReactType = bIsDeathKnockback ? HitReactEvent.DeathReactType : HitReactEvent.HitReactType;
 	float ImpulseValue = UCommonCombatUtils::GetHitImpulseValue(HitReactType);
-	if((!bIsDeathKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasGameplayTag(GetOwner(), CommonStateTags::Immovable))
+	TArray<FGameplayTag> IgnoreTags = bIsDeathKnockback ? HitReactEvent.IgnoreDeathImpulseIfTargetHasTags : HitReactEvent.IgnoreHitImpulseIfTargetHasTags;
+	if((!bIsDeathKnockback && ImpulseValue == 0.f) || UGameplayTagComponent::ActorHasAnyGameplayTags(GetOwner(), IgnoreTags))
 	{
 		return;
 	}
@@ -266,10 +267,7 @@ void UCharacterAnimationComponent::Internal_TryStartLaunchKnockback(const FDamag
 	{
 		return;
 	}
-	if(UGameplayTagComponent::ActorHasGameplayTag(HitCharacter, CommonStateTags::Immovable))
-	{
-		return;
-	}
+	
 	if(UGameplayTagComponent::ActorHasGameplayTag(HitCharacter, CommonStateTags::Ragdoll))
 	{
 		return;

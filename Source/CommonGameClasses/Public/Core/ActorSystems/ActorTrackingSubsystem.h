@@ -38,16 +38,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|ActorTracking")
 	TArray<AActor*> GetAllActorsOfClass_TrackedOnly(TSubclassOf<AActor> ActorClass);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="COMMON|ActorTracking")
+	TArray<AActor*> GetAllActorsOfAffiliation_TrackedOnly(EAffiliation Affiliation);
 	
-	void EmptyQuestRelevantArray();
 	void TryAddActorToTrackedArrays(AActor* InActor);
 	
-	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> QuestRelevantActors;
-	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> AlliedActors;
-	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> EnemyActors;
 	UPROPERTY()
 	TMap<EAffiliation, FWorldActorTrackerEntry> ActorsOfAffiliation;
 	UPROPERTY()

@@ -21,8 +21,6 @@ public:
 	virtual void PressTrigger() PURE_VIRTUAL(ITriggerMechanism::PressTrigger,)
 	virtual void ReleaseTrigger() PURE_VIRTUAL(ITriggerMechanism::ReleaseTrigger,)
 	
-	// Useful for burst triggers (once cooldown is done, ability hasn't necessarily ended)
-	virtual bool ShouldRetriggerAbilityAfterCooldown() const PURE_VIRTUAL(ITriggerMechanism::ShouldRetriggerAbilityAfterCooldown, return false;)
 	// Most don't need this, only for combo + montage abilities 
 	virtual void ResetTrigger() {}
 	

@@ -8,11 +8,9 @@ UBotBehaviorComponent::UBotBehaviorComponent()
 void UBotBehaviorComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void UBotBehaviorComponent::HandlePerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 {
 	
-} 
-
+}

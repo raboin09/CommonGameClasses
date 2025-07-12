@@ -213,11 +213,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="NumberOfActivations", meta=(ClampMin = 0.f, EditCondition = "TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides))
 	int32 BurstTrigger_NumberOfActivations = 1;
-	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="TimeBetweenBurstShots", meta=(EditCondition = "BurstTrigger_NumberOfActivations > 1 && TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides, ClampMin = 0.f))
+	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="Has Burst Delay Between Shots", meta=(EditCondition = "BurstTrigger_NumberOfActivations > 1 && TriggerType == EAbilityTriggerType::SimpleBurst"))
+	bool BurstTrigger_HasDelayBetweenShots = false; 
+	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="Burst Delay Between Shots", meta=(EditCondition = "BurstTrigger_NumberOfActivations > 1 && TriggerType == EAbilityTriggerType::SimpleBurst && BurstTrigger_HasDelayBetweenShots", EditConditionHides, ClampMin = 0.1f))
 	float BurstTrigger_TimeBetweenBurstShots = .1f;
-	UPROPERTY(EditAnywhere, Category="COMMON|Trigger", DisplayName="ShouldRetriggerAbilityAfterCooldown", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleBurst", EditConditionHides))
-	bool BurstTrigger_ShouldRetriggerAbilityAfterCooldown = false;
-	
+
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="MontageToPlay", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
 	TObjectPtr<UAnimMontage> MontageTrigger_MontageToPlay;
 	UPROPERTY(EditDefaultsOnly, Category="COMMON|Trigger", DisplayName="HasCombos", meta=(EditCondition = "TriggerType == EAbilityTriggerType::SimpleMontage", EditConditionHides))
